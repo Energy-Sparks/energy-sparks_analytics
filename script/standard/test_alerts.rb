@@ -7,15 +7,41 @@ module Logging
   logger.level = :debug
 end
 
-asof_date = Date.new(2022, 10, 22)
-schools = ['aught*']
+asof_date = Date.new(2023, 4, 20)
+schools = ['t*']
 
 overrides = {
   schools:  schools,
   cache_school: false,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
-  alerts:   { alerts: [ AlertHeatingComingOnTooEarly ], control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving], log: [:invalid_alerts] } },
-  no_alerts:   { alerts: [ AlertCommunityPreviousHolidayComparisonElectricity ], control: { asof_date: asof_date } }
+  alerts:   { alerts: [
+    # AlertEnergyAnnualVersusBenchmark
+    # AlertSchoolWeekComparisonGas
+    #AlertOutOfHoursElectricityUsage,
+    # AlertElectricityBaseloadVersusBenchmark
+    # AlertHeatingComingOnTooEarly
+    # AlertPreviousYearHolidayComparisonElectricity
+    # AlertSolarPVBenefitEstimator
+    #AlertElectricityAnnualVersusBenchmark,
+    #AlertElectricityLongTermTrend,
+    # AlertGasAnnualVersusBenchmark
+    # AlertEnergyAnnualVersusBenchmark
+    # AlertElectricityPeakKWVersusBenchmark,
+    #AlertElectricityBaseloadVersusBenchmark,
+    # AlertSeasonalBaseloadVariation,
+    # AlertIntraweekBaseloadVariation
+    #AlertGasAnnualVersusBenchmark,
+    #AlertGasLongTermTrend
+    # AlertChangeInElectricityBaseloadShortTerm
+    #AlertPreviousYearHolidayComparisonElectricity,
+    #AlertPreviousHolidayComparisonElectricity,
+    #AlertLayerUpPowerdown11November2022ElectricityComparison,
+    #AlertEaster2023ShutdownElectricityComparison,
+    AlertEaster2023ShutdownGasComparison,
+    #AlertEaster2023ShutdownStorageHeaterComparison
+    ],
+  control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
+  no_alerts:   { alerts: [], control: { asof_date: asof_date } }
 }
 
 script = RunAlerts.default_config.deep_merge(overrides)

@@ -109,14 +109,19 @@ class CompareContentResults
       remove_content_classes(new_component)
       if comparison_component != new_component
         if @control[:compare_results].include?(:report_differences)
-          puts "Differs: #{index}"
-          h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001)
-          puts "'Difference:"
-          puts h_diff
-          puts 'Original:'
-          puts comparison_component
-          puts 'Versus:'
-          puts new_component
+          tolerance = 0.000001
+          h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => tolerance)
+          if h_diff.empty?
+            puts "Object comparison differences but Hashdiff doesnt (tolerance #{tolerance})"
+          else
+            puts "Differs: #{index}"
+            puts "Difference:"
+            puts h_diff
+            puts 'Original:'
+            puts comparison_component
+            puts 'Versus:'
+            puts new_component
+          end
         end
         return new_component_orig
       end

@@ -11,9 +11,9 @@ class ConvertKwh
     when :co2 # https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2018
       case fuel_type
       when :electricity, :storage_heater
-        unit_scale = 0.283 # 283g/kWh UK Grid Intensity
+        unit_scale = EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas
-        unit_scale = 0.204 # 204g/kWh
+        unit_scale = EnergyEquivalences::UK_GAS_CO2_KG_KWH
       when :oil
         unit_scale = 0.285 # 285g/kWh
       when :solar_pv

@@ -60,7 +60,7 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
 
     calculate_adhoc_values(asof_date)
 
-    set_savings_capital_costs_payback(warm_weather_heating_days_all_days_£, 0.0, warm_weather_heating_days_all_days_co2)
+    set_savings_capital_costs_payback(warm_weather_heating_days_all_days_£current, 0.0, warm_weather_heating_days_all_days_co2)
 
     @rating = calculate_rating_from_range(0.03, 0.12, percent_of_annual_heating)
 
@@ -84,12 +84,13 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
       schooldays: %i[schoolday],
       non_schooldays: %i[weekend holiday],
     }
-    data_types = %i[kwh co2 £ days]
+    data_types = %i[kwh co2 £ £current days]
     benchmark_codes = {
-      warm_weather_heating_days_all_days_kwh:   'wkwh',
-      warm_weather_heating_days_all_days_co2:   'wco2',
-      warm_weather_heating_days_all_days_£:     'w£__',
-      warm_weather_heating_days_all_days_days:  'wdys',
+      warm_weather_heating_days_all_days_kwh:       'wkwh',
+      warm_weather_heating_days_all_days_co2:       'wco2',
+      warm_weather_heating_days_all_days_£:         'w£__',
+      warm_weather_heating_days_all_days_£current:  'w€__',
+      warm_weather_heating_days_all_days_days:      'wdys',
     }
 
     templates = {}
@@ -124,11 +125,13 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
     end
   end
 
+  #e.g. date, [:schoolday, :weekend, :holiday], [:heating_warm_weather], :kwh
   def seasonal_value(asof_date, day_types, heating_types, data_type)
     total = 0.0
 
     analysis = seasonal_analysis(asof_date)
 
+    #e.g. [[:schoolday, :heating_warm_weather], [:weekend, :heating_warm_weather]]
     analysis_types = day_types.product(heating_types)
 
     analysis_types.each do |(day_type, heating_type)|

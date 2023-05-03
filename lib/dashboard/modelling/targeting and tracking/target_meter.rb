@@ -4,7 +4,7 @@ class TargetMeter < Dashboard::Meter
   class UnableToFindMatchingProfile < StandardError; end
   class UnableToCalculateTargetDates < StandardError; end
   class MissingGasEstimationAmrData < StandardError; end
-  MAX_MISSING_PROFILES_TO_IGNORE = 4
+  MAX_MISSING_PROFILES_TO_IGNORE = 6
   include Logging
   attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter, :synthetic_meter
 
@@ -247,8 +247,7 @@ class TargetMeter < Dashboard::Meter
 
   def calculate_costs_for_meter
     logger.info "Creating economic & accounting costs for target #{mpan_mprn} fuel #{fuel_type} from #{amr_data.start_date} to #{amr_data.end_date}"
-    @amr_data.set_economic_tariff(self)
-    @amr_data.set_accounting_tariff(self)
+    amr_data.set_tariffs(self)
   end
 
   def debug(var, ap: false)

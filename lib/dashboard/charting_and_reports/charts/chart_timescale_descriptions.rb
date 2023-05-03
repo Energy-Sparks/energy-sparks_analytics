@@ -1,31 +1,15 @@
+# Helper class that interprets the `:timescale` key in a chart configuration
+# to produce a label or description of the time period
 class ChartTimeScaleDescriptions
+  TIMESCALE_TYPES = 'charts.timescale_name'.freeze
+
   def initialize(chart_config)
     @chart_config = chart_config
   end
 
-  TIME_SCALE_TYPES = { 
-    year:           'year',
-    up_to_a_year:   'year',
-    years:          'long term',
-    academicyear:   'academic year',
-    month:          'month',
-    holiday:        'holiday',
-    includeholiday: 'holiday',
-    week:           'week',
-    workweek:       'week',
-    schoolweek:     'school week',
-    day:            'day',
-    frostday:       'frosty day',
-    frostday_3:     'frosty day',
-    diurnal:        'day with large diurnal range',
-    optimum_start:  'optimum start example day',
-    daterange:      'date range',
-    hotwater:       'summer period with hot water usage',
-    none:           ''
-  }.freeze
-
   def self.timescale_name(timescale_symbol) # also used by drilldown
-    TIME_SCALE_TYPES.key?(timescale_symbol) ? TIME_SCALE_TYPES[timescale_symbol] : TIME_SCALE_TYPES[:none] 
+    #using default rather than falling back to :none
+    I18n.t("charts.timescale_name.#{timescale_symbol}", default: '')
   end
 
   def self.convert_timescale_to_array(timescale)
@@ -51,12 +35,12 @@ class ChartTimeScaleDescriptions
     timescale = timescales[0]
     if timescale.is_a?(Hash) && !timescale.empty? && timescale.keys[0] == :daterange
       impute_description_from_date_range(timescale.values[0])
-    elsif TIME_SCALE_TYPES.key?(timescale)
+    elsif known_type?(timescale)
       timescale_name(timescale)
-    elsif timescale.is_a?(Hash) && !timescale.empty? && TIME_SCALE_TYPES.key?(timescale.keys[0])
+    elsif timescale.is_a?(Hash) && !timescale.empty? && known_type?(timescale.keys[0])
       timescale_name(timescale.keys[0])
     else
-      'period'
+      timescale_name(:period)
     end
   end
 
@@ -79,10 +63,17 @@ class ChartTimeScaleDescriptions
       if days > 380
         timescale_name(:years)
       elsif days % 7 == 0
-        "#{days / 7} weeks" # ends up with duplicate number e.g. 'Move forward 1 2 weeks' TODO(PH, 13Sep2019) fix further up hierarchy
+        # ends up with duplicate number e.g. 'Move forward 1 2 weeks' TODO(PH, 13Sep2019) fix further up hierarchy
+        I18n.t("#{TIMESCALE_TYPES}.n_weeks", count: days / 7)
       else
         timescale_name(:daterange)
       end
     end
+  end
+
+  def self.known_type?(timescale)
+    #test for :none as fallback behaviour for any code relying on
+    #previous behaviour
+    I18n.t(TIMESCALE_TYPES).key?(timescale) || timescale == :none
   end
 end

@@ -38,8 +38,12 @@ class ChartManager
       yaxis_units:      :£,
       restrict_y1_axis: [:£, :co2],
       yaxis_scaling:    :none,
-
       inject:           :benchmark
+    },
+    benchmark_one_year:  {
+      name:             'Annual Electricity and Gas Consumption Comparison, Latest year',
+      inherits_from:    :benchmark,
+      timescale:        :year
     },
     benchmark_varying_floor_area_pupils: {
       name:             'Annual Electricity and Gas Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
@@ -52,6 +56,7 @@ class ChartManager
     benchmark_electric_only_£_varying_floor_area_pupils: {
       name:             'Annual Electricity Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       filter:           { fuel: [ 'electricity' ] },
+      restrict_y1_axis: nil,
       scale_y_axis:     [
         { number_of_pupils: { to: :to_current_period, series_name: 'electricity' } }
       ],
@@ -60,6 +65,7 @@ class ChartManager
     benchmark_gas_only_£_varying_floor_area_pupils: {
       name:             'Annual Gas Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       filter:           { fuel: [ 'gas' ] },
+      restrict_y1_axis: nil,
       scale_y_axis:     [
         { number_of_pupils: { to: :to_current_period, series_name: 'gas' } }
       ],
@@ -69,6 +75,7 @@ class ChartManager
       name:             'Annual Storage Heater Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'storage heaters' ] },
+      restrict_y1_axis: nil,
       scale_y_axis:     [
         { number_of_pupils: { to: :to_current_period, series_name: 'storage heaters' } }
       ],
@@ -86,23 +93,46 @@ class ChartManager
     benchmark_kwh_electric_only: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'electricity' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :kwh
     },
     benchmark_electric_only_£: {
       name:             'Annual Electricity Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'electricity' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :£
+    },
+    benchmark_electric_only_one_year_kwh: {
+      inherits_from:    :benchmark,
+      meter_definition: :allelectricity,
+      restrict_y1_axis: nil,
+      timescale:        :year,
+      yaxis_units:      :kwh
     },
     benchmark_gas_only_£: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'gas' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :£
+    },
+    benchmark_gas_only_one_year_kwh: {
+      inherits_from:    :benchmark,
+      meter_definition: :allheat,
+      restrict_y1_axis: nil,
+      timescale:        :year,
+      yaxis_units:      :kwh
     },
     benchmark_storage_heater_only_£: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'storage heaters' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :£
+    },
+    benchmark_storage_heater_only_one_year_kwh: {
+      inherits_from:    :benchmark_storage_heater_only_£,
+      timescale:        :year,
+      yaxis_units:      :kwh
     },
     last_2_weeks_carbon_emissions: {
       name:             'Last 2 weeks carbon emissions at your school from electricity and gas',
@@ -207,11 +237,43 @@ class ChartManager
     alert_daytype_breakdown_gas: {
       inherits_from: :daytype_breakdown_gas
     },
+    alert_daytype_breakdown_gas_kwh: {
+      inherits_from: :alert_daytype_breakdown_gas,
+      yaxis_units:   :kwh
+    },
+    alert_daytype_breakdown_gas_co2: {
+      inherits_from: :alert_daytype_breakdown_gas,
+      yaxis_units:   :co2
+    },
+    alert_daytype_breakdown_gas_£: {
+      inherits_from: :alert_daytype_breakdown_gas,
+      yaxis_units:   :£,
+    },
+    alert_daytype_breakdown_gas_£current: {
+      inherits_from: :alert_daytype_breakdown_gas_£,
+      yaxis_units:   :£current,
+    },
     alert_daytype_breakdown_storage_heater: {
       inherits_from:      :alert_daytype_breakdown_gas,
       name:               'Breakdown by type of day/time: Storage Heaters',
       replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
       meter_definition:   :storage_heater_meter
+    },
+    alert_daytype_breakdown_storage_heater_kwh: {
+      inherits_from: :alert_daytype_breakdown_storage_heater,
+      yaxis_units:   :kwh
+    },
+    alert_daytype_breakdown_storage_heater_co2: {
+      inherits_from: :alert_daytype_breakdown_storage_heater,
+      yaxis_units:   :co2
+    },
+    alert_daytype_breakdown_storage_heater_£: {
+      inherits_from: :alert_daytype_breakdown_storage_heater,
+      yaxis_units:   :£,
+    },
+    alert_daytype_breakdown_storage_heater_£current: {
+      inherits_from: :alert_daytype_breakdown_storage_heater_£,
+      yaxis_units:   :£current,
     },
     daytype_breakdown_electricity: {
       name:             'Breakdown by type of day/time: Electricity',
@@ -230,6 +292,22 @@ class ChartManager
     },
     alert_daytype_breakdown_electricity: {
       inherits_from: :daytype_breakdown_electricity
+    },
+    alert_daytype_breakdown_electricity_kwh: {
+      inherits_from: :alert_daytype_breakdown_electricity,
+      yaxis_units:   :kwh
+    },
+    alert_daytype_breakdown_electricity_co2: {
+      inherits_from: :alert_daytype_breakdown_electricity,
+      yaxis_units:   :co2
+    },
+    alert_daytype_breakdown_electricity_£: {
+      inherits_from: :alert_daytype_breakdown_electricity,
+      yaxis_units:   :£,
+    },
+    alert_daytype_breakdown_electricity_£current: {
+      inherits_from: :alert_daytype_breakdown_electricity_£,
+      yaxis_units:   :£current,
     },
     group_by_week_electricity: {
       name:             'By Week: Electricity',
@@ -271,10 +349,15 @@ class ChartManager
       yaxis_units:      :accounting_cost,
     },
     test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
-      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited meter breakdown',
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Economic Cost Unlimited meter breakdown',
       inherits_from:    :group_by_week_electricity_meter_breakdown,
       yaxis_units:      :£,
       timescale:        nil
+    },
+    test_current_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Current Economic Cost Unlimited meter breakdown',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown,
+      yaxis_units:      :£current,
     },
     test_economic_costs_electric_by_datetime_year_£: {
       name:             'By Week: <%= meter.fuel_type.capitalize %> £ by datetime - 1 year',
@@ -282,6 +365,12 @@ class ChartManager
       yaxis_units:      :£,
       x_axis:           :datetime,
       timescale:        :year
+    },
+
+    test_current_economic_costs_electric_by_week_unlimited_£: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited current £',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :£current,
     },
 
     test_economic_costs_gas_by_week_unlimited_£: {
@@ -304,19 +393,6 @@ class ChartManager
       inherits_from:    :test_economic_costs_electric_by_datetime_year_£,
       meter_definition: :allheat
     },
-
-    targeting_and_tracking_weekly_electricity_to_date_column_deprecated: {
-      name:           :targeting_and_tracking_weekly_electricity_to_date_column.to_s,
-      chart1_type:    :column,
-      chart1_subtype: nil,
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
-    },
-    targeting_and_tracking_weekly_electricity_one_year_column_deprecated: {
-      name:           :targeting_and_tracking_weekly_electricity_one_year_column.to_s,
-      target:             {calculation_type: :day, extend_chart_into_future: true, truncate_before_start_date: true},
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_column
-    },
-
     # ============================================================================================
     group_by_week_electricity_versus_benchmark: {
       name:                 'By Week: Electricity - compared with benchmark',
@@ -395,14 +471,16 @@ class ChartManager
       x_axis:                       :week,
       nullify_trailing_zeros:       true,
       timescale:                    :up_to_a_year,
+      restrict_y1_axis:             [:kwh, :co2],
       ignore_single_series_failure: true,
       target:                       {calculation_type: :day, extend_chart_into_future: true, truncate_before_start_date: true},
       inherits_from:                :group_by_week_electricity
     },
     targeting_and_tracking_weekly_electricity_one_year_line: {
-      name:           'Weekly progress versus target to date',
+      name:               'Weekly progress versus target to date',
       target:             {calculation_type: :day, extend_chart_into_future: false, truncate_before_start_date: true},
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
+      restrict_y1_axis:   [:kwh, :co2],
+      inherits_from:      :targeting_and_tracking_weekly_electricity_to_date_line
     },
     targeting_and_tracking_standard_group_by_week_electricity: {
       name:          'Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
@@ -427,15 +505,18 @@ class ChartManager
     },
 
     targeting_and_tracking_weekly_gas_to_date_cumulative_line: {
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
-      meter_definition:   :allheat
+      inherits_from:    :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
+      restrict_y1_axis: [:kwh, :co2],
+      meter_definition: :allheat
     },
     targeting_and_tracking_weekly_gas_to_date_line: {
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line,
+      inherits_from:      :targeting_and_tracking_weekly_electricity_to_date_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :allheat
     },
     targeting_and_tracking_weekly_gas_one_year_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :allheat
     },
     targeting_and_tracking_standard_group_by_week_gas: {
@@ -460,14 +541,17 @@ class ChartManager
 
     targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :storage_heater_meter
     },
     targeting_and_tracking_weekly_storage_heater_to_date_line: {
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line,
+      inherits_from:      :targeting_and_tracking_weekly_electricity_to_date_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :storage_heater_meter
     },
     targeting_and_tracking_weekly_storage_heater_one_year_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :storage_heater_meter
     },
     targeting_and_tracking_standard_group_by_week_storage_heater: {
@@ -741,10 +825,6 @@ class ChartManager
       chart1_type:      :line,
       series_breakdown: :none,
       yaxis_units:      :kw
-    },
-    group_by_week_electricity_school_comparison_line: {
-      inherits_from:    :group_by_week_electricity_school_comparison,
-      chart1_type:      :line
     },
     group_by_week_electricity_unlimited: {
       name:             'By Week: Electricity (multi-year)',
@@ -1291,6 +1371,14 @@ class ChartManager
       inherits_from:    :thermostatic_regression_simple_school_day,
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
       subtitle:         :daterange
+    },
+    test_thermostatic_£: {
+      inherits_from:  :thermostatic_regression_simple_school_day,
+      yaxis_units:         :£
+    },
+    test_thermostatic_co2: {
+      inherits_from:  :thermostatic_regression_simple_school_day,
+      yaxis_units:    :co2
     },
     thermostatic_up_to_1_year: {
       inherits_from:    :thermostatic,
@@ -1940,6 +2028,44 @@ class ChartManager
       meter_definition: :allelectricity,
       y2_axis:          :none
     },
+    layerup_powerdown_11_november_2022_electricity_comparison_alert: {
+      name:             '<%= meter.fuel_type.capitalize %> Comparison: Layer Up Powerdown Day 11 November 2022',
+      inherits_from:    :last_2_school_weeks_electricity_comparison_alert,
+      x_axis:           :day,
+      timescale: [
+        { daterange: Date.new(2021, 10, 12)..Date.new(2021, 10, 14) },
+        { daterange: Date.new(2022, 10, 11)..Date.new(2022, 10, 13) }
+      ],
+      meter_definition: :allelectricity,
+      y2_axis:          :none
+    },
+    layerup_powerdown_11_november_2022_gas_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :allheat
+    },
+    layerup_powerdown_11_november_2022_storage_heater_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :storage_heater_meter
+    },
+    autumn_term_2022_electricity_comparison_alert: {
+      name:             '<%= meter.fuel_type.capitalize %> Comparison: Autumn Term 2022',
+      inherits_from:    :last_2_school_weeks_electricity_comparison_alert,
+      x_axis:           :day,
+      timescale: [
+        { daterange: Date.new(2021, 9, 6)..Date.new(2021, 12, 17) },
+        { daterange: Date.new(2022, 9, 5)..Date.new(2022, 12, 16) }
+      ],
+      meter_definition: :allelectricity,
+      y2_axis:          :none
+    },
+    autumn_term_2022_gas_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :allheat
+    },
+    autumn_term_2022_storage_heater_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :storage_heater_meter
+    },
     recent_holiday_electricity_comparison_alert: {
       name:             'Comparison of electricity consumption for recent holidays',
       inherits_from:    :group_by_week_electricity,
@@ -1966,6 +2092,10 @@ class ChartManager
       inherits_from:    :alert_weekend_last_week_gas_datetime_kwh,
       name:             'Last weeks half hourly gas consumption (£/half hour)',
       yaxis_units:      :£
+    },
+    alert_weekend_last_week_gas_datetime_£current: {
+      inherits_from:    :alert_weekend_last_week_gas_datetime_£,
+      yaxis_units:      :£current
     },
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',
@@ -1997,6 +2127,14 @@ class ChartManager
 
       #asof_date:              Date.new(2019, 3, 7), # gets overridden by alert
       inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_adjusted: {
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted,
+      meter_definition: :storage_heater_meter
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_unadjusted: {
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted,
+      meter_definition: :storage_heater_meter
     },
     schoolweek_alert_2_previous_holiday_comparison_gas_adjusted: {
       name:                           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
@@ -2181,6 +2319,7 @@ class ChartManager
     pupil_dashboard_electricity_benchmark: {
       name:               'How much my school spends on electricity in comparison with other schools (£)',
       inherits_from:      :benchmark,
+      restrict_y1_axis:   nil,
       meter_definition:   :allelectricity
     },
     pupil_dashboard_electricity_longterm_trend_£: {
@@ -2232,6 +2371,7 @@ class ChartManager
     pupil_dashboard_gas_benchmark: {
       name:             'How much my school spends on gas in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
+      restrict_y1_axis:   nil,
       meter_definition:   :allheat
     },
     pupil_dashboard_daytype_breakdown_gas: {
@@ -2276,6 +2416,7 @@ class ChartManager
     pupil_dashboard_storage_heaters_benchmark: {
       name:             'How much my school spends on storage heating in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
+      restrict_y1_axis:   nil,
       meter_definition:   :storage_heater_meter
     },
     pupil_dashboard_daytype_breakdown_storage_heaters: {
@@ -2311,5 +2452,16 @@ class ChartManager
       ],
       inherits_from:      :solar_pv_group_by_month_dashboard_overview
     },
+    stacked_all_years:  {
+      name:             'Stacked bar chart, all years of data',
+      chart1_type:      :bar,
+      chart1_subtype:   :stacked,
+      meter_definition: :all,
+      x_axis:           :year,
+      series_breakdown: :fuel,
+      yaxis_units:      :£,
+      restrict_y1_axis: [:£, :co2],
+      yaxis_scaling:    :none
+    }
   }.freeze
 end

@@ -1,4 +1,4 @@
-class DayTypeBreakDownTable
+class DayTypeBreakDownTableDeprecated
   def initialize(school, fuel_type, time_period = { year: 0 })
     @school = school
     @fuel_type = fuel_type

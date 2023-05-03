@@ -6,12 +6,18 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
   include ElectricityCostCo2Mixin
   attr_reader :daytype_breakdown_table
   def initialize(school)
-    super(school, 'electricity', BenchmarkMetrics::PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK,
-          :electricityoutofhours, 'ElectricityOutOfHours', :allelectricity,
-          0.35, 0.65)
+    super(
+      school,
+      'electricity',
+      :electricityoutofhours,
+      'ElectricityOutOfHours',
+      :allelectricity,
+      BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY,
+      BenchmarkMetrics::BENCHMARK_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY
+    )
   end
 
-  protected def aggregate_meter
+  def aggregate_meter
     @school.aggregated_electricity_meters
   end
 
@@ -25,6 +31,15 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
 
   def breakdown_chart
     :alert_daytype_breakdown_electricity
+  end
+
+  def breakdown_charts
+    {
+      kwh:      :alert_daytype_breakdown_electricity_kwh,
+      co2:      :alert_daytype_breakdown_electricity_co2,
+      £:        :alert_daytype_breakdown_electricity_£,
+      £current: :alert_daytype_breakdown_electricity_£current,
+    }
   end
 
   def group_by_week_day_type_chart

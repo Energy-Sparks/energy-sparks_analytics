@@ -49,7 +49,7 @@ class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
       </p>
       <p>
         Your school could save up to
-        <%= formatted_impact(:£) %>,
+        <%= formatted_impact(:£current) %>,
         <%= formatted_impact(:co2) %> or
         <%= formatted_impact(:kwh) %>
         by turning its boiler off in warm weather,

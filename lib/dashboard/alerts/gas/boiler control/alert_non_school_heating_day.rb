@@ -6,7 +6,7 @@ require_relative '../alert_gas_model_base.rb'
 #NOTE: this doesn't seem to be setup in the application, as its not registered
 #in the database. Should it be removed?
 #Was removed from live system around 2022-04-11
-class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
+class AlertHeatingOnNonSchoolDaysDeprecated < AlertHeatingDaysBase
 
   attr_reader :number_of_non_heating_days_last_year, :average_number_of_non_heating_days_last_year
   attr_reader :exemplar_number_of_non_heating_days_last_year

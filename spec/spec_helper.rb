@@ -1,6 +1,8 @@
 require 'simplecov'
 require 'pry'
 require 'rollbar'
+require 'nokogiri'
+require 'compare-xml'
 
 SimpleCov.start do
   add_group "Models", "app/models"
@@ -33,8 +35,12 @@ end
 require 'dashboard'
 require 'factory_bot'
 
+#Load the helpers from the support directory
+Dir[File.expand_path(File.join('spec','support', '**', '*.rb'))].each { |f| require_relative f }
+
 #Load YAML files for translations
 I18n.load_path += Dir[File.join('config', 'locales', '**', '*.yml').to_s]
+
 
 # switch off most logging while testing
 module Logging
@@ -131,4 +137,29 @@ RSpec.configure do |config|
     FactoryBot.find_definitions
   end
 
+  # Adapted from https://makandracards.com/makandra/505308-rspec-matcher-to-compare-two-html-fragments
+  RSpec::Matchers.define :match_html do |expected_html, **options|
+    match do |actual_html|
+      expected_doc = Nokogiri::HTML5.fragment(expected_html)
+      actual_doc = Nokogiri::HTML5.fragment(actual_html)
+      # Options documented here: https://github.com/vkononov/compare-xml
+      default_options = {
+        collapse_whitespace: true,
+        ignore_attr_order: true,
+        ignore_comments: true,
+      }
+      options = default_options.merge(options).merge(verbose: true)
+      diff = CompareXML.equivalent?(expected_doc, actual_doc, **options)
+      diff.blank?
+    end
+  end
+
+  RSpec::Matchers.define :round_to_two_digits do |expected_float|
+    match do |actual_float|
+      actual_float.round(2) == expected_float
+    end
+    failure_message do |actual_float|
+      "expected: #{expected_float}\nactual: #{actual_float}\nrounded: #{actual_float.round(2) if actual_float}\n"
+    end
+  end
 end

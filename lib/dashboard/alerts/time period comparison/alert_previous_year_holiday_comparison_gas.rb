@@ -1,37 +1,23 @@
 require_relative './alert_period_comparison_base.rb'
+require_relative './alert_previous_year_holiday_comparison_electricity.rb'
+require_relative './alert_arbitrary_period_comparison_mixin.rb'
+require_relative './alert_previous_year_holiday_comparison_gas.rb'
+require_relative './alert_period_comparison_temperature_adjustment_mixin.rb'
+require_relative './alert_period_comparison_gas_mixin.rb'
 
 class AlertPreviousYearHolidayComparisonGas < AlertPreviousYearHolidayComparisonElectricity
   include AlertPeriodComparisonTemperatureAdjustmentMixin
+  include AlertPeriodComparisonGasMixin
+
+  def self.template_variables
+    AlertPeriodComparisonGasMixin.template_variables.merge(superclass.template_variables)
+  end
 
   def initialize(school, type = :gaspreviousyearholidaycomparison)
     super(school, type)
   end
 
-  def self.template_variables
-    specific = { 'Adjusted gas school week specific (debugging)' => holiday_adjusted_gas_variables }
-    specific['Change in between last 2 holidays'] = dynamic_template_variables(:gas)
-    specific['Unadjusted previous period consumption'] = AlertPeriodComparisonTemperatureAdjustmentMixin.unadjusted_template_variables
-    specific.merge(superclass.template_variables)
-  end
-
-  def self.holiday_adjusted_gas_variables
-    {}
-  end
-
   def comparison_chart
     :alert_group_by_week_gas_14_months
   end
-
-  protected def max_days_out_of_date_while_still_relevant
-    60
-  end
-
-  def fuel_type; :gas end
-
-  def calculate(asof_date)
-    model_calculation(asof_date)
-    super(asof_date)
-    set_previous_period_unadjusted_kwh_£_co2_variables
-  end
-  alias_method :analyse_private, :calculate
 end

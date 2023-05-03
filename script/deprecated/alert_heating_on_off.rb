@@ -7,7 +7,7 @@
 #                    - AMR data might be several days out of date?
 require_relative '../alert_gas_model_base.rb'
 
-class AlertHeatingOnOffBase < AlertGasModelBase
+class AlertHeatingOnOffBaseDeprecated < AlertGasModelBase
   include Logging
   MIN_HEATING_TEMPERATURE_MONDAY    = 15
   MIN_HEATING_TEMPERATURE_WEEKDAY   = 12
@@ -347,7 +347,7 @@ class AlertHeatingOnOffBase < AlertGasModelBase
 end
 
 # typically fires in Autumn when weather cold enough to turn heating on
-class AlertHeatingOn < AlertHeatingOnOffBase
+class AlertHeatingOnDeprecated < AlertHeatingOnOffBase
   def heating_on_alert?
     true
   end

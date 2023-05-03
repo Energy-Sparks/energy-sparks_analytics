@@ -100,6 +100,8 @@ class AdviceOldToNewConversion < AdviceBase
             { type: :html,  content: advice_class.erb_bind(content[:data]) }
           when :function
             { type: :html,  content: advice_class.send(content[:data]) }
+          when :raw_html
+            { type: :html,  content: content[:data] }
           when :chart, :chart_and_text
             components = content.key?(:components) ? content[:components] : [true, true, true]
             chart = run_chart(content[:data])

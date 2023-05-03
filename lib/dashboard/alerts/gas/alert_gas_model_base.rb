@@ -139,7 +139,7 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   protected def calculate_model(asof_date)
-    @heating_model = model_cache(@school.urn, asof_date)
+    @heating_model = model_cache(aggregate_meter, asof_date)
     @heating_on = @heating_model.heating_on?(asof_date)
     @heating_model
   end

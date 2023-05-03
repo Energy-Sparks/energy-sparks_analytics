@@ -22,6 +22,7 @@ school_names.each do |school_name|
 
     school.all_meters.each do |meter|
       meter.meter_attributes.each do |meter_attribute_name, attribute|
+        meter_attribute_name = :solar_pv_export_max if meter_attribute_name == :solar_pv && attribute.any?{ |h| h.key?(:maximum_export_level_kw) }
         if %i[meter_corrections aggregation function].include?(meter_attribute_name)
           meter_attribute_names = attribute.map do |att|
             att = att.keys[0] if att.is_a?(Hash)

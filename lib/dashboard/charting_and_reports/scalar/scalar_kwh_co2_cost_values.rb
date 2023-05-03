@@ -91,7 +91,7 @@ class ScalarkWhCO2CostValues
     data
   end
 
-  private def aggregation_configuration(timescales, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
+  def aggregation_configuration(timescales, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
     results = non_contiguous_timescale_breakdown(timescales).map do |timescale|
       aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
     end
@@ -105,7 +105,7 @@ class ScalarkWhCO2CostValues
   end
 
   private def aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
-    aggregator = generic_aggregation_calculation(timescale, fuel_type, data_type, override)   
+    aggregator = generic_aggregation_calculation(timescale, fuel_type, data_type, override)
     dates = aggregator.x_axis_bucket_date_ranges
     check_dates(aggregator.last_meter_date, max_days_out_of_date)
     value = aggregator.valid? ? aggregator.bucketed_data['Energy'][0] : nil
@@ -168,7 +168,7 @@ class ScalarkWhCO2CostValues
       :solar_pv_meter
     else
       raise EnergySparksNoMeterDataAvailableForFuelType.new('Unexpected nil fuel type for scalar energy calculation') if fuel_type.nil?
-      raise EnergySparksNoMeterDataAvailableForFuelType.new("Unexpected fuel type #{fuel_type} for scalar energy calculation") 
+      raise EnergySparksNoMeterDataAvailableForFuelType.new("Unexpected fuel type #{fuel_type} for scalar energy calculation")
     end
   end
 
@@ -186,7 +186,7 @@ class ScalarkWhCO2CostValues
       :solar_pv_meter
     else
       raise EnergySparksBadChartSpecification.new('Unexpected nil fuel type for scalar energy calculation') if fuel_type.nil?
-      raise EnergySparksBadChartSpecification.new("Unexpected fuel type #{fuel_type} for scalar energy calculation") 
+      raise EnergySparksBadChartSpecification.new("Unexpected fuel type #{fuel_type} for scalar energy calculation")
     end
   end
 end

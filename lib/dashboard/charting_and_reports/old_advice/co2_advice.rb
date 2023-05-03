@@ -103,7 +103,7 @@ class DashboardEnergyAdvice
       template =  %q{ <%= @body_start %> } +
                   advice_list.join(' ') +
                   %q{ <%= @body_end %> }
-                  
+
       template.gsub(/^  /, '')
     end
   end

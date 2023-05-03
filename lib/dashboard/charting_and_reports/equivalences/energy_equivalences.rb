@@ -111,14 +111,3 @@ class EnergyEquivalences
   end
 end
 
-class ElectricityEquivalencekWh < EnergyEquivalences
-  def initialize(kwh)
-    super(kwh, :kwh, :electricity)
-  end
-end
-
-class GasEquivalencekWh < EnergyEquivalences
-  def initialize(kwh)
-    super(kwh, :kwh, :gas)
-  end
-end

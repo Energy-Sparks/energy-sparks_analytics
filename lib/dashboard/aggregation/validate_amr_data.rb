@@ -131,7 +131,7 @@ class ValidateAMRData
     grouped_rules.each do |rule|
       rule.each do |type, config|
         groups[type] ||= []
-        groups[type].push({ type => config })  
+        groups[type].push({ type => config })
       end
     end
     groups
@@ -153,17 +153,9 @@ class ValidateAMRData
         rule[:rescale_amr_data][:scale]
       )
     elsif rule.key?(:readings_start_date)
-      fix_start_date = rule[:readings_start_date]
-      logger.debug "Fixing start date to #{fix_start_date} for #{@meter_id}"
-      substitute_data_x48 = @amr_data.one_days_data_x48(fix_start_date)
-      @amr_data.add(fix_start_date, OneDayAMRReading.new(meter_id, fix_start_date, 'FIXS', nil, DateTime.now, substitute_data_x48))
-      @amr_data.set_start_date(fix_start_date)
+      apply_readings_start_date(rule[:readings_start_date])
     elsif rule.key?(:readings_end_date)
-      fix_end_date = rule[:readings_end_date]
-      logger.debug "Fixing end date to #{fix_end_date}"
-      substitute_data_x48 = @amr_data.one_days_data_x48(fix_end_date)
-      @amr_data.add(fix_end_date, OneDayAMRReading.new(meter_id, fix_end_date, 'FIXE', nil, DateTime.now, substitute_data_x48))
-      @amr_data.set_end_date(fix_end_date)
+      apply_readings_end_date(rule[:readings_end_date])
     elsif rule.key?(:set_bad_data_to_zero)
       zero_data_in_date_range(
         rule[:set_bad_data_to_zero][:start_date],
@@ -210,6 +202,29 @@ class ValidateAMRData
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
     end
+  end
+
+  def apply_readings_start_date(fix_start_date)
+    check_date_exists(fix_start_date, :readings_start_date)
+    logger.debug "Fixing start date to #{fix_start_date} for #{@meter_id}"
+    substitute_data_x48 = @amr_data.one_days_data_x48(fix_start_date)
+    @amr_data.add(fix_start_date, OneDayAMRReading.new(meter_id, fix_start_date, 'FIXS', nil, DateTime.now, substitute_data_x48))
+    @amr_data.set_start_date(fix_start_date)
+  end
+
+  def apply_readings_end_date(fix_end_date)
+    check_date_exists(fix_end_date, :readings_end_date)
+    logger.debug "Fixing end date to #{fix_end_date}"
+    substitute_data_x48 = @amr_data.one_days_data_x48(fix_end_date)
+    @amr_data.add(fix_end_date, OneDayAMRReading.new(meter_id, fix_end_date, 'FIXE', nil, DateTime.now, substitute_data_x48))
+    @amr_data.set_end_date(fix_end_date)
+  end
+
+  def check_date_exists(date, attribute)
+    return if @amr_data.date_exists?(date)
+
+    error_message = "Unable to apply #{attribute} correction for meter #{@meter_id}. There is no meter data for #{date}. Check the date and/or for missing readings"
+    raise EnergySparksMeterSpecification.new(error_message)
   end
 
   def extend_start_date(date)
@@ -653,7 +668,7 @@ class ValidateAMRData
 
   def fill_in_missing_data(sd = @amr_data.start_date, ed = @amr_data.end_date, sub_type_code = 'S', override = false)
     @amr_data.delete_date_range(sd, ed) if override
-      
+
     missing_days = {}
     (sd..ed).each do |date|
       if @amr_data.date_missing?(date)
@@ -868,7 +883,7 @@ class ValidateAMRData
     sunrise = sun_times.rise(date, latitude, longitude)
     sr_criteria = sunrise + 60 * 60 * margin_hours
     hh_sunrise = DateTimeHelper.half_hour_index(sr_criteria)
-    
+
     sunset = sun_times.set(date, latitude, longitude)
     ss_criteria = sunset - 60 * 60 * margin_hours
     hh_sunset = DateTimeHelper.half_hour_index(ss_criteria)

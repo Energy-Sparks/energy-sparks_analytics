@@ -3,7 +3,7 @@ require_relative '../alert_electricity_only_base.rb'
 
 class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   attr_reader :winter_kw, :summer_kw, :percent_seasonal_variation
-  attr_reader :annual_cost_kwh, :annual_cost_£, :annual_cost_co2
+  attr_reader :annual_cost_kwh, :annual_cost_£, :annual_cost_£current, :annual_cost_co2
   attr_reader :one_year_baseload_chart
 
   def initialize(school, report_type = :seasonalbaseload, meter = school.aggregated_electricity_meters)
@@ -32,9 +32,14 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
       benchmark_code: 'ckwh'
     },
     annual_cost_£: {
-      description: 'annual cost of seasonal baseload variation (£)',
+      description: 'annual cost of seasonal baseload variation (£) at historic tariff',
       units:  :£,
       benchmark_code: 'cgbp'
+    },
+    annual_cost_£current: {
+      description: 'annual cost of seasonal baseload variation (£) as latest tariff',
+      units:  :£,
+      benchmark_code: 'c€bp'
     },
     annual_co2: {
       description: 'annual cost of seasonal baseload variation (co2)',
@@ -56,7 +61,7 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   end
 
   def enough_data
-    calculator.one_years_data? ? :enough : :not_enough
+    baseload_analysis.one_years_data? ? :enough : :not_enough
   end
 
   def analysis_description
@@ -80,7 +85,7 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
               <% else %>
                 There is a large variation in your seasonal usage from <%= format_kw(winter_kw) %>
                 in the winter to <%= format_kw(summer_kw) %> in the summer. Reducing this difference
-                could save you <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %> annually.
+                could save you <%= FormatEnergyUnit.format(:£, @annual_cost_£current, :html) %> annually.
               <% end %>
             )
     ERB.new(text).result(binding)
@@ -88,22 +93,20 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
 
   private
 
-  def calculator
-    @calculator ||= ElectricityBaseloadAnalysis.new(@meter)
-  end
-
   def calculate(asof_date)
+    super(asof_date)
     # def 'enough_data' doesn;t know the asof_date
-    raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{asof_date}" unless calculator.one_years_data?(asof_date)
-    @winter_kw = calculator.winter_kw(asof_date)
-    @summer_kw = calculator.summer_kw(asof_date)
-    @percent_seasonal_variation = calculator.percent_seasonal_variation(asof_date)
+    raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{asof_date}" unless baseload_analysis.one_years_data?(asof_date)
+    @winter_kw = baseload_analysis.winter_kw(asof_date)
+    @summer_kw = baseload_analysis.summer_kw(asof_date)
+    @percent_seasonal_variation = baseload_analysis.percent_seasonal_variation(asof_date)
 
     @annual_cost_kwh = calculator.costs_of_baseload_above_minimum_kwh(asof_date, @summer_kw)
     @annual_cost_£   = @annual_cost_kwh * BenchmarkMetrics.pricing.electricity_price
+    @annual_cost_£current = @annual_cost_kwh * blended_baseload_rate_£current_per_kwh
     @annual_co2      = @annual_cost_kwh * blended_co2_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£ ), nil, @annual_co2)
+    set_savings_capital_costs_payback(Range.new(@annual_cost_£current, @annual_cost_£ ), nil, @annual_co2)
 
     @rating = calculate_rating_from_range(0, 0.50, @percent_seasonal_variation.magnitude)
 

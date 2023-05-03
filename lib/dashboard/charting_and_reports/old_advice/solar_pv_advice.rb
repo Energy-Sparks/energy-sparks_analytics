@@ -94,6 +94,14 @@ class DashboardEnergyAdvice
         ERB.new(text).result(binding)
       end
     end
+
+    private def electricity_price_£current_per_kwh
+      @school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£current).round(5)
+    end
+
+    private def electricity_price_£current_per_kwh_html
+      FormatEnergyUnit.format(:£_per_kwh, electricity_price_£current_per_kwh, :html)
+    end
   end 
 
   class SolarPVVersusIrradianceLastYearAdvice < SolarPVAdviceBase
@@ -311,10 +319,11 @@ class DashboardEnergyAdvice
                 (&#163;<%= BenchmarkMetrics.pricing.solar_export_price %>/kWh)
               </li>
               <li>
-                It will also gain from the 'feed-in-tariff', a government subsidy, the
-                amount of the feed in tariff will depend on when the panels were installed
-                and is typically in the range 5p/kWh to 40 p/kWh x the total 'Photovoltaic
-                production' of <%= annual_solar_pv_kwh_html %>, each year
+                If the panels were installed before April 2019 it might also gain from the
+                government subsidy called 'feed-in-tariff'. The amount of the feed in tariff
+                will depend on when the panels were installed and is typically in the range
+                5p/kWh to 40 p/kWh x the total 'Photovoltaic production' of
+                <%= annual_solar_pv_kwh_html %>, each year
               </li>
             </ul>
           </ul>
