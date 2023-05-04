@@ -8,7 +8,7 @@ module AlertGasToStorageHeaterSubstitutionMixIn
   end
 
   def fuel_price_deprecated
-    BenchmarkMetrics::ELECTRICITY_PRICE # deprecated
+    BenchmarkMetrics.pricing.electricity_price # deprecated
   end
 
   def self.fuel_lc

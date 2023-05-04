@@ -19,7 +19,7 @@ class EnergyEquivalences
   J_TO_KWH = 1000.0 * 60 * 60
 
   UK_ELECTRIC_GRID_CO2_KG_KWH = 0.230
-  UK_ELECTRIC_GRID_£_KWH = BenchmarkMetrics::ELECTRICITY_PRICE
+  UK_ELECTRIC_GRID_£_KWH = BenchmarkMetrics.pricing.electricity_price
   UK_DOMESTIC_ELECTRICITY_£_KWH = 0.15
 
   UK_GAS_CO2_KG_KWH = 0.210
