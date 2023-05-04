@@ -175,7 +175,7 @@ end
     return 1.0 if unit == :kwh
 
     if fuel_type == :storage_heaters && meter_collection.aggregate_meter(:gas).nil?
-      BenchmarkMetrics::GAS_PRICE
+      BenchmarkMetrics.pricing.gas_price
     else
       fuel_type = :gas if fuel_type == :storage_heaters # compare storage heater £ with gas £ to encourage fuel switch
       @school.aggregate_meter(fuel_type).amr_data.blended_rate(unit, :kwh, last_start_date, last_end_date)

@@ -99,10 +99,10 @@ class AlertHeatingOnNonSchoolDaysDeprecated < AlertHeatingDaysBase
     @kwh_below_frost_on_unoccupied_days, @total_kwh_on_unoccupied_days = calculate_heating_off_statistics(asof_date)
     @one_year_saving_kwh = @total_kwh_on_unoccupied_days - @kwh_below_frost_on_unoccupied_days
 
-    @below_frost_£ = @kwh_below_frost_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE  # deprecated
-    @unoccupied_above_frost_£ = @one_year_saving_kwh * BenchmarkMetrics::GAS_PRICE  # deprecated
+    @below_frost_£ = @kwh_below_frost_on_unoccupied_days * BenchmarkMetrics.pricing.gas_price # deprecated
+    @unoccupied_above_frost_£ = @one_year_saving_kwh * BenchmarkMetrics.pricing.gas_price # deprecated
     @unoccupied_above_frost_co2 = @one_year_saving_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    @total_on_unoccupied_days_£   = @total_kwh_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE  # deprecated
+    @total_on_unoccupied_days_£   = @total_kwh_on_unoccupied_days * BenchmarkMetrics.pricing.gas_price # deprecated
     @total_on_unoccupied_days_co2 = @total_kwh_on_unoccupied_days * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
     set_savings_capital_costs_payback(Range.new(@unoccupied_above_frost_£ , @unoccupied_above_frost_£), nil, @unoccupied_above_frost_co2)

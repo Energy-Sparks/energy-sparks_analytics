@@ -516,7 +516,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   # from a cost perspective, if the school has gas as well then use that tariff
   def defaulted_gas_tariff_£_per_kwh(datatype)
     if @school.aggregated_heat_meters.nil?
-      BenchmarkMetrics::GAS_PRICE
+      BenchmarkMetrics.pricing.gas_price
     else
       @school.aggregated_heat_meters.amr_data.blended_rate(:kwh, datatype).round(5)
     end

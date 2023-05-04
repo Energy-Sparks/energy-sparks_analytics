@@ -30,6 +30,19 @@ module BenchmarkMetrics
   EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.2
   BENCHMARK_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.5
 
+  def self.pricing
+    if Object.const_defined?('Rails') && EnergySparks::FeatureFlags.active?(:use_site_settings_current_prices)
+      SiteSettings.current_prices
+    else
+      OpenStruct.new(
+        gas_price: BenchmarkMetrics::GAS_PRICE,
+        oil_price: BenchmarkMetrics::OIL_PRICE,
+        electricity_price: BenchmarkMetrics::ELECTRICITY_PRICE,
+        solar_export_price: BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      )
+    end
+  end
+
   # BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * GAS_PRICE +
   #                                  BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE
 

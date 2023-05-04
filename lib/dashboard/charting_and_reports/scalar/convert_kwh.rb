@@ -29,7 +29,7 @@ class ConvertKwh
       when :solar_export
         unit_scale = BenchmarkMetrics::SOLAR_EXPORT_PRICE # 5p/kWh
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas
-        unit_scale = BenchmarkMetrics::GAS_PRICE # 3p/kWh long term average
+        unit_scale = BenchmarkMetrics.pricing.gas_price # 3p/kWh long term average
       when :oil
         unit_scale = BenchmarkMetrics::OIL_PRICE # 5p/kWh long term average
       when :solar_pv
