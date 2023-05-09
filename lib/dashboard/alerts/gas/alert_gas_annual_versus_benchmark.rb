@@ -511,17 +511,6 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     BenchmarkMetrics.normalise_degree_days(@school.temperatures, @school.holidays, :gas, asof_date)
   end
 
-  # benchmark some storage heater alerts against gas cost e.g. per floor area
-  # as gas is cheaper and it should be clear to schools that gas is a better choice
-  # from a cost perspective, if the school has gas as well then use that tariff
-  def defaulted_gas_tariff_£_per_kwh(datatype)
-    if @school.aggregated_heat_meters.nil?
-      BenchmarkMetrics.pricing.gas_price
-    else
-      @school.aggregated_heat_meters.amr_data.blended_rate(:kwh, datatype).round(5)
-    end
-  end
-
   def last_year_date_range(asof_date)
     last_year_start_date = asof_date - DAYSINYEAR
     last_year_start_date..asof_date
