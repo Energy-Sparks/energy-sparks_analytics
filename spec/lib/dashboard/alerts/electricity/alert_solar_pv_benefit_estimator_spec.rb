@@ -170,7 +170,7 @@ describe AlertSolarPVBenefitEstimator do
     expect(alert.text_template_variables[:capital_cost]).to eq('£53,000')
     expect(alert.text_template_variables[:average_capital_cost]).to eq('£53,000')
 
-    new_pricing = OpenStruct.new(gas_price: 0.06, oil_price: 0.1, electricity_price: 0.3, solar_export_price: 0.1)
+    new_pricing = OpenStruct.new(gas_price: 0.06, electricity_price: 0.3, solar_export_price: 0.1)
     class_double('BenchmarkMetrics', pricing: new_pricing, default_prices: new_pricing).as_stubbed_const
     expect(BenchmarkMetrics.pricing).to eq(new_pricing)
     alert.calculate(Date.new(2022, 7, 12))
