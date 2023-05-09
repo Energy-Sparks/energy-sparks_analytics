@@ -163,13 +163,13 @@ class SolarPVProfitLoss
   private def rate_deprecated(meter_name)
     case meter_name
     when SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
-      BenchmarkMetrics::ELECTRICITY_PRICE  # deprecated
+      BenchmarkMetrics.pricing.electricity_price  # deprecated
     when SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME
-      BenchmarkMetrics::SOLAR_EXPORT_PRICE  # deprecated
+      BenchmarkMetrics.pricing.solar_export_price  # deprecated
     when SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
-      BenchmarkMetrics::ELECTRICITY_PRICE  # deprecated
+      BenchmarkMetrics.pricing.electricity_price  # deprecated
     else
-      -1.0 * BenchmarkMetrics::ELECTRICITY_PRICE  # deprecated
+      -1.0 * BenchmarkMetrics.pricing.electricity_price  # deprecated
     end
   end
 end
