@@ -1,3 +1,8 @@
+# experimental script used to work out how to improve the aggregation service's
+# use of Sheffield PV data where schools have large solar PV arrays but relatively
+# small baseloads where the max_export variable has been used to fix the data
+# this variable and mechanism isn't working well and so needs replacing in the
+# aggregation service with the code labeled 'PHASE 1 CODE - revised export calculation logic' below
 require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
@@ -7,6 +12,15 @@ module Logging
   logger.level = :debug
 end
 
+# This class adjusts between the Sheffield PV generation data which
+# is assumed to be facing south and at 30degrees inclinaton and
+# the actual angle/azimuth of the school's panels
+# it is essentially a geometric calculation but doesn't
+# work well in the summer where the Sheffield data implies no sun
+# as its potentially below the horizon but the school's panels for
+# example facing east are seeing the sun. Also assumes direct sunlight
+# and not ambient light reflected off clouds
+# this class needs moving to the same location as sun_angle_orientation.rb
 class PVPanelAzimuthAngleAdjustment
   SHEFFIELD_PV_ANGLE  =  30
   SHEFIELD_PV_AZIMUTH = 180
@@ -73,8 +87,7 @@ class PVPanelAzimuthAngleAdjustment
   def sin(deg)
     Math.sin(radians(deg))
   end
-  
-    
+
   def cos(deg)
     Math.cos(radians(deg))
   end
@@ -84,6 +97,7 @@ class PVPanelAzimuthAngleAdjustment
   end
 end
 
+# used in research, for output to csv, results not used in required aggregation calculation
 def calculate_years_factors(school, meter, panel_azimuth, panel_angle = 30)
   puts "Calculating factors for #{panel_azimuth} #{panel_angle}"
   pv_factor = PVPanelAzimuthAngleAdjustment.new(school.latitude, school.longitude, panel_angle, panel_azimuth)
@@ -139,11 +153,15 @@ def solar_pv_attributes(meter)
   meter.meter_attributes[:solar_pv][0]
 end
 
+# this is a potentially better alternative to specifying an half hourly offset
+# for the data (which is wrong anyway but vaguely works) as it takes the panels'
+# azimuth and implies the half hour offset, howvere it currently doesn't work well
+# so should be ignored
 def calculate_solar_azimuth_half_hour_offset(school, attributes)
   return attributes[:azimuth_hours_offset] unless attributes[:azimuth_hours_offset].nil?
 
   azimuth_degrees = attributes[:azimuth_override] || attributes[:azimuth]
-  
+
   return 0 if azimuth_degrees.nil?
 
   degrees_per_hour = SunAngleOrientation.average_azimuth_change_degrees_per_hour(school.latitude, school.longitude)
@@ -163,6 +181,9 @@ def updated_solar_pv_calculation(school, sub_meters, date, baseload_kw, pv_hh_of
   pv_factor = PVPanelAzimuthAngleAdjustment.new(school.latitude, school.longitude, 30, 124)
 
   (0..47).each do |hh_i|
+    # PHASE 2 CODE - panel reorientation
+    # this code reorientates the panels from Sheffield's south facing 30 degree assumption
+    # to that of the school's actual panel orientation
     corrected_pv_hhi = [[hh_i - pv_hh_offset, 0].max, 47].min
     generation_kwh            = sub_meters[:generation].amr_data.kwh(date, corrected_pv_hhi)
 
@@ -172,6 +193,13 @@ def updated_solar_pv_calculation(school, sub_meters, date, baseload_kw, pv_hh_of
     hhi_offset = [[hh_i + fudge_hhi_offset, 0].max, 47].min
     generation_kwh            = sub_meters[:generation].amr_data.kwh(date, hhi_offset) * f
 
+
+    # PHASE 1 CODE - revised export calculation logic
+    # this code replicated the spreadsheet's line by line revision of the logic
+    # which replaces the max export meter attribute and is all that is necessary
+    # to be moved to the aggregation service in the first phase of this work
+    # replicates on line by line basis logic in NewCode tab of
+    # Google Drive\Energy Sparks Project Team Documents\Analytics\Solar PV\solar export problem 2.xlsx
     mains_kwh                 = sub_meters[:mains_consume].amr_data.kwh(date, hh_i)
     unoccupied_appliance_kwh  = [mains_kwh, baseload_kw / 2.0].max
 
@@ -185,6 +213,8 @@ def updated_solar_pv_calculation(school, sub_meters, date, baseload_kw, pv_hh_of
   end
 end
 
+# just replicated some code which is already in the aggregation service, used
+# just for the purposes of this script
 def baseload_kw(meter, yesterday_date)
   yesterday_date = meter.amr_data.start_date if yesterday_date < meter.amr_data.start_date
   meter.amr_data.overnight_baseload_kw(yesterday_date)
@@ -220,13 +250,18 @@ days = [
   Date.new(2022,  8,  6),
   Date.new(2022, 10, 28),
   Date.new(2022, 12, 26),
-  Date.new(2023,  4,  12), # Hastings looks strange
+  Date.new(2023,  4, 12), # Hastings looks strange
 ]
 
+# azimuth_hours_offset: N, azimuth: M could ultimately become solar_pv meter
+# attribute values used to reotientate the panels in the second phase of this work?
 config = {
   'Sutton Park Primary School' => { azimuth_hours_offset: -6, azimuth: 124, date: days },
   'Hastings High School'       => { azimuth_hours_offset:  0, azimuth: 180, date: days }
 }
+
+
+# test script start here:
 
 school_name_pattern_match = ['*']
 source_db = :unvalidated_meter_data
