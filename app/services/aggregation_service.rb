@@ -1,8 +1,32 @@
 # frozen_string_literal: true
-
-# This should take a meter collection and populate
-# it with aggregated & validated data
 require 'benchmark/memory'
+
+# Service responsible for carrying out the data "validation" and "aggregation" processes
+# for a +MeterCollection+
+#
+# The "validation" process involves applying a set of data quality checks and validation
+# rules to each meter in the collection. This involves, e.g. substituting for missing or
+# bad data. The is delegated to the +ValidateAMRData+ class.
+#
+# The "aggregation" process involves a variety of steps, including:
+#
+# - creating new "virtual" meters that hold derived data
+#   e.g. solar import/export/self-consumption values)
+#
+# - creating one ore more "aggregate" meters that combine the individual time-series
+#   for each real and virtual meter into a combined series that describes consumption
+#   for the whole school.
+#
+# - processing tariff data so that it can be efficiently applied at runtime
+#
+# There are various configuration options that can guide this process, e.g. rules
+# for combining together meter data, as well configuration that drives individual
+# steps (e.g. tariffs, solar panel configuration, etc)
+#
+# The results of both processes involve modifications to the +MeterCollection+, e.g.
+# adding new +Meter+ objects or modifying existing data.
+#
+# This is a CPU intensive process so generally we aim to cache the results
 class AggregateDataService
   include Logging
   include AggregationMixin
@@ -26,6 +50,8 @@ class AggregateDataService
     @meter_collection
   end
 
+  # Run the validation process on all meters in a +MeterCollection+
+  #
   # This is called by the EnergySparks codebase
   def validate_meter_data
     log 'Validating Meters'
@@ -33,6 +59,11 @@ class AggregateDataService
     validate_meter_list(@electricity_meters)
   end
 
+  # Run the aggregation process on all meters in a +MeterCollection+
+  #
+  # Should be called after the validation process to ensure that the underlying
+  # meter data has been corrected.
+  #
   # This is called by the EnergySparks codebase
   def aggregate_heat_and_electricity_meters
     log 'Aggregate Meters'
