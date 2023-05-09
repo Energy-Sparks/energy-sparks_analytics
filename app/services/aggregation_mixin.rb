@@ -173,6 +173,11 @@ module AggregationMixin
     [start_dates.max, end_dates.min]
   end
 
+  # Triggers the calculation and caching of co2 emissions for a meter
+  # Results in the underlying +AmrData+ object holding a schedule of co2 emissions data
+  #
+  # If this is not called, then the +AmrData+ object will not be able to correctly return
+  # co2 values for a given day or period
   private def calculate_carbon_emissions_for_meter(meter, fuel_type)
     if fuel_type == :electricity || fuel_type == :aggregated_electricity # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
       meter.amr_data.set_carbon_emissions(meter.id, nil, meter_collection.grid_carbon_intensity)
@@ -181,6 +186,11 @@ module AggregationMixin
     end
   end
 
+  # Triggers the calculation of tariffs for a meter
+  # Results in the underlying +AmrData+ object holding a schedule of cost data
+  #
+  # If this is not called, then the +AmrData+ object will not be able to correctly return
+  # cost values for a given day or period
   private def calculate_costs_for_meter(meter)
     logger.info "Creating economic & accounting costs for #{meter.mpan_mprn} fuel #{meter.fuel_type} from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}"
     meter.amr_data.set_tariffs(meter)

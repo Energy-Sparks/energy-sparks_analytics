@@ -41,6 +41,8 @@ class AggregateDataService
     @electricity_meters = @meter_collection.electricity_meters
   end
 
+  # Convenience method for calling both the validation and aggregation
+  # stages.
   def validate_and_aggregate_meter_data
     log 'Validating and Aggregating Meters'
     validate_meter_data
@@ -62,20 +64,27 @@ class AggregateDataService
   # Run the aggregation process on all meters in a +MeterCollection+
   #
   # Should be called after the validation process to ensure that the underlying
-  # meter data has been corrected.
+  # meter data has first been corrected.
   #
   # This is called by the EnergySparks codebase
   def aggregate_heat_and_electricity_meters
     log 'Aggregate Meters'
     bm = Benchmark.realtime do
+      #adjust meter start/end dates if needed
       set_long_gap_boundary_on_all_meters
 
+      #aggregate heat meters
       aggregate_heat_meters
 
+      #pre-process, aggregate and post-process electricity meters
       process_electricity_meters
 
+      #process the community use opening times, configuring
+      #results for each aggregate meter
       process_community_usage_open_close_times
 
+      #set flags on amr data to indicate aggregation process
+      #has been completed
       set_post_aggregation_state_on_all_meters
     end
     calc_text = "Calculated meter aggregation for |#{format('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds"
@@ -144,10 +153,14 @@ class AggregateDataService
     end
   end
 
+  # Returns true if the school has solar panels and multiple electricity meters
   def more_than_one_solar_pv_sub_meter?
     @meter_collection.solar_pv_panels? && @meter_collection.electricity_meters.length > 1
   end
 
+  # Set flags on each meter to indicate aggregation process has
+  # been completed.
+  #
   # allows parameterised carbon/cost objects to cache data post
   # aggregation, reducing memory footprint in front end cache prior to this
   # while maintaining charting performance once out of cache
@@ -157,6 +170,11 @@ class AggregateDataService
     end
   end
 
+  #Run the validation process on a list of meters.
+  #
+  #If any meter fails validation then an exception will be raised
+  #
+  # @param Array list_of_meters an array of +Dashboard::Meter+
   def validate_meter_list(list_of_meters)
     log "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
@@ -205,6 +223,8 @@ class AggregateDataService
     combined_meter.sub_meters.each { |t, m| log "   #{t}: #{m}" }
   end
 
+  # TODO: this appears to be unused
+  #
   # if an electricity meter is split up into a storage and non-storage version
   # we need to artificially split up the standing charges
   # in any account scenario these probably need re-aggregating for any bill
@@ -217,6 +237,7 @@ class AggregateDataService
     meter2.amr_data.accounting_tariff.scale_standing_charges(1.0 - percent_meter1)
   end
 
+  # TODO: this appears to be unused
   def lookup_synthetic_meter(type)
     meter_id = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type)
     @meter_collection.meter?(meter_id, true)
@@ -235,6 +256,8 @@ class AggregateDataService
     # assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
   end
 
+  # TODO: this appears to be unused
+  #
   # pv and storage heater meters alter the meter data, but for
   # P&L purposes we need an unaltered copy of the original meter
   def create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
@@ -245,6 +268,7 @@ class AggregateDataService
     end
   end
 
+  # TODO: this appears to be unused
   def assign_unaltered_electricity_meter_deprecated(meter)
     @meter_collection.unaltered_aggregated_electricity_meters ||= meter
   end
@@ -446,6 +470,7 @@ class AggregateDataService
     end
   end
 
+  # TODO: this appears to be unused
   def group_sub_meters_by_fuel_type(list_of_meters)
     sub_meter_types = {}
     list_of_meters.each do |meter|
@@ -458,6 +483,7 @@ class AggregateDataService
     sub_meter_types
   end
 
+  # TODO: this appears to be unused
   def combine_sub_meters_deprecated(parent_meter, list_of_meters)
     sub_meter_types = group_sub_meters_by_fuel_type(list_of_meters)
 
