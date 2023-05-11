@@ -243,6 +243,10 @@ class AggregateDataService
     @meter_collection.meter?(meter_id, true)
   end
 
+  # Carry out the aggregation process for gas meters
+  #
+  # Triggers calculation of carbon emissions and costs for each meter, and
+  # creation of the aggregate heat meter.
   def aggregate_heat_meters
     calculate_meters_carbon_emissions_and_costs(@heat_meters, :gas)
     @meter_collection.aggregated_heat_meters = aggregate_main_meters(@meter_collection.aggregated_heat_meters, @heat_meters, :gas)
@@ -273,6 +277,12 @@ class AggregateDataService
     @meter_collection.unaltered_aggregated_electricity_meters ||= meter
   end
 
+  #Creates a name, id, total floor area and total number of pupils based on
+  #metadata associated with a list of meters
+  #
+  #Names and ids are just concentated, floor area and pupil counts are totalled.
+  #
+  # @param Array list_of_meters list of meters to process
   def combine_meter_meta_data(list_of_meters)
     meter_names = []
     ids = []
@@ -298,15 +308,31 @@ class AggregateDataService
   end
 
   # rubocop:disable Layout/LineLength
+  #
+  # Carry out the aggregation process for a list of meters, of a given type
+  #
+  # @param Dashboard::Meter combined_meter the existing aggregate meter of this type (if there is one)
+  # @param Array list_of_meters the list of meters to aggregate
+  # @param Symbol type the fuel type being aggregated
+  # @param boolean copy_amr_data whether to copy the AMR data to the aggregate meter? Looks to be unused now?
   def aggregate_main_meters(combined_meter, list_of_meters, type, copy_amr_data = false)
     log "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map { |sm| sm.sub_meters.length }.sum} sub meters"
     aggregate_meters(combined_meter, list_of_meters, type, copy_amr_data)
     # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
     # combine_sub_meters_deprecated(combined_meter, list_of_meters)
   end
-  # rubocop:enable Layout/LineLength
 
-  # copy meter and amr data - for pv, storage heater meters about to be disaggregated
+  # rubocop:enable Layout/LineLength
+  #
+  # TODO: this now appears to be unused. Only called if +aggregate_meters+ has +copy_amr_data+ flag.
+  # That flag is only set in +create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters_+ which is never called?
+  #
+  # Creates a copy of an existing +Dashboard::Meter+, along with its underlying +AMRData+
+  #
+  # For pv, storage heater meters about to be disaggregated
+  #
+  # @param Dashboard::Meter meter the meter to copy
+  # @return Dashboard::Meter
   def copy_meter_and_amr_data(meter)
     log "Creating cloned copy of meter #{meter.mpan_mprn}"
     new_meter = nil
@@ -330,11 +356,29 @@ class AggregateDataService
     new_meter
   end
 
+  # Aggregates a list of meters with the same fuel type.
+  #
+  # If there is a single meter in the list, then this is returned directly. It will be
+  # treated as the aggregate meter
+  #
+  # If +combined_meter+ is not nil then this is used as the basis for the aggregation.
+  # Any existing floor area, pupil numbers or amr data will be overwritten
+  #
+  # Otherwise (the common case) creates a new +Dashboard::AggregateMeter+.
+  #
+  #
+  # @param Dashboard::Meter combined_meter the existing aggregate meter, if there is one
+  # @param Array list_of_meters the meters to combine
+  # @param Symbol fuel_type the fuel type of the meters being aggregated
+  # @param boolean copy_amr_data whether to copy the AMR data to the aggregate meter? Looks to be unused now?
+  # @return nil if list of meters is nil or empty, a Dashboard::Meter if list contains single entry, the existing combined meter,
+  # or a new +Dashboard::AggregateMeter+
   def aggregate_meters(combined_meter, list_of_meters, fuel_type, copy_amr_data = false)
     return nil if list_of_meters.nil? || list_of_meters.empty?
 
     if list_of_meters.length == 1
       meter = list_of_meters.first
+      #Note this call only seem to happen from a deprecated method?
       meter = copy_meter_and_amr_data(meter) if copy_amr_data
       log "Single meter of type #{fuel_type} - using as combined meter from #{meter.amr_data.start_date} to #{meter.amr_data.end_date} rather than creating new one"
       return meter
@@ -342,12 +386,16 @@ class AggregateDataService
 
     log_meter_dates(list_of_meters)
 
+    #Combine the AMR data for the meters to create a new +AmrData+ object
+    #Will apply rules that define how the time series are combined
     combined_amr_data = aggregate_amr_data(list_of_meters, fuel_type)
 
     has_sheffield_solar_pv = list_of_meters.any?(&:sheffield_simulated_solar_pv_panels?)
 
+    #Concatenate meter names ids and sum floor area and number of pupils
     combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
+    #As there is no existing aggregate meter, create a new one
     if combined_meter.nil?
       unless @meter_collection.urn.nil?
         mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, fuel_type)
@@ -396,6 +444,8 @@ class AggregateDataService
     combined_meter
   end
 
+  #Returns true if there are any differential tariffs for any meters in the provided list, within
+  #the specified date range.
   def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
     return false if fuel_type == :gas
 
@@ -405,6 +455,7 @@ class AggregateDataService
     false
   end
 
+  #Returns true all economic tariffs for the list of meters are identical.
   def all_economic_tariffs_identical?(list_of_meters)
     return true if list_of_meters.length == 1
 
@@ -412,6 +463,8 @@ class AggregateDataService
     economic_tariffs.uniq { |t| [t.tariff, t.tariff]}.count == 1
   end
 
+  #Returns true if there are any "time varying" economic tariffs. i.e. economic
+  #tariffs with different start/end dates.
   def any_time_variant_economic_tariffs?(list_of_meters)
     list_of_meters.each do |meter|
       return true if meter.meter_tariffs.economic_tariffs_change_over_time?

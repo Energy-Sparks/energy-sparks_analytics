@@ -56,7 +56,7 @@ module AggregationMixin
     new_aggregate_meter
   end
 
-  # Aggregate a list of meters, optionally ignoring any aggregation rules
+  # Aggregate the data associated with a list of meters, optionally ignoring any aggregation rules
   #
   # @param Array meter an array of +Dashboard::Meter+
   # @param Symbol type the fuel type
