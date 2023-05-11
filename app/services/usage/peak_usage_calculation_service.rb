@@ -11,6 +11,8 @@ module Usage
     end
 
     def average_peak_kw
+      return 0.0 if peak_kws.length.zero?
+
       peak_kws.sum / peak_kws.length
     end
 
