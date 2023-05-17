@@ -21,7 +21,8 @@ describe ChartManagerTimescaleManipulation do
     }
   }
 
-  let(:end_date)    { Date.today - 1 }
+  #one year of data
+  let(:end_date)    { Date.today }
   let(:start_date)  { end_date - 365 }
   let(:amr_data)    { double('amr-data') }
 
@@ -47,7 +48,7 @@ describe ChartManagerTimescaleManipulation do
     let(:manipulator) { ChartManagerTimescaleManipulationMove.new(operation_type, chart_config, meter_collection)}
 
     context '#adjust_timescale' do
-      context 'with enough data' do
+      context 'with several years of data, can adjust timescale by one year' do
         let(:period)  { -1 }
         let(:expected_timescale)  { [{timescale => period}]}
 
@@ -58,24 +59,24 @@ describe ChartManagerTimescaleManipulation do
         end
       end
 
-      context 'with not enough data' do
+      context 'with one year of data, cannot adjust back two years' do
         it 'raises exception' do
-          expect { manipulator.adjust_timescale(-1) }.to raise_error(EnergySparksNotEnoughDataException)
+          expect { manipulator.adjust_timescale(-2) }.to raise_error(EnergySparksNotEnoughDataException)
         end
       end
     end
 
     context '#can_go_back_in_time_one_period?' do
-      context 'with enough data' do
+      context 'with several years of data, can move back one year' do
         let(:start_date) { end_date - (365*3) }
         it 'returns true' do
           expect(manipulator.can_go_back_in_time_one_period?).to be true
         end
       end
 
-      context 'with not enough data' do
+      context 'with thirty days of data, cannot move back one year' do
+        let(:start_date) { end_date - (30) }
         it 'returns false' do
-          #default dates are a single year
           expect(manipulator.can_go_back_in_time_one_period?).to be false
         end
       end
