@@ -26,6 +26,7 @@ class MeterTariffManager
   class NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs < StandardError; end
   class TooManyWeekdayWeekendTariffsOnDate                        < StandardError; end
   class MissingWeekdayWeekendTariffsOnDate                        < StandardError; end
+  class EconomicCostCalculationError                              < StandardError; end
 
   def initialize(meter)
     @mpxn = meter.mpxn
@@ -35,7 +36,8 @@ class MeterTariffManager
   end
 
   def economic_cost(date, kwh_x48)
-    t = if differential_tariff_on_date?(date)
+    differential_tariff = differential_tariff_on_date?(date)
+    t = if differential_tariff
           {
             rates_x48: {
               MeterTariff::NIGHTTIME_RATE => @economic_tariff.weighted_cost(date, kwh_x48, :nighttime_rate),
@@ -53,6 +55,8 @@ class MeterTariffManager
         end
 
     t.merge( { standing_charges: {}, system_wide: true, default: true } )
+  rescue => e
+    raise_and_log_error(EconomicCostCalculationError, "Unable to calculate economic cost for mpxn #{@mpxn} on #{date}. Differential tariff: #{differential_tariff}")
   end
 
   def accounting_cost(date, kwh_x48)
@@ -377,7 +381,7 @@ class MeterTariffManager
   # weekday/weekend tariffs are typically represented by 2 tariffs within a given supply contract
   # i.e. have same or very similar start and end dates, but are differentiated by having
   # [:weekday] or [:weekend] flags set, ultimately only 1 of the 2 tariffs is used depending on the date
-  # generally you would expect zero or 1 weekday/weekend tariff on a given date 
+  # generally you would expect zero or 1 weekday/weekend tariff on a given date
   def weekend_weekday_tariff(tariffs, date)
     weekday_tariffs = tariffs.select { |tariff| tariff.tariff.key?(:weekday) }
     weekend_tariffs = tariffs.select { |tariff| tariff.tariff.key?(:weekend) }
@@ -391,7 +395,7 @@ class MeterTariffManager
 
   # defensive programming on basis either user or dcc might setup tariffs incorrectly
   def check_weekday_weekend_tariffs(tariffs, weekday_tariffs, weekend_tariffs, date)
-    if tariffs.length != weekday_tariffs.length + weekend_tariffs.length 
+    if tariffs.length != weekday_tariffs.length + weekend_tariffs.length
       raise_and_log_error(NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs, "Not all tariffs on #{date} for mpxn #{@mpxn} are  weekday weekend tariffs")
     end
 

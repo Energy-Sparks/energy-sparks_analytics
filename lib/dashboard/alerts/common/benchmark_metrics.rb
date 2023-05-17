@@ -1,10 +1,10 @@
 # benchmark metrics
 #
 module BenchmarkMetrics
+  @@current_prices = nil
   ELECTRICITY_PRICE = 0.15
   SOLAR_EXPORT_PRICE = 0.05
   GAS_PRICE = 0.03
-  OIL_PRICE = 0.05
 
   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL = 50_000.0 / 200.0
   RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE = 1.3 # secondary electricity usage typically 1.3 times higher due extra hours and server ICT
@@ -29,6 +29,22 @@ module BenchmarkMetrics
 
   EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.2
   BENCHMARK_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.5
+
+  def self.set_current_prices(prices:)
+    @@current_prices = prices
+  end
+
+  def self.pricing
+    @@current_prices || default_prices
+  end
+
+  def self.default_prices
+    OpenStruct.new(
+      gas_price: BenchmarkMetrics::GAS_PRICE,
+      electricity_price: BenchmarkMetrics::ELECTRICITY_PRICE,
+      solar_export_price: BenchmarkMetrics::SOLAR_EXPORT_PRICE
+    )
+  end
 
   # BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * GAS_PRICE +
   #                                  BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE

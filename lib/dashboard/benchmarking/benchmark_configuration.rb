@@ -147,7 +147,8 @@ module Benchmarking
         :layer_up_powerdown_day_november_2022,
         :change_in_energy_use_since_joined_energy_sparks,
         :autumn_term_2021_2022_energy_comparison,
-        :sept_nov_2021_2022_energy_comparison
+        :sept_nov_2021_2022_energy_comparison,
+        :easter_shutdown_2023_energy_comparison
       ]
     }
 
@@ -211,7 +212,7 @@ module Benchmarking
         sort_by:  [4],
         type: %i[chart table],
         admin_only: false,
-        column_heading_explanation: :last_year_definition_html        
+        column_heading_explanation: :last_year_definition_html
       },
       annual_energy_costs_per_floor_area: {
         benchmark_class:  BenchmarkContentEnergyPerFloorArea,
@@ -257,7 +258,7 @@ module Benchmarking
           # kWh
 
           { data: ->{ sum_if_complete([lue1_pppk, lug1_pppk, lus1_pppk], [lue1_cppk, lug1_cppk, lus1_cppk]) }, name: :previous_year, units: :kwh },
-          { data: ->{ sum_data([lue1_cppk, lug1_cppk, lus1_cppk]) },                                name: :last_year,  units: :kwh }, 
+          { data: ->{ sum_data([lue1_cppk, lug1_cppk, lus1_cppk]) },                                name: :last_year,  units: :kwh },
           {
             data: ->{ percent_change(
                                       sum_if_complete([lue1_pppk, lug1_pppk, lus1_pppk], [lue1_cppk, lug1_cppk, lus1_cppk]),
@@ -269,7 +270,7 @@ module Benchmarking
 
           # CO2
           { data: ->{ sum_if_complete([lue1_pppc, lug1_pppc, lus1_pppc], [lue1_cppc, lug1_cppc, lus1_cppc]) }, name: :previous_year, units: :co2 },
-          { data: ->{ sum_data([lue1_cppc, lug1_cppc, lus1_cppc]) },                                name: :last_year,  units: :co2 }, 
+          { data: ->{ sum_data([lue1_cppc, lug1_cppc, lus1_cppc]) },                                name: :last_year,  units: :co2 },
           {
             data: ->{ percent_change(
                                       sum_if_complete([lue1_pppc, lug1_pppc, lus1_pppc], [lue1_cppc, lug1_cppc, lus1_cppc]),
@@ -282,7 +283,7 @@ module Benchmarking
           # £
 
           { data: ->{ sum_if_complete([lue1_ppp£, lug1_ppp£, lus1_ppp£], [lue1_cpp£, lug1_cpp£, lus1_cpp£]) }, name: :previous_year, units: :£ },
-          { data: ->{ sum_data([lue1_cpp£, lug1_cpp£, lus1_cpp£]) },                                name: :last_year,  units: :£ }, 
+          { data: ->{ sum_data([lue1_cpp£, lug1_cpp£, lus1_cpp£]) },                                name: :last_year,  units: :£ },
           {
             data: ->{ percent_change(
                                       sum_if_complete([lue1_ppp£, lug1_ppp£, lus1_ppp£], [lue1_cpp£, lug1_cpp£, lus1_cpp£]),
@@ -327,7 +328,7 @@ module Benchmarking
           # kWh
 
           { data: ->{ sum_if_complete([a22e_pppk, a22g_pppk, a22s_pppk], [a22e_cppk, a22g_cppk, a22s_cppk]) }, name: :previous_year, units: :kwh },
-          { data: ->{ sum_data([a22e_cppk, a22g_cppk, a22s_cppk]) },                                name: :last_year,  units: :kwh }, 
+          { data: ->{ sum_data([a22e_cppk, a22g_cppk, a22s_cppk]) },                                name: :last_year,  units: :kwh },
           {
             data: ->{ percent_change(
                                       sum_if_complete([a22e_pppk, a22g_pppk, a22s_pppk], [a22e_cppk, a22g_cppk, a22s_cppk]),
@@ -339,7 +340,7 @@ module Benchmarking
 
           # CO2
           { data: ->{ sum_if_complete([a22e_pppc, a22g_pppc, a22s_pppc], [a22e_cppc, a22g_cppc, a22s_cppc]) }, name: :previous_year, units: :co2 },
-          { data: ->{ sum_data([a22e_cppc, a22g_cppc, a22s_cppc]) },                                name: :last_year,  units: :co2 }, 
+          { data: ->{ sum_data([a22e_cppc, a22g_cppc, a22s_cppc]) },                                name: :last_year,  units: :co2 },
           {
             data: ->{ percent_change(
                                       sum_if_complete([a22e_pppc, a22g_pppc, a22s_pppc], [a22e_cppc, a22g_cppc, a22s_cppc]),
@@ -352,7 +353,7 @@ module Benchmarking
           # £
 
           { data: ->{ sum_if_complete([a22e_ppp£, a22g_ppp£, a22s_ppp£], [a22e_cpp£, a22g_cpp£, a22s_cpp£]) }, name: :previous_year, units: :£ },
-          { data: ->{ sum_data([a22e_cpp£, a22g_cpp£, a22s_cpp£]) },                                name: :last_year,  units: :£ }, 
+          { data: ->{ sum_data([a22e_cpp£, a22g_cpp£, a22s_cpp£]) },                                name: :last_year,  units: :£ },
           {
             data: ->{ percent_change(
                                       sum_if_complete([a22e_ppp£, a22g_ppp£, a22s_ppp£], [a22e_cpp£, a22g_cpp£, a22s_cpp£]),
@@ -398,7 +399,7 @@ module Benchmarking
           # kWh
 
           { data: ->{ sum_if_complete([s22e_pppk, s22g_pppk, s22s_pppk], [s22e_cppk, s22g_cppk, s22s_cppk]) }, name: :previous_year, units: :kwh },
-          { data: ->{ sum_data([s22e_cppk, s22g_cppk, s22s_cppk]) },                                name: :last_year,  units: :kwh }, 
+          { data: ->{ sum_data([s22e_cppk, s22g_cppk, s22s_cppk]) },                                name: :last_year,  units: :kwh },
           {
             data: ->{ percent_change(
                                       sum_if_complete([s22e_pppk, s22g_pppk, s22s_pppk], [s22e_cppk, s22g_cppk, s22s_cppk]),
@@ -410,7 +411,7 @@ module Benchmarking
 
           # CO2
           { data: ->{ sum_if_complete([s22e_pppc, s22g_pppc, s22s_pppc], [s22e_cppc, s22g_cppc, s22s_cppc]) }, name: :previous_year, units: :co2 },
-          { data: ->{ sum_data([s22e_cppc, s22g_cppc, s22s_cppc]) },                                name: :last_year,  units: :co2 }, 
+          { data: ->{ sum_data([s22e_cppc, s22g_cppc, s22s_cppc]) },                                name: :last_year,  units: :co2 },
           {
             data: ->{ percent_change(
                                       sum_if_complete([s22e_pppc, s22g_pppc, s22s_pppc], [s22e_cppc, s22g_cppc, s22s_cppc]),
@@ -423,7 +424,7 @@ module Benchmarking
           # £
 
           { data: ->{ sum_if_complete([s22e_ppp£, s22g_ppp£, s22s_ppp£], [s22e_cpp£, s22g_cpp£, s22s_cpp£]) }, name: :previous_year, units: :£ },
-          { data: ->{ sum_data([s22e_cpp£, s22g_cpp£, s22s_cpp£]) },                                name: :last_year,  units: :£ }, 
+          { data: ->{ sum_data([s22e_cpp£, s22g_cpp£, s22s_cpp£]) },                                name: :last_year,  units: :£ },
           {
             data: ->{ percent_change(
                                       sum_if_complete([s22e_ppp£, s22g_ppp£, s22s_ppp£], [s22e_cpp£, s22g_cpp£, s22s_cpp£]),
@@ -465,7 +466,7 @@ module Benchmarking
         name:     'Change in energy use since last year',
         columns:  [
           { data: 'addp_name',              name: :name, units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
-          { data: ->{ sum_if_complete([enba_ken, enba_kgn, enba_khn, enba_ksn], 
+          { data: ->{ sum_if_complete([enba_ken, enba_kgn, enba_khn, enba_ksn],
                                       [enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: :previous_year, units: :kwh },
           { data: ->{ sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: :last_year, units: :kwh },
           { data: ->{ percent_change(
@@ -480,7 +481,7 @@ module Benchmarking
                     name: :change_pct, units: :relative_percent_0dp
           },
 
-          { data: ->{ sum_if_complete([enba_cen, enba_cgn, enba_chn, enba_csn], 
+          { data: ->{ sum_if_complete([enba_cen, enba_cgn, enba_chn, enba_csn],
                                       [enba_ce0, enba_cg0, enba_ch0, enba_cs0]) }, name: :previous_year, units: :co2 },
           { data: ->{ sum_data([enba_ce0, enba_cg0, enba_ch0, enba_cs0]) }, name: :last_year, units: :co2 },
           { data: ->{ percent_change(
@@ -495,7 +496,7 @@ module Benchmarking
                     name: :change_pct, units: :relative_percent_0dp
           },
 
-          { data: ->{ sum_if_complete([enba_pen, enba_pgn, enba_phn, enba_psn], 
+          { data: ->{ sum_if_complete([enba_pen, enba_pgn, enba_phn, enba_psn],
                                       [enba_pe0, enba_pg0, enba_ph0, enba_ps0]) }, name: :previous_year, units: :£ },
           { data: ->{ sum_data([enba_pe0, enba_pg0, enba_ph0, enba_ps0]) }, name: :last_year, units: :£ },
           { data: ->{ percent_change(
@@ -510,7 +511,7 @@ module Benchmarking
                     name: :change_pct, units: :relative_percent_0dp
           },
           {
-            data: ->{ 
+            data: ->{
               [
                 enba_pe0.nil?     ? nil : 'E',
                 enba_pg0.nil?     ? nil : 'G',
@@ -520,8 +521,8 @@ module Benchmarking
             },
             name: :fuel, units: String
           },
-          { 
-            data: ->{ 
+          {
+            data: ->{
               (enba_peap == ManagementSummaryTable::NO_RECENT_DATA_MESSAGE ||
                enba_pgap == ManagementSummaryTable::NO_RECENT_DATA_MESSAGE) ? 'Y' : ''
              },
@@ -639,7 +640,7 @@ module Benchmarking
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceStorageHeaters },
         admin_only: false,
-        column_heading_explanation: :last_year_previous_year_definition_html             
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       change_in_solar_pv_since_last_year: {
         benchmark_class:  BenchmarkChangeInSolarPVSinceLastYear,
@@ -683,7 +684,7 @@ module Benchmarking
         sort_by:  [1], # column 1 i.e. Annual kWh
         type: %i[table],
         admin_only: false,
-        column_heading_explanation: :last_year_definition_html        
+        column_heading_explanation: :last_year_definition_html
       },
       electricity_targets: {
         benchmark_class:  BenchmarkElectricityTarget,
@@ -832,7 +833,7 @@ module Benchmarking
         where:   ->{ !sole_opvk.nil? },
         sort_by: [1],
         type: %i[table],
-        admin_only: false        
+        admin_only: false
       },
       annual_heating_costs_per_floor_area: {
         benchmark_class:  BenchmarkContentHeatingPerFloorArea,
@@ -1181,17 +1182,17 @@ module Benchmarking
 
           # kWh
           { data: ->{ a22e_pppk }, name: :previous_year, units: :kwh },
-          { data: ->{ a22e_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ a22e_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(a22e_pppk, a22e_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ a22e_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ a22e_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ a22e_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(a22e_pppc, a22e_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ a22e_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ a22e_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ a22e_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(a22e_ppp£, a22e_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
@@ -1217,17 +1218,17 @@ module Benchmarking
           # kWh
           { data: ->{ a22g_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ a22g_pppk }, name: :previous_year_temperature_adjusted, units: :kwh },
-          { data: ->{ a22g_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ a22g_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(a22g_pppk, a22g_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ a22g_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ a22g_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ a22g_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(a22g_pppc, a22g_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ a22g_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ a22g_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ a22g_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(a22g_ppp£, a22g_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
@@ -1253,17 +1254,17 @@ module Benchmarking
           # kWh
           { data: ->{ a22s_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ a22s_pppk }, name: :previous_year_temperature_adjusted, units: :kwh },
-          { data: ->{ a22s_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ a22s_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(a22s_pppk, a22s_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ a22s_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ a22s_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ a22s_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(a22s_pppc, a22s_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ a22s_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ a22s_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ a22s_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(a22s_ppp£, a22s_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
@@ -1288,17 +1289,17 @@ module Benchmarking
 
           # kWh
           { data: ->{ lue1_pppk }, name: :previous_year, units: :kwh },
-          { data: ->{ lue1_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ lue1_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(lue1_pppk, lue1_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ lue1_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ lue1_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ lue1_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(lue1_pppc, lue1_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ lue1_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ lue1_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ lue1_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(lue1_ppp£, lue1_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
         ],
@@ -1323,17 +1324,17 @@ module Benchmarking
           # kWh
           { data: ->{ lug1_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ lug1_pppk }, name: :previous_year_temperature_adjusted, units: :kwh },
-          { data: ->{ lug1_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ lug1_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(lug1_pppk, lug1_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ lug1_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ lug1_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ lug1_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(lug1_pppc, lug1_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ lug1_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ lug1_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ lug1_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(lug1_ppp£, lug1_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
         ],
@@ -1346,7 +1347,7 @@ module Benchmarking
         where:   ->{ !lug1_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
-        admin_only: true        
+        admin_only: true
       },
       layer_up_powerdown_day_november_2022_storage_heater_table: {
         benchmark_class:  BenchmarkChangeAdhocComparisonStorageHeaterTable,
@@ -1358,17 +1359,17 @@ module Benchmarking
           # kWh
           { data: ->{ lus1_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ lus1_pppk }, name: :previous_year_temperature_adjusted, units: :kwh },
-          { data: ->{ lus1_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ lus1_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(lus1_pppk, lus1_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ lus1_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ lus1_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ lus1_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(lus1_pppc, lus1_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ lus1_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ lus1_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ lus1_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(lus1_ppp£, lus1_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
         ],
@@ -1381,7 +1382,7 @@ module Benchmarking
         where:   ->{ !lus1_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
-        admin_only: true        
+        admin_only: true
       },
 
 
@@ -1452,17 +1453,17 @@ module Benchmarking
 
           # kWh
           { data: ->{ s22e_pppk }, name: :previous_year, units: :kwh },
-          { data: ->{ s22e_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ s22e_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(s22e_pppk, s22e_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ s22e_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ s22e_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ s22e_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(s22e_pppc, s22e_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ s22e_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ s22e_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ s22e_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(s22e_ppp£, s22e_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
@@ -1488,17 +1489,17 @@ module Benchmarking
           # kWh
           { data: ->{ s22g_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ s22g_pppk }, name: :previous_year_temperature_adjusted, units: :kwh },
-          { data: ->{ s22g_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ s22g_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(s22g_pppk, s22g_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ s22g_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ s22g_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ s22g_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(s22g_pppc, s22g_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ s22g_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ s22g_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ s22g_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(s22g_ppp£, s22g_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
@@ -1524,17 +1525,17 @@ module Benchmarking
           # kWh
           { data: ->{ s22s_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ s22s_pppk }, name: :previous_year_temperature_adjusted, units: :kwh },
-          { data: ->{ s22s_cppk }, name: :last_year,  units: :kwh }, 
+          { data: ->{ s22s_cppk }, name: :last_year,  units: :kwh },
           { data: ->{ percent_change(s22s_pppk, s22s_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # CO2
           { data: ->{ s22s_pppc }, name: :previous_year, units: :co2 },
-          { data: ->{ s22s_cppc }, name: :last_year,  units: :co2 }, 
+          { data: ->{ s22s_cppc }, name: :last_year,  units: :co2 },
           { data: ->{ percent_change(s22s_pppc, s22s_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ s22s_ppp£ }, name: :previous_year, units: :£ },
-          { data: ->{ s22s_cpp£ }, name: :last_year,  units: :£ }, 
+          { data: ->{ s22s_cpp£ }, name: :last_year,  units: :£ },
           { data: ->{ percent_change(s22s_ppp£, s22s_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
@@ -1547,6 +1548,144 @@ module Benchmarking
         ],
         where:   ->{ !s22s_ppp£.nil? },
         sort_by:  [9],
+        type: %i[table],
+        admin_only: true
+      },
+      easter_shutdown_2023_energy_comparison: {
+        benchmark_class:  BenchmarkEaster2023ShutdownComparison,
+        name:       'Easter shutdown 2023 energy use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          # kWh
+          {
+            data: ->{ sum_data([e23e_difk, e23g_difk, e23s_difk]) },
+            name: :change_kwh,  units: :kwh
+          },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([e23e_pppk, e23g_pppk, e23s_pppk], [e23e_cppk, e23g_cppk, e23s_cppk]),
+                                      sum_data([e23e_cppk, e23g_cppk, e23s_cppk]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp
+          },
+
+          # CO2
+          {
+            data: ->{ sum_data([e23e_difc, e23g_difc, e23s_difc]) },
+            name: :change_co2,  units: :co2
+          },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([e23e_pppc, e23g_pppc, e23s_pppc], [e23e_cppc, e23g_cppc, e23s_cppc]),
+                                      sum_data([e23e_cppc, e23g_cppc, e23s_cppc]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp
+          },
+
+          # £
+          {
+            data: ->{ sum_data([e23e_dif€, e23g_dif€, e23s_dif€]) },
+            name: :change_£current,  units: :£
+          },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([e23e_ppp€, e23g_ppp€, e23s_ppp€], [e23e_cpp€, e23g_cpp€, e23s_cpp€]),
+                                      sum_data([e23e_cpp€, e23g_cpp€, e23s_cpp€]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp, chart_data: true
+          },
+
+          # Metering
+
+          { data: ->{
+              [
+                e23e_ppp£.nil? ? nil : :electricity,
+                e23g_ppp£.nil? ? nil : :gas,
+                e23s_ppp£.nil? ? nil : :storage_heaters
+              ].compact.join(', ')
+            },
+            name: :metering,
+            units: String
+          },
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: :kwh,      span: 2 },
+          { name: :co2_kg, span: 2 },
+          { name: :cost,     span: 2 },
+          { name: '',         span: 1 }
+        ],
+        where:   ->{ !sum_data([e23e_ppp£, e23g_ppp£, e23s_ppp£], true).nil? },
+        sort_by:  [6],
+        type: %i[table],
+        admin_only: true
+      },
+      easter_shutdown_2023_electricity_table: {
+        benchmark_class:  BenchmarkEasterShutdown2023ElectricityTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Easter shutdown 2023 electricity use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          { data: ->{ e23e_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ e23e_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ e23e_dif€ },  name: :change_£current, units: :£_0dp },
+          #percent
+          { data: ->{ percent_change(e23e_pppk, e23e_cppk, true) }, name: :change_pct_combo, units: :relative_percent_0dp },
+          # percent co2
+          { data: ->{ percent_change(e23e_pppc, e23e_cppc, true) }, name: :change_pct_co2, units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_COL
+        ],
+        where:   ->{ !e23e_ppp£.nil? },
+        sort_by:  [4],
+        type: %i[table],
+        admin_only: true
+      },
+      easter_shutdown_2023_gas_table: {
+        benchmark_class:  BenchmarkEasterShutdown2023GasTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Easter shutdown 2023 gas use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          { data: ->{ e23g_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ e23g_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ e23g_dif€ },  name: :change_£current, units: :£_0dp },
+          # percent
+          { data: ->{ percent_change(e23g_pppk, e23g_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_COL
+        ],
+        where:   ->{ !e23g_ppp£.nil? },
+        sort_by:  [4],
+        type: %i[table],
+        admin_only: true
+      },
+      easter_shutdown_2023_storage_heater_table: {
+        benchmark_class:  BenchmarkEasterShutdown2023StorageHeaterTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Easter shutdown 2023 storage heater use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          { data: ->{ e23s_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ e23s_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ e23s_dif€ },  name: :change_£current, units: :£_0dp },
+          #percent
+          { data: ->{ percent_change(e23s_pppk, e23s_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
+          # percent co2
+          { data: ->{ percent_change(e23s_pppc, e23s_cppc, true) }, name: :change_pct_co2, units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_COL
+        ],
+        where:   ->{ !e23s_ppp£.nil? },
+        sort_by:  [4],
         type: %i[table],
         admin_only: true
       }

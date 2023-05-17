@@ -7,6 +7,8 @@ class AggregateDataService
   include Logging
   include AggregationMixin
 
+  MAX_DAYS_MISSING_DATA = 50
+
   attr_reader :meter_collection
 
   def initialize(meter_collection)
@@ -92,6 +94,18 @@ class AggregateDataService
     end
   end
 
+  #2023 (LD): this looks to be unnecessary. Do some further tests and remove
+  #
+  #set_long_gap_boundary will try and adjust the amr data start/end to the
+  #date of an LGAP, FIXS, FIXE reading if it can find one
+  #
+  #But in the validation step, setting these readings will result in the AMR data before
+  #or after the data to be removed from the AmrData object. The application removes any
+  #validated data that isn't part of this range.
+  #
+  # So there's never any data provided outside of these dates and we're doing an
+  # unnecessary scan of all meter data in case we find one of these readings. But
+  # they will already be the start or end of provided meter data range
   def set_long_gap_boundary_on_all_meters
     @meter_collection.all_meters.each do |meter|
       log "Considering setting long gap boundaries on #{meter.mpan_mprn}?"
@@ -115,7 +129,7 @@ class AggregateDataService
   def validate_meter_list(list_of_meters)
     log "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
-      validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures)
+      validate_meter = ValidateAMRData.new(meter, MAX_DAYS_MISSING_DATA, @meter_collection.holidays, @meter_collection.temperatures)
       validate_meter.validate
     rescue StandardError => e
       add_rollbar_context_if_available(meter, e)

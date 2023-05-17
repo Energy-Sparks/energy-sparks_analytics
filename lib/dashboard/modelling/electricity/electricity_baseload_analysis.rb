@@ -36,6 +36,7 @@ class ElectricityBaseloadAnalysis
 
     start_date, end_date, scale_to_year = scaled_annual_dates(asof_date)
     kwh = @meter.amr_data.kwh_date_range(start_date, end_date, :kwh) * scale_to_year
+    return 0.0 if kwh.zero?
 
     baseload_kwh / kwh
   end
@@ -46,7 +47,10 @@ class ElectricityBaseloadAnalysis
   end
 
   def blended_baseload_tariff_rate_£_per_kwh(datatype, asof_date = amr_data.end_date)
-    scaled_annual_baseload_cost_£(datatype, asof_date) / annual_average_baseload_kwh(asof_date)
+    annual_average_baseload_kwh = annual_average_baseload_kwh(asof_date)
+    return 0.0 if annual_average_baseload_kwh.zero?
+    scaled_annual_baseload_cost_£ = scaled_annual_baseload_cost_£(datatype, asof_date)
+    scaled_annual_baseload_cost_£ / annual_average_baseload_kwh
   end
 
   def one_years_data?(asof_date = amr_data.end_date)

@@ -57,7 +57,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       difference_kwh:       { description: 'Difference in kwh between last 2 periods',      units:  { kwh: fuel_type }, benchmark_code: 'difk' },
       difference_£:         { description: 'Difference in £ between last 2 periods (using historic tariffs)',  units:  :£, benchmark_code: 'dif£'},
       difference_£current:  { description: 'Difference in £ between last 2 periods (using latest tariffs)',    units:  :£current, benchmark_code: 'dif€'},
-      difference_co2:     { description: 'Difference in co2 kg between last 2 periods', units:  :co2 },
+      difference_co2:     { description: 'Difference in co2 kg between last 2 periods', units:  :co2, benchmark_code: 'difc' },
       abs_difference_kwh: { description: 'Difference in kwh between last 2 periods - absolute',    units:  { kwh: fuel_type } },
       abs_difference_£:        { description: 'Difference in £ between last 2 periods - absolute (using historic tariffs)', units:  :£},
       abs_difference_£current: { description: 'Difference in £ between last 2 periods - absolute (using latest tariffs)',   units:  :£current},
@@ -548,6 +548,7 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
   end
 
   protected def truncate_period_to_available_meter_data(period)
+    return nil if period.nil?
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min
