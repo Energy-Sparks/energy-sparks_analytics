@@ -1205,7 +1205,7 @@ class ChartManager
     electricity_1_year_intraday_accounting_breakdown: {
       name:             'Electricity costs for last year by time of day (accounting costs)',
       inherits_from:    :gas_heating_season_intraday,
-      meter_definition: :allelectricity,
+      meter_definition: :allelectricity_unmodified,
       filter:           nil,
       series_breakdown: :accounting_cost,
       yaxis_units:      :£,
