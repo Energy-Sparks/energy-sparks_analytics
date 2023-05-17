@@ -453,11 +453,9 @@ class Holidays
   def self.years_to_date(start_date, end_date, move_to_saturday_boundary)
     yrs_to_date = []
 
-    last_date_of_period = end_date
-    # move to previous Saturday, so last date a Saturday - better for getting weekends and holidays on right boundaries
-    if move_to_saturday_boundary
-      last_date_of_period = nearest_previous_saturday(last_date_of_period)
-    end
+    # move to previous Saturday, so last date a Saturday - better for
+    # getting weekends and holidays on right boundaries
+    last_date_of_period = move_to_saturday_boundary ? nearest_previous_saturday(end_date) : end_date
 
     # iterate backwards creating a year periods until we run out of AMR data
     first_date_of_period = last_date_of_period - 52 * 7 + 1

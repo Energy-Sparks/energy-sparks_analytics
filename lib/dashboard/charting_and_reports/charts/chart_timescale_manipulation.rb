@@ -211,10 +211,9 @@ class ChartManagerTimescaleManipulation
     when :year
       ((end_date - start_date + 1) / 365.0).floor
     when :up_to_a_year
-      # Replaced older logic to allow dashbaord charts to navigate through the entire
+      # Replaced older logic to allow dashboard charts to navigate through the entire
       # range of data.
       Holidays.periods_cadence(start_date, end_date, include_partial_period: true).count
-      #((end_date - start_date + 1) / 365.0).floor
     when :academicyear
       @school.holidays.academic_years(start_date, end_date).length
     when :workweek
