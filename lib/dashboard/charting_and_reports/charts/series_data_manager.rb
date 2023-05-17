@@ -844,8 +844,8 @@ module Series
 
     def series_names
       #Need to use the aggregate meter to get bill components? If using a sub meter
-      #then they list of components is empty
-      #meter.amr_data.accounting_tariff.bill_component_types.uniq
+      #then the list of components may sometimes be empty? E.g. fails if there's a single electricity
+      #meter + solar
       @school.aggregate_meter(meter.fuel_type).amr_data.accounting_tariff.bill_component_types.uniq
     end
 
