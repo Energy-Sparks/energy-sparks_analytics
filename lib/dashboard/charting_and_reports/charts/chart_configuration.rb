@@ -1078,10 +1078,11 @@ class ChartManager
     },
     electricity_cost_comparison_last_2_years_accounting: {
       name:             '',
-      inherits_from:    :electricity_cost_comparison_last_2_years,
-      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      inherits_from:     :electricity_cost_comparison_last_2_years,
+      timescale:         [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       ignore_single_series_failure: true,
-      yaxis_units:      :accounting_cost
+      yaxis_units:       :accounting_cost,
+      meter_definition:  :allelectricity_unmodified
     },
     electricity_cost_1_year_accounting_breakdown: {
       name:             '',
@@ -1168,7 +1169,8 @@ class ChartManager
     electricity_cost_comparison_last_2_years_accounting_breakdown: {
       name:             'Energy Costs', # title for 1st heading of introductory text for web page
       inherits_from:    :electricity_cost_comparison_last_2_years_accounting,
-      series_breakdown: :accounting_cost
+      series_breakdown: :accounting_cost,
+      meter_definition:  :allelectricity_unmodified
     },
     gas_cost_comparison_last_2_years_accounting_breakdown: {
       name:             'Gas accounting cost by month for the last year',
