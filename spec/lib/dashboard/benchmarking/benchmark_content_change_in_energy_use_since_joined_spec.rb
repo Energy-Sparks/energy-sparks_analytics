@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
           Change in energy use since the school joined Energy Sparks
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_energy_use_since_joined_energy_sparks") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_energy_use_since_joined_energy_sparks')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -43,7 +43,7 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
         </p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_energy_sparks.introduction_text_html') +
-        I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
+                     I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       expect(html).to match_html(content_html)
     end
   end
@@ -99,10 +99,53 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
     end
   end
 
-
   describe '#tables?' do
     it 'returns if tables are present' do
       expect(benchmark.send(:tables?)).to eq(true)
     end
-  end  
+  end
+
+  describe '#column_heading_explanation' do
+    it 'returns the benchmark column_heading_explanation' do
+      html = benchmark.column_heading_explanation
+      expect(html).to match_html(<<~HTML)
+      HTML
+    end
+  end
+
+  describe 'footnote' do
+    it 'returns footnote text' do
+      content = benchmark.footnote([795, 629, 634], nil, {})
+      expect(content).to eq('')
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) } #.flatten.map { |c| c[:name] }
+      expect(column_groups).to eq(
+        [
+          [
+            { name: "", span: 2},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.change_since_joined_energy_sparks"), span: 5}
+          ],
+          [
+            { name: "", span: 2},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.electricity_consumption"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.gas_consumption"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.storage_heater_consumption"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.solar_pv_production"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.total_energy_consumption"), span: 1}
+          ]
+        ]
+      )
+    end
+  end
 end

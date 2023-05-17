@@ -10,6 +10,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
         [
           {
             name: 'Total Energy Use Benchmarks',
+            description: 'These benchmarks compare the combined energy use of a school site',
             benchmarks: {
               annual_energy_costs: 'Annual cost of electricity, gas, storage heaters and combined energy',
               annual_energy_costs_per_floor_area: 'Annual energy cost per floor area',
@@ -20,6 +21,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Electricity Benchmarks',
+            description: "These benchmarks compare schools' electricity consumption, including last year's consumption, recent and long term changes in consumption, baseload and performance against the school's target.",
             benchmarks: {
               annual_electricity_costs_per_pupil: 'Annual electricity use per pupil with savings potential',
               annual_electricity_out_of_hours_use: 'Electricity used out of school hours',
@@ -38,6 +40,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Gas and Storage Heater Benchmarks',
+            description: "These benchmarks compare schools' gas or storage heater consumption, including last year's consumption, recent and long term changes in consumption, the standard of their heating control and performance against the school's target.",
             benchmarks: {
               annual_gas_out_of_hours_use: 'Gas used out of school hours',
               annual_heating_costs_per_floor_area: 'Annual heating cost per floor area with savings potential',
@@ -59,6 +62,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Solar Benchmarks',
+            description: "These benchmarks compare schools' solar PV production and the benefits of installing solar.",
             benchmarks: {
               change_in_solar_pv_since_last_year: 'Annual change in solar PV production and resulting CO2 savings',
               solar_pv_benefit_estimate: 'Benefit of solar PV installation'
@@ -66,11 +70,13 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Date limited comparisons',
+            description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
               autumn_term_2021_2022_energy_comparison: 'Autumn Term 2021 versus 2022 energy use',
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
               layer_up_powerdown_day_november_2022: 'Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)',
-              sept_nov_2021_2022_energy_comparison: 'September to November 2021 versus 2022 energy use'
+              sept_nov_2021_2022_energy_comparison: 'September to November 2021 versus 2022 energy use',
+              easter_shutdown_2023_energy_comparison: 'Easter shutdown 2023 comparison'
             }
           }
         ]
@@ -82,6 +88,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
         [
           {
             name: 'Total Energy Use Benchmarks',
+            description: 'These benchmarks compare the combined energy use of a school site',
             benchmarks: {
               annual_energy_costs: 'Annual cost of electricity, gas, storage heaters and combined energy',
               annual_energy_costs_per_floor_area: 'Annual energy cost per floor area',
@@ -92,6 +99,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Electricity Benchmarks',
+            description: "These benchmarks compare schools' electricity consumption, including last year's consumption, recent and long term changes in consumption, baseload and performance against the school's target.",
             benchmarks: {
               annual_electricity_costs_per_pupil: 'Annual electricity use per pupil with savings potential',
               annual_electricity_out_of_hours_use: 'Electricity used out of school hours',
@@ -110,6 +118,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Gas and Storage Heater Benchmarks',
+            description: "These benchmarks compare schools' gas or storage heater consumption, including last year's consumption, recent and long term changes in consumption, the standard of their heating control and performance against the school's target.",
             benchmarks: {
               annual_gas_out_of_hours_use: 'Gas used out of school hours',
               annual_heating_costs_per_floor_area: 'Annual heating cost per floor area with savings potential',
@@ -131,6 +140,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Solar Benchmarks',
+            description: "These benchmarks compare schools' solar PV production and the benefits of installing solar.",
             benchmarks: {
               change_in_solar_pv_since_last_year: 'Annual change in solar PV production and resulting CO2 savings',
               solar_pv_benefit_estimate: 'Benefit of solar PV installation'
@@ -138,11 +148,13 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Date limited comparisons',
+            description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
               autumn_term_2021_2022_energy_comparison: 'Autumn Term 2021 versus 2022 energy use',
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
               layer_up_powerdown_day_november_2022: 'Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)',
-              sept_nov_2021_2022_energy_comparison: 'September to November 2021 versus 2022 energy use'
+              sept_nov_2021_2022_energy_comparison: 'September to November 2021 versus 2022 energy use',
+              easter_shutdown_2023_energy_comparison: 'Easter shutdown 2023 comparison'
             }
           }
         ]
@@ -150,10 +162,11 @@ describe Benchmarking::BenchmarkManager, type: :service do
     end
 
     it 'returns benchmarks by group for guest user types' do
-      expect(Benchmarking::BenchmarkManager.structured_pages({user_role: :guest})).to eq(
+      expect(Benchmarking::BenchmarkManager.structured_pages({ user_role: :guest })).to eq(
         [
           {
             name: 'Total Energy Use Benchmarks',
+            description: 'These benchmarks compare the combined energy use of a school site',
             benchmarks: {
               annual_energy_costs: 'Annual cost of electricity, gas, storage heaters and combined energy',
               annual_energy_costs_per_floor_area: 'Annual energy cost per floor area',
@@ -164,6 +177,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Electricity Benchmarks',
+            description: "These benchmarks compare schools' electricity consumption, including last year's consumption, recent and long term changes in consumption, baseload and performance against the school's target.",
             benchmarks: {
               annual_electricity_costs_per_pupil: 'Annual electricity use per pupil with savings potential',
               annual_electricity_out_of_hours_use: 'Electricity used out of school hours',
@@ -182,6 +196,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Gas and Storage Heater Benchmarks',
+            description: "These benchmarks compare schools' gas or storage heater consumption, including last year's consumption, recent and long term changes in consumption, the standard of their heating control and performance against the school's target.",
             benchmarks: {
               annual_gas_out_of_hours_use: 'Gas used out of school hours',
               annual_heating_costs_per_floor_area: 'Annual heating cost per floor area with savings potential',
@@ -203,6 +218,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Solar Benchmarks',
+            description: "These benchmarks compare schools' solar PV production and the benefits of installing solar.",
             benchmarks: {
               change_in_solar_pv_since_last_year: 'Annual change in solar PV production and resulting CO2 savings',
               solar_pv_benefit_estimate: 'Benefit of solar PV installation'

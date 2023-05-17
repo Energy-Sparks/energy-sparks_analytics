@@ -25,11 +25,28 @@ module SolarPhotovoltaics
     end
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Layout/LineLength
 
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
+    # If we don't have enough data, then when will it be available?
+    def data_available_from
+      meter_data_checker.date_when_enough_data_available(365)
+    end
+
     private
+
+    def aggregated_electricity_meters
+      @aggregated_electricity_meters ||= @meter_collection.aggregated_electricity_meters
+    end
+
+    def meter_data_checker
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregated_electricity_meters, aggregated_electricity_meters.amr_data.end_date)
+    end
 
     # rubocop:disable Naming/MethodName
     def export_£
-      solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics.pricing.solar_export_price
     end
 
     def saving_£current

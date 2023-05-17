@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '~> 2.7.6'
 
 gem 'require_all'
-gem 'activesupport', '~> 6.0.4'
+gem 'activesupport', '~> 6.1.7'
 
 # Forked statsample to do proper relases and to remove dependency on awesome_print which is no longer supported
 # Last official release of statsample also had a problem where it overrode the definition of Array#sum with dodgy results
@@ -43,7 +43,7 @@ end
 
 # For tests
 group :test do
-  gem 'rspec', '~> 3.8.0'
+  gem 'rspec', '~> 3.12.0'
   gem 'bundler-audit', platforms: :ruby
   gem 'factory_bot'
   gem 'simplecov', require: false

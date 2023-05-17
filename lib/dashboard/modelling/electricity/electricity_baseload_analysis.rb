@@ -1,5 +1,6 @@
 # mix of electricity baseload analysis
 class ElectricityBaseloadAnalysis
+  HOURS_IN_YEAR = 24.0 * 365.0
   def initialize(meter)
     @meter = meter
   end
@@ -35,6 +36,7 @@ class ElectricityBaseloadAnalysis
 
     start_date, end_date, scale_to_year = scaled_annual_dates(asof_date)
     kwh = @meter.amr_data.kwh_date_range(start_date, end_date, :kwh) * scale_to_year
+    return 0.0 if kwh.zero?
 
     baseload_kwh / kwh
   end
@@ -45,7 +47,10 @@ class ElectricityBaseloadAnalysis
   end
 
   def blended_baseload_tariff_rate_£_per_kwh(datatype, asof_date = amr_data.end_date)
-    scaled_annual_baseload_cost_£(datatype, asof_date) / annual_average_baseload_kwh(asof_date)
+    annual_average_baseload_kwh = annual_average_baseload_kwh(asof_date)
+    return 0.0 if annual_average_baseload_kwh.zero?
+    scaled_annual_baseload_cost_£ = scaled_annual_baseload_cost_£(datatype, asof_date)
+    scaled_annual_baseload_cost_£ / annual_average_baseload_kwh
   end
 
   def one_years_data?(asof_date = amr_data.end_date)
@@ -66,6 +71,17 @@ class ElectricityBaseloadAnalysis
   def one_week_ago(date)
     date - 6
   end
+
+  def baseload_co2_carbon_intensity_co2_k2_per_kwh(asof_date = amr_data.end_date)
+    end_date = [asof_date, amr_data.end_date].min
+    start_date = [end_date - 364, amr_data.start_date].max
+    @meter.meter_collection.grid_carbon_intensity.average_in_date_range(start_date, end_date)
+  end
+
+  def one_years_baseload_co2_kg(asof_date = amr_data.end_date)
+    HOURS_IN_YEAR * baseload_co2_carbon_intensity_co2_k2_per_kwh(asof_date)
+  end
+
 
   def baseload_economic_cost_date_range_£(d1, d2, datatype)
     (d1..d2).map do |date|
@@ -94,7 +110,8 @@ class ElectricityBaseloadAnalysis
   def percent_seasonal_variation(asof_date = amr_data.end_date)
     return nil unless one_years_data?
     kw_in_summer = summer_kw(asof_date)
-    (winter_kw(asof_date) - kw_in_summer) /kw_in_summer
+    return 0.0 if kw_in_summer.zero? # Otherwise the division (by zero) below will return Infinity
+    (winter_kw(asof_date) - kw_in_summer) / kw_in_summer
   end
 
   def average_intraweek_schoolday_kw(asof_date = amr_data.end_date)

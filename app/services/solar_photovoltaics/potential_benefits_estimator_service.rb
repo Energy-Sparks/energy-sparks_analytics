@@ -3,6 +3,8 @@
 # rubocop:disable Naming/VariableName, Metrics/ClassLength
 module SolarPhotovoltaics
   class PotentialBenefitsEstimatorService
+    include AnalysableMixin
+
     attr_reader :scenarios, :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
 
     def initialize(meter_collection:, asof_date: Date.today)
@@ -23,7 +25,20 @@ module SolarPhotovoltaics
       )
     end
 
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
+    # If we don't have enough data, then when will it be available?
+    def data_available_from
+      meter_data_checker.date_when_enough_data_available(365)
+    end
+
     private
+
+    def meter_data_checker
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregated_electricity_meters, @asof_date)
+    end
 
     def calculate_potential_benefits_estimates
       # (use_max_meter_date_if_less_than_asof_date: false)
@@ -159,7 +174,7 @@ module SolarPhotovoltaics
     def calculate_economic_benefit(kwh_data)
       new_mains_cost = kwh_data[:new_mains_consumption_£]
       old_mains_cost = kwh_data[:existing_annual_£]
-      export_income  = kwh_data[:exported_kwh] * BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      export_income  = kwh_data[:exported_kwh] * BenchmarkMetrics.pricing.solar_export_price
 
       mains_savings   = old_mains_cost - new_mains_cost
       saving          = mains_savings + export_income

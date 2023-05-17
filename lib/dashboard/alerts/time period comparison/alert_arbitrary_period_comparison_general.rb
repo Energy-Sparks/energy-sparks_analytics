@@ -122,3 +122,48 @@ end
 
 class AlertSeptNov20212022StorageHeaterComparison < AlertAutumnTerm20212022StorageHeaterComparison
 end
+
+module AlertEaster2023ShutdownConfigurationMixin
+  def basic_configuration
+    {
+      name:                   'Easter shutdown 2023',
+      max_days_out_of_date:   30,
+      enough_days_data:       1,
+      holiday_date:           Date.new(2023,4,7), #good friday
+      school_weeks:           0
+    }
+  end
+end
+
+class AlertEaster2023ShutdownElectricityComparison < AlertArbitraryPeriodComparisonElectricityBase
+  include ArbitraryPeriodComparisonMixIn #adds in helpers
+  include HolidayShutdownComparisonMixin #adds in some additional helpers
+  include AlertEaster2023ShutdownConfigurationMixin #mixin the configuration
+
+  #Method to access the configuration
+  def comparison_configuration
+    basic_configuration
+  end
+end
+
+class AlertEaster2023ShutdownGasComparison < AlertArbitraryPeriodComparisonGasBase
+  include ArbitraryPeriodComparisonMixIn #adds in helpers
+  include HolidayShutdownComparisonMixin #adds in some additional helpers
+  include AlertEaster2023ShutdownConfigurationMixin #mixin the configuration
+
+  #Method to access the configuration
+  def comparison_configuration
+    basic_configuration
+  end
+end
+
+class AlertEaster2023ShutdownStorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
+  include ArbitraryPeriodComparisonMixIn #adds in helpers
+  include HolidayShutdownComparisonMixin #adds in some additional helpers
+  include AlertEaster2023ShutdownConfigurationMixin #mixin the configuration
+
+  #Method to access the configuration
+  def comparison_configuration
+    basic_configuration
+  end
+end

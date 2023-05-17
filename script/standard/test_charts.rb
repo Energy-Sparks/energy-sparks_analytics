@@ -22,8 +22,6 @@ charts = {
   #]
 }
 
-no_charts = { adhoc: %i[group_by_week_gas_versus_benchmark intraday_line_school_days_gas_reduced_data_versus_benchmarks] }
-
 no_charts = RunCharts.standard_charts_for_school
 
 control = {

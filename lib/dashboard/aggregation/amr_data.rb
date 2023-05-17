@@ -570,7 +570,9 @@ class AMRData < HalfHourlyData
   end
 
   def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
-    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / (date2 - date1 + 1) / 24.0
+    date_divisor = (date2 - date1 + 1)
+    return 0.0 if date_divisor.zero?
+    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / date_divisor / 24.0
   end
 
   def baseload_£_economic_cost_date_range_deprecated(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)

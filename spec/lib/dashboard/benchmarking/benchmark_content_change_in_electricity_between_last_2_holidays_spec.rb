@@ -13,6 +13,13 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays, 
     )
   end
 
+  let(:rows) {
+    [
+      ["Acme Academy 1", -0.11306994902338399, -220.52099999999996, -1470.1399999999994, "Xmas", "Autumn half term", false, 10, 650, 640],
+      ["Acme Academy 2", -0.11306994902338399, -220.52099999999996, -1470.1399999999994, "Xmas", "Autumn half term", false, 10, 550, 540]
+    ]
+  }
+
   describe '#page' do
     it 'returns a chart name if charts are present' do
       expect(benchmark.page_name).to eq(:change_in_electricity_holiday_consumption_previous_holiday)
@@ -27,7 +34,7 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays, 
           Change in electricity use between the last two holidays
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_electricity_holiday_consumption_previous_holiday") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_electricity_holiday_consumption_previous_holiday')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -83,6 +90,57 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays, 
   describe '#tables?' do
     it 'returns if tables are present' do
       expect(benchmark.send(:tables?)).to eq(true)
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      expect(column_groups).to eq([])
+    end
+  end
+
+  describe 'footnote' do
+    it 'returns footnote text' do
+      content = benchmark.send(:footnote, [795, 629, 634], nil, {})
+      expect(content).to match_html('')
+    end
+  end
+
+  describe '#column_heading_explanation' do
+    it 'returns the benchmark column_heading_explanation' do
+      html = benchmark.column_heading_explanation
+      expect(html).to match_html(<<~HTML)
+      HTML
+    end
+  end
+
+  describe 'footnote_text_for' do
+    it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
+      html = benchmark.footnote_text_for(rows,rows,rows)
+      expect(html).to match_html(<<~HTML)
+        <p> 
+          Notes:
+          <ul>
+            <li>
+              (*1) the comparison has been adjusted because the number of pupils have changed between the two holidays for Acme Academy 1 and Acme Academy 2.
+            </li>
+            <li>
+              (*2) schools where percentage change is +Infinity is caused by the electricity consumption in the previous holiday being more than zero but in the current holiday zero
+            </li>
+            <li>
+              (*3) schools where percentage change is -Infinity is caused by the electricity consumption in the current holiday being zero but in the previous holiday it was more than zero
+            </li>
+          </ul>
+        </p>
+      HTML
     end
   end
 end

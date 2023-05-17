@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkChangeInGasSinceLastYear, type: :service do
           Annual change in gas use
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_gas_since_last_year") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_gas_since_last_year')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -112,6 +112,50 @@ describe Benchmarking::BenchmarkChangeInGasSinceLastYear, type: :service do
   describe '#tables?' do
     it 'returns if tables are present' do
       expect(benchmark.send(:tables?)).to eq(true)
+    end
+  end
+
+  describe '#column_heading_explanation' do
+    it 'returns the benchmark column_heading_explanation' do
+      html = benchmark.column_heading_explanation
+      expect(html).to match_html(<<~HTML)
+        <p>
+          In school comparisons &apos;last year&apos; is defined as this year to date,
+          &apos;previous year&apos; is defined as the year before.
+        </p>
+      HTML
+    end
+  end
+
+  describe 'footnote' do
+    it 'returns footnote text' do
+      content = benchmark.send(:footnote, [795, 629, 634], nil, {})
+      expect(content).to match_html('')
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }
+      
+      expect(column_groups).to eq(
+        [
+          [
+            {:name=>"", :span=>1},
+            {:name=>"kWh", :span=>3},
+            {:name=>"CO2 (kg)", :span=>2},
+            {:name=>"£", :span=>2},
+            {:name=>"Percent changed", :span=>2}
+          ]
+        ]
+      )
     end
   end
 end

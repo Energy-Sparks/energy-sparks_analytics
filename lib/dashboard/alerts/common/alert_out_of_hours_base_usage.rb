@@ -22,7 +22,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :total_annual_£, :total_annual_co2, :summary
   attr_reader :tariff_has_changed_during_period_text
 
-  def initialize(school, fuel, benchmark_out_of_hours_percent,
+  def initialize(school, fuel,
                  alert_type, bookmark, meter_definition,
                  good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
     super(school, alert_type)
@@ -219,7 +219,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
   def analysis_table_data(fuel_type, datatype)
     raise UnexpectedDataType, "Unexpected data type #{datatype}" unless %i[£ £current].include?(datatype)
-  
+
     data_rows = table_data(datatype)
     {
       units:  table_config(fuel_type, datatype, :column_types),
@@ -297,7 +297,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
   def calculate_table_current_£
     @daytype_breakdown_table_current_£ = [
-      [Series::DayType::HOLIDAY,          @holidays_kwh,         @holidays_£current,         @holidays_co2,         @holidays_percent], 
+      [Series::DayType::HOLIDAY,          @holidays_kwh,         @holidays_£current,         @holidays_co2,         @holidays_percent],
       [Series::DayType::WEEKEND,          @weekends_kwh,         @weekends_£current,         @weekends_co2,         @weekends_percent],
       [Series::DayType::SCHOOLDAYOPEN,    @schoolday_open_kwh,   @schoolday_open_£current,   @schoolday_open_co2,   @schoolday_open_percent],
       [school_day_closed_key,             @schoolday_closed_kwh, @schoolday_closed_£current, @schoolday_closed_co2, @schoolday_closed_percent]

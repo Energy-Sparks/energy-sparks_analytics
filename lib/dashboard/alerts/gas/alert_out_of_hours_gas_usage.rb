@@ -6,17 +6,15 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   def initialize(
     school,
     fuel = 'gas',
-    oo_percent = BenchmarkMetrics::PERCENT_GAS_OUT_OF_HOURS_BENCHMARK,
     type = :gasoutofhours,
     bookmark = 'GasOutOfHours',
     meter_defn_not_used = :allheat,
-    good_out_of_hours_use_percent = BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_GAS,
-    bad_out_of_hours_use_percent = BenchmarkMetrics::BAD_OUT_OF_HOURS_USE_PERCENT_GAS
+    good_out_of_hours_use_percent = BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_GAS,
+    bad_out_of_hours_use_percent = BenchmarkMetrics::BENCHMARK_OUT_OF_HOURS_USE_PERCENT_GAS
   )
     super(
       school,
       fuel,
-      oo_percent,
       type,
       bookmark,
       meter_defn_not_used,

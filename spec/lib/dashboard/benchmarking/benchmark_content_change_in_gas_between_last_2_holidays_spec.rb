@@ -13,6 +13,13 @@ describe Benchmarking::BenchmarkContentChangeInGasBetweenLast2Holidays, type: :s
     )
   end
 
+  let(:rows) {
+    [
+      ["Acme Primary School 2", -0.09877771200341656, -55.094143277636476, -1836.4714425878847, "Xmas 2022/2023", "Xmas 2021/2022", false, 3007.0, 3007.0, 3010],
+      ["Acme Primary School 1", -0.49206059850480305, -104.5201356349236, -3484.0045211641204, "Xmas 2022/2023", "Xmas 2021/2022", false, 1547.0, 1547.0, 0]
+    ]
+  }
+
   describe '#page' do
     it 'returns a chart name if charts are present' do
       expect(benchmark.page_name).to eq(:change_in_gas_holiday_consumption_previous_holiday)
@@ -27,7 +34,7 @@ describe Benchmarking::BenchmarkContentChangeInGasBetweenLast2Holidays, type: :s
           Change in gas use between the last two holidays
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_gas_holiday_consumption_previous_holiday") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_gas_holiday_consumption_previous_holiday')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -41,7 +48,7 @@ describe Benchmarking::BenchmarkContentChangeInGasBetweenLast2Holidays, type: :s
         <p>An infinite or incalculable value indicates the consumption in the first period was zero.</p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.change_in_gas_holiday_consumption_previous_holiday.introduction_text_html') +
-        I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
+                     I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       expect(html).to match_html(content_html)
     end
   end
@@ -86,5 +93,56 @@ describe Benchmarking::BenchmarkContentChangeInGasBetweenLast2Holidays, type: :s
     it 'returns if tables are present' do
       expect(benchmark.send(:tables?)).to eq(true)
     end
-  end  
+  end
+
+  describe '#column_heading_explanation' do
+    it 'returns the benchmark column_heading_explanation' do
+      html = benchmark.column_heading_explanation
+      expect(html).to match_html(<<~HTML)
+      HTML
+    end
+  end
+
+  describe 'footnote' do
+    it 'returns footnote text' do
+      content = benchmark.send(:footnote, [795, 629, 634], nil, {})
+      expect(content).to match_html('')
+    end
+  end
+
+  describe 'footnote_text_for' do
+    it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
+      html = benchmark.footnote_text_for(rows,rows,rows)
+      expect(html).to match_html(<<~HTML)
+        <p>
+          Notes:
+          <ul>
+            <li>
+              (*1) the comparison has been adjusted because the floor area has changed between the two holidays for Acme Primary School 1 and Acme Primary School 2.
+            </li>
+            <li>
+              (*2) schools where percentage change is +Infinity is caused by the gas consumption in the previous holiday being more than zero but in the current holiday zero
+            </li>
+            <li>
+              (*3) schools where percentage change is -Infinity is caused by the gas consumption in the current holiday being zero but in the previous holiday it was more than zero
+            </li>
+          </ul>
+        </p>
+      HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      expect(column_groups).to eq([])
+    end    
+  end
 end

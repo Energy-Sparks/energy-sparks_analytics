@@ -4,11 +4,12 @@ module EnergySparksAnalyticsDataHelpers
   #loads a YAML file containing an unvalidated meter collection
   #then turns it into a real MeterCollection object, having
   #validated and aggregated the data
-  def load_unvalidated_meter_collection(dir: 'test_output/MeterCollections', school: 'acme-academy')
+  def load_unvalidated_meter_collection(dir: 'test_output/MeterCollections', school: 'acme-academy', validate_and_aggregate: true)
     file_name = "#{dir}/unvalidated-data-#{school}.yaml"
     data = load_meter_collection(dir: dir, file_name: file_name)
     meter_collection = create_meter_collection( data )
-    validate_and_aggregate( meter_collection )
+    validate_and_aggregate( meter_collection ) if validate_and_aggregate
+    meter_collection
   end
 
   #load YAML file

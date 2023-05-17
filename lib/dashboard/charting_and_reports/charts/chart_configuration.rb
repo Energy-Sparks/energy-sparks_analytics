@@ -393,19 +393,6 @@ class ChartManager
       inherits_from:    :test_economic_costs_electric_by_datetime_year_£,
       meter_definition: :allheat
     },
-
-    targeting_and_tracking_weekly_electricity_to_date_column_deprecated: {
-      name:           :targeting_and_tracking_weekly_electricity_to_date_column.to_s,
-      chart1_type:    :column,
-      chart1_subtype: nil,
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
-    },
-    targeting_and_tracking_weekly_electricity_one_year_column_deprecated: {
-      name:           :targeting_and_tracking_weekly_electricity_one_year_column.to_s,
-      target:             {calculation_type: :day, extend_chart_into_future: true, truncate_before_start_date: true},
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_column
-    },
-
     # ============================================================================================
     group_by_week_electricity_versus_benchmark: {
       name:                 'By Week: Electricity - compared with benchmark',
@@ -838,10 +825,6 @@ class ChartManager
       chart1_type:      :line,
       series_breakdown: :none,
       yaxis_units:      :kw
-    },
-    group_by_week_electricity_school_comparison_line: {
-      inherits_from:    :group_by_week_electricity_school_comparison,
-      chart1_type:      :line
     },
     group_by_week_electricity_unlimited: {
       name:             'By Week: Electricity (multi-year)',

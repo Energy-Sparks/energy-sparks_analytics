@@ -52,11 +52,12 @@ class AlertAnalysisBase < ContentBase
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue EnergySparksCalculationException => e
       # LD(2022-08-23) add handler for custom exception so we can highlight problems
-      Rollbar.warning(e, alert_type: self.class.name, asof_date: asof_date)
+      Rollbar.warning(e, alert_type: self.class.name, asof_date: asof_date, school: @school.name)
       log_stack_trace(e)
       @calculation_worked = false
     rescue StandardError => e
       log_stack_trace(e)
+      Rollbar.error(e, alert_type: self.class.name, asof_date: asof_date, school: @school.name) if ENV["LOG_ALL_ANALYTICS_ERRORS"] == 'true'
       @calculation_worked = false
     end
   end
@@ -594,7 +595,10 @@ class AlertAnalysisBase < ContentBase
       AlertAutumnTerm20212022StorageHeaterComparison              => 'a22s',
       AlertSeptNov20212022ElectricityComparison                   => 's22e',
       AlertSeptNov20212022GasComparison                           => 's22g',
-      AlertSeptNov20212022StorageHeaterComparison                 => 's22s'
+      AlertSeptNov20212022StorageHeaterComparison                 => 's22s',
+      AlertEaster2023ShutdownElectricityComparison                => 'e23e',
+      AlertEaster2023ShutdownGasComparison                        => 'e23g',
+      AlertEaster2023ShutdownStorageHeaterComparison              => 'e23s'
     }
   end
 

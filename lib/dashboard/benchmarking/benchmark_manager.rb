@@ -128,6 +128,7 @@ module Benchmarking
     def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type, hide_visible_columns)
       results = []
       full_config = self.class.chart_table_config(report)
+
       config = hide_columns(full_config, user_type, ignore_aggregate_columns)
       school_ids = all_school_ids([today]) if school_ids.nil?
       last_year = today - 364
@@ -141,6 +142,7 @@ module Benchmarking
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
+        
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -229,11 +231,27 @@ module Benchmarking
         [header] + raw_rows
       when :text, :text_and_raw
         formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
-        { column_groups: table_definition[:column_groups],   header: header, rows: formatted_rows}
+        {
+          column_groups: translate_column_groups_for(table_definition[:column_groups]),
+          header: header,
+          rows: formatted_rows
+        }
       when :html
         formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
-        HtmlTableFormatting.new(header, formatted_rows).html(column_groups: table_definition[:column_groups])
+        HtmlTableFormatting.new(header, formatted_rows).html(column_groups: translate_column_groups_for(table_definition[:column_groups]))
       end
+    end
+
+    def translate_column_groups_for(column_groups)
+      return unless column_groups
+      translated_column_groups = []
+      column_groups.each do |column_group|
+         translated_column_groups << {
+           name: column_group[:name].present? ? I18n.t("analytics.benchmarking.configuration.column_groups.#{column_group[:name]}"): '',
+           span: column_group[:span]
+         }
+      end
+      translated_column_groups
     end
 
     def format_rows(rows, table_definition, medium, school_ids, hide_visible_columns)
@@ -263,7 +281,9 @@ module Benchmarking
     def remove_hidden_columns(table_definition, rows, hide_visible_columns)
       visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
 
-      header    = table_definition[:columns].map{ |column_definition| column_definition[:name] }
+      header    = table_definition[:columns].map do |column_definition|
+        I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name].downcase}") if column_definition[:name]
+      end
       header    = visible_data(table_definition, header, hide_visible_columns)
       raw_rows  =  rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }
       [header, raw_rows]
@@ -386,11 +406,21 @@ module Benchmarking
     end
 
     def y_axis_label_name(unit)
-      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W', £_0dp: '£',
-                     timeofday: 'Time of day',
-                     percent: 'percent', percent_0dp: 'percent',
-                     relative_percent: 'percent', relative_percent_0dp: 'percent',
-                     days: 'days', r2: ''}
+      unit_names = { 
+        kwh: I18n.t('chart_configuration.y_axis_label_name.kwh'),
+        kw: I18n.t('chart_configuration.y_axis_label_name.kw'),
+        co2: I18n.t('chart_configuration.y_axis_label_name.co2'), 
+        £: I18n.t('chart_configuration.y_axis_label_name.£'), 
+        w: I18n.t('chart_configuration.y_axis_label_name.w'), 
+        £_0dp: I18n.t('chart_configuration.y_axis_label_name.£_0dp'),
+        timeofday: I18n.t('chart_configuration.y_axis_label_name.timeofday'),
+        percent: I18n.t('chart_configuration.y_axis_label_name.percent'),
+        percent_0dp: I18n.t('chart_configuration.y_axis_label_name.percent_0dp'),
+        relative_percent: I18n.t('chart_configuration.y_axis_label_name.relative_percent'),
+        relative_percent_0dp: I18n.t('chart_configuration.y_axis_label_name.relative_percent_0dp'),
+        days: I18n.t('chart_configuration.y_axis_label_name.days'),
+        r2: I18n.t('chart_configuration.y_axis_label_name.r2')
+      }
       return unit_names[unit] if unit_names.key?(unit)
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
       puts "Unexpected untranslated unit type for benchmark chart #{unit}"
@@ -445,7 +475,7 @@ module Benchmarking
       chart_column_numbers.each_with_index do |chart_column_number, index|
         next if index == 0 # skip entry as its the school name
         data = remove_first_column(table.map{ |row| row[chart_column_number] })
-        series_name = chart_columns_definitions[index][:name]
+        series_name = I18n.t("analytics.benchmarking.configuration.column_headings.#{chart_columns_definitions[index][:name].downcase}")
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
           chart_data[series_name] = data
           percent_type = %i[percent relative_percent percent_0dp relative_percent_0dp].include?(chart_columns_definitions[1][:units])
@@ -482,7 +512,7 @@ module Benchmarking
     end
 
     def rating_column?(column_specification)
-      column_specification[:name] == 'rating'
+      column_specification[:name] == :rating
     end
 
     def calculate_value(row, column_specification, school_id_debug)
@@ -491,7 +521,12 @@ module Benchmarking
         when String
           row.send(column_specification[:data])
         when Proc
-          row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
+          row_data = row.instance_exec(&column_specification[:data])
+          if row_data.is_a? String
+            row_data.blank? ? '' : I18n.t("analytics.benchmarking.chart_table_config.data.metering.#{row_data}", default: row_data)
+          else
+            row_data
+          end
         else
           nil
         end

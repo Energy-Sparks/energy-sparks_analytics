@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentHeatingPerFloorArea, type: :service do
           Annual heating cost per floor area with savings potential
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_heating_costs_per_floor_area") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.annual_heating_costs_per_floor_area')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -35,7 +35,7 @@ describe Benchmarking::BenchmarkContentHeatingPerFloorArea, type: :service do
   describe 'introduction_text' do
     it 'formats introduction and any caveat text as html' do
       html = benchmark.send(:introduction_text)
-      
+
       expect(html).to match_html(<<~HTML)
         <p>This benchmark compares last year’s gas and storage heater costs per floor area (m2).</p>
         <p>The benchmark is adjusted for regional temperatures over the last year, so that for example schools in Scotland are compared on the same terms as schools in the warmer south west of England.</p>
@@ -87,5 +87,37 @@ describe Benchmarking::BenchmarkContentHeatingPerFloorArea, type: :service do
     it 'returns if tables are present' do
       expect(benchmark.send(:tables?)).to eq(true)
     end
+  end
+
+  describe '#column_heading_explanation' do
+    it 'returns the benchmark column_heading_explanation' do
+      html = benchmark.column_heading_explanation
+      expect(html).to match_html(<<~HTML)
+        <p>
+          In school comparisons &apos;last year&apos; is defined as this year to date.
+        </p>
+      HTML
+    end
+  end
+
+  describe 'footnote' do
+    it 'returns footnote text' do
+      content = benchmark.send(:footnote, [795, 629, 634], nil, {})
+      expect(content).to match_html('')
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      expect(column_groups).to eq([])
+    end    
   end
 end

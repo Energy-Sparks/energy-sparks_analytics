@@ -2,6 +2,8 @@
 
 module Usage
   class RecentUsageComparisonService
+    include AnalysableMixin
+
     def initialize(meter_collection:, fuel_type:, date: Date.today)
       @meter_collection = meter_collection
       @fuel_type = fuel_type
@@ -16,7 +18,15 @@ module Usage
       )
     end
 
+    def enough_data?
+      meter_data_checker.at_least_x_days_data?(56) # At least 56 days (8 weeks) of data
+    end
+
     private
+
+    def meter_data_checker
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(@meter_collection, @date)
+    end
 
     def last_4_school_weeks
       OpenStruct.new(
