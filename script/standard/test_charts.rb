@@ -8,7 +8,18 @@ module Logging
 end
 
 charts = {
-  adhoc: %i[ management_dashboard_group_by_week_electricity ]
+  adhoc: %i[ electricity_cost_1_year_accounting_breakdown ]
+  # bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
+  # eco: %i[test_economic_costs_gas_by_week_unlimited_£ test_economic_costs_electric_by_week_unlimited_£ ],
+  # solar: %i[solar_pv_group_by_month solar_pv_last_7_days_by_submeter]
+  #     test_current_economic_costs_electric_by_week_unlimited_£
+  #     test_current_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
+  #     test_economic_costs_electric_by_week_unlimited_£
+  #     test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
+  #economictariffs: %i[
+  #
+  #  targeting_and_tracking_weekly_electricity_to_date_line
+  #]
 }
 
 no_charts = RunCharts.standard_charts_for_school
@@ -24,7 +35,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['a*'],
+  schools:  ['w*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }
