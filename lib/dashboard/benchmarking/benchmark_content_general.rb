@@ -495,7 +495,7 @@ module Benchmarking
     end
 
     def calculate_rate_changed_in_period(school_ids, filter, user_type)
-      col_index = column_headings(school_ids, filter, user_type).index(:tariff_changed_period)
+      col_index = column_headings(school_ids, filter, user_type).index(I18n.t('analytics.benchmarking.configuration.column_headings.tariff_changed_period'))
       return false if col_index.nil?
 
       data = raw_data(school_ids, filter, user_type)
