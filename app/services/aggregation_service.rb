@@ -106,6 +106,8 @@ class AggregateDataService
     combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
   end
 
+  #If a school has solar panels, then run the solar aggregation process which
+  #results in creation of additional solar meters
   def process_solar_meters
     if @meter_collection.solar_pv_panels?
       aggregate_solar = AggregateDataServiceSolar.new(@meter_collection)
@@ -116,6 +118,8 @@ class AggregateDataService
     end
   end
 
+  #If a school has storage heaters, then run the storage heater disaggregation
+  #process which creates new storage heaters
   def process_storage_heaters
     if @meter_collection.storage_heaters?
       adssh = AggregateDataServiceStorageHeaters.new(@meter_collection)
@@ -195,6 +199,10 @@ class AggregateDataService
     aggregate_sub_meters_by_type(aggregate_meter, @meter_collection.electricity_meters)
   end
 
+  #Creates a new aggregate meter that combines together all of the mains consumption (and other subtypes)
+  #sub meters associated with the list of meters.
+  #
+  #This is only called for schools that have multiple solar meters.
   def aggregate_sub_meters_by_type(combined_meter, meters)
     log "Aggregating sub meters for combined meter #{combined_meter} and main electricity meters #{meters.map(&:to_s).join(' ')}"
     sub_meter_types = meters.map { |m| m.sub_meters.keys }.flatten.compact.uniq
@@ -455,7 +463,7 @@ class AggregateDataService
     false
   end
 
-  #Returns true all economic tariffs for the list of meters are identical.
+  #Returns true if all economic tariffs for the list of meters are identical.
   def all_economic_tariffs_identical?(list_of_meters)
     return true if list_of_meters.length == 1
 
@@ -472,6 +480,15 @@ class AggregateDataService
     false
   end
 
+  # Set the tariff information for an aggregate meter
+  #
+  # Results in setting the economic, current economic and accounting cost tariff schedules
+  # for the meter. The flags are used to decide how to precalculate and store the tariffs.
+  #
+  # @param Dashboard::Meter combined_meter the aggregate meter to which costs will be added
+  # @param Array list_of_meters the underlying meters whose costs will be used to calculate tariffs
+  # @param boolean has_differing_tariffs whether there are any differential tariffs, or different economic tariffs for the meters
+  # @param boolean whether any of the meters has economic tariffs that vary over time
   def set_costs_for_combined_meter(combined_meter, list_of_meters, has_differing_tariffs, has_time_variant_economic_tariffs)
     mpan_mprn = combined_meter.mpan_mprn
     start_date = combined_meter.amr_data.start_date # use combined meter start and end dates to conform with (deprecated) meter aggregation rules
