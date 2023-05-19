@@ -1,6 +1,17 @@
 require_relative '../utilities/half_hourly_data'
 require_relative '../utilities/half_hourly_loader'
 
+# HalfHourlyData
+#  CostsBase
+#    EconomicCosts
+#      EconomicCostsParameterised
+#        CurrentEconomicCostsParameterised
+#    EconomicCostsPreAggregated
+#        CurrentEconomicCostsPreAggregated
+#    AccountingCosts
+#      AccountingCostsParameterised
+#      AccountingCostsPreAggregated
+
 # maintain costs information in parallel to AMRData
 # set of data per day: 48 x half hour costs, plus standing charges
 # 2 derived classes for: economic costs, accounting costs
@@ -9,6 +20,8 @@ require_relative '../utilities/half_hourly_loader'
 class CostsBase < HalfHourlyData
   attr_reader :meter, :fuel_type, :amr_data, :fuel_type
   attr_accessor :post_aggregation_state
+
+  #@param Dashboard::Meter meter the meter whose costs this schedule describes
   def initialize(meter)
     super(:amr_data_accounting_tariff)
     @meter = meter
@@ -77,69 +90,6 @@ class CostsBase < HalfHourlyData
   def scale_standing_charges(percent)
     (start_date..end_date).each do |date|
       one_days_cost_data(date).scale_standing_charges(percent)
-    end
-  end
-
-  class OneDaysCostData
-    attr_reader :standing_charges, :total_standing_charge, :one_day_total_cost
-    attr_reader :bill_components, :bill_component_costs_per_day
-    attr_reader :all_costs_x48
-    # these could be true, false or :mixed
-    attr_reader :system_wide, :default
-    # either a single tariff, or an array for combined meters
-    attr_reader :tariff
-
-    def initialize(costs)
-      @all_costs_x48    = costs[:rates_x48]
-      @standing_charges = costs[:standing_charges]
-      @differential     = costs[:differential]
-      @system_wide      = costs[:system_wide]
-      @default          = costs[:default]
-      @tariff           = costs[:tariff]
-
-      @total_standing_charge = standing_charges.empty? ? 0.0 : standing_charges.values.sum
-      @one_day_total_cost = total_x48_costs + @total_standing_charge
-      calculate_day_bill_components
-    end
-
-    def to_s
-      "OneDaysCostData: Tcost #{one_day_total_cost} skeys: #{standing_charges.empty? ? '' : standing_charges.keys.map(&:to_s).join(',')} scT: #{total_standing_charge&.round(0)}"
-    end
-
-    def costs_x48
-      @costs_x48 ||= AMRData.fast_add_multiple_x48_x_x48(@all_costs_x48.values)
-    end
-
-    def total_x48_costs
-      @total_x48_costs ||= costs_x48.sum
-    end
-
-    def cost_x48(type)
-      @all_costs_x48[type]
-    end
-
-    def differential_tariff?
-      @differential
-    end
-
-    def rates_at_half_hour(halfhour_index)
-      @all_costs_x48.map { |type, £_x48| [type, £_x48[halfhour_index]] }.to_h
-    end
-
-    # used for storage heater disaggregation
-    def scale_standing_charges(percent)
-      @standing_charges = @standing_charges.transform_values { |value| value * percent }
-      @one_day_total_cost -= @total_standing_charge * (1.0 - percent)
-      @total_standing_charge *= percent
-      @bill_component_costs_per_day.merge!(@standing_charges)
-    end
-
-    private
-
-    def calculate_day_bill_components
-      @bill_component_costs_per_day = @all_costs_x48.transform_values{ |£_x48| £_x48.sum }
-      @bill_component_costs_per_day.merge!(standing_charges)
-      @bill_components = @bill_component_costs_per_day.keys
     end
   end
 
@@ -359,10 +309,10 @@ class AccountingCosts < CostsBase
     combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }.compact    
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }.compact
       missing_accounting_costs = list_of_meters_on_date.select { |m| !m.amr_data.date_exists_by_type?(date, :accounting_cost) }
       # silently skip calculation
-      next if missing_accounting_costs.length > 0 
+      next if missing_accounting_costs.length > 0
       list_of_days_accounting_costs = list_of_meters_on_date.map { |m| m.amr_data.accounting_tariff.one_days_cost_data(date) }
       combined_accounting_costs.add(date, combined_day_costs(list_of_days_accounting_costs))
     end
