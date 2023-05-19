@@ -1,5 +1,6 @@
 require_relative './alert_period_comparison_base.rb'
 require_relative './alert_schoolweek_comparison_electricity.rb'
+require_relative './alert_period_comparison_temperature_adjustment_mixin.rb'
 require_relative './../gas/alert_model_cache_mixin.rb'
 # Compares the last two SCHOOL weeks - i.e. when this school is occupied, i.e. skips holidays
 # Unlike the other week/short term comparison alerts, it works completly off chart data
@@ -12,7 +13,7 @@ require_relative './../gas/alert_model_cache_mixin.rb'
 #
 class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   include AlertModelCacheMixin
-  # include AlertPeriodComparisonTemperatureAdjustmentMixin
+  include AlertPeriodComparisonTemperatureAdjustmentMixin
   attr_reader :current_week_kwhs, :previous_week_kwhs_unadjusted, :previous_week_kwhs_adjusted
   attr_reader :current_weeks_temperatures, :previous_weeks_temperatures
   attr_reader :current_week_kwh_total, :previous_week_kwh_unadjusted_total,  :previous_week_kwh_total
@@ -32,6 +33,10 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
     21
   end
 
+  def comparison_chart
+    :alert_last_2_weeks_gas_comparison_temperature_compensated
+  end
+
   def self.schoolweek_adjusted_gas_variables
     {
       current_week_kwhs:              { description: 'List of current school week kWh values', units:  String },
@@ -45,7 +50,7 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
 
       current_week_kwh_total:             { description: 'Current week total kWh',                units:  :kwh  },
       previous_week_kwh_unadjusted_total: { description: 'Previous week total kWh (unadjusted)' , units:  :kwh, benchmark_code: 'najk'  },
-      previous_week_kwh_total:            { description: 'Previous week total kWh (adjusted)',    units:  :kwh, benchmark_code: 'ajkw'  },
+      previous_week_kwh_total:            { description: 'Previous week total kWh (from chart, adjusted, maybe slightly different from previous_period_kwh which uses better underlying alert compensation )',    units:  :kwh, benchmark_code: 'ajkw'  },
     }
   end
 
@@ -64,9 +69,15 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   end
 
   def calculate(asof_date)
+    @model_asof_date = asof_date
     # this needs to be called first
     calculate_temperature_adjusted_and_unadjusted_gas_from_chart_data(asof_date)
     super(asof_date)
+
+    # this isn't ideal, the temperature compensation of the underlying
+    # period comparison alert is subtely different from that of the
+    # chart calculation, so use the chart's:
+    # @previous_period_kwh = @previous_week_kwh_total
   end
   alias_method :analyse_private, :calculate
 
@@ -91,22 +102,6 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
 
   protected def last_two_periods(_asof_date)
     [@current_period, @previous_period]
-  end
-
-  protected def meter_values_period(_current_period)
-    {
-      kwh:    @current_week_kwh_total,
-      £:      @current_week_kwh_total * BenchmarkMetrics::GAS_PRICE,
-      co2:    @current_week_kwh_total * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    }
-  end
-
-  protected def normalised_period_data(_current_period, _previous_period)
-    {
-      kwh:    @previous_week_kwh_total ,
-      £:      @previous_week_kwh_total * BenchmarkMetrics::GAS_PRICE,
-      co2:    @previous_week_kwh_total * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    }
   end
 
   private def format_a_weeks_kwh_values(values)
@@ -138,7 +133,7 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   end
 
   private def heating_on_in_period(asof_date, period)
-    @heating_model ||= model_cache(@school.urn, asof_date)
+    @heating_model ||= model_cache(aggregate_meter, asof_date)
     school_days = (period.start_date..period.end_date).to_a.select{ |date| date.wday.between?(1,5) }
     heating_on_days = school_days.count{ |school_day| @heating_model.heating_on?(school_day) }
     heating_on_most_days = heating_on_days > (school_days.length / 2.0)

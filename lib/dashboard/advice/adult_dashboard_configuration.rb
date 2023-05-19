@@ -18,7 +18,6 @@ class DashboardConfiguration
       solar_pv_group
       underlying_electricity_meters_breakdown
       electricity_profit_loss
-      refrigeration
     ],
     gas_group: %i[
       gas_annual
@@ -58,6 +57,7 @@ class DashboardConfiguration
           rating:                               :rating,
           # enough_data:                          :enough_data,
           last_year_£:                          :last_year_£,
+          last_year_£current:                   :last_year_£current,
           last_year_kwh:                        :last_year_kwh,
           last_year_co2:                        :last_year_co2,
           summary:                              :summary
@@ -97,6 +97,7 @@ class DashboardConfiguration
         AlertElectricityAnnualVersusBenchmark => { # need new electricity trend alert!
           rating:                               :rating,
           last_year_£:                          :last_year_£,
+          last_year_£current:                   :last_year_£current,
           percent_difference:                   :percent_difference_from_average_per_pupil,
           percent_difference_adjective:         :percent_difference_adjective,
           simple_percent_difference_adjective:  :simple_percent_difference_adjective,
@@ -152,6 +153,7 @@ class DashboardConfiguration
           average_baseload_last_year_kw:      :average_baseload_last_year_kw,
           exemplar_per_pupil_kw:              :exemplar_per_pupil_kw,
           benchmark_per_pupil_kw:             :benchmark_per_pupil_kw,
+          annual_baseload_percent:            :annual_baseload_percent,
           summary:                            :summary
         }
       },
@@ -161,26 +163,6 @@ class DashboardConfiguration
         charts:             %i[ baseload_lastyear ],
         fuel_type:          :electricity
       }
-    },
-    refrigeration: {
-      name:                   'Experimental refrigeration analysis',
-      content_class:           AdviceRefrigeration,
-      excel_worksheet_name:   'Fridge',
-      charts: %i[
-        baseload_lastyear
-        baseload
-      ],
-      promoted_variables: {
-        AlertSummerHolidayRefrigerationAnalysis => {
-          rating:                 :rating,
-          annualised_reduction_£: :annualised_reduction_£,
-          holiday_reduction_£:    :holiday_reduction_£,
-          reduction_kw:           :reduction_kw,
-          reduction_rating:       :reduction_rating,
-          turn_off_rating:        :turn_off_rating,
-          summary:                :summary
-        }
-      },
     },
     electric_target: {
       name:                   'Setting and tracking targets for your electricity',
@@ -301,6 +283,7 @@ class DashboardConfiguration
         AlertGasAnnualVersusBenchmark => { # need new gas trend alert!
           rating:                               :rating,
           last_year_£:                          :last_year_£,
+          last_year_£current:                   :last_year_£current,
           percent_difference:                   :percent_difference_from_average_per_floor_area,
           percent_difference_adjective:         :percent_difference_adjective,
           simple_percent_difference_adjective:  :simple_percent_difference_adjective,
@@ -441,7 +424,8 @@ class DashboardConfiguration
       promoted_variables: {
         AlertHeatingComingOnTooEarly => {
           rating:         :rating,
-          one_year_optimum_start_saving_£: :one_year_optimum_start_saving_£
+          one_year_optimum_start_saving_£:        :one_year_optimum_start_saving_£,
+          one_year_optimum_start_saving_£current: :one_year_optimum_start_saving_£current
         }
       },
       meter_breakdown: {
@@ -465,9 +449,9 @@ class DashboardConfiguration
         heating_on_off_by_week
       ],
       promoted_variables: {
-        AlertHeatingOnSchoolDays => {
+        AlertSeasonalHeatingSchoolDays => {
           rating:         :rating,
-          one_year_saving_reduced_days_to_exemplar_£: :one_year_saving_reduced_days_to_exemplar_£
+          one_year_saving_£: :one_year_saving_£
         }
       },
       meter_breakdown: {

@@ -143,11 +143,11 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def rate_description(rate_type, costs)
     case rate_type.to_s
     when 'flat_rate'
-      'Flat Rate'
+      'flat_rate'
     when 'commodity_rate'
-      'Commodity Rate'
+      'commodity_rate'
     when 'non_commodity_rate'
-      'Non Commodity Rate'
+      'non_commodity_rate'
     when /^rate[0-9]$/
       time_range_description(costs)
     when 'daytime_rate', 'nighttime_rate'
@@ -266,7 +266,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     header = ['Tariff type', 'Rate']
     html_table(header, table)
   end
-  
+
   def add_tooltips_to_table(table)
     table.map do |(tariff_type, rate)|
       [
@@ -294,7 +294,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def if_not_full_tariff_coverage_html(tariff_info)
     html = ''
     contact_us_for_tariff_setup = false
- 
+
     if tariff_info[:start_date] > meter.amr_data.start_date
       contact_us_for_tariff_setup = true
       html += %{

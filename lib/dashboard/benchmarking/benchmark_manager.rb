@@ -8,6 +8,7 @@ module Benchmarking
       def initialize(school_id, school_data)
         super(school_data)
         @school_id = school_id
+        @change_refs = []
       end
 
       def zero(value)
@@ -27,12 +28,18 @@ module Benchmarking
 
       # NB if you change this format, you need to change the decode
       #    function def remove_references(school_name) in benchmark_content_general.rb
-      def referenced(name, changed, percent)
-        change_refs = []
-        change_refs.push(1) if changed
-        change_refs.push(2) if percent ==  Float::INFINITY
-        change_refs.push(3) if percent == -Float::INFINITY
-        change_refs.empty? ? name : "#{name} (* #{change_refs.join(',')})"
+      def referenced(name, changed, percent, tariff_changed = nil)
+        @change_refs.push(1) if changed
+        @change_refs.push(2) if percent ==  Float::INFINITY
+        @change_refs.push(3) if percent == -Float::INFINITY
+        @change_refs.push(6) if !tariff_changed.nil? && tariff_changed
+
+        @change_refs.empty? ? name : "#{name} (* #{@change_refs.join(',')})"
+      end
+
+      def tariff_change_reference(name, changed)
+        @change_refs.push(5) if changed
+        @change_refs.empty? ? name : "#{name} (* #{@change_refs.join(',')})"
       end
 
       # helper function for config lamda, only sums
@@ -92,12 +99,13 @@ module Benchmarking
     def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       create_and_store_school_map(report, today, school_ids, user_type)
       #@school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
-      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, true, user_type)
+      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, true, user_type, true)
     end
 
     def run_table_including_aggregate_columns(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       ignore_aggregate_columns = false
-      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, ignore_aggregate_columns, user_type)
+      hide_visible_columns = false
+      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, ignore_aggregate_columns, user_type, hide_visible_columns)
     end
 
     def drilldown_class(report)
@@ -117,33 +125,34 @@ module Benchmarking
       config[:columns].any?{ |column_definition| column_definition.key?(:content_class) }
     end
 
-    def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type)
+    def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type, hide_visible_columns)
       results = []
       full_config = self.class.chart_table_config(report)
+
       config = hide_columns(full_config, user_type, ignore_aggregate_columns)
       school_ids = all_school_ids([today]) if school_ids.nil?
       last_year = today - 364
-
       school_ids.each do |school_id|
         school_data = @benchmark_database.fetch(today, {}).fetch(school_id)
         # @benchmark_database.@benchmark_database.fetch(last_year){{}}.fetch(school_id)
-        school_data_last_year = @benchmark_database.dig(last_year, school_id)
-        school_data.merge!(dated_attributes('_last_year', school_data_last_year)) unless school_data_last_year.nil?
-        next unless school_data # && school_data_last_year
+        # school_data_last_year = @benchmark_database.dig(last_year, school_id)
+        # school_data.merge!(dated_attributes('_last_year', school_data_last_year)) unless school_data_last_year.nil?
+        next if school_data.nil? || school_data.empty? # && school_data_last_year
         row  = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
+        
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
       sort_table!(results, config) if config.key?(:sort_by)
 
-      format_table(config, results, medium)
+      format_table(config, results, medium, hide_visible_columns)
     end
 
     def school_map(asof_date, school_ids, user_type)
-      schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, true, user_type)
+      schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, true, user_type, false)
       schools.map do |school_data|
         [
           school_data[2],
@@ -213,26 +222,43 @@ module Benchmarking
       v.is_a?(Float) && v.nan? ? Float::INFINITY : v
     end
 
-    def format_table(table_definition, rows, medium)
-      header = table_definition[:columns].map{ |column_definition| column_definition[:name] }
-      raw_rows = rows.map{ |d| d[:data] }
+    def format_table(table_definition, rows, medium, hide_visible_columns)
+      header, raw_rows = remove_hidden_columns(table_definition, rows, hide_visible_columns)
       school_ids = rows.map{ |d| d[:school_id] }
+
       case medium
       when :raw
         [header] + raw_rows
       when :text, :text_and_raw
-        formatted_rows = format_rows(raw_rows, table_definition[:columns], medium, school_ids)
-        { column_groups: table_definition[:column_groups],   header: header, rows: formatted_rows}
+        formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
+        {
+          column_groups: translate_column_groups_for(table_definition[:column_groups]),
+          header: header,
+          rows: formatted_rows
+        }
       when :html
-        formatted_rows = format_rows(raw_rows, table_definition[:columns], medium, school_ids)
-        HtmlTableFormatting.new(header, formatted_rows).html(column_groups: table_definition[:column_groups])
+        formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
+        HtmlTableFormatting.new(header, formatted_rows).html(column_groups: translate_column_groups_for(table_definition[:column_groups]))
       end
     end
 
-    def format_rows(rows, column_definitions, medium, school_ids)
-      column_units    = column_definitions.map{ |column_definition| column_definition[:units] }
-      column_sense    = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
-      content_classes = column_definitions.map{ |column_definition| column_definition.dig(:content_class) }
+    def translate_column_groups_for(column_groups)
+      return unless column_groups
+      translated_column_groups = []
+      column_groups.each do |column_group|
+         translated_column_groups << {
+           name: column_group[:name].present? ? I18n.t("analytics.benchmarking.configuration.column_groups.#{column_group[:name]}"): '',
+           span: column_group[:span]
+         }
+      end
+      translated_column_groups
+    end
+
+    def format_rows(rows, table_definition, medium, school_ids, hide_visible_columns)
+      column_definitions = table_definition[:columns]
+      column_units    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition[:units] }, hide_visible_columns)
+      column_sense    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:sense) }, hide_visible_columns)
+      content_classes = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:content_class) }, hide_visible_columns)
       formatted_rows = rows.each_with_index.map do |row, row_number|
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
@@ -244,6 +270,23 @@ module Benchmarking
           end
         end
       end
+    end
+
+    def visible_data(table_definition, data, hide_visible_columns)
+      return data unless hide_visible_columns
+      visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
+      data.select.with_index { |_v, i| visible_columns[i] }
+    end
+
+    def remove_hidden_columns(table_definition, rows, hide_visible_columns)
+      visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
+
+      header    = table_definition[:columns].map do |column_definition|
+        I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name].downcase}") if column_definition[:name]
+      end
+      header    = visible_data(table_definition, header, hide_visible_columns)
+      raw_rows  =  rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }
+      [header, raw_rows]
     end
 
     def sense_column(sense)
@@ -363,11 +406,21 @@ module Benchmarking
     end
 
     def y_axis_label_name(unit)
-      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W', £_0dp: '£',
-                     timeofday: 'Time of day',
-                     percent: 'percent', percent_0dp: 'percent',
-                     relative_percent: 'percent', relative_percent_0dp: 'percent',
-                     days: 'days', r2: ''}
+      unit_names = { 
+        kwh: I18n.t('chart_configuration.y_axis_label_name.kwh'),
+        kw: I18n.t('chart_configuration.y_axis_label_name.kw'),
+        co2: I18n.t('chart_configuration.y_axis_label_name.co2'), 
+        £: I18n.t('chart_configuration.y_axis_label_name.£'), 
+        w: I18n.t('chart_configuration.y_axis_label_name.w'), 
+        £_0dp: I18n.t('chart_configuration.y_axis_label_name.£_0dp'),
+        timeofday: I18n.t('chart_configuration.y_axis_label_name.timeofday'),
+        percent: I18n.t('chart_configuration.y_axis_label_name.percent'),
+        percent_0dp: I18n.t('chart_configuration.y_axis_label_name.percent_0dp'),
+        relative_percent: I18n.t('chart_configuration.y_axis_label_name.relative_percent'),
+        relative_percent_0dp: I18n.t('chart_configuration.y_axis_label_name.relative_percent_0dp'),
+        days: I18n.t('chart_configuration.y_axis_label_name.days'),
+        r2: I18n.t('chart_configuration.y_axis_label_name.r2')
+      }
       return unit_names[unit] if unit_names.key?(unit)
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
       puts "Unexpected untranslated unit type for benchmark chart #{unit}"
@@ -398,10 +451,10 @@ module Benchmarking
 
     def calculate_max_x_value(x_data, config)
       max_x_value = config[:max_x_value]
-
       return nil if max_x_value.nil?
 
       max_chart_value = x_data.values.map { |vals| strip_nan(vals).compact.max }.compact.max
+      return nil if max_chart_value.nil?
 
       # only set chart range if any value below maximum specified
       max_chart_value > max_x_value ? max_x_value : nil
@@ -422,7 +475,7 @@ module Benchmarking
       chart_column_numbers.each_with_index do |chart_column_number, index|
         next if index == 0 # skip entry as its the school name
         data = remove_first_column(table.map{ |row| row[chart_column_number] })
-        series_name = chart_columns_definitions[index][:name]
+        series_name = I18n.t("analytics.benchmarking.configuration.column_headings.#{chart_columns_definitions[index][:name].downcase}")
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
           chart_data[series_name] = data
           percent_type = %i[percent relative_percent percent_0dp relative_percent_0dp].include?(chart_columns_definitions[1][:units])
@@ -459,15 +512,23 @@ module Benchmarking
     end
 
     def rating_column?(column_specification)
-      column_specification[:name] == 'rating'
+      column_specification[:name] == :rating
     end
 
     def calculate_value(row, column_specification, school_id_debug)
       begin
         case column_specification[:data]
-        when String then row.send(column_specification[:data])
-        when Proc then row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
-        else nil
+        when String
+          row.send(column_specification[:data])
+        when Proc
+          row_data = row.instance_exec(&column_specification[:data])
+          if row_data.is_a? String
+            row_data.blank? ? '' : I18n.t("analytics.benchmarking.chart_table_config.data.metering.#{row_data}", default: row_data)
+          else
+            row_data
+          end
+        else
+          nil
         end
       rescue StandardError => e
         name = row.instance_exec(& ->{ school_name })

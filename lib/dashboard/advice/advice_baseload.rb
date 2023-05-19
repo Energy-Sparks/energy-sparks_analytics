@@ -36,6 +36,8 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,           content: statement_of_baseload } )
     charts_and_html.push( { type: :html,           content: explanation_of_baseload } )
     charts_and_html.push( { type: :html,           content: benefit_of_moving_to_exemplar_baseload } )
+    charts_and_html.push( { type: :html,           content: baseload_percent_of_annual } )
+    charts_and_html.push( { type: :html,           content: economic_tariff_changed_caveat_text } )
     charts_and_html.push( { type: :chart,          content: baseload_one_year_chart } )
     charts_and_html.push( { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(baseload_one_year_chart[:config_name] ) } )
     charts_and_html.push( { type: :chart_name,     content: baseload_one_year_chart[:config_name] } )
@@ -59,7 +61,7 @@ class AdviceBaseload < AdviceElectricityBase
 
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
 
-    charts_and_html += AdviceBaseloadCommentary.all_background_and_advice_on_reducing_issues
+    charts_and_html += AdviceBaseloadCommentary.all_background_and_advice_on_reducing_issues(aggregate_meter)
 
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
@@ -124,6 +126,15 @@ class AdviceBaseload < AdviceElectricityBase
     ERB.new(text).result(binding)
   end
 
+  def baseload_percent_of_annual
+    text = %{
+      <p>
+        Your baseload represents <%= FormatEnergyUnit.format(:percent, annual_baseload_percent, :html) %> of your annual consumption.
+      </p>
+    }
+    ERB.new(text).result(binding)
+  end
+
   def chart_drilldown_explanation
     %{
       <p>
@@ -141,6 +152,10 @@ class AdviceBaseload < AdviceElectricityBase
         trends in your baseload.
       <p>
     }
+  end
+
+  def economic_tariff_changed_caveat_text
+    EconomicTariffsChangeCaveats.new(@school).tariff_text_with_sentence(true, false, savings_use_current_tariff_text: true)
   end
 
   def longterm_chart_trend_should_be_downwards
@@ -163,7 +178,7 @@ class AdviceBaseload < AdviceElectricityBase
     avg = FormatEnergyUnit.format(:kw, stats[:kw], :html)
     pct = FormatEnergyUnit.format(:percent, stats[:percent], :html)
     pct_str = stats[:percent] == 1.0 ? '' : "#{pct},"
-    annual_cost_£ = stats[:kw] * 24.0 * 365.0 * BenchmarkMetrics::ELECTRICITY_PRICE
+    annual_cost_£ = ElectricityBaseloadAnalysis.new(meter).scaled_annual_baseload_cost_£(:£)
     annual_cost_formatted = FormatEnergyUnit.format(:£, annual_cost_£, :html)
     "#{meter.mpxn.to_s + name} (#{avg} average, #{pct_str} #{annual_cost_formatted}/year)"
   end

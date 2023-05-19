@@ -73,6 +73,7 @@ class ElectricitySimulator
       end
       stats_by_month
     end
+    
     def calculate_peak_kw(occupied)
       total = 0.0
       count = 0

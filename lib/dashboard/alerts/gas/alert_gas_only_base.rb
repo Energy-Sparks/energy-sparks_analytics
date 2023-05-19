@@ -37,6 +37,10 @@ class AlertGasOnlyBase < AlertAnalysisBase
     }
   }.freeze
 
+  def blended_gas_£_per_kwh
+    @blended_gas_£_per_kwh ||= blended_rate(:£)   
+  end
+
   def last_meter_data_date
     aggregate_meter.amr_data.end_date
   end
@@ -54,8 +58,8 @@ class AlertGasOnlyBase < AlertAnalysisBase
     kwhs
   end
 
-  protected def gas_cost(kwh)
-    kwh * BenchmarkMetrics::GAS_PRICE
+  protected def gas_cost_deprecated(kwh)
+    kwh * fuel_price
   end
 
   protected def gas_co2(kwh)
@@ -72,12 +76,12 @@ class AlertGasOnlyBase < AlertAnalysisBase
     Range.new(number_of_toilets * 300.0, number_of_toilets * 600.0)
   end
 
-  protected def aggregate_meter
+  def aggregate_meter
     @school.aggregated_heat_meters
   end
 
-  def fuel_price
-    BenchmarkMetrics::GAS_PRICE
+  def fuel_price_deprecated
+    blended_gas_£_per_kwh
   end
 
   def non_heating_only

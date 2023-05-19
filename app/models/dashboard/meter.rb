@@ -12,6 +12,7 @@ module Dashboard
     attr_reader :meter_tariffs
     attr_reader :community_opening_times
     attr_accessor :amr_data, :floor_area, :number_of_pupils, :solar_pv_setup, :solar_pv_overrides
+    attr_reader :constituent_meters
 
     # Energy Sparks activerecord fields:
     attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn, :dcc_meter
@@ -43,11 +44,16 @@ module Dashboard
       @has_sheffield_solar_pv = has_sheffield_solar_pv
       set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
+      @constituent_meters = [self]
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
     def mpxn
       mpan_mprn
+    end
+
+    def aggregate_meter?
+      false
     end
 
     def set_meter_attributes(meter_attributes)
@@ -388,6 +394,17 @@ module Dashboard
       else
         raise EnergySparksUnexpectedStateException.new("Unexpected type #{type} for modified mpan/mprn")
       end
+    end
+  end
+
+  class AggregateMeter < Meter
+    # must be called immediately after construction
+    def set_constituent_meters(list_of_meters)
+      @constituent_meters = list_of_meters
+    end
+
+    def aggregate_meter?
+      true
     end
   end
 end

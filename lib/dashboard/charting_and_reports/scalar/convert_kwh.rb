@@ -11,9 +11,9 @@ class ConvertKwh
     when :co2 # https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2018
       case fuel_type
       when :electricity, :storage_heater
-        unit_scale = 0.283 # 283g/kWh UK Grid Intensity
+        unit_scale = EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas
-        unit_scale = 0.204 # 204g/kWh
+        unit_scale = EnergyEquivalences::UK_GAS_CO2_KG_KWH
       when :oil
         unit_scale = 0.285 # 285g/kWh
       when :solar_pv
@@ -25,13 +25,11 @@ class ConvertKwh
     when :£, :accounting_cost # these costs, typically called from dashboard_advice should be moved into the proper differential tariff supporting infrastructure
       case fuel_type
       when :electricity, :storage_heater, :aggregated_electricity
-        unit_scale = BenchmarkMetrics::ELECTRICITY_PRICE # 15p/kWh long term average
+        unit_scale = BenchmarkMetrics.pricing.electricity_price # 15p/kWh long term average
       when :solar_export
-        unit_scale = BenchmarkMetrics::SOLAR_EXPORT_PRICE # 5p/kWh
+        unit_scale = BenchmarkMetrics.pricing.solar_export_price # 5p/kWh
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas
-        unit_scale = BenchmarkMetrics::GAS_PRICE # 3p/kWh long term average
-      when :oil
-        unit_scale = BenchmarkMetrics::OIL_PRICE # 5p/kWh long term average
+        unit_scale = BenchmarkMetrics.pricing.gas_price # 3p/kWh long term average
       when :solar_pv
         unit_scale = -1 * scale_unit_from_kwh(:£, :electricity)
       else

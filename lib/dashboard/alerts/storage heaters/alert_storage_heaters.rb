@@ -6,7 +6,9 @@ require_relative './../gas/boiler control/alert_heating_hotwater_on_during_holid
 require_relative './../gas/boiler control/alert_seasonal_heating_schooldays.rb'
 require_relative './../gas/boiler control/alert_heating_off.rb'
 require_relative './../common/alert_targets.rb'
+# require_all 'lib/dashboard/alerts/time period comparison/'
 require_relative './../time period comparison/alert_schoolweek_comparison_gas.rb'
+require_relative './../time period comparison/alert_previous_year_holiday_comparison_gas.rb'
 
 class AlertStorageHeaterAnnualVersusBenchmark < AlertGasAnnualVersusBenchmark
   include AlertGasToStorageHeaterSubstitutionMixIn
@@ -31,29 +33,6 @@ class AlertStorageHeaterThermostatic < AlertThermostaticControl
 
   def thermostatic_chart
     :storage_heater_thermostatic
-  end
-end
-
-class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
-  include AlertGasToStorageHeaterSubstitutionMixIn
-  include ElectricityCostCo2Mixin
-  def initialize(school)
-    super(school, 'electricity', BenchmarkMetrics::PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK,
-          :storageheateroutofhours,
-          '', :allstorageheater, 0.2, 0.5)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
-  end
-
-  def breakdown_chart
-    :alert_daytype_breakdown_storage_heater
-  end
-
-  def group_by_week_day_type_chart
-    :alert_group_by_week_storage_heaters
-  end
-
-  def school_day_closed_key
-    Series::DayType::STORAGE_HEATER_CHARGE
   end
 end
 
@@ -83,7 +62,7 @@ end
 #NOTE: this doesn't seem to be setup in the application, as its not registered
 #in the database. Should it be removed?
 #Was removed from live system around 2022-04-11 and replaced by above
-class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
+class AlertHeatingOnSchoolDaysStorageHeatersDeprecated < AlertHeatingOnSchoolDaysDeprecated
   include AlertGasToStorageHeaterSubstitutionMixIn
   include ElectricityCostCo2Mixin
   def initialize(school)
@@ -201,3 +180,31 @@ class AlertSchoolWeekComparisonStorageHeater < AlertSchoolWeekComparisonGas
   end
 end
 
+class AlertPreviousYearHolidayComparisonStorageHeater < AlertPreviousYearHolidayComparisonGas
+  include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
+  def initialize(school)
+    super(school, :storage_heaters)
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
+  end
+
+  def adjusted_temperature_comparison_chart
+    :schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_adjusted
+  end
+
+  def unadjusted_temperature_comparison_chart
+    :schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_unadjusted
+  end
+
+  def heating_type
+    I18n.t("analytics.common.storage_heaters")
+  end
+
+  def aggregate_meter
+    @school.storage_heater_meter
+  end
+
+  def needs_storage_heater_data?
+    true
+  end
+end

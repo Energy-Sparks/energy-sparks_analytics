@@ -2,7 +2,7 @@ require_relative '../utilities/half_hourly_data'
 require_relative '../utilities/half_hourly_loader'
 
 class AMRData < HalfHourlyData
-  attr_reader :economic_tariff, :accounting_tariff, :carbon_emissions
+  attr_reader :economic_tariff, :current_economic_tariff, :accounting_tariff, :carbon_emissions
   attr_accessor :open_close_breakdown
 
   class UnexpectedDataType < StandardError; end
@@ -21,14 +21,34 @@ class AMRData < HalfHourlyData
   end
 
   def set_post_aggregation_state
-    @carbon_emissions.post_aggregation_state = true if @carbon_emissions.is_a?(CarbonEmissionsParameterised)
-    @economic_tariff.post_aggregation_state = true if @economic_tariff.is_a?(EconomicCostsParameterised)
-    @accounting_tariff.post_aggregation_state = true if @accounting_tariff.is_a?(AccountingCostsParameterised)
+    @carbon_emissions.post_aggregation_state        = true if @carbon_emissions.is_a?(CarbonEmissionsParameterised)
+    @economic_tariff.post_aggregation_state         = true if @economic_tariff.is_a?(EconomicCostsParameterised)
+    @current_economic_tariff.post_aggregation_state = true if @current_economic_tariff.is_a?(CurrentEconomicCostsParameterised)
+    @accounting_tariff.post_aggregation_state       = true if @accounting_tariff.is_a?(AccountingCostsParameterised)
+  end
+
+  def set_tariffs(meter)
+    set_economic_tariff(meter)
+    set_current_economic_tariff(meter)
+    set_accounting_tariff(meter)
   end
 
   def set_economic_tariff(meter)
     logger.info "Creating an economic costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
     @economic_tariff = EconomicCostsParameterised.create_costs(meter)
+    # @current_economic_tariff = @economic_tariff
+  end
+
+  def set_current_economic_tariff(meter)
+    logger.info "Setting current economic tariff for meter #{meter.name}"
+    if meter.meter_tariffs.economic_tariffs_change_over_time?
+      @current_economic_tariff = CurrentEconomicCostsParameterised.create_costs(meter)
+    else
+      # there no computational benefit in doing this,
+      # given the tariff for amr_data.end_date is always re-looked up rather than cached
+      # but perhaps a slight memory benefit
+      @current_economic_tariff = @economic_tariff
+    end
   end
 
   def set_accounting_tariff(meter)
@@ -38,6 +58,16 @@ class AMRData < HalfHourlyData
 
   def set_economic_tariff_schedule(tariff)
     @economic_tariff = tariff
+  end
+
+  def set_current_economic_tariff_schedule(tariff)
+    logger.info  "Setting current economic tariff schedule"
+    @current_economic_tariff = tariff
+  end
+
+  def set_current_economic_tariff_schedule_to_economic_tariff
+    logger.info "Setting current economic tariff schedule to economic tariff"
+    @current_economic_tariff = @economic_tariff
   end
 
   def set_accounting_tariff_schedule(tariff)
@@ -96,11 +126,12 @@ class AMRData < HalfHourlyData
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
     return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
+    return @current_economic_tariff.days_cost_data_x48(date) if type == :£current || type == :current_economic_cost
     return @accounting_tariff.days_cost_data_x48(date) if type == :accounting_cost
     return co2_x48(date) if type == :co2
   end
 
-  private def co2_x48(date) 
+  private def co2_x48(date)
     if @type == :solar_pv
       @solar_pv_co2_x48_cache ||= {}
       @solar_pv_co2_x48_cache[date] ||= calculate_solar_pv_co2_x48(date)
@@ -108,6 +139,72 @@ class AMRData < HalfHourlyData
     else
       return @carbon_emissions.one_days_data_x48(date)
     end
+  end
+
+  # performance benefit in collatin the information
+  private def calculate_information_date_range_deprecated(start_date, end_date)
+    kwh = kwh_date_range(start_date, end_date, :kwh)
+    £   = kwh_date_range(start_date, end_date, :£)
+    co2 = kwh_date_range(start_date, end_date, :co2)
+
+    {
+      kwh:                      kwh,
+      co2:                      co2,
+      £:                        £,
+      co2_intensity_kw_per_kwh: co2 / kwh,
+      blended_£_per_kwh:        £ / kwh
+    }
+  end
+
+  def information_date_range_deprecated(start_date, end_date)
+    @cached_information ||= {}
+    @cached_information[start_date..end_date] ||= calculate_information_date_range_deprecated(start_date, end_date)
+  end
+
+  def blended_£_per_kwh_date_range(start_date, end_date)
+    @blended_£_per_kwh_date_range ||= {}
+    @blended_£_per_kwh_date_range[start_date..end_date] ||= calculate_blended_£_per_kwh_date_range(start_date, end_date)
+  end
+
+  def blended_rate(from_unit, to_unit, sd = up_to_1_year_ago, ed = end_date)
+    @blended_rate ||= {}
+    key         = [from_unit, to_unit,   sd, ed]
+    reverse_key = [to_unit,   from_unit, sd, ed]
+    return @blended_rate[key]               if @blended_rate.key?(key)
+    return 1.0 / @blended_rate[reverse_key] if @blended_rate.key?(reverse_key)
+    @blended_rate[key] ||= calculate_blended_rate(from_unit, to_unit, sd, ed)
+  end
+
+  private def calculate_blended_rate(from_unit, to_unit, sd, ed)
+    from_value = kwh_date_range(sd, ed, from_unit)
+    to_value   = kwh_date_range(sd, ed, to_unit)
+    to_value / from_value
+  end
+
+  private def calculate_blended_£_per_kwh_date_range(sd, ed, datatype = :£)
+    blended_rate(:kwh, datatype, sd, ed)
+  end
+
+  # calculates a blended rate x 48, based on aggregate data
+  # which could either be parameterised costs or pre-calculated
+  def blended_rate_£_per_kwh_x48(date, datatype = :£)
+    kwh_x48 = days_kwh_x48(date)
+    £_x48 = days_kwh_x48(date, datatype)
+    AMRData.fast_divide_x48_by_x48(£_x48, kwh_x48)
+  end
+
+  def current_tariff_rate_£_per_kwh
+    # needs to average rate over up to last year because:
+    # - the latest day might have 0 kWh, and therefore £0 so no implied rate
+    # - for electricity with differential tariffs this is a blended rate - beware
+    @current_tariff_rate_£_per_kwh ||= calculate_blended_£_per_kwh_date_range(up_to_1_year_ago, end_date, :£current)
+  end
+
+  def historic_tariff_rate_£_per_kwh
+    # needs to average rate over up to last year because:
+    # - the latest day might have 0 kWh, and therefore £0 so no implied rate
+    # - for electricity with differential tariffs this is a blended rate - beware
+    @historic_tariff_rate_£_per_kwh ||= calculate_blended_£_per_kwh_date_range(up_to_1_year_ago, end_date, :£)
   end
 
   def calculate_solar_pv_co2_x48(date)
@@ -127,6 +224,8 @@ class AMRData < HalfHourlyData
       date_exists?(date)
     when :economic_cost, :£
       @economic_tariff.date_exists?(date)
+    when :current_economic_cost, :£current
+      @current_economic_tariff.date_exists?(date)
     when :accounting_cost
       @accounting_tariff.date_exists?(date)
     when :co2
@@ -135,7 +234,7 @@ class AMRData < HalfHourlyData
   end
 
   def check_type(type)
-    raise UnexpectedDataType, "Unexpected data type #{type}" unless %i[kwh £ economic_cost co2 accounting_cost].include?(type)
+    raise UnexpectedDataType, "Unexpected data type #{type}" unless %i[kwh £ economic_cost co2 £current current_economic_cost accounting_cost].include?(type)
   end
 
   def substitution_type(date)
@@ -160,11 +259,17 @@ class AMRData < HalfHourlyData
 
   def self.single_value_kwh_x48(kwh)
     Array.new(48, kwh)
-  end 
+  end
 
   def self.fast_multiply_x48_x_x48(a, b)
     c = one_day_zero_kwh_x48
     (0..47).each { |x| c[x] = a[x] * b[x] }
+    c
+  end
+
+  def self.fast_divide_x48_by_x48(a, b)
+    c = one_day_zero_kwh_x48
+    (0..47).each { |x| c[x] = b[x] == 0.0 ? 0.0 : (a[x] / b[x]) }
     c
   end
 
@@ -209,6 +314,7 @@ class AMRData < HalfHourlyData
 
     return self[date].kwh_halfhour(halfhour_index) if type == :kwh
     return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
+    return @current_economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£current || type == :current_economic_cost
     return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
     return co2_half_hour(date, halfhour_index) if type == :co2
   end
@@ -241,6 +347,7 @@ class AMRData < HalfHourlyData
 
     return self[date].one_day_kwh  if type == :kwh
     return @economic_tariff.one_day_total_cost(date) if type == :£ || type == :economic_cost
+    return @current_economic_tariff.one_day_total_cost(date) if type == :£current || type == :current_economic_cost
     return @accounting_tariff.one_day_total_cost(date) if type == :accounting_cost
     return co2_one_day(date) if type == :co2
   end
@@ -311,6 +418,16 @@ class AMRData < HalfHourlyData
     total_kwh
   end
 
+  def economics_date_range(date1, date2, community_use: nil)
+    kwh = kwh_date_range(date1, date2, :kwh, community_use: community_use)
+    £ = kwh_date_range(date1, date2, :£, community_use: community_use)
+    {
+      kwh:  kwh,
+      £:    £,
+      rate: kwh == 0.0 ? current_tariff_rate_£_per_kwh : £ / kwh # risk this may end up being infinity
+    }
+  end
+
   def kwh_period(period)
     kwh_date_range(period.start_date, period.end_date)
   end
@@ -349,6 +466,10 @@ class AMRData < HalfHourlyData
 
   def overnight_baseload_kw(date, data_type = :kwh)
     raise EnergySparksNotEnoughDataException.new("Missing electric data (2) for #{date}") if date_missing?(date)
+    # The values 41 and 47 represent the electricity consumed between 20:30 and midnight.
+    # (i.e. 48 half hour values in a day so 41 * 0.5 = 20.5 => 20:30 in the evening to 47 * 0.5 => 23.5 => 23:30)
+    # This time of day for schools with solar PV panels synthesized by Sheffield PV data should provide a reasonable estimate of baseload.
+    # Sampling in the early morning instead is problematic as other consumers startup (e.g. boiler pumps, often from around 01:00).
     baseload_kw_between_half_hour_indices(date, 41, 47, data_type)
   end
 
@@ -449,15 +570,34 @@ class AMRData < HalfHourlyData
   end
 
   def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
-    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / (date2 - date1 + 1)
+    date_divisor = (date2 - date1 + 1)
+    return 0.0 if date_divisor.zero?
+    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / date_divisor / 24.0
+  end
+
+  def baseload_£_economic_cost_date_range_deprecated(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
+    total_£ = 0.0
+
+    (date1..date2).each do |date|
+      bl_kw = baseload_kw(date, sheffield_solar_pv)
+      total_£ += @economic_tariff.calculate_baseload_cost(date, bl_kw)
+    end
+
+    total_£
+  end
+
+  def economic_cost_for_x48_kwhs(date, kwh_x48)
+    rate_£_per_kwh_x48 = blended_rate_£_per_kwh_x48(date)
+    res = AMRData.fast_multiply_x48_x_x48(kwh_x48, rate_£_per_kwh_x48)
+    res.sum
   end
 
   def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)
-    total = 0.0
+    total_kwh = 0.0
     (date1..date2).each do |date|
-      total += baseload_kw(date, sheffield_solar_pv)
+      total_kwh += baseload_kw(date, sheffield_solar_pv)
     end
-    total
+    total_kwh * 24.0
   end
 
   def self.create_empty_dataset(type, start_date, end_date, reading_type = 'ORIG')

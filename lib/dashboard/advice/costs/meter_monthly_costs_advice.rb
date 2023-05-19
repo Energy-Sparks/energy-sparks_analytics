@@ -49,9 +49,9 @@ class MeterMonthlyCostsAdvice
 
   # eccentrically sort columns logically for human consumption
   def column_order(column)
-    return 0 if column == :flat_rate          || column == 'Flat Rate'
-    return 1 if column == :commodity_rate     || column == 'Commodity rate'
-    return 2 if column == :non_commodity_rate || column == 'Non commodity rate'
+    return 0 if column == :flat_rate          || column == 'flat_rate'
+    return 1 if column == :commodity_rate     || column == 'commodity_rate'
+    return 2 if column == :non_commodity_rate || column == 'non_commodity_rate'
     return 3 if column.match(/^\d\d:\d\d to \d\d:\d\d$/)
     return 10 if column.to_s.downcase.match(/^climate.*$/)
 

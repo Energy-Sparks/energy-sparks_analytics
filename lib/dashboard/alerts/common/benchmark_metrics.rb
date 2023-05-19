@@ -1,34 +1,60 @@
 # benchmark metrics
 #
 module BenchmarkMetrics
+  @@current_prices = nil
   ELECTRICITY_PRICE = 0.15
   SOLAR_EXPORT_PRICE = 0.05
   GAS_PRICE = 0.03
-  OIL_PRICE = 0.05
-  PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK = 0.3
-  PERCENT_GAS_OUT_OF_HOURS_BENCHMARK = 0.3
-  PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK = 0.2
+
   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL = 50_000.0 / 200.0
   RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE = 1.3 # secondary electricity usage typically 1.3 times higher due extra hours and server ICT
   BENCHMARK_ELECTRICITY_USAGE_PER_M2 = 50_000.0 / 1_200.0
   BENCHMARK_GAS_USAGE_PER_PUPIL = 0.9 * 115_000.0 / 200.0 # 0.9 is artificial incentive for schools to do better
   BENCHMARK_GAS_USAGE_PER_M2 = 0.9 * 115_000.0 / 1_200.0 # 0.9 is artificial incentive for schools to do better
   EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
-  EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175
-  BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2 = 0.01
+  EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175.0
   LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH = 0.15
   ANNUAL_AVERAGE_DEGREE_DAYS = 2000.0
   AVERAGE_GAS_PROPORTION_OF_HEATING = 0.6
 
-  BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * GAS_PRICE +
-                                    BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE
+  AVERAGE_OUT_OF_HOURS_PERCENT = 0.5
+
+  #Out of hours metrics recalculated in Feb 2023, see trello
+  #https://trello.com/c/FdBEY5Qz/2903-revise-approach-for-calculating-out-of-hours-usage-benchmark
+  EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY = 0.5
+  BENCHMARK_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY = 0.6
+
+  EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_GAS = 0.5
+  BENCHMARK_OUT_OF_HOURS_USE_PERCENT_GAS = 0.6
+
+  EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.2
+  BENCHMARK_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.5
+
+  def self.set_current_prices(prices:)
+    @@current_prices = prices
+  end
+
+  def self.pricing
+    @@current_prices || default_prices
+  end
+
+  def self.default_prices
+    OpenStruct.new(
+      gas_price: BenchmarkMetrics::GAS_PRICE,
+      electricity_price: BenchmarkMetrics::ELECTRICITY_PRICE,
+      solar_export_price: BenchmarkMetrics::SOLAR_EXPORT_PRICE
+    )
+  end
+
+  # BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * GAS_PRICE +
+  #                                  BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE
 
   # number less than 1.0 for colder area, > 1.0 for milder areas
   # multiply by this number if normalising school to other schools in different regions
   # divide by this number if scaling a central UK wide benchmark to a school
-  def self.normalise_degree_days(regional_temperatures, _holidays, fuel_type, asof_date = nil)
+  def self.normalise_degree_days(regional_temperatures, _holidays, fuel_type, asof_date)
     regional_degree_days = regional_temperatures.degree_days_this_year(asof_date)
-    if fuel_type == :gas 
+    if fuel_type == :gas
       scale_percent_towards_1(ANNUAL_AVERAGE_DEGREE_DAYS / regional_degree_days, AVERAGE_GAS_PROPORTION_OF_HEATING)
     elsif fuel_type == :electricity || fuel_type == :storage_heaters
       ANNUAL_AVERAGE_DEGREE_DAYS / regional_degree_days
@@ -42,18 +68,31 @@ module BenchmarkMetrics
     ((percent - 1.0) * scale) + 1.0
   end
 
-  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date = nil, list_of_fuels)
+  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date, list_of_fuels)
+
     total = 0.0
+
     if list_of_fuels.include?(:electricity)
       total += benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    elsif list_of_fuels.include?(:gas) || list_of_fuels.include?(:storage_heater) || list_of_fuels.include?(:storage_heaters)
+    end
+
+    if !(list_of_fuels & %i[gas storage_heater storage_heaters]).empty?
       total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date)
     end
+
     total
   end
 
   def self.benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * ELECTRICITY_PRICE
+    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * electricity_price_£_per_kwh(school)
+  end
+
+  def self.electricity_price_£_per_kwh(school)
+    school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£)
+  end
+
+  def self.gas_price_£_per_kwh(school)
+    school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£)
   end
 
   # scale benchmark to schools's temperature zone; so result if higher for
@@ -70,7 +109,7 @@ module BenchmarkMetrics
 
   # as above, larger number returned for Scotland, lower for SW
   def self.benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date = nil)
-    benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date) * GAS_PRICE
+    benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date) * gas_price_£_per_kwh(school)
   end
 
   def self.benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school)
@@ -96,9 +135,9 @@ module BenchmarkMetrics
   def self.exemplar_£(school, fuel_type, start_date, end_date)
     case fuel_type
     when :electricity, :storage_heater, :storage_heaters
-      exemplar_kwh(school, fuel_type, start_date, end_date) * BenchmarkMetrics::ELECTRICITY_PRICE
+      exemplar_kwh(school, fuel_type, start_date, end_date) * electricity_price_£_per_kwh(school)
     when :gas
-      exemplar_kwh(school, fuel_type, start_date, end_date) * BenchmarkMetrics::GAS_PRICE
+      exemplar_kwh(school, fuel_type, start_date, end_date) * gas_price_£_per_kwh(school)
     end
   end
 
@@ -130,19 +169,23 @@ module BenchmarkMetrics
     check_school_type(school_type)
 
     case school_type
-    when :primary, :infant, :junior, :special
+    when :primary, :infant, :junior
       if pupils < 150
-        1.5
-      elsif pupils < 300
+        1.0
+      else
+        1.0 + 1.0 * (pupils - 150) / 100
+      end
+    when :special
+      if pupils < 30
         2.5
       else
-        2.5 * (pupils / 300)
+        2.5 + 1.8 * (pupils - 30) / 30
       end
     when :secondary, :middle, :mixed_primary_and_secondary
-      if pupils < 400
+      if pupils < 500
         10
       else
-        10 + 10 * (pupils - 400) / 400
+        10 + 9.5 * (pupils - 500) / 500
       end
     end
   end
@@ -210,4 +253,39 @@ module BenchmarkMetrics
       raise EnergySparksUnexpectedStateException.new('Nil type of school in baseload floor area request') if school_type.nil?
     end
   end
+
+  #Numbers based on analysis of school data, Feb 2023
+  #https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
+  def self.exemplar_peak_kw(pupils, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type)
+    case school_type
+    when :primary, :infant, :junior
+      0.078 * pupils
+    when :secondary, :middle, :mixed_primary_and_secondary
+      0.112 * pupils
+    when :special
+      0.251 * pupils
+    else
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request")
+    end
+  end
+
+  #Numbers based on analysis of school data, Feb 2023
+  #https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
+  def self.benchmark_peak_kw(pupils, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type)
+    case school_type
+    when :primary, :infant, :junior
+      0.089 * pupils
+    when :secondary, :middle, :mixed_primary_and_secondary
+      0.125 * pupils
+    when :special
+      0.314 * pupils
+    else
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request")
+    end
+  end
+
 end

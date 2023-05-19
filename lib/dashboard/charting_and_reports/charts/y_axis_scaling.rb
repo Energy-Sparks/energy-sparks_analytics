@@ -12,13 +12,13 @@ class YAxisScaling
 
   def initialize
     # rubocop:disable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
-    @@units = %i[kwh kw co2 £ library_books]
+    @@units = %i[kwh kw co2 £ £current library_books]
     @@scaling_factors = %i[none per_pupil per_floor_area per_200_pupils per_1000_pupils]
     # rubocop:enable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
   end
 
-  def scale_from_kwh(value, unit, scaling_factor_type, fuel_type, meter_collection)
-    unit_scale = scale_unit_from_kwh(unit, fuel_type)
+  def scale_from_kwh_deprecated(value, unit, scaling_factor_type, fuel_type, meter_collection)
+    unit_scale = scale_unit_from_kwh(unit, fuel_type, meter_collection)
     factor = scaling_factor(scaling_factor_type, meter_collection)
     value * factor * unit_scale
   end
@@ -63,8 +63,9 @@ class YAxisScaling
     factor
   end
 
-  def self.convert(from_unit, to_unit, fuel_type, from_value, round = true)
-    val = ConvertKwh.convert(from_unit, to_unit, fuel_type, from_value)
+  def self.convert(from_unit, to_unit, fuel_type, from_value, round, meter_collection)
+    # TODO(PH, 17Nov2022) not tested as only called by simulator advice
+    val = YAxisScaling.scale(from_unit, to_unit, from_value, fuel_type, meter_collection)
     round ? FormatEnergyUnit.scale_num(val) : val
   end
 
@@ -76,7 +77,28 @@ class YAxisScaling
     converted_values
   end
 
-  def scale_unit_from_kwh(unit, fuel_type)
-    ConvertKwh.scale_unit_from_kwh(unit, fuel_type)
+  def scale(from_unit, to_unit, val, fuel_type, meter_collection)
+    return val if from_unit == to_unit
+    val * scale_unit_from_kwh(to_unit, fuel_type, meter_collection) / scale_unit_from_kwh(from_unit, fuel_type, meter_collection)
+  end
+
+  def scale_unit_from_kwh(unit, fuel_type, meter_collection)
+    return 1.0 if unit == :kwh
+
+    if meter_collection.aggregate_meter(fuel_type).nil?
+      # the benchmarking code for a school with storage heaters
+      # benchmarks against gas tariffs, so if no gas then
+      # default conversion to a constant rate
+      ConvertKwh.scale_unit_from_kwh(unit, fuel_type)
+    else
+      puts Thread.current.backtrace
+      puts "Chart: Blending calc #{1.0 / one_year_blended_conversion_from_kwh(unit, fuel_type, meter_collection)}"
+      one_year_blended_conversion_from_kwh(unit, fuel_type, meter_collection)
+    end
+  end
+
+  def one_year_blended_conversion_from_kwh(to_unit, fuel_type, meter_collection)
+    aggregate_meter = meter_collection.aggregate_meter(fuel_type)
+    aggregate_meter.amr_data.blended_rate(:kwh, to_unit)
   end
 end

@@ -47,7 +47,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   include Logging
   include TemplateVarPromotionMixIn
 
-  attr_reader :last_year_kwh, :last_year_£, :last_year_co2, :last_year_co2_tonnes
+  attr_reader :last_year_kwh, :last_year_£, :last_year_£current, :last_year_co2, :last_year_co2_tonnes
   attr_reader :one_year_energy_per_pupil_kwh, :one_year_energy_per_pupil_£, :one_year_energy_per_pupil_co2
   attr_reader :one_year_energy_per_floor_area_kwh, :one_year_energy_per_floor_area_£, :one_year_energy_per_floor_area_co2
   attr_reader :percent_difference_from_average_per_pupil
@@ -100,9 +100,14 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       # calc: ->{ scalar({ year: 0}, :energy_ex_solar, :kwh) }
     },
     last_year_£: {
-      description: 'Last years energy consumption - £ including differential tariff',
-      units:  {£: :electricity},
+      description: 'Last years energy consumption - £ including differential tariff (historic tariffs)',
+      units:  :£,
       benchmark_code: '£lyr'
+    },
+    last_year_£current: {
+      description: 'Last years energy consumption - £ including differential tariff (latest tariffs)',
+      units:  :£current,
+      benchmark_code: '€lyr'
     },
     last_year_co2: {
       description: 'Last years energy CO2 kg',
@@ -233,7 +238,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
 
     available_recent_fuel_types = fuel_types_with_up_to_date_data_in_last_year(asof_date)
     logger.info "Benchmarking versus these recent fuel_types: #{available_recent_fuel_types.join(',')}"
-    raise EnergySparksNotEnoughDataException, 'Zero up to dat meter data (by fuel type)' if available_recent_fuel_types.empty?
+    raise EnergySparksNotEnoughDataException, 'Zero up to date meter data (by fuel type)' if available_recent_fuel_types.empty?
     @recent_fuel_types_for_debug = available_recent_fuel_types.join(',')
 
     @one_year_energy_per_pupil_kwh      = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :number_of_pupils)
@@ -245,8 +250,8 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     @one_year_energy_per_pupil_co2      = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :number_of_pupils)
     @one_year_energy_per_floor_area_co2 = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :floor_area)
 
-    per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school, available_recent_fuel_types)
-    per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school, available_recent_fuel_types)
+    per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school, asof_date, available_recent_fuel_types)
+    per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school, asof_date, available_recent_fuel_types)
 
     @percent_difference_from_average_per_pupil = percent_change(per_pupil_energy_benchmark_£, @one_year_energy_per_pupil_£)
 
@@ -307,6 +312,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     # backwards compatibility TODO(PH, 10Oct2020) - remove and change references in calling code
     @last_year_kwh                = @current_year_energy_kwh
     @last_year_£                  = @current_year_energy_£
+    @last_year_£current           = @current_year_energy_£current
     @last_year_solar_pv_co2       = @current_year_solar_pv_co2
     @last_year_co2                = @current_year_energy_co2
     @last_year_co2_tonnes         = @current_year_energy_co2.nil? ? nil : @current_year_energy_co2 / 1000.0
@@ -357,7 +363,6 @@ class ChangeInEnergyUse < AlertAnalysisBase
         results.merge!(result)
       end
     end
-
     results
   end
 
@@ -619,7 +624,7 @@ end
 # see list of symbols and benchmark codes in comments below
 class ChangeInEnergyUseSymbols
   # mappings to benchmark codes for these
-  DATA_TYPES = { kwh: 'k', co2: 'c', £: 'p'}
+  DATA_TYPES = { kwh: 'k', co2: 'c', £: 'p', £current: '€'}
   METER_TYPES = { electricity: 'e', gas: 'g', storage_heaters: 'h', solar_pv: 's' }
 
   def self.template_variables
@@ -657,7 +662,7 @@ class ChangeInEnergyUseSymbols
     {
       self.symbol(stub, period, fuel_type, datatype, percent_type) => {
         description:    "#{period_name(period)} #{fuel_type} in #{datatype}",
-        units:          datatype,
+        units:          percent_type || datatype,
         benchmark_code: benchmark_code(benchmark_code_prefix, period, fuel_type, datatype, percent_type)
       }
     }

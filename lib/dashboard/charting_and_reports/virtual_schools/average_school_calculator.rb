@@ -70,8 +70,6 @@ class AverageSchoolCalculator
 
     # if a school is colder than average i.e. > school_degree_days increase its consumption from average
 
-    puts "Scale by dd #{school_degree_days / avg_degree_days}"
-
     floor_area * school_degree_days / avg_degree_days
   end
 

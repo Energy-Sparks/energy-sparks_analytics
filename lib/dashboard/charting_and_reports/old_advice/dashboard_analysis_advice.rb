@@ -43,7 +43,7 @@ class DashboardChartAdviceBase
 =begin
     end
 =end
-  
+
   end
 
   def self.advice_factory_group(chart_type, school, chart_definition, charts)
@@ -188,6 +188,18 @@ class DashboardChartAdviceBase
 
   protected
 
+  def calculate_alert(alert_class, fuel_type, asof_date = nil)
+    aggregate_meter = @school.aggregate_meter(fuel_type)
+    return nil if aggregate_meter.nil?
+    alert = alert_class.new(@school)
+    alert.analyse(asof_date || aggregate_meter.amr_data.end_date)
+    alert
+  rescue => e
+    # PH in 2 minds whether this general catch all should reraise or not?
+    logger.info "Failed to calculate alert #{alert_class.class.name}: #{e.message}"
+    nil
+  end
+
   # copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
   def html_table(header, rows, totals_row = nil)
     HtmlTableFormatting.new(header, rows, totals_row).html
@@ -249,20 +261,94 @@ class DashboardChartAdviceBase
     (value * 100.0).round(0).to_s + '%'
   end
 
-  def pounds_to_kwh(pounds, fuel_type_sym)
-    pounds / ConvertKwh.scale_unit_from_kwh(:£, fuel_type_sym)
-  end
-
-  def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
-    kwh = pounds_to_kwh(pounds, fuel_type_sym)
-    kwh_text = FormatEnergyUnit.scale_num(kwh)
-    '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + kwh_text + 'kWh)'
-  end
-
-  def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units])
-    pounds = YAxisScaling.convert(data_units, :£, fuel_type_sym, kwh, false)
-    # logger.info "kwh_to_pounds_and_kwh:  kwh = #{kwh} £ = #{pounds}"
+  def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units], £_datatype = :£)
+    pounds = YAxisScaling.new.scale(data_units, £_datatype, kwh, fuel_type, @school)
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + FormatEnergyUnit.scale_num(kwh) + 'kWh)'
+  end
+
+  def benchmark_data_deprecated(fuel_type, benchmark_type, datatype)
+    @alerts ||= {}
+    @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
+    @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
+  end
+
+  def benchmark_alert(fuel_type)
+    @benchmark_alerts ||= {}
+    @benchmark_alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
+  end
+
+  def benchmark_data(fuel_type, benchmark_type, datatype, saving = false)
+    if saving
+      benchmark_alert(fuel_type).benchmark_chart_data[benchmark_type][:saving][datatype]
+    else
+      benchmark_alert(fuel_type).benchmark_chart_data[benchmark_type][datatype]
+    end
+  end
+
+  def out_of_hours_alert(fuel_type)
+    @out_of_hours_alerts ||= {}
+    @out_of_hours_alerts[fuel_type] ||= AlertAnalysisBase.out_of_hours_alert(@school, fuel_type, last_chart_end_date)
+  end
+
+  def meter_tariffs_have_changed?(fuel_type, start_date = nil, end_date = nil)
+    start_date ||= @school.aggregate_meter(fuel_type).amr_data.start_date
+    end_date   ||= @school.aggregate_meter(fuel_type).amr_data.end_date
+    @school.aggregate_meter(fuel_type).meter_tariffs.meter_tariffs_differ_within_date_range?(start_date, end_date)
+  end
+
+  def switch_to_kwh_chart_if_economic_tariffs_changed(fuel_type, start_date = nil, end_date = nil)
+    if meter_tariffs_have_changed?(fuel_type, start_date, end_date)
+      txt = %(
+        Your tariff has changed over the period of the chart above and other charts on this page.
+        Make sure the y-axis is set to kWh by selecting &apos;Change Unit&apos; to kWh so you
+        can see how your <%= fuel_type.to_s %> consumption has changed over time without the
+        impact of the tariff change.
+      )
+      ERB.new(txt).result(binding)
+    else
+      %()
+    end
+  end
+
+  def switch_to_kwh_chart_if_economic_tariffs_changed_in_last_2_weeks(fuel_type)
+    end_date = @school.aggregate_meter(fuel_type).amr_data.end_date
+    start_date = [end_date - 7 - 6, @school.aggregate_meter(fuel_type).amr_data.start_date].max
+
+    if meter_tariffs_have_changed?(fuel_type, start_date, end_date)
+      txt = %(
+        Your <%= fuel_type.to_s %> tariff has changed in the last 2 weeks.
+        Make sure the y-axis is set to kWh by selecting &apos;Change Unit&apos; to kWh so you
+        can see how your <%= fuel_type.to_s %> consumption has changed over the
+        last 2 weeks without the impact of the tariff change.
+      )
+      ERB.new(txt).result(binding)
+    else
+      %()
+    end
+  end
+
+  def annual_£current_cost_of_1_kw_html
+    FormatEnergyUnit.format(:£current, annual_£current_cost_of_1_kw, :html)
+  end
+
+  def annual_£current_cost_of_1_kw
+    blended_rate_£current_per_kwh * 24.0 * 365.0
+  end
+
+  def blended_rate_£current_per_kwh_html
+    FormatEnergyUnit.format(:£_per_kwh, blended_rate_£current_per_kwh, :html)
+  end
+
+  def blended_rate_£current_per_kwh
+    @school.aggregated_electricity_meters.amr_data.current_tariff_rate_£_per_kwh
+  end
+
+  def annualx5_£current_cost_of_1_kw_html
+    FormatEnergyUnit.format(:£current, 5.0 * annual_£current_cost_of_1_kw, :html)
+  end
+
+  def last_chart_end_date
+    @chart_data[:x_axis_ranges].flatten.sort.last
   end
 
   def html_table_from_graph_data(data, fuel_type = :electricity, totals_row = true, column1_description = '', sort = 0)
@@ -300,13 +386,13 @@ class DashboardChartAdviceBase
               <td><%= row %></td>
               <% val = value[0] %>
               <% pct = val / total %>
-              <td class="text-right"><%= YAxisScaling.convert(units, :kwh, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(units, :kwh, fuel_type, val, @school) %></td>
               <% if row.match?(/export/i) %>
-                <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val) %></td>
+                <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val, @school) %></td>
               <% else %>
-                <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val) %></td>
+                <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val, @school) %></td>
               <% end %>
-              <td class="text-right"><%= YAxisScaling.convert(units, :co2, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(units, :co2, fuel_type, val, @school) %></td>
               <td class="text-right"><%= percent(pct) %></td>
             </tr>
           <% end %>
@@ -314,9 +400,9 @@ class DashboardChartAdviceBase
           <% if totals_row %>
             <tr class="table-success">
               <td><b>Total</b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :kwh, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :kwh, fuel_type, total, @school) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total, @school) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total, @school) %></b></td>
               <td></td>
             </tr>
           <% end %>
@@ -397,11 +483,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   protected def electric_usage
-    get_energy_usage('electricity', :electricity, index_of_most_recent_date)
+    get_energy_usage(:electricity)
   end
 
   protected def gas_usage
-    get_energy_usage('gas', :gas, index_of_most_recent_date)
+    get_energy_usage(:gas)
   end
 
   protected def gas?;             !gas_usage.nil?             end
@@ -409,22 +495,43 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   protected def storage_heaters?; !storage_heater_usage.nil?  end
 
   protected def storage_heater_usage
-    get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
+    get_energy_usage(:storage_heater)
   end
 
   protected def electric_comparison_benchmark
-    compare = comparison('electricity', index_of_data(benchmark_school_name))
+    compare = comparison(:electricity, :benchmark)
     generate_html(%{ The electricity usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def gas_comparison_benchmark
-    compare = comparison('gas', index_of_data(benchmark_school_name))
-    generate_html(%{ The gas usage <%= compare %>: }.gsub(/^  /, ''), binding)
+    compare = comparison(:gas, :benchmark)
+    generate_html(%{ The gas usage <%= compare %>.  }.gsub(/^  /, ''), binding)
+  end
+
+  protected def electric_comparison_exemplar
+    compare = comparison(:electricity, :exemplar)
+    generate_html(%{ The electricity usage <%= compare %>. }.gsub(/^  /, ''), binding)
+  end
+
+  protected def gas_comparison_exemplar
+    compare = comparison(:gas, :exemplar)
+    generate_html(%{ The gas usage <%= compare %>.  }.gsub(/^  /, ''), binding)
+  end
+
+  def has_changed_by_percent?(old_value, new_value, percent)
+    return false if old_value.nil? || new_value.nil?
+
+    ((new_value - old_value) / old_value).magnitude > percent
   end
 
   protected def storage_heater_benchmark_comparison
-    compare = comparison('storage heaters', index_of_data(benchmark_school_name))
-    generate_html(%{ The storage heater usage <%= compare %>: }.gsub(/^  /, ''), binding)
+    compare = comparison(:storage_heater, :benchmark)
+    generate_html(%{ The storage heater usage <%= compare %>. }.gsub(/^  /, ''), binding)
+  end
+
+  protected def storage_heater_exemplar_comparison
+    compare = comparison(:storage_heater, :exemplar)
+    generate_html(%{ The storage heater usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def usage_adjective
@@ -433,6 +540,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   protected def usage_preposition
     'on'
+  end
+
+  def tariff_text(electricity_usage, gas_usage)
+    preamble = 'Monetary values for well managed and exemplar schools are converted using your school&apos;s tariffs.'
+    EconomicTariffsChangeCaveats.new(@school).tariff_text_with_sentence(electricity_usage, gas_usage, preamble: preamble, charts: true)
   end
 
   def generate_advice
@@ -447,30 +559,30 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <body>
       <% end %>
       <p>
-        <%= @school.name %> is a <%= @school.school_type %> school near <%= address %>
+        <%= @school.name %> is a <%= @school.school_type.to_s.humanize.downcase %> school near <%= address %>
         with <%= @school.number_of_pupils %> pupils
         and a floor area of <%= @school.floor_area.round(0) %>m<sup>2</sup>.
       </p>
       <p>
         <% if actual_gas_usage > 0 && actual_electricity_usage <= 0 %>
           <%= energy_usage_intro('gas', gas_usage) %>
-          <%= gas_comparison_benchmark %>
+          <%= gas_comparison_exemplar %>
         <% elsif actual_electricity_usage > 0 && actual_gas_usage <= 0 && actual_storage_heater_usage <= 0 %>
           <%= energy_usage_intro('electricity', electric_usage) %>
-          <%= electric_comparison_benchmark %>
+          <%= electric_comparison_exemplar %>
         <% elsif actual_electricity_usage > 0 && actual_storage_heater_usage > 0 %>
           <%= energy_usage_intro('storage heating', storage_heater_usage, ',') %>
           plus <%= electric_usage %> for the remaining electrical appliances (lighting. ICT etc.).
-          <%= electric_comparison_benchmark %>
-          <%= storage_heater_benchmark_comparison %>
+          <%= electric_comparison_exemplar %>
+          <%= storage_heater_comparison_exemplar %>
         <% elsif actual_storage_heater_usage > 0 %>
           <%= energy_usage_intro('storage heating', storage_heater_usage, ',') %>
-          <%= storage_heater_benchmark_comparison %>
+          <%= storage_heater_comparison_exemplar %>
         <% else %>
           Your school <%= usage_adjective %> <%= electric_usage %> <%= usage_preposition %> electricity
           and <%= gas_usage %> <%= usage_preposition %> gas last year.
-          <%= electric_comparison_benchmark %>
-          <%= gas_comparison_benchmark %>
+          <%= electric_comparison_exemplar %>
+          <%= gas_comparison_exemplar %>
         <% end %>
       </p>
       <%= @body_end %>
@@ -480,39 +592,44 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <p>
-      <% if actual_gas_usage > 0 %>
-        Your gas usage is <%= percent(percent_gas_of_benchmark_average) %> of well managed schools which
-        <% if actual_gas_usage < exemplar_gas_usage %>
-          is very good.
-        <% else %>
-          <% if actual_gas_usage < average_benchmark_gas_usage %>
-            although good, could be improved
+        <% if actual_electricity_usage > 0 %>
+          Your electricity usage is <%= percent(percent_electricity_of_exemplar_average) %> of exemplar schools which
+          <% if actual_electricity_usage < exemplar_electricity_usage %>
+            is very good.
           <% else %>
-            is above average, the school should aim to reduce this,
+            <% if actual_electricity_usage < exemplar_electricity_usage %>
+              although good, could be improved
+            <% else %>
+              is above average, the school should aim to reduce this,
+            <% end %>
+            which would save you <%= £_saving_versus_exemplar_html(:electricity) %> per year if you matched the most energy efficient (exemplar) schools.
+            <% random_equivalence_text(benchmark_data(:electricity, :exemplar, :kwh, true), :electricity) %>
           <% end %>
-          which would save you <%= pound_gas_saving_versus_exemplar %> per year if you matched the most energy efficient (exemplar) schools.
+          <p>
+          This is how your school&apos;s electricity consumption compares:
+            <%= school_well_managed_exemplar_comparison_table_html(:electricity) %>
+          </p>
         <% end %>
-      <% end %>
-      <% if actual_electricity_usage > 0 %>
-        Your electricity usage is <%= percent(percent_electricity_of_benchmark_average) %> of well managed schools which
-        <% if actual_electricity_usage < exemplar_electricity_usage %>
-          is very good.
-        <% else %>
-          <% if actual_electricity_usage < average_benchmark_electricity_usage %>
-            although good, could be improved
+
+        <% if actual_gas_usage > 0 %>
+          Your gas usage is <%= percent(percent_gas_of_exemplar_average) %> of exemplar schools which
+          <% if actual_gas_usage < exemplar_gas_usage %>
+            is very good.
           <% else %>
-            is above average, the school should aim to reduce this,
+            <% if actual_gas_usage < exemplar_gas_usage %>
+              although good, could be improved
+            <% else %>
+              is above average, the school should aim to reduce this,
+            <% end %>
+            which would save you <%= £_saving_versus_exemplar_html(:gas) %> per year if you matched the most energy efficient (exemplar) schools.
           <% end %>
-          which would save you <%= pound_electricity_saving_versus_exemplar %> per year if you matched the most energy efficient (exemplar) schools.
-          <% random_equivalence_text(kwh_electricity_saving_versus_exemplar, :electricity) %>
         <% end %>
-      <% end %>
       </p>
       <% if actual_gas_usage > 0 %>
         <p>
-          <% if percent_gas_of_benchmark_average < 0.7 %>
+          <% if percent_gas_of_exemplar_average < 0.7 %>
             Well done you gas usage is very low and you should be congratulated for being an energy efficient school.
-          <% elsif percent_gas_of_benchmark_average < 0.7 && percent_electricity_of_benchmark_average < 0.7 %>
+          <% elsif percent_gas_of_exemplar_average < 0.7 && percent_electricity_of_exemplar_average < 0.7 %>
             Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
           <% else %>
             Whether you have old or new school buildings, good energy management and best
@@ -521,6 +638,10 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
             Improving controls, upgrading to more efficient lighting and other measures are
             applicable to all school buildings.
           <% end %>
+        </p>
+        <p>
+          This is how your school&apos;s gas consumption compares:
+          <%= school_well_managed_exemplar_comparison_table_html(:gas) %>
         </p>
       <% end %>
       <% if actual_storage_heater_usage > 0 %>
@@ -531,11 +652,24 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           temperatures and the remainder (all other appliances including lighting and ICT) which is less seasonal.
         </p>
       <% end %>
+      <%= tariff_text(actual_electricity_usage > 0, actual_gas_usage > 0) %>
       <%= varying_floor_area_explanation %>
       <%= varying_pupil_numbers_explanation %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  end
+
+  def school_well_managed_exemplar_comparison_table_html(fuel_type)
+    data = benchmark_alert(fuel_type).saving_table_data
+
+    HtmlTableFormatting.new(
+      data[:header],
+      data[:data],
+      nil, # no totals
+      data[:units],
+      Array.new(data[:units].length, false)
+    ).html
   end
 
   def varying_floor_area_explanation
@@ -596,20 +730,32 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def actual_electricity_usage
-    actual_fuel_usage('electricity', index_of_most_recent_date)
+    actual_fuel_usage(:electricity, :school)
   end
 
   def actual_gas_usage
-    actual_fuel_usage('gas', index_of_most_recent_date)
+    actual_fuel_usage(:gas, :school)
   end
 
   def actual_storage_heater_usage
-    actual_fuel_usage('storage heaters', index_of_most_recent_date)
+    actual_fuel_usage(:storage_heater, :school)
   end
 
-  def actual_fuel_usage(fuel, index)
-    return 0.0 unless @chart_data[:x_data].key?(fuel)
-    @chart_data[:x_data][fuel][index]
+  def fuel_to_s(fuel)
+    case fuel
+    when :electricity
+      fuel.to_s
+    when :gas
+      fuel.to_s
+    when :storage_heater
+      'storage heaters'
+    end
+  end
+
+  def actual_fuel_usage(fuel, benchmark_type)
+    return 0.0 unless @chart_data[:x_data].key?(fuel_to_s(fuel)) && @chart_data[:x_data][fuel_to_s(fuel)].sum > 0.0
+
+    benchmark_data(fuel, benchmark_type, :£)
   end
 
   def benchmark_school_name
@@ -624,76 +770,133 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     AggregatorBenchmarks::SCALESPLITCHAR
   end
 
-
   def average_benchmark_electricity_usage
-    actual_fuel_usage('electricity', index_of_data(benchmark_school_name))
+    actual_fuel_usage(:electricity, :benchmark)
   end
 
   def average_benchmark_gas_usage
-    actual_fuel_usage('gas', index_of_data(benchmark_school_name))
+    actual_fuel_usage(:gas, :benchmark)
   end
 
   def exemplar_electricity_usage
-    actual_fuel_usage('electricity', index_of_data(exemplar_school_name))
+    actual_fuel_usage(:electricity, :exemplar)
   end
 
   def exemplar_gas_usage
-    actual_fuel_usage('gas', index_of_data(exemplar_school_name))
+    actual_fuel_usage(:gas, :exemplar)
+  end
+
+  def percent_gas_of_exemplar_average
+    1.0 + benchmark_data(:gas, :exemplar, :percent, true)
   end
 
   def percent_gas_of_benchmark_average
-    actual_gas_usage / average_benchmark_gas_usage
+    1.0 + benchmark_data(:gas, :benchmark, :percent, true)
   end
 
   def percent_electricity_of_benchmark_average
-    actual_electricity_usage / average_benchmark_electricity_usage
+    1.0 + benchmark_data(:electricity, :benchmark, :percent,   true)
   end
 
-  def pound_gas_saving_versus_exemplar
-    pounds = actual_gas_usage - exemplar_gas_usage
-    pounds_to_pounds_and_kwh(pounds, :gas)
+  def percent_electricity_of_exemplar_average
+    1.0 + benchmark_data(:electricity, :exemplar, :percent,   true)
   end
 
   def pound_electricity_saving_versus_exemplar
-    pounds = actual_electricity_usage - exemplar_electricity_usage
-    pounds_to_pounds_and_kwh(pounds, :electricity)
+    £   = FormatEnergyUnit.format(:£,   benchmark_data(:electricity, :exemplar, :£,   true), :html)
+    kwh = FormatEnergyUnit.format(:kwh, benchmark_data(:electricity, :exemplar, :kwh, true), :html)
+    "#{£} (#{kwh})"
   end
 
-  def kwh_electricity_saving_versus_exemplar
-    pounds_to_kwh(actual_electricity_usage - exemplar_electricity_usage, :electricity)
-  end
+  def comparison(fuel, benchmark_type)
+    tariff_change_saving_to_examplar_html(fuel, benchmark_type)
+=begin
+    school_£    = benchmark_data(fuel, :school,        :£)
+    benchmark_£ = benchmark_data(fuel, benchmark_type, :£)
 
-  def comparison(type_str, with)
-    usage_from_chart_£ = @chart_data[:x_data][type_str][index_of_most_recent_date]
-    benchmark_from_chart = @chart_data[:x_data][type_str][with]
-    formatted_usage_£ = FormatEnergyUnit.format(:£, usage_from_chart_£, :html)
-    benchmark_usage_£ = FormatEnergyUnit.format(:£, benchmark_from_chart, :html)
+    school_£_html    = FormatEnergyUnit.format(:£, school_£,    :html)
+    benchmark_£_html = FormatEnergyUnit.format(:£, benchmark_£, :html)
+    tc_html = tariff_change_saving_to_examplar_html(fuel, benchmark_type)
 
-    if formatted_usage_£ == benchmark_usage_£ # values same in formatted space
-      'is similar to other well managed schools which spent ' + benchmark_usage_£
-    elsif usage_from_chart_£ > benchmark_from_chart
-      'is more than well managed schools which spent ' + benchmark_usage_£
+    if school_£_html == benchmark_£_html # values same in formatted space
+      'is similar to other well managed schools which spent ' + benchmark_£_html + tc_html
+    elsif school_£ > benchmark_£
+      'is more than well managed schools which spent ' + benchmark_£_html + tc_html
     else
-      'is less than well managed schools which spent ' + benchmark_usage_£
+      'is less than well managed schools which spent ' + benchmark_£_html + tc_html
+    end
+=end
+  end
+
+  def tariff_change_saving_to_examplar_html(fuel, benchmark_type)
+    school_comparison_name = benchmark_type == :benchmark ? 'well managed' : 'exemplar'
+
+    school_£    = benchmark_data(fuel, :school,        :£)
+    benchmark_£ = benchmark_data(fuel, benchmark_type, :£)
+
+    school_£_html    = FormatEnergyUnit.format(:£, school_£,    :html)
+    benchmark_£_html = FormatEnergyUnit.format(:£, benchmark_£, :html)
+    tc_html = '' # tariff_change_saving_to_exemplar_html(fuel)
+
+    if school_£_html == benchmark_£_html # values same in formatted space
+      "is similar to other #{school_comparison_name} schools which spent " + benchmark_£_html + tc_html
+    elsif school_£ > benchmark_£
+      "is more than #{school_comparison_name} schools which spent " + benchmark_£_html + tc_html
+    else
+      "is less than #{school_comparison_name} schools which spent " + benchmark_£_html + tc_html
     end
   end
 
-  def get_energy_usage(type_str, type_sym, index)
-    return nil unless @chart_data[:x_data].key?(type_str) && @chart_data[:x_data][type_str].sum > 0.0
-    pounds = @chart_data[:x_data][type_str][index]
-    pounds_to_pounds_and_kwh(pounds, type_sym)
+  def tariff_change_saving_to_exemplar_html_deprecated(fuel)
+    return '' unless tariff_changed_signifcantly?(fuel)
+
+    £current = FormatEnergyUnit.format(:£,   benchmark_data(fuel, :exemplar, :£current, false), :html)
+    " (#{£current} at your current tariff)"
   end
 
-  def index_of_data(name)
-    @chart_data[:x_axis].find_index do |v|
-      v.include?(name)
-    end
+  def get_energy_usage(fuel)
+    return nil unless @chart_data[:x_data].key?(fuel.to_s) && @chart_data[:x_data][fuel.to_s].sum > 0.0
+
+    £_html   = FormatEnergyUnit.format(:£,   benchmark_data(fuel, :school, :£),   :html)
+    kwh_html = FormatEnergyUnit.format(:kwh, benchmark_data(fuel, :school, :kwh), :html)
+
+    "#{£_html}" #  (#{kwh_html}#{tariff_changed_spend_html(fuel)})"
   end
 
-  def index_of_most_recent_date
-    dr = date_range
-    last_date = dr.compact.sort { |a, b| a.first <=> b.first }.last
-    dr.find_index(last_date)
+  def tariff_changed_signifcantly?(fuel)
+    has_changed_by_percent?(benchmark_data(fuel, :school, :£), benchmark_data(fuel, :school, :£current), 0.01)
+  end
+
+  def tariff_changed_spend_html_deprecated(fuel)
+    "#{£_html} (#{kwh_html})"
+  end
+
+  def tariff_changed_spend_html(fuel)
+    return '' unless tariff_changed_signifcantly?(fuel)
+
+    kwh_html = FormatEnergyUnit.format(:£, benchmark_data(fuel, :school, :£current), :html)
+    ", #{kwh_html} at your current tariff"
+  end
+
+  def gas_tariff_change_text_deprecated
+    benchmark_data(:gas, :school, :£)
+    changed = has_changed_by_percent?(benchmark_data(:gas, :school, :£), benchmark_data(:gas, :school, :£current), 0.01)
+
+    saving_£   = FormatEnergyUnit.format(:£,   benchmark_data(:gas, :exemplar, :£current, true), :html)
+    saving_kwh = FormatEnergyUnit.format(:kwh, benchmark_data(:gas, :exemplar, :kwh,      true), :html)
+    changed_txt = changed ? ' at your current tariff' : ''
+
+    "(#{saving_£} #{changed_txt})"
+  end
+
+  def £_saving_versus_exemplar_html(fuel)
+    £current_html   = FormatEnergyUnit.format(:£,   benchmark_data(fuel, :exemplar, :£current,   true),   :html)
+    kwh_html = FormatEnergyUnit.format(:kwh, benchmark_data(fuel, :exemplar, :kwh, true), :html)
+
+    tariff_change_indicator_text = ''
+    tariff_change_indicator_text = '(using your latest tariff)' if tariff_changed_signifcantly?(fuel)
+
+    "#{kwh_html} or #{£current_html} #{tariff_change_indicator_text}"
   end
 
   def date_range_of_most_recent_school_chart_value
@@ -754,8 +957,6 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
   end
 
   def comparison(type_str, with)
-    usage_from_chart_kwh = @chart_data[:x_data][type_str][index_of_most_recent_date]
-    benchmark_from_chart = @chart_data[:x_data][type_str][with]
     formatted_usage_kwh = FormatEnergyUnit.format(:kwh, usage_from_chart_kwh, :html)
     benchmark_usage_kwh = FormatEnergyUnit.format(:kwh, benchmark_from_chart, :html)
 
@@ -767,63 +968,33 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
       'is less than well managed schools which consumed ' + benchmark_usage_kwh
     end
   end
-
 end
 #==============================================================================
 class FuelDaytypeAdvice < DashboardChartAdviceBase
+  AVERAGE_PERCENT = 0.5
   attr_reader :fuel_type, :fuel_type_str
-  BENCHMARK_PERCENT = 0.5
-  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type, exemplar_percentage)
+  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
     super(school, chart_definition, chart_data, chart_symbol)
     @fuel_type = fuel_type
     @fuel_type_str = @fuel_type.to_s
-    @exemplar_percentage = exemplar_percentage
-  end
-
-  def random_out_of_hours_equivalence
-    equivalence = EnergyConversionsOutOfHours.random_out_of_hours_to_exemplar_percent_improvement(@school, @fuel_type, @exemplar_percentage)
-    ['This saving is equivalent to ' + equivalence[:adult_dashboard_wording], equivalence[:calculation_description ]]
-  end
-
-  def chart_period
-    FormatEnergyUnit.format(:years, days  / 365.0, :html)
-  end
-
-  def days
-    chart_interpretation = ChartInterpretation.new(@chart_data)
-    chart_interpretation.days
   end
 
   def generate_advice
-    # Centrica TODO
     equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence if days > 360
-    in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
-    percent_value = out_of_hours / (in_hours + out_of_hours)
-    percent_str = percent(percent_value)
-    saving_percent = percent_value - @exemplar_percentage
-    saving = (in_hours + out_of_hours) * saving_percent * 365.0 / days
-    saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
-    saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
     excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(excluding storage heaters)' : ''
-
-    # table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
-
-    daytype_breakdown_table = DayTypeBreakDownTable.new(@school, @fuel_type, :up_to_a_year)
-    daytype_breakdown_table_html = daytype_breakdown_table.html
-    grid_intensity = daytype_breakdown_table.uk_electricity_grid_carbon_intensity_kg_per_kwh
 
     header_template = %{
       <%= @body_start %>
         <p>
           This chart shows when you have used <%= @fuel_type_str %> <%= excluding_storage_heaters %> over the past <%= chart_period %>.
-          <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
-          which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
-          of <%= percent(BENCHMARK_PERCENT) %>.
-          <% if percent_value > @exemplar_percentage %>
-            The best schools only consume <%= percent(@exemplar_percentage) %> out of hours.
-            Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
-            would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
+          <%= percent(percent_kwh) %> of your <%= @fuel_type_str %> usage is out of hours:
+          which is <%= adjective(percent_kwh, average_percent) %>
+          of <%= percent(average_percent) %>.
+          <% if percent_kwh > exemplar_percentage %>
+            The best schools only consume <%= percent(exemplar_percentage) %> out of hours.
+            Reducing your school's out of hours usage to <%= percent(exemplar_percentage) %>
+            would save <%= saving_versus_well_managed_schools_html %> per year.
             <%# increase loop size to test %>
             <% if days > 360 %>
               <%= equivalence_tool_tip_html(equivalence_saving_description, equivalence_calculation_description) %>
@@ -848,7 +1019,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
         This is the breakdown for the most recent <%= chart_period %>:
       </p>
       <p>
-        <%= daytype_breakdown_table_html %>
+        <%= table_html(:£current) %>
       </p>
       <% if @school.storage_heaters? %>
         <p>
@@ -859,6 +1030,51 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  end
+
+  private
+
+  def percent_kwh
+    out_of_hours_alert(@fuel_type).out_of_hours_percent
+  end
+
+  def average_percent
+    AVERAGE_PERCENT
+  end
+
+  def exemplar_percentage
+    out_of_hours_alert(@fuel_type).good_out_of_hours_use_percent
+  end
+
+  def random_out_of_hours_equivalence
+    equivalence = EnergyConversionsOutOfHours.random_out_of_hours_to_exemplar_percent_improvement(@school, @fuel_type, exemplar_percentage)
+    ['This saving is equivalent to ' + equivalence[:adult_dashboard_wording], equivalence[:calculation_description ]]
+  end
+
+  def chart_period
+    FormatEnergyUnit.format(:years, days  / 365.0, :html)
+  end
+
+  def days
+    chart_interpretation = ChartInterpretation.new(@chart_data)
+    chart_interpretation.days
+  end
+
+  def saving_versus_well_managed_schools_html
+    kwh_html = FormatEnergyUnit.format(:kwh,      out_of_hours_alert(fuel_type).potential_saving_kwh, :html)
+    £current_html   = FormatEnergyUnit.format(:£current, out_of_hours_alert(fuel_type).potential_saving_£, :html)
+    "#{£current_html} (#{kwh_html})"
+  end
+
+  def table_html(datatype)
+    data = out_of_hours_alert(@fuel_type).analysis_table_data(:fuel_type, datatype)
+
+    HtmlTableFormatting.new(
+      data[:header],
+      data[:data],
+      data[:totals],
+      data[:units],
+    ).html
   end
 
   def adjective(percent, percent_benchmark, above_sense = true, the = true)
@@ -876,32 +1092,18 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
       'well below' + the_average
     end
   end
-
-  # copied from alerts code, needs rationalising
-  def in_out_of_hours_consumption(breakdown)
-    in_hours = 0.0
-    out_of_hours = 0.0
-    breakdown[:x_data].each do |daytype, consumption|
-      if daytype == Series::DayType::SCHOOLDAYOPEN
-        in_hours += consumption[0]
-      else
-        out_of_hours += consumption[0]
-      end
-    end
-    [in_hours, out_of_hours]
-  end
 end
 
 #==============================================================================
 class ElectricityDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :electricity, 0.35)
+    super(school, chart_definition, chart_data, chart_symbol, :electricity)
   end
 end
 #==============================================================================
 class GasDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :gas, 0.3)
+    super(school, chart_definition, chart_data, chart_symbol, :gas)
   end
 end
 #==============================================================================
@@ -924,6 +1126,9 @@ class GasLongTermTrend < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
+        <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed(:gas) %>
+        </p>
         <p>
           Reducing gas consumption can be achieved by turning your school's thermostat down,
           reducing out of hours usage, insulating your buildings or installing a new more efficient
@@ -956,6 +1161,9 @@ class ElectricityLongTermTrend < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
         <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed(:electricity) %>
+        </p>
+        <p>
           Unless the school has had additional buildings added, if you are managing your electricity
           consumption well this should show a downward trend; more modern ICT equipment,
           LED lighting and behavioural change all contribute to reducing electricity usage.
@@ -985,6 +1193,9 @@ class ElectricityShortTermTrend < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
+        <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed_in_last_2_weeks(:electricity) %>
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1046,7 +1257,7 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
         <p>
         Does your school&apos;s boiler in the graph above do this?
         If it doesn't you might need to speak to your building manager
-        or caretaker and ask why? 
+        or caretaker and ask why?
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1129,8 +1340,9 @@ class WeeklyAdvice < DashboardChartAdviceBase
             consume 1,500 watts of electricity, to a single more efficient server consuming 500 watts
             would reduce power consumption by 1,000 watts (1.0 kW) on every day of the year.
             This would save 1kW x 24 hours per day x 365 days per year = 8,760 kWh. Each kWh of electricity
-            costs about 15p, so this would save 8,760 x 15p = &pound;1,300 per year. If the new server lasted
-            5 years then that would be a &pound;5,250 saving to the school which is far more than the
+            costs about <%= blended_rate_£current_per_kwh_html %>,
+            so this would save 8,760 x <%= blended_rate_£current_per_kwh_html %> = <%= annual_£current_cost_of_1_kw_html %> per year. If the new server lasted
+            5 years then that would be a <%= annualx5_£current_cost_of_1_kw_html %> saving to the school which is far more than the
             likely &pound;750 cost of the new server!
           </p>
         <% end %>
@@ -1299,7 +1511,7 @@ deprecated PH 22 Jul 2022
 
     logger.debug @school.name
     header_template = %{
-      <% if @add_extra_markup %>        
+      <% if @add_extra_markup %>
           <head><h2>Cusum analysis</h2>
           <body>
       <% end %>
@@ -1350,6 +1562,14 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
   def chart_period
     chart_interpretation = ChartInterpretation.new(@chart_data)
     FormatEnergyUnit.format(:years, chart_interpretation.days / 365.0, :html)
+  end
+
+  def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units], £_datatype = :£)
+    £current = kwh * @school.aggregated_heat_meters.amr_data.current_tariff_rate_£_per_kwh
+    kwh_html      = FormatEnergyUnit.format(:kwh,      kwh,      :html)
+    £current_html = FormatEnergyUnit.format(:£current, £current, :html)
+
+    "#{£current_html} (#{kwh_html})"
   end
 
   def generate_advice
@@ -1486,7 +1706,7 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
       <p>
         Reducing a school's baseload is often the fastest way of reducing a school's energy costs
         and reducing its carbon footprint. For each 1kW reduction in baseload, the school will save
-        &pound;1,050 per year, and reduce its carbon footprint by 2,400 kg.
+        <%= annual_£current_cost_of_1_kw_html %> per year, and reduce its carbon footprint by 2,400 kg.
       </p>
       <p>
         Look carefully at the graph above, how has the baseload changed over time?
@@ -1499,6 +1719,9 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  rescue => e
+    puts e.message
+    puts e.backtrace
   end
 end
 
@@ -2043,7 +2266,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
           <%= advice.introductory_hot_water_text_3_circulatory_inefficiency %>
           <%= advice.introductory_hot_water_text_4_analysis_intro %>
           <%= advice.estimate_of_boiler_efficiency_header %>
-          <%= advice.estimate_of_boiler_efficiency_text_1_chart_explanation %> 
+          <%= advice.estimate_of_boiler_efficiency_text_1_chart_explanation %>
         <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -3048,6 +3271,9 @@ class Last2WeeksDailyGasComparisonTemperatureCompensatedAdvice < DashboardChartA
 
     footer_template = %{
       <%= @body_start %>
+        <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed_in_last_2_weeks(:gas) %>
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 

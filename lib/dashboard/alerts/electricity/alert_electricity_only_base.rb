@@ -14,38 +14,12 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
     set_time_of_year_relevance(5.0)
   end
 
-  protected
-
-  def baseload_calculator(meter = aggregate_meter)
-    @baseload_calculator ||= ElectricityBaseloadAnalysis.new(meter)
-  end
-
-  def average_baseload(date1, date2, meter = aggregate_meter)
-    baseload_calculator(meter).average_baseload(date1, date2)
-  end
-
-  def average_baseload_kw(asof_date, meter = aggregate_meter)
-    baseload_calculator(meter).average_baseload_kw(asof_date)
-  end
-
-  def annual_average_baseload_kwh(asof_date, meter = aggregate_meter)
-    baseload_calculator(meter).annual_average_baseload_kwh(asof_date)
-  end
-
-  def annual_average_baseload_£(asof_date, meter = aggregate_meter)
-    kwh = annual_average_baseload_kwh(asof_date, meter)
-    kwh * blended_electricity_£_per_kwh
-  end
-
-  def annual_average_baseload_co2(asof_date, meter = aggregate_meter)
-    kwh = annual_average_baseload_kwh(asof_date, meter)
-    kwh * blended_co2_per_kwh
-  end
-
-  protected def aggregate_meter
+  def aggregate_meter
     @school.aggregated_electricity_meters
   end
-  
+
+  protected
+
   def needs_gas_data?
     false
   end

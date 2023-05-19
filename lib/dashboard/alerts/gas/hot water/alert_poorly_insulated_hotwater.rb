@@ -76,9 +76,12 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     start_date = model_start_date(asof_date)
     savings_kwh, savings_percent =
       heating_model.hot_water_poor_insulation_cost_kwh(start_date, asof_date)
-    @annual_hotwater_poor_insulation_heatloss_estimate_£ = savings_kwh * ConvertKwh.scale_unit_from_kwh(:£, :gas)
-    @annual_hotwater_poor_insulation_heatloss_estimate_co2 = savings_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    @annual_hotwater_poor_insulation_heatloss_estimate_kwh = savings_kwh
+
+    tariff_£_per_kwh = aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
+
+    @annual_hotwater_poor_insulation_heatloss_estimate_£    = savings_kwh * tariff_£_per_kwh
+    @annual_hotwater_poor_insulation_heatloss_estimate_co2  = savings_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+    @annual_hotwater_poor_insulation_heatloss_estimate_kwh  = savings_kwh
     @annual_hotwater_poor_insulation_heatloss_estimate_percent = savings_percent
 
     one_year_saving_£ = Range.new(@annual_hotwater_poor_insulation_heatloss_estimate_£ * 0.7, @annual_hotwater_poor_insulation_heatloss_estimate_£ * 1.3)
@@ -88,8 +91,13 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
   private def calculate(asof_date)
     calculate_model(asof_date)
     calculate_annual_hotwater_poor_insulation_heatloss_estimate(asof_date) if @annual_hotwater_poor_insulation_heatloss_estimate_kwh.nil?
-    @rating = ((1.0 - annual_hotwater_poor_insulation_heatloss_estimate_percent) * 10.0).round(0)
-    @status = !enough_data ? :fail : (rating > 3.0 ? :good : :bad)
+    if annual_hotwater_poor_insulation_heatloss_estimate_percent == Float::INFINITY
+      @rating = nil
+      @status = :fail
+    else
+      @rating = ((1.0 - annual_hotwater_poor_insulation_heatloss_estimate_percent) * 10.0).round(0)
+      @status = !enough_data ? :fail : (rating > 3.0 ? :good : :bad)
+    end
     @term = :longterm
     @bookmark_url = nil
   end

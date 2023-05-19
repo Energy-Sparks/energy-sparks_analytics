@@ -28,6 +28,32 @@ class ContentBase
     []
   end
 
+  def historic_blended_rate_£_per_kwh(meter = aggregate_meter)
+    meter.amr_data.historic_tariff_rate_£_per_kwh
+  end
+
+  def current_blended_rate_£_per_kwh(meter = aggregate_meter)
+    meter.amr_data.current_tariff_rate_£_per_kwh
+  end
+
+  def annual_tariff_change_text(asof_date)
+    start_date = meter_date_up_to_one_year_before(aggregate_meter, asof_date)
+    calculate_tariff_has_changed_during_period_text(start_date, asof_date)
+  end
+
+  def calculate_tariff_has_changed_during_period_text(start_date, end_date)
+    changed = aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(start_date, end_date)
+    changed ? I18n.t("analytics.tariff_change.change_within_period_caveat") : ''
+  end
+
+  def calculate_tariff_has_changed_between_periods_text(period1, period2)
+    period1 = Range.new(period1.start_date, period1.end_date) if period1.is_a?(SchoolDatePeriod)
+    period2 = Range.new(period2.start_date, period2.end_date) if period2.is_a?(SchoolDatePeriod)
+
+    changed = aggregate_meter.meter_tariffs.meter_tariffs_changes_between_periods?(period1, period2)
+    changed ? I18n.t("analytics.tariff_change.change_between_periods_caveat") : ''
+  end
+
   def meter_readings_up_to_date_enough?
     max_days_out_of_date_while_still_relevant.nil? ? true : (days_between_today_and_last_meter_date < max_days_out_of_date_while_still_relevant)
   end
@@ -475,5 +501,29 @@ class ContentBase
   def debug(var)
     logger.info var
     puts var unless Object.const_defined?('Rails')
+  end
+
+  # an attempt to consolidate all conversion between kWh to economic costs
+  # for alerts and advice to a single piece of code
+  # no ideal in that it that the argument
+  def saving_rate(*args)
+    EconomicCostCalculations.instance.saving_rate *args 
+  end
+
+  # technically usage of a blended rate can be imperfect but sometimes when
+  # estimating savings its the best you can do
+  def blended_rate(datatype = :£)
+    up_to_1_year_ago_start_date = aggregate_meter.amr_data.up_to_1_year_ago
+    end_date = aggregate_meter.amr_data.end_date
+    blended_rate_date_range(up_to_1_year_ago_start_date, end_date, datatype)
+  end
+
+  def blended_rate_date_range(start_date, end_date, datatype)
+    kwh  = aggregate_meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
+    data = aggregate_meter.amr_data.kwh_date_range(start_date, end_date, datatype)
+
+    raise EnergySparksNotEnoughDataException, "zero kWh consumption between #{start_date} and #{end_date}" if kwh == 0.0
+
+    data / kwh
   end
 end

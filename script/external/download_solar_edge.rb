@@ -4,7 +4,8 @@ require 'json'
 require 'amazing_print'
 require 'date'
 require 'csv'
-require_relative '../../lib/dashboard/data_sources/metering/solar edge/solar_edge.rb'
+require 'faraday'
+require_relative '../../lib/dashboard/data_sources/metering/solar_edge/solar_edge_api.rb'
 
 def default_config
   {
@@ -96,7 +97,8 @@ def process_on_meter_set(config)
 
   puts "Site details:"
   if config[:site_id]
-    ap solar_edge.print_site_details
+    ap solar_edge.site_details
+    ap solar_edge.site_ids
   else
     puts "No site details"
   end
@@ -143,5 +145,3 @@ else
   config = parse_command_line(default_config)
   process_on_meter_set(config)
 end
-
-

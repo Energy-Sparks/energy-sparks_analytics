@@ -23,7 +23,7 @@ module Benchmarking
       composite   = run_table(school_ids, filter, :text_and_raw, user_type) if tables?
 
       if (tables? || charts?) && composite[:rows].empty?
-        tables = { type: :html, content: '<h3>There are no schools to report using this filter for this benchmark</h3>' }
+        tables = { type: :html, content: '<h3>' + I18n.t('analytics.benchmarking.configuration.no_schools_to_report_for_filter') + '</h3>' }
       else
         charts = [
           { type: :html,                  content: chart_introduction_text },
@@ -33,7 +33,7 @@ module Benchmarking
         ] if charts? && !chart_empty?(chart)
 
         if tables?
-          tables = [{ type: :html,                  content: table_introduction_text}]
+          tables = [{ type: :html, content: table_introduction_text}]
 
           #only generate these additional versions of the table if we're not running
           #as part of the application, as they're unused and result in extra memory usage
@@ -47,9 +47,11 @@ module Benchmarking
 
           footnote_text = footnote(school_ids, filter, user_type)
 
-          tables.push({ type: :table_composite,       content: composite })
-          tables.push({ type: :html,                  content: footnote_text })
-          tables.push({ type: :html,                  content: table_interpretation_text })
+          tables.push({ type: :table_composite, content: composite })
+          tables.push({ type: :html,            content: footnote_text })
+          tables.push({ type: :html,            content: table_interpretation_text })
+          tables.push({ type: :html,            content: tariff_changed_explanation(school_ids, filter, user_type) })
+          tables.push({ type: :html,            content: column_heading_explanation })
         end
 
         caveats = [{ type: :html, content: caveat_text}]
@@ -62,7 +64,7 @@ module Benchmarking
       [
         { type: :analytics_html,        content: '<br>' },
         # { type: :html,                  content: content_title },
-        { type: :title,                 content: chart_table_config[:name]},
+        { type: :title,                 content: I18n.t("analytics.benchmarking.chart_table_config.#{page_name}", default: chart_table_config[:name])},
         { type: :html,                  content: introduction_text },
       ]
     end
@@ -89,36 +91,34 @@ module Benchmarking
     end
 
     protected def content_title
-      text = %( <h1><%= chart_table_config[:name] %></h1> )
+      title = I18n.t("analytics.benchmarking.chart_table_config.#{page_name}", default: "<h1>#{chart_table_config[:name]}</h1>")
+      text = "<h1>#{title}</h1>"
+
       ERB.new(text).result(binding)
     end
 
     protected def introduction_text
-      %q( <h3>Introduction here</h3> )
-    end
-
-    protected def introduction_text
-      %q( <h3>Introduction here</h3> )
+      '<h3>Introduction here</h3>'
     end
 
     protected def chart_introduction_text
-      %q( <h3>Chart Introduction</h3> )
+      '<h3>Chart Introduction</h3>'
     end
 
     protected def chart_interpretation_text
-      %q( <h3>Chart interpretation</h3> )
+      '<h3>Chart interpretation</h3>'
     end
 
     protected def table_introduction_text
-      %q( <h3>Table Introduction</h3> )
+      '<h3>Table Introduction</h3>'
     end
 
     protected def table_interpretation_text
-      %q( <h3>Table interpretation</h3> )
+      '<h3>Table interpretation</h3>'
     end
 
     protected def caveat_text
-      %q( <h3>Caveat</h3> )
+      '<h3>Caveat</h3>'
     end
 
     def charts?
@@ -165,5 +165,51 @@ module Benchmarking
     def table_column_index(column_id)
       @chart_table_config[:columns].index { |v| v[:column_id] == column_id }
     end
+
+    def raw_data(school_ids, filter, user_type)
+      table_data(school_ids, filter, user_type).drop(1) # drop header
+    end
+
+    def column_headings(school_ids, filter, user_type)
+      table_data(school_ids, filter, user_type)[0]
+    end
+
+    def table_data(school_ids, filter, user_type)
+      table_data ||= {}
+      key = [school_ids, filter, user_type]
+      table_data[key] ||= benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
+    end
+
+    def column_heading_explanation
+      return '' unless @chart_table_config[:column_heading_explanation]
+
+      I18n.t("analytics.benchmarking.configuration.column_heading_explanation.#{@chart_table_config[:column_heading_explanation]}", default: '')
+    end
+
+    def includes_tariff_changed_column?(school_ids, filter, user_type)
+      cols = column_headings(school_ids, filter, user_type)
+      cols.any?{ |col_name| col_name == :tariff_changed }
+    end
+
+    def tariff_has_changed?(school_ids, filter, user_type)
+      col_index = column_headings(school_ids, filter, user_type).index(:tariff_changed)
+      return false if col_index.nil?
+
+      data = raw_data(school_ids, filter, user_type)
+      return false if data.nil? || data.empty?
+
+      tariff_changes = data.map { |row| row[col_index] }
+
+      tariff_changes.any?
+    end
+
+    def tariff_changed_explanation(school_ids, filter, user_type)
+      if includes_tariff_changed_column?(school_ids, filter, user_type) && tariff_has_changed?(school_ids, filter, user_type)
+        I18n.t('analytics.benchmarking.configuration.the_tariff_has_changed_during_the_last_year_html')
+      else
+        ''
+      end
+    end
   end
 end
+

@@ -394,11 +394,10 @@ module AnalyseHeatingAndHotWater
 
     def predicted_kwh_list_of_dates(list_of_dates, temperatures)
       total_kwh = 0.0
-      list_of_dates.each do |date|
+      list_of_dates.map do |date|
         temperature = temperatures.average_temperature(date)
-        total_kwh += predicted_kwh(date, temperature)
+        predicted_kwh(date, temperature)
       end
-      total_kwh
     end
 
     def name
@@ -750,27 +749,27 @@ module AnalyseHeatingAndHotWater
     # the result is really an 'up to figure' as doesn't take into account thermal mass,
     # which will have to wait for the building simulation model
     # and doesn't include pre-midnight startup costs TODO(PH, 12Apr19)
-    def one_year_saving_from_better_boiler_start_time(asof_date)
+    def one_year_saving_from_better_boiler_start_time(asof_date, datatype)
       start_date = [@heat_meter.amr_data.start_date, asof_date - 365].max
       total_saving = 0.0
       (start_date..asof_date).each do |date|
-        _actual_on_time, _start_time, _temperature, kwh_saving = heating_on_time_assessment(date)
+        _actual_on_time, _start_time, _temperature, kwh_saving = heating_on_time_assessment(date, datatype)
         total_saving += kwh_saving.nil? ? 0.0 : kwh_saving
       end
       # not particularly effective if data shortage doesn't cover the heating season!
       normalisation_factor_for_less_than_one_years_data = 365 / (asof_date - start_date)
       total_saving *= normalisation_factor_for_less_than_one_years_data
-      [total_saving, total_saving / @heat_meter.amr_data.kwh_date_range(start_date, asof_date, :kwh)]
+      [total_saving, total_saving / @heat_meter.amr_data.kwh_date_range(start_date, asof_date, datatype)]
     end
 
-    def heating_on_time_assessment(date)
+    def heating_on_time_assessment(date, datatype = :kwh)
       temperature = temperatures.average_temperature_in_time_range(date, 0, 10).round(1) # between midnight and 5:00am
       return [nil, nil, temperature, nil] if !heating_on?(date)
 
       heating_on_halfhour_index = heating_on_half_hour_index(date)
       return [nil, nil, temperature, nil] if heating_on_halfhour_index.nil?
 
-      days_data = @heat_meter.amr_data.days_kwh_x48(date)
+      days_data = @heat_meter.amr_data.days_kwh_x48(date, datatype)
       actual_on_time = heating_on_halfhour_index.nil? ? nil : TimeOfDay.time_of_day_from_halfhour_index(heating_on_halfhour_index)
       recommended_start_time, recommended_start_time_halfhour_index = recommended_optimum_start_time(nil, temperature)
       started_too_early = heating_on_halfhour_index < recommended_start_time_halfhour_index
@@ -1189,7 +1188,7 @@ module AnalyseHeatingAndHotWater
         day_type  = holidays.day_type(date)
         heat_type = heating_on_seasonal_type(date)
 
-        %i[kwh £ co2].each do |data_type|
+        %i[kwh £ £current co2].each do |data_type|
           if split_out_hotwater
             bdown = heating_breakdown(date, data_type)
             bdown.each do |heating_type, val|

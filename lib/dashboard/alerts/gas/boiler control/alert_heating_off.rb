@@ -29,7 +29,7 @@ class AlertTurnHeatingOff < AlertGasModelBase
       units:  :kwh
     },
     last_year_cost_heating_in_warm_weather_£: {
-      description: 'Annual (or less, meter years var) cost last year of leaving heating on in warm weather (£)',
+      description: 'Annual (or less, meter years var) cost last year of leaving heating on in warm weather (£) (historic tariff)',
       units:  :£
     },
     last_year_cost_heating_in_warm_weather_co2: {
@@ -185,8 +185,8 @@ class AlertTurnHeatingOff < AlertGasModelBase
 
     @future_degree_days = future_degreedays(forecast, future_date_range)
     @future_saving_kwh  = predicted_savings_kwh(forecast, future_date_range)
+    @future_saving_£    = @future_saving_kwh * aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
     @future_saving_co2  = gas_co2(@future_saving_kwh)
-    @future_saving_£    = gas_cost(@future_saving_kwh)
     @horizon_start_date = future_date_range.first
     @horizon_end_date   = future_date_range.last
     @horizon_days       = (future_date_range.last - future_date_range.first).to_i
@@ -233,11 +233,9 @@ class AlertTurnHeatingOff < AlertGasModelBase
   def predicted_savings_kwh(forecast, future_date_range)
     temperatures = forecast_temperatures(forecast, future_date_range, 0, 24)
 
-    savings_kwh = temperatures.map do |date, temperature|
+    temperatures.map do |date, temperature|
       warm?(temperature) ? heating_model.predicted_heating_kwh_future_date(date, temperature) : 0.0
-    end
-
-    savings_kwh.sum
+    end.sum
   end
 
   # at weekend just look forward to the coming week

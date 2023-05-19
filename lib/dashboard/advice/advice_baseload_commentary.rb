@@ -12,10 +12,10 @@ class AdviceBaseloadCommentary
     advice.flatten
   end
 
-  def self.all_background_and_advice_on_reducing_issues
+  def self.all_background_and_advice_on_reducing_issues(meter)
     [
       { type: :html, content: '<h2>How to reduce your baseload</h2>' },
-      { type: :html, content: general_advice_html },
+      { type: :html, content: general_advice_html(meter) },
       { type: :html, content: common_causes_html },
       { type: :html, content: what_to_do_html },
       # AlertBaseloadBase.baseload_alerts.map{ |alert_class| alert_class.background_and_advice_on_reducing_issue }
@@ -72,15 +72,21 @@ class AdviceBaseloadCommentary
     @alerts ||= AlertBaseloadBase.new(@school, :baseloadadvicecommentary, @meter).calculate_all_baseload_alerts(@meter.amr_data.end_date)
   end
 
-  def self.general_advice_html
-    %(
+  def self.general_advice_html(meter)
+    blended_rate_£current_per_kwh = meter.amr_data.current_tariff_rate_£_per_kwh
+    annual_£current_cost_of_1_kw = blended_rate_£current_per_kwh * 24.0 * 365.0
+    £_saving_1_kw_reduction_in_baseload_html = FormatEnergyUnit.format(:£current, annual_£current_cost_of_1_kw, :html)
+
+    text = %(
       <p>
         Reducing a school's baseload is often the fastest way of reducing a school's energy costs
         and reducing its carbon footprint. At a well-managed school the baseload should remain the same
-        throughout the year. Every 1 kW of baseload reduced will save a school £1,300 per year,
+        throughout the year. Every 1 kW of baseload reduced will save your school
+        <%= £_saving_1_kw_reduction_in_baseload_html %> per year,
         and reduce its carbon footprint by 1,800 kg.
       </p>
     )
+    ERB.new(text).result(binding)
   end
 
   def self.common_causes_html

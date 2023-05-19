@@ -62,6 +62,7 @@ module Series
     def kwh_cost_or_co2
       case chart_config[:yaxis_units]
       when :£;               :economic_cost
+      when :£current;        :current_economic_cost
       when :accounting_cost; :accounting_cost
       when :co2;             :co2
       else;                  :kwh end
@@ -167,7 +168,7 @@ module Series
 
     def amr_data_by_half_hour(meter, date, halfhour_index, data_type = :kwh)
       return missing_data if ignore_missing_amr_data? && !meter.amr_data.date_exists?(date)
-      
+
       return nil if target_truncate_before_start_date? && date < target_start_date(meter)
 
       meter.amr_data.kwh(date, halfhour_index, data_type, community_use: community_use)
@@ -243,10 +244,11 @@ module Series
 
     def scaling_factor_for_model_derived_gas_data(data_type)
       case data_type
-      when :£, :economic_cost;      BenchmarkMetrics::GAS_PRICE
-      when :accounting_cost;        BenchmarkMetrics::GAS_PRICE # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
-      when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
-      else;                         1.0 end
+      when :£, :economic_cost;                meter.amr_data.current_tariff_rate_£_per_kwh
+      when :£current, :current_economic_cost; meter.amr_data.current_tariff_rate_£_per_kwh
+      when :accounting_cost;                  raise EnergySparksUnexpectedStateException, 'scaling factor requested for accounting tariff'
+      when :co2;                              EnergyEquivalences::UK_GAS_CO2_KG_KWH
+      else;                                   1.0 end
     end
 
     def adjustment_temperatures(dates)
@@ -406,11 +408,20 @@ module Series
 
     def predicted_amr_data_one_day(date)
       temperature = school.temperatures.average_temperature(date)
-      heating_model.predicted_kwh(date, temperature)
+      scale_datatype_from_kwh(date, heating_model.predicted_kwh(date, temperature))
     end
 
-    def trendline_scale
-      scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
+    def scale_datatype_from_kwh(date, kwh)
+      case kwh_cost_or_co2
+      when :kwh
+        kwh
+      when :£, :£current
+        # just use currently blended rate as there may not be a rate fopr today
+        # if kWh = 0.0 but model still calculates?
+        kwh * meter.amr_data.current_tariff_rate_£_per_kwh
+      when :co2
+        kwh * meter.amr_data.average_co2_intensity_kwh_kg(date)
+      end
     end
 
     def heating_model_types
@@ -700,7 +711,7 @@ module Series
 
     def day_breakdown(start_date, end_date)
       heating_data = default_breakdown
-  
+
       (start_date..end_date).each do |date|
         begin
           breakdown_data = heating_model.heating_breakdown(date, kwh_cost_or_co2)
@@ -764,7 +775,7 @@ module Series
     WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'
     HOTWATERSERIESNAMES = [USEFULHOTWATERUSAGE, WASTEDHOTWATERUSAGE]
 
-    USEFULHOTWATERUSAGE_I18N_KEY = 'useful_hot_water_usage' 
+    USEFULHOTWATERUSAGE_I18N_KEY = 'useful_hot_water_usage'
     WASTEDHOTWATERUSAGE_I18N_KEY = 'wasted_hot_water_usage'
 
     def series_names;  HOTWATERSERIESNAMES; end
@@ -801,8 +812,41 @@ module Series
 
   #=====================================================================================================
   class AccountingCost < ManagerBase
+
+    #Charts showing accounting costs need to use the original underlying meters
+    #when we are using electricity data, otherwise we can end up include solar
+    #self-consumption in the cost calculations.
+    #
+    #Override the method to determine the meter to handle a couple of scenarios
+    #
+    #If we are just running a chart with a generic meter specification, then
+    #delegate to base class. This allows us to set this in chart config:
+    #
+    # meter_definition:  :allelectricity_unmodified
+    #
+    #But sometimes we are running charts with for a specific real or synthetic
+    #mpan. This is used for per-meter cost charts and, as it happens, the aggregate
+    #cost chart in the application.
+    #
+    #In this case we need to use alternative approach to finding the right meter
+    def determine_meter
+      #Just return super if its a generic meter specification
+      return super if chart_config[:meter_definition].is_a? Symbol
+      #Find the meter
+      meter = @school.meter?(chart_config[:meter_definition], true)
+      #Check whether there's an underlying meter. If there isn't then just
+      #use this meter.
+      return meter unless meter.sub_meters.key?(:mains_consume) && !meter.sub_meters[:mains_consume].nil?
+      #Return the original meter. Should only end up being called for
+      #gas and electric meters
+      meter.original_meter
+    end
+
     def series_names
-      meter.amr_data.accounting_tariff.bill_component_types.uniq
+      #Need to use the aggregate meter to get bill components? If using a sub meter
+      #then the list of components may sometimes be empty? E.g. fails if there's a single electricity
+      #meter + solar
+      @school.aggregate_meter(meter.fuel_type).amr_data.accounting_tariff.bill_component_types.uniq
     end
 
     def half_hour_breakdown(date, hhi)
@@ -815,7 +859,11 @@ module Series
       (d1..d2).each do |date|
         components = meter.amr_data.accounting_tariff.bill_component_costs_for_day(date)
         components.each do |type, value|
-          bill_components[type] += value
+          if bill_components[type] == nil
+            bill_components[type] = value
+          else
+            bill_components[type] += value
+          end
         end
       end
 
@@ -836,6 +884,15 @@ module Series
     SOLARPV_I18N_KEY          = 'solar_pv' # think unused?
 
     def series_names
+      #If the chart config specifies a specific meter then we should only
+      #add series for that fuel type. Otherwise assume all fuel types are
+      #required.
+      #
+      #This was added to allow the benchmarking charts to work with specific
+      #fuel types
+      return [GAS] if @chart_config[:meter_definition] == :allheat
+      return [ELECTRICITY] if @chart_config[:meter_definition] == :allelectricity
+      return [STORAGEHEATERS] if @chart_config[:meter_definition] == :storage_heater_meter
       aggregate_meters.keys
     end
 
@@ -886,7 +943,7 @@ module Series
   class PredictedHeat < ModelManagerBase
     PREDICTEDHEAT = 'Predicted Heat'
     PREDICTEDHEAT_I18N_KEY = 'predicted_heat'
-    
+
     def series_names;  [PREDICTEDHEAT]; end
 
     def day_breakdown(d1, d2)
@@ -925,12 +982,12 @@ module Series
   class Baseload < ManagerBase
     BASELOAD = 'BASELOAD'
     BASELOAD_I18N_KEY = 'baseload'
-    
+
     def series_names;  [BASELOAD]; end
 
     def day_breakdown(d1, d2)
-      kwh = meter.amr_data.baseload_kwh_date_range(d1, d2, meter.sheffield_simulated_solar_pv_panels?)
-      { BASELOAD => kwh }
+      kw = meter.amr_data.average_baseload_kw_date_range(d1, d2, sheffield_solar_pv: meter.sheffield_simulated_solar_pv_panels?)
+      { BASELOAD => kw }
     end
   end
 

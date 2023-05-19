@@ -57,7 +57,7 @@ class AlertThermostaticControl < AlertGasModelBase
     potential_saving_£: {
       description: 'Potential savings £ through perfect themostatic control',
       units: :£,
-      benchmark_code: 'sav£'
+      benchmark_code: 'sav€'
     },
     potential_saving_co2: {
       description: 'Potential savings co2 through perfect themostatic control',
@@ -96,9 +96,8 @@ class AlertThermostaticControl < AlertGasModelBase
   private def calculate(asof_date)
     calculate_model(asof_date)
 
-    @potential_saving_kwh = calculate_annual_heating_deviance_from_model_kwh(asof_date)
-    @potential_saving_£ = @potential_saving_kwh * BenchmarkMetrics::GAS_PRICE
-    @potential_saving_co2 = @potential_saving_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+    @potential_saving_kwh, @potential_saving_£ = calculate_annual_heating_deviance_from_model(asof_date)
+    @potential_saving_co2 = gas_co2(@potential_saving_kwh)
 
     set_savings_capital_costs_payback(@potential_saving_£, 1000.0, @potential_saving_co2) # suggested £1,000 cost
 
@@ -113,9 +112,11 @@ class AlertThermostaticControl < AlertGasModelBase
 
   # crudely assess the potential saving as the difference between actual and predicted
   # multiplied by the difference in the r2 to perfect 1.0, for the moment (PH, 27Aug2019)
-  private def calculate_annual_heating_deviance_from_model_kwh(asof_date)
+  private def calculate_annual_heating_deviance_from_model(asof_date)
     potential_saving_kwh = 0.0
+    potential_saving_£ = 0.0
     start_date = meter_date_up_to_one_year_before(aggregate_meter, asof_date)
+
     (start_date..asof_date).each do |date|
       if @heating_model.heating_on?(date)
         avg_temperature = @school.temperatures.average_temperature(date)
@@ -123,8 +124,9 @@ class AlertThermostaticControl < AlertGasModelBase
         actual_kwh = kwh(date, date)
         loss_versus_predicted_kwh = actual_kwh - predicted_kwh
         potential_saving_kwh += loss_versus_predicted_kwh.magnitude # use absolute value for want of any other basis for the moment (PH, 27Aug2019)
+        potential_saving_£ += loss_versus_predicted_kwh.magnitude * aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
       end
     end
-    potential_saving_kwh * (1.0 - r2)
+    [potential_saving_kwh * (1.0 - r2), potential_saving_£ * (1.0 - r2)]
   end
 end

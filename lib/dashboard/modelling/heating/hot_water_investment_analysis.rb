@@ -11,6 +11,13 @@ module AnalyseHeatingAndHotWater
       @theoretical_hw_kwh, _standing_loss_kwh, _total_kwh = self.class.annual_point_of_use_electricity_meter_kwh(@school.number_of_pupils)
     end
 
+    def enough_data?
+      # As per AlertHotWaterEfficiency#enough_data
+      @hotwater_model.find_period_before_and_during_summer_holidays(
+        @school.holidays, @school.aggregated_heat_meters.amr_data
+      ).present?
+    end
+
     def analyse_annual
       current = existing_gas_estimates
       {
@@ -54,7 +61,7 @@ module AnalyseHeatingAndHotWater
       total_kwh = @hotwater_model.annual_hotwater_kwh_estimate
       {
         annual_kwh:   total_kwh,
-        annual_£:     total_kwh * BenchmarkMetrics::GAS_PRICE,
+        annual_£:     total_kwh * gas_price_£_per_kwh,
         annual_co2:   total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
         capex:        0.0,
         efficiency:   efficiency(total_kwh)
@@ -65,7 +72,7 @@ module AnalyseHeatingAndHotWater
       total_kwh = @hotwater_model.annual_hotwater_kwh_estimate_better_control
       {
         annual_kwh:    total_kwh,
-        annual_£:      total_kwh * BenchmarkMetrics::GAS_PRICE,
+        annual_£:      total_kwh * gas_price_£_per_kwh,
         annual_co2:    total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
         capex:         0.0,
         efficiency:    efficiency(total_kwh)
@@ -76,11 +83,28 @@ module AnalyseHeatingAndHotWater
       @theoretical_hw_kwh, standing_loss_kwh, total_kwh = self.class.annual_point_of_use_electricity_meter_kwh(@school.number_of_pupils)
       {
         annual_kwh:   total_kwh,
-        annual_£:     total_kwh * BenchmarkMetrics::ELECTRICITY_PRICE,
+        annual_£:     total_kwh * electric_price_£_per_kwh,
         annual_co2:   total_kwh * BenchmarkMetrics::LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH,
         capex:        point_of_use_electric_heaters_capex,
         efficiency:   efficiency(total_kwh)
       }
+    end
+
+    private def gas_price_£_per_kwh
+      @gas_price_£_per_kwh ||= @school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£current)
+    end
+
+    # school may have gas only, so estimate using default electricity tariff
+    private def defaulted_electricity_tariff_£_per_kwh
+      if @school.aggregated_electricity_meters.nil?
+        BenchmarkMetrics.pricing.electricity_price
+      else
+        @school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£current).round(5)
+      end
+    end
+
+    private def electric_price_£_per_kwh
+      @electric_price_£_per_kwh ||= defaulted_electricity_tariff_£_per_kwh
     end
 
     private def point_of_use_electric_heaters_capex

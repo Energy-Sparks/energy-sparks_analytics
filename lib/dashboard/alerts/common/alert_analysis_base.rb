@@ -52,11 +52,12 @@ class AlertAnalysisBase < ContentBase
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue EnergySparksCalculationException => e
       # LD(2022-08-23) add handler for custom exception so we can highlight problems
-      Rollbar.warning(e, alert_type: self.class.name, asof_date: asof_date)
+      Rollbar.warning(e, alert_type: self.class.name, asof_date: asof_date, school: @school.name)
       log_stack_trace(e)
       @calculation_worked = false
     rescue StandardError => e
       log_stack_trace(e)
+      Rollbar.error(e, alert_type: self.class.name, asof_date: asof_date, school: @school.name) if ENV["LOG_ALL_ANALYTICS_ERRORS"] == 'true'
       @calculation_worked = false
     end
   end
@@ -477,6 +478,50 @@ class AlertAnalysisBase < ContentBase
     matching_alerts.first
   end
 
+  class UnknownFuelTypeForBenchmarkAlert < StandardError; end
+
+  def self.benchmark_alert(school, fuel_type, asof_date)
+    alert_class = case fuel_type
+                  when :electricity
+                    AlertElectricityAnnualVersusBenchmark
+                  when :gas
+                    AlertGasAnnualVersusBenchmark
+                  when :storage_heater
+                    AlertStorageHeaterAnnualVersusBenchmark
+                  else
+                    raise UnknownFuelTypeForBenchmarkAlert, "Unknown benchmark fuel type #{fuel_type}"
+                  end
+
+    alert = alert_class.new(school)
+
+    asof_date = [asof_date, alert.aggregate_meter.amr_data.end_date].min
+
+    alert.analyse(asof_date)
+    alert
+  end
+
+  def self.out_of_hours_alert(school, fuel_type, asof_date)
+    alert_class = case fuel_type
+                  when :electricity
+                    AlertOutOfHoursElectricityUsage
+                  when :gas
+                    AlertOutOfHoursGasUsage
+                  when :storage_heater
+                    AlertStorageHeaterOutOfHours
+                  else
+                    raise UnknownFuelTypeForBenchmarkAlert, "Unknown out of hours fuel type #{fuel_type}"
+                  end
+
+
+    alert = alert_class.new(school)
+
+    asof_date = [asof_date, alert.aggregate_meter.amr_data.end_date].min
+
+    alert.analyse(asof_date)
+
+    alert
+  end
+
   def self.all_alerts
     {
       AlertChangeInDailyElectricityShortTerm                      => 'elst',
@@ -490,11 +535,11 @@ class AlertAnalysisBase < ContentBase
       AlertHeatingSensitivityAdvice                               => 'htsa',
       AlertHotWaterEfficiency                                     => 'hotw',
       AlertImpendingHoliday                                       => 'ihol',
-      AlertHeatingOnNonSchoolDays                                 => 'htns',
+#       AlertHeatingOnNonSchoolDays                                 => 'htns', deprecated
       AlertOutOfHoursElectricityUsage                             => 'eloo',
       AlertOutOfHoursGasUsage                                     => 'gsoo',
       AlertHotWaterInsulationAdvice                               => 'hwia',
-      AlertHeatingOnSchoolDays                                    => 'htsd',
+#      AlertHeatingOnSchoolDays                                    => 'htsd', deprecated
       AlertThermostaticControl                                    => 'httc',
       AlertWeekendGasConsumptionShortTerm                         => 'gswe',
       AlertElectricityMeterConsolidationOpportunity               => 'emtc',
@@ -507,12 +552,13 @@ class AlertAnalysisBase < ContentBase
       AlertSchoolWeekComparisonGas                                => 'gswc',
       AlertPreviousHolidayComparisonGas                           => 'gphc',
       AlertPreviousYearHolidayComparisonGas                       => 'gpyc',
+      AlertPreviousYearHolidayComparisonStorageHeater             => 'spyc',
       AlertAdditionalPrioritisationData                           => 'addp',
       AlertElectricityPeakKWVersusBenchmark                       => 'epkb',
       AlertStorageHeaterAnnualVersusBenchmark                     => 'shan',
       AlertStorageHeaterThermostatic                              => 'shtc',
       AlertStorageHeaterOutOfHours                                => 'shoo',
-      AlertHeatingOnSchoolDaysStorageHeaters                      => 'shhd',
+#      AlertHeatingOnSchoolDaysStorageHeaters                      => 'shhd', deprecated
       AlertSolarPVBenefitEstimator                                => 'sole',
       AlertElectricityLongTermTrend                               => 'ellt',
       AlertGasLongTermTrend                                       => 'gslt',
@@ -543,8 +589,16 @@ class AlertAnalysisBase < ContentBase
       AlertSchoolWeekComparisonStorageHeater                      => 'sswc',
       AlertLayerUpPowerdown11November2022ElectricityComparison    => 'lue1',
       AlertLayerUpPowerdown11November2022GasComparison            => 'lug1',
-      AlertLayerUpPowerdown11November2022StorageHeaterComparison  => 'lus1'
-
+      AlertLayerUpPowerdown11November2022StorageHeaterComparison  => 'lus1',
+      AlertAutumnTerm20212022ElectricityComparison                => 'a22e',
+      AlertAutumnTerm20212022GasComparison                        => 'a22g',
+      AlertAutumnTerm20212022StorageHeaterComparison              => 'a22s',
+      AlertSeptNov20212022ElectricityComparison                   => 's22e',
+      AlertSeptNov20212022GasComparison                           => 's22g',
+      AlertSeptNov20212022StorageHeaterComparison                 => 's22s',
+      AlertEaster2023ShutdownElectricityComparison                => 'e23e',
+      AlertEaster2023ShutdownGasComparison                        => 'e23g',
+      AlertEaster2023ShutdownStorageHeaterComparison              => 'e23s'
     }
   end
 

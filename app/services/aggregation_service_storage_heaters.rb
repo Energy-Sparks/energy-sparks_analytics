@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Electricity meters with storage heaters are flagged by the presence of a
 # storage heater meter attribute on the meter.
 #
@@ -8,7 +10,9 @@
 # are then aggregated seperately, so there are aggregate versions of each
 #
 class SHMap < RestrictedKeyHash
-  def self.unique_keys; %i[original storage_heater ex_storage_heater] end
+  def self.unique_keys
+    %i[original storage_heater ex_storage_heater]
+  end
 end
 
 class AggregateDataServiceStorageHeaters
@@ -27,9 +31,9 @@ class AggregateDataServiceStorageHeaters
     log('=' * 100)
     log("Disaggregating storage heater meters for #{@meter_collection.name}: #{@electricity_meters.length} electricity meters")
 
-    bm = Benchmark.realtime {
+    bm = Benchmark.realtime do
       reworked_meter_maps = disaggregate_meters
-      
+
       calculate_meters_carbon_emissions_and_costs(reworked_meter_maps)
 
       summarise_maps(reworked_meter_maps) if @debug
@@ -39,9 +43,9 @@ class AggregateDataServiceStorageHeaters
                   else
                     reworked_meter_maps[0]
                   end
-      
+
       assign_aggregate(aggregate)
-    }
+    end
 
     summarise_aggregated_meter
     summarise_component_meters
@@ -92,16 +96,16 @@ class AggregateDataServiceStorageHeaters
   end
 
   def aggregate_meter_desciption(meter)
-    sprintf('%60.60s: %9.0f kWh', meter.to_s, meter.amr_data.total)
+    format('%60.60s: %9.0f kWh', meter.to_s, meter.amr_data.total)
   end
 
   def summarise_component_meters
     log('Component Meter Setup')
     @meter_collection.electricity_meters.each.with_index do |meter, i|
       log("    Meter #{i}")
-      log(sprintf('        %-18.18s %s', 'ex storage heater', meter_description(meter)))
-      log(sprintf('        %-18.18s %s', 'original',          meter_description(meter.sub_meters[:mains_consume])))
-      log(sprintf('        %-18.18s %s', 'storage heaters',   meter_description(meter.sub_meters[:storage_heaters])))
+      log(format('        %-18.18s %s', 'ex storage heater', meter_description(meter)))
+      log(format('        %-18.18s %s', 'original',          meter_description(meter.sub_meters[:mains_consume])))
+      log(format('        %-18.18s %s', 'storage heaters',   meter_description(meter.sub_meters[:storage_heaters])))
     end
   end
 
@@ -119,6 +123,7 @@ class AggregateDataServiceStorageHeaters
     meter_maps.each do |meter_map|
       meter_map.each do |type, meter|
         next if meter.nil?
+
         aggregate_map[type] ||= []
         aggregate_map[type].push(meter)
       end
@@ -129,10 +134,10 @@ class AggregateDataServiceStorageHeaters
     end
 
     aggregated_meter_map = SHMap.new
-    type_map = { 
-      storage_heater:     :storage_heater_disaggregated_storage_heater,
-      ex_storage_heater:  :storage_heater_disaggregated_electricity,
-      original:           :aggregated_electricity
+    type_map = {
+      storage_heater: :storage_heater_disaggregated_storage_heater,
+      ex_storage_heater: :storage_heater_disaggregated_electricity,
+      original: :aggregated_electricity
     }
     aggregated_amr_data.each do |type, amr_data|
       fuel_type = type == :storage_heater ? :storage_heater : :electricity
@@ -157,12 +162,12 @@ class AggregateDataServiceStorageHeaters
 
   def summarise_map(map)
     map.each do |type, meter|
-      log(sprintf('    %-18.18s %s', type.to_s, meter_description(meter)))
+      log(format('    %-18.18s %s', type.to_s, meter_description(meter)))
     end
   end
 
   def meter_description(meter)
-    meter.nil? ? '' : sprintf('%14.14s %.0f kWh', meter.mpxn, meter.amr_data.total)
+    meter.nil? ? '' : format('%14.14s %.0f kWh', meter.mpxn, meter.amr_data.total)
   end
 
   def create_meter(meter, amr_data, meter_type, fuel_type = :electricity)
@@ -171,7 +176,7 @@ class AggregateDataServiceStorageHeaters
       amr_data,
       fuel_type,
       meter.id,
-      meter.name + ' ' + meter_type.to_s.humanize,
+      "#{meter.name} #{meter_type.to_s.humanize}",
       meter_type
     )
 
@@ -197,6 +202,7 @@ class AggregateDataServiceStorageHeaters
   def calculate_carbon_emissions_and_costs(map)
     map.each_value do |meter|
       next if meter.nil?
+
       calculate_meter_carbon_emissions_and_costs(meter, :electricity)
     end
   end

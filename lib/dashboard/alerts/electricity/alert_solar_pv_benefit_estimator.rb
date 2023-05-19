@@ -2,6 +2,7 @@ require 'minimization'
 class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   attr_reader :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
   attr_reader :solar_pv_scenario_table, :solar_pv_scenario_table_html
+  attr_reader :one_year_saving_£current
 
   def initialize(school)
     super(school, :solarpvbenefitestimate)
@@ -58,10 +59,18 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       description: 'Optimum: percent redcution in mains consumption',
       units:  :percent,
       benchmark_code: 'opvp'
+    },
+    one_year_saving_£current: {
+      description: 'Saving at latest tariffs for optimum scenario',
+      units:  :£current,
+      benchmark_code: 'opv€'
     }
   }
 
   def calculate(asof_date)
+    days_data = [aggregate_meter.amr_data.end_date, asof_date].min - aggregate_meter.amr_data.start_date
+    raise EnergySparksNotEnoughDataException, "Only #{days_data.to_i} days meter data" unless days_data > 364
+
     scenarios, optimum_kwp = calculate_range_of_scenarios(asof_date)
 
     @solar_pv_scenario_table  = format_scenarios_into_table(scenarios, :raw)
@@ -72,8 +81,8 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     optimum_scenario = find_optimum_kwp(scenarios, round_optimum_kwp(optimum_kwp))
     promote_optimum_variables(optimum_scenario)
 
-    one_year_saving = optimum_scenario[:total_annual_saving_£]
-    savings_range = Range.new(one_year_saving, one_year_saving)
+    @one_year_saving_£current = optimum_scenario[:total_annual_saving_£]
+    savings_range = Range.new(@one_year_saving_£current, @one_year_saving_£current)
     set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£], optimum_scenario[:total_annual_saving_co2])
 
     @rating = 5.0
@@ -183,12 +192,16 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
 
     kwh = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date)
 
+    £   = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date, :£current)
+
     {
       kwp:                          kwp,
       panels:                       number_of_panels(kwp),
       area:                         panel_area_m2(number_of_panels(kwp)),
       existing_annual_kwh:          kwh,
+      existing_annual_£:            £,
       new_mains_consumption_kwh:    kwh_totals[:new_mains_consumption],
+      new_mains_consumption_£:      kwh_totals[:new_mains_consumption_£],
       reduction_in_mains_percent:   (kwh - kwh_totals[:new_mains_consumption]) / kwh,
       solar_consumed_onsite_kwh:    kwh_totals[:solar_consumed_onsite],
       exported_kwh:                 kwh_totals[:exported],
@@ -207,12 +220,9 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   end
 
   def calculate_economic_benefit(kwh_data)
-    mains_tariff    = BenchmarkMetrics::ELECTRICITY_PRICE
-    export_tariff   = BenchmarkMetrics::SOLAR_EXPORT_PRICE
-
-    new_mains_cost  = kwh_data[:new_mains_consumption_kwh] * mains_tariff
-    old_mains_cost  = kwh_data[:existing_annual_kwh]       * mains_tariff
-    export_income   = kwh_data[:exported_kwh]              * export_tariff
+    new_mains_cost = kwh_data[:new_mains_consumption_£]
+    old_mains_cost = kwh_data[:existing_annual_£]
+    export_income  = kwh_data[:exported_kwh] * BenchmarkMetrics.pricing.solar_export_price
 
     mains_savings   = old_mains_cost - new_mains_cost
     saving          = mains_savings  + export_income

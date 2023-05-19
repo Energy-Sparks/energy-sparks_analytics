@@ -3,16 +3,27 @@ require_relative '../common/alert_out_of_hours_base_usage.rb'
 
 class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   attr_reader :daytype_breakdown_table
-  def initialize(school, fuel = 'gas', oo_percent = BenchmarkMetrics::PERCENT_GAS_OUT_OF_HOURS_BENCHMARK,
-          type = :gasoutofhours,
-          bookmark = 'GasOutOfHours', meter_defn_not_used = :allheat,
-          good_out_of_hours_use_percent = 0.3, bad_out_of_hours_use_percent = 0.7)
-    super(school, fuel, oo_percent,
-          type, bookmark, meter_defn_not_used,
-          good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
+  def initialize(
+    school,
+    fuel = 'gas',
+    type = :gasoutofhours,
+    bookmark = 'GasOutOfHours',
+    meter_defn_not_used = :allheat,
+    good_out_of_hours_use_percent = BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_GAS,
+    bad_out_of_hours_use_percent = BenchmarkMetrics::BENCHMARK_OUT_OF_HOURS_USE_PERCENT_GAS
+  )
+    super(
+      school,
+      fuel,
+      type,
+      bookmark,
+      meter_defn_not_used,
+      good_out_of_hours_use_percent,
+      bad_out_of_hours_use_percent
+    )
   end
 
-  protected def aggregate_meter
+  def aggregate_meter
     @school.aggregated_heat_meters
   end
 
@@ -26,6 +37,15 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
 
   def breakdown_chart
     :alert_daytype_breakdown_gas
+  end
+
+  def breakdown_charts
+    {
+      kwh:      :alert_daytype_breakdown_gas_kwh,
+      co2:      :alert_daytype_breakdown_gas_co2,
+      £:        :alert_daytype_breakdown_gas_£,
+      £current: :alert_daytype_breakdown_gas_£current
+    }
   end
 
   def group_by_week_day_type_chart
@@ -51,8 +71,8 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
     specific.merge(superclass.template_variables)
   end
 
-  def tariff
-    BenchmarkMetrics::GAS_PRICE
+  def tariff_deprecated
+    # BenchmarkMetrics::GAS_PRICE
   end
 
   def co2_intensity_per_kwh

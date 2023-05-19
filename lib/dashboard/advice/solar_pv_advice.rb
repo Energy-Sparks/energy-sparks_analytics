@@ -72,8 +72,10 @@ class AdviceSolarPV < AdviceElectricityBase
         and reduce your school&apos;s carbon emissions. It should be seen as an addition to reducing
         your school&apos;s electricity consumption through energy efficiency rather than an alternative.
         Economically, following the removal of subsidies from solar panels it might take
-        between 10 and 15 years to payback the capital costs of installing solar panels, but
-        PTAs will often be prepared to raise some of the capital costs making it more economic for schools.
+        between 2 and 15 years to payback the capital costs of installing solar panels
+        depending on your assumptions for future electricity tariffs, but
+        PTAs will often be prepared to raise some of the capital costs making
+        it more economic for schools.
       <p>
     }
   end
@@ -103,21 +105,21 @@ class AdviceSolarPV < AdviceElectricityBase
   end
 
   def caveats
-    %{
+    text = %{
       <p>Comments</p>
       <ul>
         <li>
           The calculations currently assume you will get some income from any
-          exported electricity. Since the end of the Feed-In-Tariff in April 2019 there has
-          been no replacement scheme to provide income from exported electricity. The
-          government have proposed a Smart Export Guarantee (SEG) scheme, but
-          it is not in place yet (as of Nov 2019) but some suppliers are
-          already offering to pay you for any exported electricity.
+          exported electricity. Since the end of the Feed-In-Tariff in April 2019
+          automatic income from export has been replaced by the 
+          Smart Export Guarantee (SEG) scheme but this income is dependent on
+          agreement with your electricity supplier
         </li>
         <li>
-          The calculations are based on a current electricity price of 15p/kWh,
-          if mains electricity prices reduce there will be a lower economic benefit and
-          longer payback to the installation.
+          The calculations are based on a current electricity price of
+          <%= electricity_tariff_£current_per_kwh_html %>,
+          if mains electricity prices increase there will be a higher economic benefit and
+          shorter payback to the installation.
         </li>
         <li>
           If the school becomes more efficient at using electricity and reduces its electricity
@@ -125,8 +127,8 @@ class AdviceSolarPV < AdviceElectricityBase
         </li>
         <li>
           The capital costs in the table above are estimates based on
-          current market rates; an installation cost at your
-          school might be a little different.
+          current market rates; the installation cost at your
+          school might be a little different - you need to get quotes.
         </li>
         <li>
           The estimates assume your have roof space and that is it roughly
@@ -140,5 +142,11 @@ class AdviceSolarPV < AdviceElectricityBase
         </li>
       </ul>
     }
+    ERB.new(text).result(binding)
+  end
+
+  def electricity_tariff_£current_per_kwh_html
+    rate = @school.aggregated_electricity_meters.amr_data.current_tariff_rate_£_per_kwh
+    FormatEnergyUnit.format(:£_per_kwh, rate, :html)
   end
 end
