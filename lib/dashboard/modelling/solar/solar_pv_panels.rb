@@ -21,6 +21,8 @@ class SolarPVPanels
     SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
   ]
 
+  # @param [Hash] meter_attributes_config the :solar_pv meter attributes to process
+  # @param [SolarPV] synthetic_sheffield_solar_pv_yields the Sheffield Solar data for this school
   def initialize(meter_attributes_config, synthetic_sheffield_solar_pv_yields)
     @solar_pv_panel_config = SolarPVPanelConfiguration.new(meter_attributes_config) unless meter_attributes_config.nil?
     @synthetic_sheffield_solar_pv_yields = synthetic_sheffield_solar_pv_yields
@@ -32,16 +34,45 @@ class SolarPVPanels
     @solar_pv_panel_config.first_installation_date
   end
 
+  # Main entry point into the service, called as part of the aggregation process.
+  # Creates new meters and synthetic data as required.
+  #
+  # The provided PVMap might be empty (other than the mains consumption meter) or
+  # may contain entries from the `solar_pv_mpan_meter_mapping` meter attribute if
+  # there is actual metered solar data. In this case we might end up overriding that
+  # specific date ranges within that data if configured to do so.
+  #
+  # @param [PVMap] pv_meter_map list of meters used for solar calculations
+  # @param [MeterCollection] meter_collection the school whose solar data is being processed
   def process(pv_meter_map, meter_collection)
+    #Print debug output. Unused unless @debug_date_range is set
     print_detailed_results(pv_meter_map, 'Before solar pv calculation:')
+
+    #Create the solar PV generation data (or override existing data if needed)
     create_generation_data(pv_meter_map, false)
+
+    #Create an export meter, with empty data, unless there is one already
     create_export_meter_if_missing(pv_meter_map)
+
+    #Calculate exported solar data. Might be populating a completely synthetic
+    #meter, or overriding date ranges in real metered solar data
     create_or_override_export_data(pv_meter_map, meter_collection)
+
+    #Create a self consumption meter, with empty data, unless there is one already
     create_self_consumption_meter_if_missing(pv_meter_map)
+
+    #Calculate self consumption data. Might be populating a completely synthetic
+    #meter, or overriding date ranges in real metered solar data
     create_self_consumption_data(pv_meter_map, meter_collection)
+
+    #Print debug output. Unused unless @debug_date_range is set
     print_detailed_results(pv_meter_map, 'After solar pv calculation')
   end
 
+  # Calculate solar PV generation for a given day
+  #
+  # @param [Date] date the day to calculate
+  # @param [String] mpan the mpan for the meter
   def days_pv(date, mpan)
     capacity = degraded_kwp(date)
     pv_yield = @synthetic_sheffield_solar_pv_yields[date]
@@ -52,6 +83,14 @@ class SolarPVPanels
 
   private
 
+  #Creates a solar generation meter, if required, then populates the meter
+  #with synthetic data
+  #
+  #For an existing meter, may just end up overridding specific days if
+  #meter attributes are configured to do so
+  #
+  # @param [PVMap] pv_meter_map the solar meters
+  # @param [boolean] create_zero_if_no_config THIS IS ALWAYS FALSE
   def create_generation_data(pv_meter_map, create_zero_if_no_config)
     pv_meter_map[:generation] = create_generation_meter_from_map(pv_meter_map) if pv_meter_map[:generation].nil?
 
@@ -67,6 +106,7 @@ class SolarPVPanels
     pv_meter_map[:export] = create_export_meter_from_map(pv_meter_map) if pv_meter_map[:export].nil?
   end
 
+  # Calculate or override the solar export data for the export meter in the PVMap
   def create_or_override_export_data(pv_meter_map, meter_collection)
     override_export_data_detail(
       pv_meter_map[:mains_consume].amr_data,
@@ -81,6 +121,7 @@ class SolarPVPanels
     pv_meter_map[:self_consume] = create_self_consumption_meter_from_map(pv_meter_map) if pv_meter_map[:self_consume].nil?
   end
 
+  # Calculate or override the solar self consumption data for the self consumption meter in the PVMap
   def create_self_consumption_data(pv_meter_map, meter_collection)
     calculate_self_consumption_data(
       pv_meter_map[:mains_consume].amr_data,
@@ -92,13 +133,21 @@ class SolarPVPanels
       )
   end
 
+  # @param [AmrData] mains_amr_data data for the mains consumption meter
+  # @param [AmrData] pv_amr_data data for the pv generation meter
+  # @param [String] mpan mpan/mprn for the mains consumption meter
+  # @param [boolean] create_zero_if_no_config THIS IS ALWAYS FALSE?
   def create_generation_amr_data(mains_amr_data, pv_amr_data, mpan, create_zero_if_no_config)
     mains_amr_data.date_range.each do |date|
-      if synthetic_data?(date, :override_generation) # set only where config says so, either override or straight Sheffield synthetic case
+      # set only where config says so, either because we are overridding actual metered solar data
+      # or we are just producing synthetic solar data
+      if synthetic_data?(date, :override_generation)
         pv = days_pv(date, mpan)
         pv_amr_data.add(date, pv)
         compact_print_day('override generation', date, pv.kwh_data_x48)
       elsif create_zero_if_no_config
+         # TODO: this never seems to be used, as param is always FALSE?
+         #
          # pad out generation data to that of mains electric meter
          # so downstream analysis doesn't need to continually test
          # for its existence
@@ -108,6 +157,13 @@ class SolarPVPanels
     end
   end
 
+  # Calculate the solar export values based on the mains consumption and generation data
+  #
+  # @param [AmrData] main_amr the amr data for the mains consumption meter
+  # @param [AmrData] pv_amr the amr data for the generation meter
+  # @param [AmrData] export_amr the amr data for the export meter to be populated or updated
+  # @param [MeterCollection] meter_collection the school
+  # @param [String] mpan the mpan of the mains consumption meter
   def override_export_data_detail(mains_amr, pv_amr, export_amr, meter_collection, mpan)
     mains_amr.date_range.each do |date|
       if synthetic_data?(date, :override_export) # set only where config says so
@@ -125,6 +181,19 @@ class SolarPVPanels
     config.values.first[:maximum_export_level_kw] || 0.0
   end
 
+  # Calculate solar export for a single day
+  #
+  # Export calculation assumes that on days that a school is occupied there is
+  # never enough generation to allow for export. Otherwise would need simulation
+  # of schools consumption pattern in the absence of solar panels. This is known
+  # limitation in our synthetic data generation.
+  #
+  # @param [Date] date the date to be calculated
+  # @param [MeterCollection] meter_collection the school
+  # @param [AmrData] mains_amr_data the AMR data for the mains meter
+  # @param [AmrData] pv_amr_data the AMR data for the solar generation meter
+  #
+  # @return [Array] array of x48 half-hourly export values
   def calculate_days_exported_days_data(date, meter_collection, mains_amr_data, pv_amr_data)
     return nil unless synthetic_data?(date, :override_export)
 
@@ -151,6 +220,14 @@ class SolarPVPanels
     export_x48
   end
 
+  # Calculate the solar self consumption values based on the mains consumption, generation and export data
+  #
+  # @param [AmrData] main_amr the amr data for the mains consumption meter
+  # @param [AmrData] pv_amr the amr data for the generation meter
+  # @param [AmrData] export_amr the amr data for the export meter
+  # @param [AmrData] self_consumption_amr the amr data for the self consumption meter that will be populated
+  # @param [MeterCollection] meter_collection the school
+  # @param [String] mpan the mpan of the mains consumption meter
   def calculate_self_consumption_data(mains_amr, pv_amr, export_amr, self_consumption_amr, meter_collection, mpan)
     mains_amr.date_range.each do |date|
       if synthetic_data?(date, :override_self_consume) # set only where config says so
@@ -167,6 +244,19 @@ class SolarPVPanels
     end
   end
 
+  # Calculate solar self consumption for a single day
+  #
+  # Calculation assumes that on days that a school is occupied all the generated
+  # solar is consumed.
+  #
+  # @see SolarPVPanels.calculate_days_exported_days_data
+  #
+  # @param [Date] date the date to be calculated
+  # @param [MeterCollection] meter_collection the school
+  # @param [AmrData] mains_amr_data the AMR data for the mains meter
+  # @param [AmrData] pv_amr_data the AMR data for the solar generation meter
+  #
+  # @return [Array] array of x48 half-hourly export values
   def calculate_days_self_consumption_days_data(date, meter_collection, mains_amr_data, pv_amr_data)
     return nil unless synthetic_data?(date, :override_self_consume)
 
@@ -192,6 +282,7 @@ class SolarPVPanels
     self_x48
   end
 
+  # Create a solar generation meter, based on the mains_consume meter in the map
   def create_generation_meter_from_map(pv_meter_map)
     date_range, meter_to_clone, meter_collection = meter_creation_data(pv_meter_map)
     create_generation_meter(date_range, meter_to_clone, meter_collection)
@@ -208,6 +299,7 @@ class SolarPVPanels
     )
   end
 
+  # Create a solar export meter, based on the mains_consume meter in the map
   def create_export_meter_from_map(pv_meter_map)
     date_range, meter_to_clone, meter_collection = meter_creation_data(pv_meter_map)
     create_export_meter(date_range, meter_to_clone, meter_collection)
@@ -224,6 +316,7 @@ class SolarPVPanels
     )
   end
 
+  # Create a solar self consumption meter, based on the mains_consume meter in the map
   def create_self_consumption_meter_from_map(pv_meter_map)
     date_range, meter_to_clone, meter_collection = meter_creation_data(pv_meter_map)
     create_self_consumption_meter(date_range, meter_to_clone, meter_collection)
@@ -240,6 +333,22 @@ class SolarPVPanels
     )
   end
 
+  # Creates a new meter, cloning some values from an original
+  #
+  # Used to create a variety of different solar sub meters
+  #
+  # The values cloned include the floor area, number of pupils, solar and
+  # storage heater configuration, plus some meter attributes
+  #
+  # The returned meter will have an empty AmrData object populated with empty
+  # values for the same date range as the original meter
+  #
+  # @param [Dashboard::Meter] meter_to_clone the meter to copy from
+  # @param [Symbol] meter_type the type of meter to create
+  # @param [Symbol] pseudo_meter_type category of pseudo meter attributes
+  # @param [MeterCollection] meter_collection the school to copy from
+  # @param [String] meter_name name for the new meter
+  # @param [String] reading_type a reading type used as default for the AMRData for this meter
   def create_meter(meter_to_clone, meter_type, pseudo_meter_type, meter_collection, meter_name, reading_type)
     date_range = meter_to_clone.amr_data.date_range
     amr_data = AMRData.create_empty_dataset(meter_type, date_range.first, date_range.last, reading_type)
@@ -266,6 +375,12 @@ class SolarPVPanels
     ]
   end
 
+  # Find the kwp value for a given date
+  #
+  # Will return nil if there were no panels installed on that date
+  #
+  # Otherwise returns the kwp value for the meters on that date, allowing for
+  # panel degradation over time.
   def degraded_kwp(date, override_key = :override_generation)
     @solar_pv_panel_config.degraded_kwp(date, override_key)
   end
@@ -284,22 +399,28 @@ class SolarPVPanels
     days_pv_consumed_onsite_kwh = pv_consumed_onsite_kwh_x48.sum
     scale_factor = days_pv_consumed_onsite_kwh == 0 ? 1.0 : 1.0 + (positive_export_kwh / days_pv_consumed_onsite_kwh)
     scaled_onsite_kwh_x48 = pv_consumed_onsite_kwh_x48.map { |kwh| kwh * scale_factor }
-            
+
     compact_print_day('normalised export', date, negative_only_exported_kwh_x48)
     compact_print_day('scaled onsite',     date, scaled_onsite_kwh_x48)
 
     [negative_only_exported_kwh_x48, scaled_onsite_kwh_x48]
   end
 
+  #Is the school unoccupied on a given date
   def unoccupied?(meter_collection, date)
     DateTimeHelper.weekend?(date) || meter_collection.holidays.holiday?(date)
   end
 
+  #Calculate baseload for previous day
   def yesterday_baseload_kw(date, electricity_amr)
     yesterday_date = date == electricity_amr.start_date ? electricity_amr.start_date : (date - 1)
     electricity_amr.overnight_baseload_kw(yesterday_date)
   end
 
+  # Return true if we have solar panel configuration and we a kwp value for
+  # the solar panels for the given day
+  #
+  # Used to decide whether to use synthetic data or not.
   def synthetic_data?(date, type)
     !@solar_pv_panel_config.nil? && !degraded_kwp(date, type).nil?
   end
@@ -344,6 +465,11 @@ class SolarPVPanels
   end
 end
 
+# Subclass used where we have metered generation data, but no export or
+# self-consumption. Just ensures that the generation data is padded out
+# to match the mains meter and treats entire date range as needing
+# synthetic data
+#
 # called where metered generation meter but no export or self consumption
 class SolarPVPanelsMeteredProduction < SolarPVPanels
   def initialize
