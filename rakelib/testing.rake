@@ -110,7 +110,7 @@ namespace :testing do
     $stderr.puts "Anonymising files"
     schools.each_with_index do |school, index|
       file_name = "./#{test_dir}/MeterCollections/unvalidated-data-acme-#{index}.yaml"
-      $stderr.puts "Anonymising #{filename}"
+      $stderr.puts "Anonymising #{file_name}"
       meter_readings = YAML::load_file(file_name)
       meter_readings[:school_data][:id] = index
       meter_readings[:school_data][:name] = "Acme School #{index}"

@@ -8,7 +8,7 @@ module Logging
 end
 
 charts = {
-  adhoc: %i[ management_dashboard_group_by_week_electricity ]
+  adhoc: %i[ management_dashboard_group_by_month_solar_pv ]
 }
 
 no_charts = RunCharts.standard_charts_for_school
@@ -24,7 +24,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['a*'],
+  schools:  ['*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }
