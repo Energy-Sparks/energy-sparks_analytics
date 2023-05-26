@@ -205,6 +205,9 @@ class SolarPVPanels
     max_hh_export_kwh = maximum_export_kw(date) / 2.0
 
     (0..47).each do |hh_i|
+
+
+
       # arguably this could be improved by changing <= 0.0 to something a little less
       # strict in the sense the half hour could be part cloudy, part sunny so
       # there will be some export and some mains consumption
