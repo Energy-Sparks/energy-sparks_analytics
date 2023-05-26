@@ -1063,7 +1063,7 @@ class ChartManager
       chart1_type:      :column,
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
-      x_axis:           :month,
+      x_axis:           :month_excluding_year,
       timescale:        [{ year: 0 }, { year: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
