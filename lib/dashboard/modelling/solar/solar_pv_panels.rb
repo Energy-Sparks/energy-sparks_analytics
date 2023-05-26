@@ -277,15 +277,12 @@ class SolarPVPanels
       if unoccupied
         #if school is unoccupied and we have some solar generation
         solar_pv_on           = generation_kwh > 0.0
-        #TODO: our self consumption on unoccupied days is unrelated to the amount of solar generation.
-        #This seems wrong?
-        #
         #TODO: if our current mains consumption is more than y'day baseload, then we'll end up
         #with a self-consumption of 0.0, regardless of amount of solar generation.
         #
         #TODO: if current mains consumption is < baseload, e.g. holiday switch off,
         #then we'll end up consuming less than baseload, but will even out over time
-        self_consumption_kwh  = solar_pv_on ? [unoccupied_appliance_kwh - mains_kwh, 0.0].max : 0.0
+        self_consumption_kwh  = solar_pv_on ? unoccupied_appliance_kwh : 0.0
         self_x48[hh_i] = self_consumption_kwh
       else
         # else all the pv output is being consumed

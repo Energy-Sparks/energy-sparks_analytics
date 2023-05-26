@@ -90,16 +90,69 @@ describe SolarPVPanels, type: :service do
     end
 
     it 'should calculate self consumption data' do
+#      puts "EXPORT"
+#      days_data = pv_meter_map[:generation].amr_data.days_kwh_x48(sunday)
+#      puts days_data.inspect
+
+#      puts "EXPORT"
+#      days_data = pv_meter_map[:export].amr_data.days_kwh_x48(sunday)
+#      puts days_data.inspect
+
+#      puts "SELF CONSUME"
       days_data = pv_meter_map[:self_consume].amr_data.days_kwh_x48(sunday)
       #should be consuming from periods 11-37 on the sunday based on AMR and solar data
       #TODO: think there's a bug in old calculation, as its showing self consumption when no solar generation
-      puts days_data.inspect
+#      puts days_data.inspect
+
       expect( days_data[11..37].all? {|hh| hh > 0.0 } ).to eq true
 
       days_data = pv_meter_map[:self_consume].amr_data.days_kwh_x48(monday)
+#      puts days_data
       #should be consuming on the monday
       #TODO this could be better: could check that we're consuming ~pv output
       expect( days_data[11..37].all? {|hh| hh > 0.0 } ).to eq true
+    end
+  end
+
+  #Cross check values against spreadsheet with revised logic.
+  context 'spreadsheet-cross-check' do
+    let(:solar_pv_installation_date)  { Date.new(2022,6,8) }
+    let(:kwp)                         { 24.0 }
+    xit 'does expected' do
+      date = Date.new(2022,6,8)
+
+      reading = build(:one_day_amr_reading, date: date, kwh_data_x48: [3.4,3.5,3.5,3.9,3.6,3.3,3.7,3.4,3.2,3.6,3.1,3,2.3,1,0.2,0.1,0,0,0,0.4,0.3,0.3,0.1,0.1,0,0,0,0,0.3,0,0.1,0.1,1.2,1.1,1.3,2.4,2.7,3.5,3,3.5,3.2,3.7,3.2,3.5,3.6,3.4,3.3,3.6])
+      amr_data = AMRData.new('electricity')
+      amr_data.add(date, reading)
+
+      solar_pv = SolarPV.new('solar_pv')
+      solar_pv.add(date, [0,0,0,0,0,0,0,0,0,0,0,0,0,0.0102292607,0.02527004417,0.05414745056,0.1027541402,0.1842037198,0.2789794793,0.3693801247,0.4476824576,0.4852147137,0.4942571411,0.5498844907,0.6265139627,0.6605681804,0.6953745554,0.7105956991,0.7234012758,0.6947854312,0.6825343244,0.6292445694,0.5549196129,0.5131681874,0.4427158565,0.3485575749,0.2733355428,0.1824355594,0.103570093,0.03990552904,0.01339359833,0,0,0,0,0,0,0])
+
+      meter = build(:meter, meter_collection: meter_collection, amr_data: amr_data)
+      pv_meter_map[:mains_consume] = meter
+
+      service = SolarPVPanels.new(meter_attributes, solar_pv)
+      allow(service).to receive(:yesterday_baseload_kw).and_return(6.88571428571428)
+      allow(service).to receive(:unoccupied?).and_return(true)
+
+      service.process(pv_meter_map, meter_collection)
+
+      puts "YIELD"
+      puts solar_pv.one_days_data_x48(date).inspect
+
+      puts "MAINS"
+      puts pv_meter_map[:mains_consume].amr_data.inspect
+      puts pv_meter_map[:mains_consume].amr_data.days_kwh_x48(date).inspect
+
+      puts "GENERATION"
+      puts pv_meter_map[:generation].amr_data.days_kwh_x48(date).inspect
+
+      puts "EXPORT"
+      puts pv_meter_map[:export].amr_data.days_kwh_x48(date).inspect
+
+      puts "SELF"
+      puts pv_meter_map[:self_consume].amr_data.days_kwh_x48(date).inspect
+
     end
   end
 
