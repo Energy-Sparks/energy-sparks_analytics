@@ -173,13 +173,13 @@ class SolarPVPanels
     end
   end
 
-  def maximum_export_kw(date)
-    return 0.0 if real_production_data
-    config = @solar_pv_panel_config.config_by_date_range.select { |date_range, config| date.between?(date_range.first, date_range.last) }
-    return 0.0 if config.empty?
-
-    config.values.first[:maximum_export_level_kw] || 0.0
-  end
+  # def maximum_export_kw(date)
+  #   return 0.0 if real_production_data
+  #   config = @solar_pv_panel_config.config_by_date_range.select { |date_range, config| date.between?(date_range.first, date_range.last) }
+  #   return 0.0 if config.empty?
+  #
+  #   config.values.first[:maximum_export_level_kw] || 0.0
+  # end
 
   # Calculate solar export for a single day
   #
@@ -198,23 +198,25 @@ class SolarPVPanels
     return nil unless synthetic_data?(date, :override_export)
 
     export_x48    = AMRData.one_day_zero_kwh_x48
-    pv_output_x48 = pv_amr_data.one_days_data_x48(date)
-    baseload_kw   = yesterday_baseload_kw(date, mains_amr_data)
-    unoccupied    = unoccupied?(meter_collection, date)
+    #return empty array if school is occupied
+    return export_x48 unless unoccupied?(meter_collection, date)
 
-    max_hh_export_kwh = maximum_export_kw(date) / 2.0
+    yesterday_baseload_kw   = yesterday_baseload_kw(date, mains_amr_data)
 
     (0..47).each do |hh_i|
+      #how much are we consuming and generating?
+      mains_kwh = mains_amr_data.kwh(date, hh_i)
+      generation_kwh = pv_amr_data.kwh(date, hh_i)
 
+      #assume we're always consuming at least the baseload
+      unoccupied_appliance_kwh = [mains_kwh, yesterday_baseload_kw / 2.0].max
 
-
-      # arguably this could be improved by changing <= 0.0 to something a little less
-      # strict in the sense the half hour could be part cloudy, part sunny so
-      # there will be some export and some mains consumption
-      # PH: 19Aug2022: comment above proved correct, non-zero override now supported
-      if unoccupied && mains_amr_data.kwh(date, hh_i) <= max_hh_export_kwh
-        # if unoccupied then assume export is excess of generation over baseload
-        export_x48[hh_i] = -1.0 * (pv_output_x48[hh_i] - (baseload_kw / 2.0))
+      #we are exporting if we're generating more than we're using
+      if generation_kwh > unoccupied_appliance_kwh
+        #how much are we exporting?
+        #export will be a maximum of 0.0, as generation > usage
+        export_kwh = [unoccupied_appliance_kwh - generation_kwh, 0.0].min
+        export_x48[hh_i] = export_kwh
       end
     end
 
@@ -235,14 +237,7 @@ class SolarPVPanels
     mains_amr.date_range.each do |date|
       if synthetic_data?(date, :override_self_consume) # set only where config says so
         self_consume_x48 = calculate_days_self_consumption_days_data(date, meter_collection, mains_amr, pv_amr)
-        unless self_consume_x48.nil?
-          exported_x48 = export_amr.one_days_data_x48(date)
-
-          exported_x48, self_consume_x48 = normalise_pv(date, exported_x48, self_consume_x48)
-
-          export_amr.add(date, one_day_reading(mpan, date, 'SOLO', exported_x48))
-          self_consumption_amr.add(date, one_day_reading(mpan, date, 'SOLE', self_consume_x48))
-        end
+        self_consumption_amr.add(date, one_day_reading(mpan, date, 'SOLO', self_consume_x48)) unless self_consume_x48.nil?
       end
     end
   end
@@ -264,19 +259,37 @@ class SolarPVPanels
     return nil unless synthetic_data?(date, :override_self_consume)
 
     self_x48      = AMRData.one_day_zero_kwh_x48
-    pv_output_x48 = pv_amr_data.one_days_data_x48(date)
-    baseload_kw   = yesterday_baseload_kw(date, mains_amr_data)
-    unoccupied    = unoccupied?(meter_collection, date)
 
-    max_hh_export_kwh = maximum_export_kw(date) / 2.0
+    yesterday_baseload_kw = yesterday_baseload_kw(date, mains_amr_data)
+    unoccupied = unoccupied?(meter_collection, date)
 
     (0..47).each do |hh_i|
-      if unoccupied && mains_amr_data.kwh(date, hh_i) <= max_hh_export_kwh
-        # if unoccupied and zero then assume consuming baseload
-        self_x48[hh_i] = baseload_kw / 2.0
+      #how much are we consuming and generating?
+      mains_kwh = mains_amr_data.kwh(date, hh_i)
+      generation_kwh = pv_amr_data.kwh(date, hh_i)
+
+      #assume we're always consuming at least the baseload
+      unoccupied_appliance_kwh = [mains_kwh, yesterday_baseload_kw / 2.0].max
+
+      #TODO: we diverge from test script here, which produces zero self consumption when occupied
+      #That seems incorrect, so have left original logic in place, as our assumption is that
+      #during days when occupied we're always fully consuming solar
+      if unoccupied
+        #if school is unoccupied and we have some solar generation
+        solar_pv_on           = generation_kwh > 0.0
+        #TODO: our self consumption on unoccupied days is unrelated to the amount of solar generation.
+        #This seems wrong?
+        #
+        #TODO: if our current mains consumption is more than y'day baseload, then we'll end up
+        #with a self-consumption of 0.0, regardless of amount of solar generation.
+        #
+        #TODO: if current mains consumption is < baseload, e.g. holiday switch off,
+        #then we'll end up consuming less than baseload, but will even out over time
+        self_consumption_kwh  = solar_pv_on ? [unoccupied_appliance_kwh - mains_kwh, 0.0].max : 0.0
+        self_x48[hh_i] = self_consumption_kwh
       else
         # else all the pv output is being consumed
-        self_x48[hh_i] = pv_output_x48[hh_i]
+        self_x48[hh_i] = generation_kwh
       end
     end
 
@@ -392,22 +405,28 @@ class SolarPVPanels
     OneDayAMRReading.new(mpan, date, type, nil, DateTime.now, data_x48)
   end
 
+  # No longer called as part of solar export/self-consumption changes
+  #
+  # The removal of positive export values is done in export calculation
+  # And we're no longer normalising self-consumption?
+  #
   # to avoid persistent bias in output rescale pv_consumed_onsite_kwh_x48 if
   # the baseload minus the predicted pv output doesn't result in an export
   # and the mains consumption is zero or near zero, i.e. mains consumption is zero
   # but there isn't enough predicted pv to result in an export
-  def normalise_pv(date, exported_pv_kwh_x48, pv_consumed_onsite_kwh_x48)
-    positive_export_kwh = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? kwh : 0.0 }.sum # map then sum to avoid StatSample sum bug
-    negative_only_exported_kwh_x48 = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? 0.0 : kwh }
-    days_pv_consumed_onsite_kwh = pv_consumed_onsite_kwh_x48.sum
-    scale_factor = days_pv_consumed_onsite_kwh == 0 ? 1.0 : 1.0 + (positive_export_kwh / days_pv_consumed_onsite_kwh)
-    scaled_onsite_kwh_x48 = pv_consumed_onsite_kwh_x48.map { |kwh| kwh * scale_factor }
-
-    compact_print_day('normalised export', date, negative_only_exported_kwh_x48)
-    compact_print_day('scaled onsite',     date, scaled_onsite_kwh_x48)
-
-    [negative_only_exported_kwh_x48, scaled_onsite_kwh_x48]
-  end
+  #
+  # def normalise_pv(date, exported_pv_kwh_x48, pv_consumed_onsite_kwh_x48)
+  #   positive_export_kwh = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? kwh : 0.0 }.sum # map then sum to avoid StatSample sum bug
+  #   negative_only_exported_kwh_x48 = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? 0.0 : kwh }
+  #   days_pv_consumed_onsite_kwh = pv_consumed_onsite_kwh_x48.sum
+  #   scale_factor = days_pv_consumed_onsite_kwh == 0 ? 1.0 : 1.0 + (positive_export_kwh / days_pv_consumed_onsite_kwh)
+  #   scaled_onsite_kwh_x48 = pv_consumed_onsite_kwh_x48.map { |kwh| kwh * scale_factor }
+  #
+  #   compact_print_day('normalised export', date, negative_only_exported_kwh_x48)
+  #   compact_print_day('scaled onsite',     date, scaled_onsite_kwh_x48)
+  #
+  #   [negative_only_exported_kwh_x48, scaled_onsite_kwh_x48]
+  # end
 
   #Is the school unoccupied on a given date
   def unoccupied?(meter_collection, date)

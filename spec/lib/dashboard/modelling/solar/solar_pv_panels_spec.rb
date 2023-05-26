@@ -13,9 +13,7 @@ describe SolarPVPanels, type: :service do
 
   let(:solar_pv_installation_date)  { start_date }
   let(:kwp)                         { 10.0 }
-  #TEMP add maximum_export_level_kw
-  let(:max_export)                  { 5.0 }
-  let(:meter_attributes)   { [{ start_date: solar_pv_installation_date, kwp: kwp, maximum_export_level_kw: max_export }] }
+  let(:meter_attributes)   { [{ start_date: solar_pv_installation_date, kwp: kwp }] }
 
   #fake yield data from Sheffield
   let(:solar_yield)        { Array.new(10, 0.0) + Array.new(10, 0.25) + Array.new(8, 0.5) + Array.new(10, 0.25) + Array.new(10, 0.0)}
@@ -95,6 +93,7 @@ describe SolarPVPanels, type: :service do
       days_data = pv_meter_map[:self_consume].amr_data.days_kwh_x48(sunday)
       #should be consuming from periods 11-37 on the sunday based on AMR and solar data
       #TODO: think there's a bug in old calculation, as its showing self consumption when no solar generation
+      puts days_data.inspect
       expect( days_data[11..37].all? {|hh| hh > 0.0 } ).to eq true
 
       days_data = pv_meter_map[:self_consume].amr_data.days_kwh_x48(monday)
