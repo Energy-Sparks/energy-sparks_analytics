@@ -630,10 +630,11 @@ module Benchmarking
           { data: ->{ shan_adpc },                         name: :temperature_adjusted_kwh, units: :relative_percent_0dp },
         ],
         column_groups: [
-          { name: '',                       span: 1 },
-          { name: :kwh,                    span: 3 },
-          { name: :co2_kg,               span: 3 },
-          { name: :gbp,                      span: 4 },
+          { name: '',                 span: 1 },
+          { name: :kwh,              span: 3 },
+          { name: :co2_kg,         span: 2 },
+          { name: :gbp,                span: 2 },
+          { name: :percent_changed,  span: 2 }
         ],
         where:   ->{ !enba_khn.nil? && enba_phap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
