@@ -232,7 +232,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInEnergyUseSinceJoined,
         name:     'Change in energy use since the school joined Energy Sparks',
         columns:  [
-          { data: 'addp_name',      name: :name, units: :short_school_name, chart_data: true },
+          { data: 'addp_name',      name: :name, units: :school_name, chart_data: true },
           { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
           { data: ->{ enba_kxap },  name: :energy_total,   units: :relative_percent_0dp, chart_data: true, content_class: AdviceBenchmark },
           { data: ->{ enba_keap },  name: :electricity,      units: :relative_percent_0dp },
@@ -253,7 +253,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeAdhocComparison,
         name:       'Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)',
         columns:  [
-          { data: 'addp_name', name: :name, units: :short_school_name, chart_data: true},
+          { data: 'addp_name', name: :name, units: :school_name, chart_data: true},
 
           # kWh
 
@@ -465,7 +465,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInEnergySinceLastYear,
         name:     'Change in energy use since last year',
         columns:  [
-          { data: 'addp_name',              name: :name, units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',              name: :name, units: :school_name, chart_data: true, content_class: AdviceBenchmark },
           { data: ->{ sum_if_complete([enba_ken, enba_kgn, enba_khn, enba_ksn],
                                       [enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: :previous_year, units: :kwh },
           { data: ->{ sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: :last_year, units: :kwh },
@@ -547,7 +547,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInElectricitySinceLastYear,
         name:     'Change in electricity consumption since last year',
         columns:  [
-          { data: 'addp_name',  name: :name, units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: :name, units: :school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_ken },                          name: :previous_year,  units: :kwh },
           { data: ->{ enba_ke0 },                          name: :last_year,      units: :kwh },
@@ -581,7 +581,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInGasSinceLastYear,
         name:     'Change in gas consumption since last year',
         columns:  [
-          { data: 'addp_name',  name: :name, units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: :name, units: :school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_kgn  },                         name: :previous_year,  units: :kwh },
           { data: ->{ gsba_kpya },                         name: :previous_year_temperature_adjusted,  units: :kwh },
@@ -614,7 +614,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInStorageHeatersSinceLastYear,
         name:     'Change in storage heater consumption since last year',
         columns:  [
-          { data: 'addp_name',  name: :name, units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: :name, units: :school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_khn  },                         name: :previous_year,  units: :kwh },
           { data: ->{ shan_kpya },                         name: :previous_year_temperature_adjusted,  units: :kwh },
@@ -646,7 +646,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInSolarPVSinceLastYear,
         name:     'Change in solar PV production since last year',
         columns:  [
-          { data: 'addp_name',  name: :name, units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: :name, units: :school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_ksn },                          name: :previous_year,  units: :kwh },
           { data: ->{ enba_ks0 },                          name: :last_year,      units: :kwh },
@@ -1285,7 +1285,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Change in electricity for layer up power down day November 2022',
         columns:  [
-          { data: 'addp_name', name: :name, units: :short_school_name },
+          { data: 'addp_name', name: :name, units: :school_name },
 
           # kWh
           { data: ->{ lue1_pppk }, name: :previous_year, units: :kwh },
@@ -1319,7 +1319,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Change in gas for layer up power down day November 2022',
         columns:  [
-          { data: 'addp_name', name: :name, units: :short_school_name },
+          { data: 'addp_name', name: :name, units: :school_name },
 
           # kWh
           { data: ->{ lug1_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
@@ -1354,7 +1354,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Change in gas for layer up power down day November 2022',
         columns:  [
-          { data: 'addp_name', name: :name, units: :short_school_name },
+          { data: 'addp_name', name: :name, units: :school_name },
 
           # kWh
           { data: ->{ lus1_pppu }, name: :previous_year_temperature_unadjusted, units: :kwh },
@@ -1393,7 +1393,7 @@ module Benchmarking
         filter_out:       :dont_make_available_directly,
         name:     'breakdown in the change in energy use since the school joined Energy Sparks',
         columns:  [
-          { data: 'addp_name',      name: :name, units: :short_school_name, chart_data: true },
+          { data: 'addp_name',      name: :name, units: :school_name, chart_data: true },
           { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           { data: ->{ enba_kea }, name: :year_before_joined,       units: :kwh },
