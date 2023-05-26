@@ -1165,6 +1165,7 @@ class ChartManager
       meter_definition: :allheat
     },
     electricity_cost_comparison_last_2_years: {
+      x_axis:           :month,
       chart1_type:      :column,
       inherits_from:    :electricity_by_month_year_0_1,
       yaxis_units:      :£
