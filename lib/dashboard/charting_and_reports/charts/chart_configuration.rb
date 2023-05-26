@@ -1071,13 +1071,15 @@ class ChartManager
     },
     # 8 finance tab charts
     electricity_by_month_year_0_1_finance_advice: {
+      x_axis:           :month,
       name:             'Energy Costs',
       timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       ignore_single_series_failure: true,
       inherits_from:    :electricity_by_month_year_0_1
     },
     electricity_cost_comparison_last_2_years_accounting: {
-      name:             '',
+      name:              '',
+      x_axis:            :month,
       inherits_from:     :electricity_cost_comparison_last_2_years,
       timescale:         [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       ignore_single_series_failure: true,
@@ -1115,6 +1117,7 @@ class ChartManager
       inherits_from:    :daytype_breakdown_electricity
     },
     gas_by_month_year_0_1_finance_advice: {
+      x_axis:           :month,
       name:             'Gas Costs',
       timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       ignore_single_series_failure: true,
