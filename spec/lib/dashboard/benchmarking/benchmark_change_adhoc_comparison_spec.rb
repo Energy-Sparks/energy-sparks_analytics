@@ -132,7 +132,7 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
         [
           [
             [
-              {:formatted=>"Acme Secondary 3", :raw=>"Acme Secondary School 3"},
+              {:formatted=>"Acme Secondary School 3", :raw=>"Acme Secondary School 3"},
               {:formatted=>"1,930", :raw=>1931.0999999999997},
               {:formatted=>"1,920", :raw=>1915.8000000000004},
               {:formatted=>"-1%", :raw=>-0.007922945471492556},
@@ -145,7 +145,7 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
               {:formatted=>"Electricity", :raw=>"Electricity"}
             ],
             [
-              {:formatted=>"Acme Primary 2", :raw=>"Acme Primary School 2"},
+              {:formatted=>"Acme Primary School 2", :raw=>"Acme Primary School 2"},
               {:formatted=>"859", :raw=>859.2244230319684},
               {:formatted=>"366", :raw=>366.1723000000001},
               {:formatted=>"-57%", :raw=>-0.5738339248925467},
@@ -158,7 +158,7 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
               {:formatted=>"Gas", :raw=>"Gas"}
             ],
             [
-              {:formatted=>"Acme Primary 1", :raw=>"Acme Primary School 1"},
+              {:formatted=>"Acme Primary School 1", :raw=>"Acme Primary School 1"},
               {:formatted=>"418", :raw=>418.2374563244852},
               {:formatted=>"121", :raw=>120.5364},
               {:formatted=>"-71%", :raw=>-0.7117991270813318},
@@ -173,7 +173,7 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
           ],
           [
             [
-              {:formatted=>"Acme Secondary 3", :raw=>"Acme Secondary School 3"},
+              {:formatted=>"Acme Secondary School 3", :raw=>"Acme Secondary School 3"},
               {:formatted=>"1,930", :raw=>1931.0999999999997},
               {:formatted=>"1,920", :raw=>1915.8000000000004},
               {:formatted=>"-1%", :raw=>-0.007922945471492556},
@@ -187,7 +187,7 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
           ],
           [
             [
-              {:formatted=>"Acme Primary 2", :raw=>"Acme Primary School 2"},
+              {:formatted=>"Acme Primary School 2", :raw=>"Acme Primary School 2"},
               {:formatted=>"898", :raw=>897.5110999999997},
               {:formatted=>"859", :raw=>859.2244230319684},
               {:formatted=>"366", :raw=>366.1723000000001},
@@ -200,7 +200,7 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
               {:formatted=>"-57%", :raw=>-0.5738339248925469}
             ],
             [
-              {:formatted=>"Acme Primary 1", :raw=>"Acme Primary School 1"},
+              {:formatted=>"Acme Primary School 1", :raw=>"Acme Primary School 1"},
               {:formatted=>"527", :raw=>526.7040000000001},
               {:formatted=>"418", :raw=>418.2374563244852},
               {:formatted=>"121", :raw=>120.5364},

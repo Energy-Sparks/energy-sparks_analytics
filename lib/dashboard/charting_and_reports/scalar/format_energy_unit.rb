@@ -54,8 +54,6 @@ class FormatEnergyUnit
       format_temperature(value)
     elsif unit == :school_name
       value
-    elsif unit == :short_school_name
-      shorten_school_name(value)
     elsif %i[percent percent_0dp relative_percent relative_percent_0dp].include?(unit)
       format_percent(value, unit, user_numeric_comprehension_level, medium)
     elsif unit == :comparison_percent
@@ -136,10 +134,6 @@ class FormatEnergyUnit
         low: format_time(range.first),
         high: format_time(range.last))
     end
-  end
-
-  private_class_method def self.shorten_school_name(value)
-    value.sub(' School', '').sub('Ysgol ', '')
   end
 
   private_class_method def self.format_pound_range(range, medium, user_numeric_comprehension_level)
