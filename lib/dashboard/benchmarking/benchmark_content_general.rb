@@ -74,7 +74,7 @@ module Benchmarking
 
     private def introduction_text
       text = I18n.t('analytics.benchmarking.content.annual_change_in_electricity_out_of_hours_use.introduction_text_html')
-      text += I18n.t('analytics.benchmarking.content.annual_change_in_electricity_out_of_hours_use.table_html')
+      text += I18n.t('analytics.benchmarking.content.annual_change_in_out_of_hours_use.table_html')
       ERB.new(text).result(binding)
     end
   end
