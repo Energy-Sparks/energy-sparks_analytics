@@ -119,7 +119,8 @@ module Benchmarking
         :change_in_electricity_consumption_recent_school_weeks,
         :change_in_electricity_holiday_consumption_previous_holiday,
         :change_in_electricity_holiday_consumption_previous_years_holiday,
-        :electricity_consumption_during_holiday
+        :electricity_consumption_during_holiday,
+        :annual_change_in_electricity_out_of_hours_use
       ],
       gas_and_storage_heater_benchmarks: [
         :change_in_gas_since_last_year,
@@ -137,7 +138,8 @@ module Benchmarking
         :change_in_gas_holiday_consumption_previous_holiday,
         :change_in_gas_holiday_consumption_previous_years_holiday,
         :gas_consumption_during_holiday,
-        :storage_heater_consumption_during_holiday
+        :storage_heater_consumption_during_holiday,
+        :annual_change_in_gas_out_of_hours_use
       ],
       solar_benchmarks: [
         :change_in_solar_pv_since_last_year,
@@ -1689,9 +1691,69 @@ module Benchmarking
         sort_by:  [4],
         type: %i[table],
         admin_only: true
+      },
+      annual_change_in_electricity_out_of_hours_use: {
+        benchmark_class: BenchmarkContentAnnualChangeInElectricityOutOfHoursUsage,
+        name:     'Annual change in electricity use out of hours',
+        columns:  [
+          tariff_changed_school_name(AdviceElectricityOutHours),
+
+          { data: ->{ elop_aosk },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ eloo_aosk },  name: :last_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ percent_change(elop_aosk, eloo_aosk, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          { data: ->{ elop_aosc },  name: :previous_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ eloo_aosc },  name: :last_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ percent_change(elop_aosc, eloo_aosc, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          { data: ->{ elop_aos€ },  name: :previous_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ eloo_aos€ },  name: :last_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ percent_change(elop_aos€, eloo_aos€, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',       span: 1 },
+          { name: :kwh,     span: 3 },
+          { name: :co2_kg,     span: 3 },
+          { name: :cost,    span: 3 },
+        ],
+        sort_by:  [1],
+        type: %i[table],
+        admin_only: true,
+        column_heading_explanation: :last_year_definition_html
+      },
+      annual_change_in_gas_out_of_hours_use: {
+        benchmark_class: BenchmarkContentAnnualChangeInGasOutOfHoursUsage,
+        name:     'Annual change in gas use out of hours',
+        columns:  [
+          tariff_changed_school_name(AdviceGasOutHours),
+
+          { data: ->{ gsop_aosk },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ gsoo_aosk },  name: :last_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ percent_change(gsop_aosk, gsoo_aosk, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          { data: ->{ gsop_aosc },  name: :previous_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ gsoo_aosc },  name: :last_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ percent_change(gsop_aosc, gsoo_aosc, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          { data: ->{ gsop_aos€ },  name: :previous_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ gsoo_aos€ },  name: :last_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ percent_change(gsop_aos€, gsoo_aos€, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',       span: 1 },
+          { name: :kwh,     span: 3 },
+          { name: :co2_kg,     span: 3 },
+          { name: :cost,    span: 3 },
+        ],
+        sort_by:  [1],
+        type: %i[table],
+        admin_only: true,
+        column_heading_explanation: :last_year_definition_html
       }
-
-
     }.freeze
   end
 end

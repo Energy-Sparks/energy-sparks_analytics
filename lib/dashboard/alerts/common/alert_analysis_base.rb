@@ -537,7 +537,9 @@ class AlertAnalysisBase < ContentBase
       AlertImpendingHoliday                                       => 'ihol',
 #       AlertHeatingOnNonSchoolDays                                 => 'htns', deprecated
       AlertOutOfHoursElectricityUsage                             => 'eloo',
+      AlertOutOfHoursElectricityUsagePreviousYear                 => 'elop',
       AlertOutOfHoursGasUsage                                     => 'gsoo',
+      AlertOutOfHoursGasUsagePreviousYear                         => 'gsop',
       AlertHotWaterInsulationAdvice                               => 'hwia',
 #      AlertHeatingOnSchoolDays                                    => 'htsd', deprecated
       AlertThermostaticControl                                    => 'httc',
