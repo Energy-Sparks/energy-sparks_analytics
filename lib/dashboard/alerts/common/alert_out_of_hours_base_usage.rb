@@ -11,12 +11,12 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :significant_out_of_hours_use
   attr_reader :good_out_of_hours_use_percent, :bad_out_of_hours_use_percent, :out_of_hours_percent, :average_percent
   attr_reader :holidays_kwh, :weekends_kwh, :schoolday_open_kwh, :schoolday_closed_kwh, :community_kwh
-  attr_reader :total_annual_kwh, :out_of_hours_kwh, :out_of_hours_strict_kwh
+  attr_reader :total_annual_kwh, :out_of_hours_kwh
   attr_reader :holidays_percent, :weekends_percent, :schoolday_open_percent, :schoolday_closed_percent, :community_percent
   attr_reader :percent_out_of_hours
-  attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£, :out_of_hours_£, :out_of_hours_strict_£, :community_£
-  attr_reader :holidays_£current, :weekends_£current, :schoolday_open_£current, :schoolday_closed_£current, :out_of_hours_£current, :out_of_hours_strict_£current, :community_£current
-  attr_reader :holidays_co2, :weekends_co2, :schoolday_open_co2, :schoolday_closed_co2, :out_of_hours_co2, :out_of_hours_strict_co2, :community_co2
+  attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£, :out_of_hours_£, :community_£
+  attr_reader :holidays_£current, :weekends_£current, :schoolday_open_£current, :schoolday_closed_£current, :out_of_hours_£current, :community_£current
+  attr_reader :holidays_co2, :weekends_co2, :schoolday_open_co2, :schoolday_closed_co2, :out_of_hours_co2, :community_co2
   attr_reader :daytype_breakdown_table, :daytype_breakdown_table_current_£
   attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£, :potential_saving_co2
   attr_reader :total_annual_£, :total_annual_co2, :summary
@@ -71,7 +71,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       community_kwh:        { description: 'Annual community kwh usage',         units: fuel_kwh },
       total_annual_kwh:     { description: 'Annual kwh usage',                   units: fuel_kwh },
       out_of_hours_kwh:     { description: 'Annual kwh out of hours usage',      units: fuel_kwh, benchmark_code: 'aook' },
-      out_of_hours_strict_kwh:  { description: 'Annual kwh out of hours usage, no community use',      units: fuel_kwh, benchmark_code: 'aosk' },
 
       schoolday_open_percent:   { description: 'Annual school day open percent usage',    units: :percent, benchmark_code: 'sdop' },
       schoolday_closed_percent: { description: 'Annual school day closed percent usage',  units: :percent, benchmark_code: 'sdcp' },
@@ -86,7 +85,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       weekends_£:               { description: 'Annual weekend cost using historic tariff usage',           units: :£, benchmark_code: 'awk£' },
       community_£:              { description: 'Annual community cost using historic tariff usage',         units: :£, benchmark_code: 'com£' },
       out_of_hours_£:           { description: 'Annual £ out of hours using historic tariff usage',         units: :£, benchmark_code: 'aoo£' },
-      out_of_hours_strict_£:           { description: 'Annual £ out of hours using historic tariff usage, no community use',         units: :£, benchmark_code: 'aos£' },
 
       schoolday_open_£current:   { description: 'Annual school day open cost using latest tariff usage',   units: :£ },
       schoolday_closed_£current: { description: 'Annual school day closed cost using latest tariff usage', units: :£ },
@@ -94,7 +92,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       weekends_£current:         { description: 'Annual weekend cost using latest tariff usage',           units: :£, benchmark_code: 'awk€' },
       community_£current:        { description: 'Annual community cost using latest tariff usage',         units: :£, benchmark_code: 'com€' },
       out_of_hours_£current:     { description: 'Annual £ out of hours using latest tariff usage',         units: :£, benchmark_code: 'aoo€' },
-      out_of_hours_strict_£current:     { description: 'Annual £ out of hours using latest tariff usage, no community use',         units: :£, benchmark_code: 'aos€' },
 
       schoolday_open_co2:         { description: 'Annual school day open emissions',   units: :co2 },
       schoolday_closed_co2:       { description: 'Annual school day closed emissions', units: :co2 },
@@ -102,7 +99,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       weekends_co2:               { description: 'Annual weekend emissions',           units: :co2 },
       community_co2:              { description: 'Annual community emissions',         units: :co2 },
       out_of_hours_co2:           { description: 'Annual out of hours emissions',      units: :co2,  benchmark_code: 'aooc' },
-      out_of_hours_strict_co2:    { description: 'Annual out of hours emissions, no community use',      units: :co2,  benchmark_code: 'aosc' },
 
       good_out_of_hours_use_percent: {
         description: 'Good/Exemplar out of hours use percent (suggested benchmark comparison)',
@@ -247,7 +243,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     # @total_annual_kwh total need to be consistent with £ total for implied tariff calculation
     @total_annual_kwh = @holidays_kwh + @weekends_kwh + @schoolday_open_kwh + @schoolday_closed_kwh + @community_kwh
     @out_of_hours_kwh = @total_annual_kwh - @schoolday_open_kwh
-    @out_of_hours_strict_kwh = @holidays_kwh + @weekends_kwh + @schoolday_closed_kwh
 
     # will need adjustment for Centrica - TODO
     @out_of_hours_percent = @out_of_hours_kwh / @total_annual_kwh
@@ -271,7 +266,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     # @total_annual_£ total need to be consistent with kwh total for implied tariff calculation
     @total_annual_£ = @holidays_£ + @weekends_£ + @schoolday_open_£ + @schoolday_closed_£ + @community_£
     @out_of_hours_£ = @total_annual_£ - @schoolday_open_£
-    @out_of_hours_strict_£ = @holidays_£ + @weekends_£ + @schoolday_closed_£
   end
 
   def calculate_£current
@@ -286,7 +280,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     # @total_annual_£ total need to be consistent with kwh total for implied tariff calculation
     @total_annual_£current = @holidays_£current + @weekends_£current + @schoolday_open_£current + @schoolday_closed_£current + @community_£current
     @out_of_hours_£current = @total_annual_£current - @schoolday_open_£current
-    @out_of_hours_strict_£current = @holidays_£current + @weekends_£current + @schoolday_closed_£current
   end
 
   def calculate_co2
@@ -300,7 +293,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
     @total_annual_co2 = @holidays_co2 + @weekends_co2 + @schoolday_open_co2 + @schoolday_closed_co2 + @community_co2
     @out_of_hours_co2 = @total_annual_co2 - @schoolday_open_co2
-    @out_of_hours_strict_co2 = @holidays_co2 + @weekends_co2 + @schoolday_closed_co2
   end
 
   def calculate_table_current_£

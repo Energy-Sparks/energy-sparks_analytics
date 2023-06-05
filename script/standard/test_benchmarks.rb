@@ -19,6 +19,7 @@ overrides = {
     pages: %i[
       annual_change_in_electricity_out_of_hours_use
       annual_change_in_gas_out_of_hours_use
+      annual_change_in_storage_heater_out_of_hours_use
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }

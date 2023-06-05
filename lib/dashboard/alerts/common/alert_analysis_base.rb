@@ -560,6 +560,7 @@ class AlertAnalysisBase < ContentBase
       AlertStorageHeaterAnnualVersusBenchmark                     => 'shan',
       AlertStorageHeaterThermostatic                              => 'shtc',
       AlertStorageHeaterOutOfHours                                => 'shoo',
+      AlertOutOfHoursStorageHeaterUsagePreviousYear               => 'shop',
 #      AlertHeatingOnSchoolDaysStorageHeaters                      => 'shhd', deprecated
       AlertSolarPVBenefitEstimator                                => 'sole',
       AlertElectricityLongTermTrend                               => 'ellt',

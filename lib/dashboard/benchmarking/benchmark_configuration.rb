@@ -139,7 +139,8 @@ module Benchmarking
         :change_in_gas_holiday_consumption_previous_years_holiday,
         :gas_consumption_during_holiday,
         :storage_heater_consumption_during_holiday,
-        :annual_change_in_gas_out_of_hours_use
+        :annual_change_in_gas_out_of_hours_use,
+        :annual_change_in_storage_heater_out_of_hours_use
       ],
       solar_benchmarks: [
         :change_in_solar_pv_since_last_year,
@@ -1698,17 +1699,17 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name(AdviceElectricityOutHours),
 
-          { data: ->{ elop_aosk },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
-          { data: ->{ eloo_aosk },  name: :last_year_out_of_hours_kwh,  units: :kwh },
-          { data: ->{ percent_change(elop_aosk, eloo_aosk, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ elop_aook },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ eloo_aook },  name: :last_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ percent_change(elop_aook, eloo_aook, true) }, name: :change_pct, units: :relative_percent_0dp },
 
-          { data: ->{ elop_aosc },  name: :previous_year_out_of_hours_co2,  units: :co2 },
-          { data: ->{ eloo_aosc },  name: :last_year_out_of_hours_co2,  units: :co2 },
-          { data: ->{ percent_change(elop_aosc, eloo_aosc, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ elop_aooc },  name: :previous_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ eloo_aooc },  name: :last_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ percent_change(elop_aooc, eloo_aooc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
-          { data: ->{ elop_aos€ },  name: :previous_year_out_of_hours_cost_ct,  units: :£ },
-          { data: ->{ eloo_aos€ },  name: :last_year_out_of_hours_cost_ct,  units: :£ },
-          { data: ->{ percent_change(elop_aos€, eloo_aos€, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ elop_aoo€ },  name: :previous_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ eloo_aoo€ },  name: :last_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ percent_change(elop_aoo€, eloo_aoo€, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
         ],
@@ -1729,17 +1730,17 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name(AdviceGasOutHours),
 
-          { data: ->{ gsop_aosk },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
-          { data: ->{ gsoo_aosk },  name: :last_year_out_of_hours_kwh,  units: :kwh },
-          { data: ->{ percent_change(gsop_aosk, gsoo_aosk, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ gsop_aook },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ gsoo_aook },  name: :last_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ percent_change(gsop_aook, gsoo_aook, true) }, name: :change_pct, units: :relative_percent_0dp },
 
-          { data: ->{ gsop_aosc },  name: :previous_year_out_of_hours_co2,  units: :co2 },
-          { data: ->{ gsoo_aosc },  name: :last_year_out_of_hours_co2,  units: :co2 },
-          { data: ->{ percent_change(gsop_aosc, gsoo_aosc, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ gsop_aooc },  name: :previous_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ gsoo_aooc },  name: :last_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ percent_change(gsop_aooc, gsoo_aooc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
-          { data: ->{ gsop_aos€ },  name: :previous_year_out_of_hours_cost_ct,  units: :£ },
-          { data: ->{ gsoo_aos€ },  name: :last_year_out_of_hours_cost_ct,  units: :£ },
-          { data: ->{ percent_change(gsop_aos€, gsoo_aos€, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ gsop_aoo€ },  name: :previous_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ gsoo_aoo€ },  name: :last_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ percent_change(gsop_aoo€, gsoo_aoo€, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
         ],
@@ -1753,7 +1754,38 @@ module Benchmarking
         type: %i[table],
         admin_only: true,
         column_heading_explanation: :last_year_definition_html
-      }
+      },
+      annual_change_in_storage_heater_out_of_hours_use: {
+        benchmark_class: BenchmarkContentAnnualChangeInStorageHeaterOutOfHoursUsage,
+        name:     'Annual change in storage heater use out of hours',
+        columns:  [
+          tariff_changed_school_name(AdviceStorageHeaters),
+
+          { data: ->{ shop_aook },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ shoo_aook },  name: :last_year_out_of_hours_kwh,  units: :kwh },
+          { data: ->{ percent_change(shop_aook, shoo_aook, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          { data: ->{ shop_aooc },  name: :previous_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ shoo_aooc },  name: :last_year_out_of_hours_co2,  units: :co2 },
+          { data: ->{ percent_change(shop_aooc, shoo_aooc, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          { data: ->{ shop_aoo€ },  name: :previous_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ shoo_aoo€ },  name: :last_year_out_of_hours_cost_ct,  units: :£ },
+          { data: ->{ percent_change(shop_aoo€, shoo_aoo€, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',       span: 1 },
+          { name: :kwh,     span: 3 },
+          { name: :co2_kg,     span: 3 },
+          { name: :cost,    span: 3 },
+        ],
+        sort_by:  [1],
+        type: %i[table],
+        admin_only: true,
+        column_heading_explanation: :last_year_definition_html
+      },
     }.freeze
   end
 end

@@ -59,7 +59,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
               storage_heater_consumption_during_holiday: 'Storage heater use during current holiday',
               thermostat_sensitivity: 'Annual saving through 1C reduction in thermostat temperature',
               thermostatic_control: 'Quality of thermostatic control',
-              annual_change_in_gas_out_of_hours_use: 'Annual change in gas used out of school hours'
+              annual_change_in_gas_out_of_hours_use: 'Annual change in gas used out of school hours',
+              annual_change_in_storage_heater_out_of_hours_use: 'Annual change in storage heater usage out of school hours'
             }
           },
           {
@@ -139,7 +140,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
               storage_heater_consumption_during_holiday: 'Storage heater use during current holiday',
               thermostat_sensitivity: 'Annual saving through 1C reduction in thermostat temperature',
               thermostatic_control: 'Quality of thermostatic control',
-              annual_change_in_gas_out_of_hours_use: 'Annual change in gas used out of school hours'
+              annual_change_in_gas_out_of_hours_use: 'Annual change in gas used out of school hours',
+              annual_change_in_storage_heater_out_of_hours_use: 'Annual change in storage heater usage out of school hours'
             }
           },
           {
