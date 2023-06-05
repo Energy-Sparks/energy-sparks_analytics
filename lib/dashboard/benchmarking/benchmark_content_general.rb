@@ -69,6 +69,36 @@ module Benchmarking
     end
   end
   #=======================================================================================
+  class BenchmarkContentAnnualChangeInElectricityOutOfHoursUsage < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.annual_change_in_electricity_out_of_hours_use.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.content.annual_change_in_out_of_hours_use.table_html')
+      ERB.new(text).result(binding)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentAnnualChangeInGasOutOfHoursUsage < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.annual_change_in_gas_out_of_hours_use.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.content.annual_change_in_out_of_hours_use.table_html')
+      ERB.new(text).result(binding)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentAnnualChangeInStorageHeaterOutOfHoursUsage < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.annual_change_in_storage_heater_out_of_hours_use.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.content.annual_change_in_out_of_hours_use.table_html')
+      ERB.new(text).result(binding)
+    end
+  end
+  #=======================================================================================
   class BenchmarkBaseloadBase < BenchmarkContentBase
     def content(school_ids: nil, filter: nil, user_type: nil)
       @baseload_impact_html = baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
