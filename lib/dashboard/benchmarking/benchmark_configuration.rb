@@ -1721,7 +1721,7 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[table],
-        admin_only: true,
+        admin_only: false,
         column_heading_explanation: :last_year_definition_html
       },
       annual_change_in_gas_out_of_hours_use: {
@@ -1752,7 +1752,7 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[table],
-        admin_only: true,
+        admin_only: false,
         column_heading_explanation: :last_year_definition_html
       },
       annual_change_in_storage_heater_out_of_hours_use: {
@@ -1781,9 +1781,10 @@ module Benchmarking
           { name: :co2_kg,     span: 3 },
           { name: :cost,    span: 3 },
         ],
+        where:   ->{ !shoo_aook.nil? },
         sort_by:  [1],
         type: %i[table],
-        admin_only: true,
+        admin_only: false,
         column_heading_explanation: :last_year_definition_html
       },
     }.freeze
