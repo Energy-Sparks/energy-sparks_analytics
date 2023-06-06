@@ -46,7 +46,7 @@ module SolarPhotovoltaics
 
     # rubocop:disable Naming/MethodName
     def export_£
-      solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics.pricing.solar_export_price
     end
 
     def saving_£current

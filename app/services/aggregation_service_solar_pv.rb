@@ -10,6 +10,7 @@ class AggregateDataServiceSolar
   def initialize(meter_collection)
     @meter_collection   = meter_collection
     @electricity_meters = @meter_collection.electricity_meters
+    @electricity_meter_names = find_electricity_meter_names
   end
 
   def process_solar_pv_electricity_meters
@@ -36,6 +37,10 @@ class AggregateDataServiceSolar
   end
 
   private
+
+  def find_electricity_meter_names
+    @electricity_meters.map { |electricity_meter| [electricity_meter.mpan_mprn, electricity_meter.name] }.to_h
+  end
 
   def process_solar_pv_electricity_meter(pv_meter_map)
     log "Aggregation service: processing mains meter #{pv_meter_map[:mains_consume]} with solar pv"
@@ -253,7 +258,18 @@ class AggregateDataServiceSolar
 
   def assign_meter_names(pv_meter_map)
     pv_meter_map.each do |meter_type, meter|
-      meter.name = PVMap.meter_type_to_name_map[meter_type] unless not_a_meter?(meter)
+      next if not_a_meter?(meter)
+
+      if meter_type == :mains_plus_self_consume
+        school_meter_name = @electricity_meter_names[meter.mpan_mprn]
+        meter.name = if school_meter_name.present?
+                       I18n.t('aggregation_service_solar_pv.mains_plus_self_consume_name', meter_name: school_meter_name) + " (#{meter.mpan_mprn})"
+                     else
+                       I18n.t('aggregation_service_solar_pv.mains_plus_self_consume_name', meter_name: meter.mpan_mprn.to_s)
+                     end
+      else
+        meter.name = PVMap.meter_type_to_name_map[meter_type]
+      end
     end
   end
 

@@ -337,7 +337,10 @@ module Dashboard
     end
 
     def analytics_name
-      name.present? ? "#{name} (#{mpxn})" : mpxn.to_s
+      return mpxn.to_s unless name.present?
+
+      bracketed_text = name.include?(mpxn.to_s) ? 'MPAN' : mpxn.to_s
+      "#{name} (#{bracketed_text})"
     end
 
     def display_meter_number

@@ -97,7 +97,7 @@ module AnalyseHeatingAndHotWater
     # school may have gas only, so estimate using default electricity tariff
     private def defaulted_electricity_tariff_£_per_kwh
       if @school.aggregated_electricity_meters.nil?
-        BenchmarkMetrics::ELECTRICITY_PRICE
+        BenchmarkMetrics.pricing.electricity_price
       else
         @school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£current).round(5)
       end

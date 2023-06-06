@@ -172,7 +172,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
         [200, {}, response.to_json]
       end
       date = Date.parse("2020-01-01")
-      data = api.get_consumption_data(mpxn: mpxn, fuel_type: fuel_type, start_date: date, end_date: date)
+      data = api.get_consumption_data(mpxn: mpxn, fuel_type: fuel_type, start_date: date, end_date: date + 1)
       expect(data["resource"]).to eql "/2234567891000/electricity/consumption/1"
       stubs.verify_stubbed_calls
     end

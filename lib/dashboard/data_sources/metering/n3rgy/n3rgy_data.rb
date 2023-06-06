@@ -157,7 +157,7 @@ module MeterReadingsFeeds
       raw_readings.map do |reading|
         [
           DateTime.parse(reading['timestamp']),
-          reading['value'] * adjust_kwh_units
+          reading['value'].nil? ? nil : reading['value'] * adjust_kwh_units
         ]
       end
     end

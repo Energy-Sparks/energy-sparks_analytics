@@ -1063,7 +1063,7 @@ class ChartManager
       chart1_type:      :column,
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
-      x_axis:           :month,
+      x_axis:           :month_excluding_year,
       timescale:        [{ year: 0 }, { year: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
@@ -1071,17 +1071,20 @@ class ChartManager
     },
     # 8 finance tab charts
     electricity_by_month_year_0_1_finance_advice: {
+      x_axis:           :month,
       name:             'Energy Costs',
       timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       ignore_single_series_failure: true,
       inherits_from:    :electricity_by_month_year_0_1
     },
     electricity_cost_comparison_last_2_years_accounting: {
-      name:             '',
-      inherits_from:    :electricity_cost_comparison_last_2_years,
-      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      name:              '',
+      x_axis:            :month,
+      inherits_from:     :electricity_cost_comparison_last_2_years,
+      timescale:         [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       ignore_single_series_failure: true,
-      yaxis_units:      :accounting_cost
+      yaxis_units:       :accounting_cost,
+      meter_definition:  :allelectricity_unmodified
     },
     electricity_cost_1_year_accounting_breakdown: {
       name:             '',
@@ -1089,6 +1092,7 @@ class ChartManager
       timescale:        [{ up_to_a_year: 0 }],
       ignore_single_series_failure: true,
       chart1_subtype:   :stacked,
+      meter_definition:  :allelectricity_unmodified
     },
     pie_chart_1_year_accounting_breakdown: {
       name:             '',
@@ -1113,6 +1117,7 @@ class ChartManager
       inherits_from:    :daytype_breakdown_electricity
     },
     gas_by_month_year_0_1_finance_advice: {
+      x_axis:           :month,
       name:             'Gas Costs',
       timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       ignore_single_series_failure: true,
@@ -1160,6 +1165,7 @@ class ChartManager
       meter_definition: :allheat
     },
     electricity_cost_comparison_last_2_years: {
+      x_axis:           :month,
       chart1_type:      :column,
       inherits_from:    :electricity_by_month_year_0_1,
       yaxis_units:      :£
@@ -1167,7 +1173,8 @@ class ChartManager
     electricity_cost_comparison_last_2_years_accounting_breakdown: {
       name:             'Energy Costs', # title for 1st heading of introductory text for web page
       inherits_from:    :electricity_cost_comparison_last_2_years_accounting,
-      series_breakdown: :accounting_cost
+      series_breakdown: :accounting_cost,
+      meter_definition:  :allelectricity_unmodified
     },
     gas_cost_comparison_last_2_years_accounting_breakdown: {
       name:             'Gas accounting cost by month for the last year',
@@ -1202,7 +1209,7 @@ class ChartManager
     electricity_1_year_intraday_accounting_breakdown: {
       name:             'Electricity costs for last year by time of day (accounting costs)',
       inherits_from:    :gas_heating_season_intraday,
-      meter_definition: :allelectricity,
+      meter_definition: :allelectricity_unmodified,
       filter:           nil,
       series_breakdown: :accounting_cost,
       yaxis_units:      :£,

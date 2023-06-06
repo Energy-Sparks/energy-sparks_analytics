@@ -42,7 +42,7 @@ class DashboardEnergyAdvice
     end
 
     def annual_exported_solar_pv_£_html
-      export_£ = solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      export_£ = solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics.pricing.solar_export_price
       FormatEnergyUnit.format(:£, export_£,  :html, false, false, :ks2)
     end
 

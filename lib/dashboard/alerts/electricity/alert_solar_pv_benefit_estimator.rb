@@ -222,7 +222,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   def calculate_economic_benefit(kwh_data)
     new_mains_cost = kwh_data[:new_mains_consumption_£]
     old_mains_cost = kwh_data[:existing_annual_£]
-    export_income  = kwh_data[:exported_kwh] * BenchmarkMetrics::SOLAR_EXPORT_PRICE
+    export_income  = kwh_data[:exported_kwh] * BenchmarkMetrics.pricing.solar_export_price
 
     mains_savings   = old_mains_cost - new_mains_cost
     saving          = mains_savings  + export_income

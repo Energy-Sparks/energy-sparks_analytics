@@ -104,22 +104,6 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
     [@current_period, @previous_period]
   end
 
-  protected def meter_values_period_deprecated(_current_period)
-    {
-      kwh:    @current_week_kwh_total,
-      £:      @current_week_kwh_total * BenchmarkMetrics::GAS_PRICE,  # deprecated
-      co2:    @current_week_kwh_total * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    }
-  end
-
-  protected def normalised_period_data_deprecated(_current_period, _previous_period)
-    {
-      kwh:    @previous_week_kwh_total ,
-      £:      @previous_week_kwh_total * BenchmarkMetrics::GAS_PRICE,   # deprecated
-      co2:    @previous_week_kwh_total * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    }
-  end
-
   private def format_a_weeks_kwh_values(values)
     values.map { |kwh| kwh.round(0) }.join(', ')
   end
