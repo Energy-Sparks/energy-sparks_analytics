@@ -97,6 +97,8 @@ class AggregateDataService
   private
 
   def process_electricity_meters
+    #Preprocessing step that creates new meters and reorganises existing
+    #collection
     process_solar_meters
 
     aggregate_electricity_meters
@@ -107,7 +109,14 @@ class AggregateDataService
   end
 
   #If a school has solar panels, then run the solar aggregation process which
-  #results in creation of additional solar meters
+  #results in creation of additional solar meters.
+  #
+  #The list of meters returned by that process overrides the original list of
+  #electricity meters in the collection.
+  #
+  #TODO: within the service any newly created main_plus_self_consume meter will
+  #already have had its costs/co2 information configured. So this may get
+  #repeated or overridden in `aggregate_electricity_meters` step that follows.
   def process_solar_meters
     if @meter_collection.solar_pv_panels?
       aggregate_solar = AggregateDataServiceSolar.new(@meter_collection)
