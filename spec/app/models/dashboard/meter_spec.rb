@@ -56,6 +56,25 @@ describe Dashboard::Meter do
       end
     end
 
+    describe '#analytics_name' do
+      let(:identifier)  { "1456789" }
+      let(:name)        { nil }
+
+      let(:meter) { build(:meter, identifier: identifier, name: name) }
+
+      it 'returns mpxn by default' do
+        expect(meter.analytics_name).to eq(identifier)
+      end
+
+      context 'with name' do
+        let(:name)  { "Kitchen" }
+
+        it 'returns bracketed text' do
+          expect(meter.analytics_name).to eq("Kitchen (1456789)")
+        end
+      end
+    end
+
     # TODO check on fuel type not currently applied
     # it "raises error for unknown fuel type" do
     #   expect {

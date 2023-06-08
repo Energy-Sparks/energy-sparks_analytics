@@ -537,7 +537,9 @@ class AlertAnalysisBase < ContentBase
       AlertImpendingHoliday                                       => 'ihol',
 #       AlertHeatingOnNonSchoolDays                                 => 'htns', deprecated
       AlertOutOfHoursElectricityUsage                             => 'eloo',
+      AlertOutOfHoursElectricityUsagePreviousYear                 => 'elop',
       AlertOutOfHoursGasUsage                                     => 'gsoo',
+      AlertOutOfHoursGasUsagePreviousYear                         => 'gsop',
       AlertHotWaterInsulationAdvice                               => 'hwia',
 #      AlertHeatingOnSchoolDays                                    => 'htsd', deprecated
       AlertThermostaticControl                                    => 'httc',
@@ -558,6 +560,7 @@ class AlertAnalysisBase < ContentBase
       AlertStorageHeaterAnnualVersusBenchmark                     => 'shan',
       AlertStorageHeaterThermostatic                              => 'shtc',
       AlertStorageHeaterOutOfHours                                => 'shoo',
+      AlertOutOfHoursStorageHeaterUsagePreviousYear               => 'shop',
 #      AlertHeatingOnSchoolDaysStorageHeaters                      => 'shhd', deprecated
       AlertSolarPVBenefitEstimator                                => 'sole',
       AlertElectricityLongTermTrend                               => 'ellt',
@@ -598,7 +601,8 @@ class AlertAnalysisBase < ContentBase
       AlertSeptNov20212022StorageHeaterComparison                 => 's22s',
       AlertEaster2023ShutdownElectricityComparison                => 'e23e',
       AlertEaster2023ShutdownGasComparison                        => 'e23g',
-      AlertEaster2023ShutdownStorageHeaterComparison              => 'e23s'
+      AlertEaster2023ShutdownStorageHeaterComparison              => 'e23s',
+      AlertSolarGeneration                                        => 'sgen'
     }
   end
 

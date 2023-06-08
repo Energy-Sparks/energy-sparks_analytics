@@ -7,10 +7,6 @@ module AlertGasToStorageHeaterSubstitutionMixIn
     @school.storage_heater_meter
   end
 
-  def fuel_price_deprecated
-    BenchmarkMetrics::ELECTRICITY_PRICE # deprecated
-  end
-
   def self.fuel_lc
     'storage heater'
   end

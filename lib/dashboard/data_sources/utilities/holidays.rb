@@ -386,7 +386,7 @@ class Holidays
     raise EnergySparksBadChartSpecification.new("Badly specified min_days_in_school_week #{min_days_in_school_week} must be > 0") if min_days_in_school_week <= 0
     limit = 2000
     week_count = nth_week_number.magnitude
-    saturday = asof_date.saturday? ? asof_date : nearest_previous_saturday(asof_date)
+    saturday = asof_date.saturday? ? asof_date : self.class.nearest_previous_saturday(asof_date)
     loop do
       break if !min_date.nil? && saturday <= min_date
       monday = saturday - 5
@@ -403,7 +403,7 @@ class Holidays
 
   # was originally included in ActiveSupport code base, may be lost in rails integration
   # not sure whether it includes current Saturday, assume not, so if date is already a Saturday, returns date - 7
-  def nearest_previous_saturday(date)
+  def self.nearest_previous_saturday(date)
     date - (date.wday + 1)
   end
 
@@ -450,17 +450,14 @@ class Holidays
   end
 
   # currently in Class Holidays, but doesn't use holidays, so could be self, mirrors academic_years method above
-  def years_to_date(start_date, end_date, move_to_saturday_boundary)
+  def self.years_to_date(start_date, end_date, move_to_saturday_boundary)
     yrs_to_date = []
 
-    last_date_of_period = end_date
-    # move to previous Saturday, so last date a Saturday - better for getting weekends and holidays on right boundaries
-    if move_to_saturday_boundary
-      last_date_of_period = nearest_previous_saturday(last_date_of_period)
-    end
+    # move to previous Saturday, so last date a Saturday - better for
+    # getting weekends and holidays on right boundaries
+    last_date_of_period = move_to_saturday_boundary ? nearest_previous_saturday(end_date) : end_date
 
     # iterate backwards creating a year periods until we run out of AMR data
-
     first_date_of_period = last_date_of_period - 52 * 7 + 1
 
     while first_date_of_period >= start_date
@@ -476,8 +473,15 @@ class Holidays
     yrs_to_date
   end
 
-  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false)
-    days = end_date - start_date + 1
+  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false, move_to_saturday_boundary: false)
+
+    last_date_of_period = end_date
+    # move to previous Saturday, so last date a Saturday - better for getting weekends and holidays on right boundaries
+    if move_to_saturday_boundary
+      last_date_of_period =nearest_previous_saturday(last_date_of_period)
+    end
+
+    days = last_date_of_period - start_date + 1
     periods = days / cadence_days
 
     whole_periods = include_partial_period ? periods.ceil : periods.floor
@@ -485,7 +489,7 @@ class Holidays
     i = -1
     period_index_list = Array.new(whole_periods){ i += 1 }
 
-    period_dates = period_index_list.map { |v| [[end_date - (v + 1) * cadence_days + 1, start_date].max, end_date - v * cadence_days] }
+    period_dates = period_index_list.map { |v| [[last_date_of_period - (v + 1) * cadence_days + 1, start_date].max, last_date_of_period - v * cadence_days] }
 
     cadence = "cadence_#{cadence_days.to_i}_days".to_sym
 
@@ -502,7 +506,7 @@ class Holidays
 
     last_date_of_period = end_date
 
-    last_date_of_period = nearest_previous_saturday(last_date_of_period) if move_to_saturday_boundary
+    last_date_of_period = self.class.nearest_previous_saturday(last_date_of_period) if move_to_saturday_boundary
 
     # go backwards
     offset = 0

@@ -812,8 +812,41 @@ module Series
 
   #=====================================================================================================
   class AccountingCost < ManagerBase
+
+    #Charts showing accounting costs need to use the original underlying meters
+    #when we are using electricity data, otherwise we can end up include solar
+    #self-consumption in the cost calculations.
+    #
+    #Override the method to determine the meter to handle a couple of scenarios
+    #
+    #If we are just running a chart with a generic meter specification, then
+    #delegate to base class. This allows us to set this in chart config:
+    #
+    # meter_definition:  :allelectricity_unmodified
+    #
+    #But sometimes we are running charts with for a specific real or synthetic
+    #mpan. This is used for per-meter cost charts and, as it happens, the aggregate
+    #cost chart in the application.
+    #
+    #In this case we need to use alternative approach to finding the right meter
+    def determine_meter
+      #Just return super if its a generic meter specification
+      return super if chart_config[:meter_definition].is_a? Symbol
+      #Find the meter
+      meter = @school.meter?(chart_config[:meter_definition], true)
+      #Check whether there's an underlying meter. If there isn't then just
+      #use this meter.
+      return meter unless meter.sub_meters.key?(:mains_consume) && !meter.sub_meters[:mains_consume].nil?
+      #Return the original meter. Should only end up being called for
+      #gas and electric meters
+      meter.original_meter
+    end
+
     def series_names
-      meter.amr_data.accounting_tariff.bill_component_types.uniq
+      #Need to use the aggregate meter to get bill components? If using a sub meter
+      #then the list of components may sometimes be empty? E.g. fails if there's a single electricity
+      #meter + solar
+      @school.aggregate_meter(meter.fuel_type).amr_data.accounting_tariff.bill_component_types.uniq
     end
 
     def half_hour_breakdown(date, hhi)
@@ -826,7 +859,11 @@ module Series
       (d1..d2).each do |date|
         components = meter.amr_data.accounting_tariff.bill_component_costs_for_day(date)
         components.each do |type, value|
-          bill_components[type] += value
+          if bill_components[type] == nil
+            bill_components[type] = value
+          else
+            bill_components[type] += value
+          end
         end
       end
 

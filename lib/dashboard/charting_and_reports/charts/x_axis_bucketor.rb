@@ -44,6 +44,8 @@ class XBucketBase
     case type
     when :month
       XBucketMonth.new(type, periods)
+    when :month_excluding_year
+      XBucketMonthExcludingYear.new(type, periods)
     when :week
       XBucketWeek.new(type, periods)
     when :day
@@ -63,6 +65,27 @@ class XBucketBase
     else
       raise "Unknown x bucket type " + type.to_s
     end
+  end
+end
+
+class XBucketMonthExcludingYear < XBucketBase
+  def initialize(type, periods)
+    super(type, periods)
+  end
+
+  def key(date, _halfhour_index)
+    I18n.l(date, format: "%b")
+  end
+
+  def create_x_axis
+    first_day_of_month = data_start_date # .beginning_of_month
+    while first_day_of_month <= data_end_date
+      @x_axis.push(I18n.l(first_day_of_month, format: '%b'))
+      last_day_of_month = first_day_of_month.beginning_of_month.next_month - 1 # can't use end_of_month as there is a active_support error: undefined method `days_in_month'
+      @x_axis_bucket_date_ranges.push([first_day_of_month, last_day_of_month])
+      first_day_of_month = first_day_of_month.next_month.beginning_of_month
+    end
+    @x_axis_bucket_date_ranges.last[1] = data_end_date if @x_axis_bucket_date_ranges.last[1] > data_end_date
   end
 end
 

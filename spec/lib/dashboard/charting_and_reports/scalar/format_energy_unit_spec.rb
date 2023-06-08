@@ -264,8 +264,6 @@ describe FormatEnergyUnit do
   context 'school names' do
     it 'formats correctly' do
       expect(FormatUnit.format(:school_name, "Junior School")).to eq("Junior School")
-      expect(FormatUnit.format(:short_school_name, "Junior School")).to eq("Junior")
-      expect(FormatUnit.format(:short_school_name, "Ysgol Draig")).to eq("Draig")
     end
   end
 

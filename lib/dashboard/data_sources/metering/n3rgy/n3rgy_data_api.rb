@@ -105,7 +105,7 @@ module MeterReadingsFeeds
       url += fuel_type.to_s + '/' unless fuel_type.nil?
       url += data_type.to_s + '/' unless data_type.nil?
       url += element.to_s unless element.nil?
-      url += half_hourly_query(start_date, end_date + 1) unless start_date.nil? || end_date.nil?
+      url += half_hourly_query(start_date, end_date) unless start_date.nil? || end_date.nil?
       url
     end
 

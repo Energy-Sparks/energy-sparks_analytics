@@ -208,8 +208,12 @@ class ChartManagerTimescaleManipulation
     start_date, end_date = determine_chart_range(chart_config_original)
     timescale_type, value = timescale_type(chart_config_original)
     case timescale_type
-    when :year, :up_to_a_year
+    when :year
       ((end_date - start_date + 1) / 365.0).floor
+    when :up_to_a_year
+      # Replaced older logic to allow dashboard charts to navigate through the entire
+      # range of data.
+      Holidays.periods_cadence(start_date, end_date, include_partial_period: true).count
     when :academicyear
       @school.holidays.academic_years(start_date, end_date).length
     when :workweek
