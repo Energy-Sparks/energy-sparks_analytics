@@ -68,7 +68,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             description: "These benchmarks compare schools' solar PV production and the benefits of installing solar.",
             benchmarks: {
               change_in_solar_pv_since_last_year: 'Annual change in solar PV production and resulting CO2 savings',
-              solar_pv_benefit_estimate: 'Benefit of solar PV installation'
+              solar_pv_benefit_estimate: 'Benefit of solar PV installation',
+              solar_generation_summary: 'Solar generation summary'
             }
           },
           {
@@ -149,7 +150,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             description: "These benchmarks compare schools' solar PV production and the benefits of installing solar.",
             benchmarks: {
               change_in_solar_pv_since_last_year: 'Annual change in solar PV production and resulting CO2 savings',
-              solar_pv_benefit_estimate: 'Benefit of solar PV installation'
+              solar_pv_benefit_estimate: 'Benefit of solar PV installation',
+              solar_generation_summary: 'Solar generation summary'
             }
           },
           {
