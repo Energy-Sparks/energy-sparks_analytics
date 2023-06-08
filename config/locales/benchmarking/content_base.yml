@@ -50,7 +50,6 @@ en:
         change_in_gas_since_last_year: Annual change in gas use
         change_in_solar_pv_since_last_year: Annual change in solar PV production and resulting CO2 savings
         change_in_storage_heaters_since_last_year: Annual change in storage heater
-        solar_generation_summary: Solar generation summary
         data:
           metering:
             electricity: Electricity
@@ -70,6 +69,7 @@ en:
         recent_change_in_baseload: Recent change in baseload
         seasonal_baseload_variation: Seasonal baseload variation
         sept_nov_2021_2022_energy_comparison: September to November 2021 versus 2022 energy use
+        solar_generation_summary: Solar generation summary
         solar_pv_benefit_estimate: Benefit of solar PV installation
         storage_heater_consumption_during_holiday: Storage heater use during current holiday
         thermostat_sensitivity: Annual saving through 1C reduction in thermostat temperature
@@ -269,9 +269,14 @@ en:
           school_name: School name
           size_kwp: 'Size: kWp'
           size_of_reduction_rating: Size of reduction rating
+          solar_export: Export (kWh)
+          solar_generation: Generation (kWh)
+          solar_mains_consume: Mains consumption (kWh)
+          solar_mains_onsite: Total onsite consumption (kWh)
           solar_pv: Solar PV
           solar_pv_co2_last_year: Solar PV CO2 (last year)
           solar_pv_co2_previous_year: Solar PV CO2 (previous year)
+          solar_self_consume: Self consumption (kWh)
           standard_deviation_of_start_time__hours_last_year: Standard deviation of start time - hours, last year
           start_date_for_target: Start date for target
           storage_heater_co2_last_year: Storage Heater CO2 (last year)
@@ -295,11 +300,6 @@ en:
           weekend: Weekend
           winter_baseload_kw: Winter baseload kW
           year_before_joined: Year before joined
-          solar_generation: Generation (kWh)
-          solar_export: Export (kWh)
-          solar_self_consume: Self consumption (kWh)
-          solar_mains_consume: Mains consumption (kWh)
-          solar_mains_onsite: Total onsite consumption (kWh)
         no_schools_to_report_for_filter: There are no schools to report using this filter for this benchmark
         the_tariff_has_changed_during_the_last_year_html: |-
           <p>
@@ -308,12 +308,6 @@ en:
                 are calculated using the relevant tariff at the time
           </p>
       content:
-        solar_generation_summary:
-          introduction_text_html: |-
-            <p>
-            Summarises the performance of solar panels installed on these schools over the last 12 months. Equivalent to the
-            "Benefits of having installed solar panels" table on the school's individual solar analysis.
-            </p>
         annual_change_in_electricity_out_of_hours_use:
           introduction_text_html: |-
             <p>
@@ -696,6 +690,12 @@ en:
           introduction_text_html: |-
             <p>A school's baseload is the electricity consumed by appliances kept running at all times.</p>
             <p>In general, the baseload in the winter should be very similar to the summer. In practice many schools leave electric heaters on overnight when the school is unoccupied. Identifying and turning off or better timing such equipment is a quick way of saving electricity and costs.</p>
+        solar_generation_summary:
+          introduction_text_html: |-
+            <p>
+            Summarises the performance of solar panels installed on these schools over the last 12 months. Equivalent to the
+            "Benefits of having installed solar panels" table on the school's individual solar analysis.
+            </p>
         solar_pv_benefit_estimate:
           introduction_text_html: |-
             <p>
