@@ -144,7 +144,8 @@ module Benchmarking
       ],
       solar_benchmarks: [
         :change_in_solar_pv_since_last_year,
-        :solar_pv_benefit_estimate
+        :solar_pv_benefit_estimate,
+        :solar_generation_summary
       ],
       date_limited_comparisons: [
         :layer_up_powerdown_day_november_2022,
@@ -1787,6 +1788,27 @@ module Benchmarking
         admin_only: false,
         column_heading_explanation: :last_year_definition_html
       },
+      solar_generation_summary: {
+        benchmark_class: BenchmarkContentSolarGenerationSummary,
+        name:     'Solar generation summary',
+        columns:  [
+          { data: 'addp_name', name: :name,     units: String, chart_data: false },
+          #generation
+          { data: 'sgen_sagk', name: :solar_generation, units: :kwh},
+          #self consume
+          { data: 'sgen_sask', name: :solar_self_consume, units: :kwh},
+          #export
+          { data: 'sgen_saek', name: :solar_export, units: :kwh},
+          #mains,
+          { data: 'sgen_samk', name: :solar_mains_consume, units: :kwh},
+          #mains, plus self consume
+          { data: 'sgen_sack', name: :solar_mains_onsite, units: :kwh},
+        ],
+        where:   ->{ !sgen_sagk.nil? },
+        sort_by:  [0],
+        type: %i[table],
+        admin_only: true
+      }
     }.freeze
   end
 end

@@ -99,6 +99,16 @@ module Benchmarking
     end
   end
   #=======================================================================================
+  class BenchmarkContentSolarGenerationSummary < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.solar_generation_summary.introduction_text_html')
+      ERB.new(text).result(binding)
+    end
+  end
+
+  #=======================================================================================
   class BenchmarkBaseloadBase < BenchmarkContentBase
     def content(school_ids: nil, filter: nil, user_type: nil)
       @baseload_impact_html = baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
