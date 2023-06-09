@@ -152,11 +152,11 @@ module AnalyseHeatingAndHotWater
 
         if !simple_model.enough_samples_for_good_fit
           #puts simple_model.no_heating?
-          puts simple_model.summer_occupied_day_samples
-          puts MINIMUM_NON_HEATING_MODEL_SAMPLES
-          puts simple_model.winter_heating_samples
-          puts simple_model.minimum_samples_for_model_to_run_well
-          puts simple_model.class
+          #puts simple_model.summer_occupied_day_samples
+          #puts MINIMUM_NON_HEATING_MODEL_SAMPLES
+          #puts simple_model.winter_heating_samples
+          #puts simple_model.minimum_samples_for_model_to_run_well
+          #puts simple_model.class
           raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples} mpan or mprn #{@meter.mpan_mprn} period: #{period.start_date} to #{period.end_date}"
         end
         thermal_mass_model.standard_deviation_percent < simple_model.standard_deviation_percent ? thermal_mass_model : simple_model
@@ -1469,8 +1469,7 @@ module AnalyseHeatingAndHotWater
     def winter_heating_samples
       if SCHOOLDAYHEATINGMODELTYPES.any? { |model_type| model(model_type).nil? || !model(model_type).valid? }
         logger.warn 'Not all winter heating models are valid, returning 0.0'
-        puts SCHOOLDAYHEATINGMODELTYPES.inspect
-        SCHOOLDAYHEATINGMODELTYPES.each { |model_type| puts model_type if model(model_type).nil? || !model(model_type).valid? }
+        #SCHOOLDAYHEATINGMODELTYPES.each { |model_type| puts model_type if model(model_type).nil? || !model(model_type).valid? }
         0.0
       else
         SCHOOLDAYHEATINGMODELTYPES.map { |model_type| model(model_type).samples }.sum
