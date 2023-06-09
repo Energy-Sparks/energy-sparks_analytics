@@ -1,5 +1,11 @@
-class SolarPVPanelsNewBenefit
+# Estimates potential revised consumption, costs, and solar PV output for a
+# solar panel installation of a given size
+#
+# Uses existing electricity data, and Sheffield solar PV data to estimate the savings
+# and solar output.
+class ConsumptionEstimator
   include Logging
+
   def annual_predicted_pv_totals_fast(electricity_amr, meter_collection, start_date, end_date, kwp)
     create_solar_pv_data_fast_summary(electricity_amr, meter_collection, start_date, end_date, kwp)
   end

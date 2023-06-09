@@ -163,7 +163,7 @@ module SolarPhotovoltaics
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Layout/LineLength, Naming/VariableNumber
 
     def pv_panels
-      SolarPVPanelsNewBenefit.new
+      ConsumptionEstimator.new
     end
 
     def blended_co2_per_kwh
