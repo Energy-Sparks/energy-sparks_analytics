@@ -237,7 +237,12 @@ class SolarPVPanels
     mains_amr.date_range.each do |date|
       if synthetic_data?(date, :override_self_consume) # set only where config says so
         self_consume_x48 = calculate_days_self_consumption_days_data(date, meter_collection, mains_amr, pv_amr)
-        self_consumption_amr.add(date, one_day_reading(mpan, date, 'SOLO', self_consume_x48)) unless self_consume_x48.nil?
+        unless self_consume_x48.nil?
+          exported_x48 = export_amr.one_days_data_x48(date)
+          generated_x48 = pv_amr.one_days_data_x48(date)
+          self_consume_x48 = normalise_self_consumption(self_consume_x48, exported_x48, generated_x48)
+          self_consumption_amr.add(date, one_day_reading(mpan, date, 'SOLO', self_consume_x48))
+        end
       end
     end
   end
@@ -261,8 +266,8 @@ class SolarPVPanels
     self_x48      = AMRData.one_day_zero_kwh_x48
 
     yesterday_baseload_kw = yesterday_baseload_kw(date, mains_amr_data)
-    unoccupied = unoccupied?(meter_collection, date)
 
+    unoccupied = unoccupied?(meter_collection, date)
     (0..47).each do |hh_i|
       #how much are we consuming and generating?
       mains_kwh = mains_amr_data.kwh(date, hh_i)
@@ -271,19 +276,10 @@ class SolarPVPanels
       #assume we're always consuming at least the baseload
       unoccupied_appliance_kwh = [mains_kwh, yesterday_baseload_kw / 2.0].max
 
-      #TODO: we diverge from test script here, which produces zero self consumption when occupied
-      #That seems incorrect, so have left original logic in place, as our assumption is that
-      #during days when occupied we're always fully consuming solar
       if unoccupied
         #if school is unoccupied and we have some solar generation
         solar_pv_on           = generation_kwh > 0.0
-        #TODO: if our current mains consumption is more than y'day baseload, then we'll end up
-        #with a self-consumption of 0.0, regardless of amount of solar generation.
-        #self_consumption_kwh  = solar_pv_on ? [unoccupied_appliance_kwh - mains_kwh, 0.0].max : 0.0
-        #
-        #TODO: if current mains consumption is < baseload, e.g. holiday switch off,
-        #then we'll end up consuming less than baseload, but will even out over time
-        self_consumption_kwh  = solar_pv_on ? unoccupied_appliance_kwh : 0.0
+        self_consumption_kwh  = solar_pv_on ? [unoccupied_appliance_kwh - mains_kwh, 0.0].max : 0.0
         self_x48[hh_i] = self_consumption_kwh
       else
         # else all the pv output is being consumed
@@ -294,6 +290,31 @@ class SolarPVPanels
     compact_print_day('self consumption', date, self_x48)
 
     self_x48
+  end
+
+  #Post-processing step to normalise the calculated self-consumption. Will not
+  #be required once we are able to do half-hourly offsets
+  def normalise_self_consumption(self_consume_x48, exported_x48, generated_x48)
+    #calculate total of (self consume - exported - generation)
+    #we want this to be zero ideally, so if not, we will adjust the self consumption
+    cross_check_total = self_consume_x48.map.with_index do |self_kwh, hh|
+      self_kwh - exported_x48[hh] - generated_x48[hh]
+    end.sum
+    return self_consume_x48 if cross_check_total == 0.0
+
+    #calculate how much to add to each hh period
+    hh_periods_above_zero = self_consume_x48.count {|hh| hh > 0 }
+    adjustment = cross_check_total / hh_periods_above_zero
+
+    #adjust each period
+    normalised_self_consume_x48 = self_consume_x48.map.with_index do |self_kwh, hh|
+      #calculate adjustment
+      adjusted_kwh = self_kwh > 0 ? self_kwh - adjustment : 0.0
+      #adjusted value should not be lower than generation
+      [adjusted_kwh, generated_x48[hh]].min
+    end
+
+    normalised_self_consume_x48
   end
 
   # Create a solar generation meter, based on the mains_consume meter in the map
@@ -402,29 +423,6 @@ class SolarPVPanels
   def one_day_reading(mpan, date, type, data_x48 = Array.new(48, 0.0))
     OneDayAMRReading.new(mpan, date, type, nil, DateTime.now, data_x48)
   end
-
-  # No longer called as part of solar export/self-consumption changes
-  #
-  # The removal of positive export values is done in export calculation
-  # And we're no longer normalising self-consumption?
-  #
-  # to avoid persistent bias in output rescale pv_consumed_onsite_kwh_x48 if
-  # the baseload minus the predicted pv output doesn't result in an export
-  # and the mains consumption is zero or near zero, i.e. mains consumption is zero
-  # but there isn't enough predicted pv to result in an export
-  #
-  # def normalise_pv(date, exported_pv_kwh_x48, pv_consumed_onsite_kwh_x48)
-  #   positive_export_kwh = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? kwh : 0.0 }.sum # map then sum to avoid StatSample sum bug
-  #   negative_only_exported_kwh_x48 = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? 0.0 : kwh }
-  #   days_pv_consumed_onsite_kwh = pv_consumed_onsite_kwh_x48.sum
-  #   scale_factor = days_pv_consumed_onsite_kwh == 0 ? 1.0 : 1.0 + (positive_export_kwh / days_pv_consumed_onsite_kwh)
-  #   scaled_onsite_kwh_x48 = pv_consumed_onsite_kwh_x48.map { |kwh| kwh * scale_factor }
-  #
-  #   compact_print_day('normalised export', date, negative_only_exported_kwh_x48)
-  #   compact_print_day('scaled onsite',     date, scaled_onsite_kwh_x48)
-  #
-  #   [negative_only_exported_kwh_x48, scaled_onsite_kwh_x48]
-  # end
 
   #Is the school unoccupied on a given date
   def unoccupied?(meter_collection, date)
