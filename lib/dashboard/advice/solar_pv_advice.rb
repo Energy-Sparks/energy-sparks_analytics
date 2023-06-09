@@ -30,7 +30,7 @@ class AdviceSolarPV < AdviceElectricityBase
     charts_and_html += debug_content
     charts_and_html.push( { type: :html, content: introduction } )
     charts_and_html.push( { type: :html, content: table_intro } )
-    charts_and_html.push( { type: :html, content: pv_benefit_estimator.solar_pv_scenario_table_html } )
+    #charts_and_html.push( { type: :html, content: pv_benefit_estimator.solar_pv_scenario_table_html } )
     charts_and_html.push( { type: :html, content: table_explanation } )
     charts_and_html.push( { type: :html, content: caveats } )
     charts_and_html
@@ -111,7 +111,7 @@ class AdviceSolarPV < AdviceElectricityBase
         <li>
           The calculations currently assume you will get some income from any
           exported electricity. Since the end of the Feed-In-Tariff in April 2019
-          automatic income from export has been replaced by the 
+          automatic income from export has been replaced by the
           Smart Export Guarantee (SEG) scheme but this income is dependent on
           agreement with your electricity supplier
         </li>
@@ -137,7 +137,7 @@ class AdviceSolarPV < AdviceElectricityBase
         </li>
         <li>
           The benefits of your solar pv will be reduced if you make your school more energy efficient.
-          However, if you want your school to reduce its carbon emissions you should consider 
+          However, if you want your school to reduce its carbon emissions you should consider
           both installing solar panels and reducing your electricity consumption.
         </li>
       </ul>

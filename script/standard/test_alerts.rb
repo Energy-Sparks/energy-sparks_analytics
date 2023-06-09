@@ -23,7 +23,7 @@ overrides = {
 #    AlertElectricityBaseloadVersusBenchmark,
 #    AlertHeatingComingOnTooEarly,
 #    AlertPreviousYearHolidayComparisonElectricity,
-#    AlertSolarPVBenefitEstimator,
+    AlertSolarPVBenefitEstimator,
 #    AlertElectricityAnnualVersusBenchmark,
 #    AlertElectricityLongTermTrend,
 #    AlertGasAnnualVersusBenchmark,
@@ -42,7 +42,7 @@ overrides = {
 #    AlertEaster2023ShutdownGasComparison,
 #    AlertEaster2023ShutdownStorageHeaterComparison
 #    AlertOutOfHoursElectricityUsagePreviousYear
-     AlertSolarGeneration
+#     AlertSolarGeneration
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [], control: { asof_date: asof_date } }

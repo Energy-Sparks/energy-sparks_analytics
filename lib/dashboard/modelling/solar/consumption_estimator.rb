@@ -1,29 +1,19 @@
-class SolarPVPanelsNewBenefit
+# Estimates potential revised consumption, costs, and solar PV output for a
+# solar panel installation of a given size
+#
+# Uses existing electricity data, and Sheffield solar PV data to estimate the savings
+# and solar output.
+class ConsumptionEstimator
   include Logging
+
   def annual_predicted_pv_totals_fast(electricity_amr, meter_collection, start_date, end_date, kwp)
     create_solar_pv_data_fast_summary(electricity_amr, meter_collection, start_date, end_date, kwp)
-  end
-
-  def average_annual_yield_x48_deprecated(electricity_amr, meter_collection, start_date, end_date)
-    culmulative_yield_x48 = AMRData.one_day_zero_kwh_x48
-    culmulative_yield_count = 0
-
-    (start_date..end_date).each do |date|
-      pv_yield_x48 = meter_collection.solar_pv[date]
-      next if pv_yield_x48.nil?
-      culmulative_yield_x48 = AMRData.fast_add_x48_x_x48(culmulative_yield_x48, pv_yield_x48)
-      culmulative_yield_count += 1
-    end
-
-    AMRData.fast_multiply_x48_x_scalar(culmulative_yield_x48, 1.0 / culmulative_yield_count)
   end
 
   private
 
   def create_solar_pv_data_fast_summary(electricity_amr, meter_collection, start_date, end_date, kwp)
     logger.info 'Simulating half hourly benefit of new solar pv panels'
-
-    latest_tariff_£_per_kwh_x48 = electricity_amr.blended_rate_£_per_kwh_x48(end_date)
 
     solar_pv_output_total             = 0.0
     exported_solar_pv_total           = 0.0
