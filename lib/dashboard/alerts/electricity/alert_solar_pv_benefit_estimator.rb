@@ -1,6 +1,7 @@
 require 'minimization'
 class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   attr_reader :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
+  attr_reader :solar_pv_scenario_table, :solar_pv_scenario_table_html
   attr_reader :one_year_saving_£current
 
   def initialize(school)
@@ -21,7 +22,29 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     aggregate_meter.amr_data.days_valid_data > 364 ? :enough : :not_enough
   end
 
+  def self.scenario_table_text
+    [
+      'Capacity(kWp)',
+      'Panels',
+      'Area (m2)',
+      'Annual self consumed solar electricity (kWh)',
+      'Annual exported solar electricity (kWh)',
+      'Annual output from panels (kWh)',
+      'Reduction in mains consumption',
+      'Annual saving',
+      'Annual saving (CO2)',
+      'Estimated cost',
+      'Payback years'
+    ]
+  end
+
   TEMPLATE_VARIABLES = {
+    solar_pv_scenario_table: {
+      description: 'Estimate of benefits of solar PV for a range of capacity/panels',
+      units:    :table,
+      column_types: [:kwp, :panels, :m2, :kwh, :kwh, :kwh, :percent, :£, :co2, :£, :years],
+      header:   scenario_table_text
+    },
     optimum_kwp: {
       description: 'Optimum PV capacity for school (kWp)',
       units:  :kwp,
@@ -49,6 +72,11 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     raise EnergySparksNotEnoughDataException, "Only #{days_data.to_i} days meter data" unless days_data > 364
 
     scenarios, optimum_kwp = calculate_range_of_scenarios(asof_date)
+
+    @solar_pv_scenario_table  = format_scenarios_into_table(scenarios, :raw)
+    html_table_data           = format_scenarios_into_table(scenarios, :html)
+
+    @solar_pv_scenario_table_html = HtmlTableFormatting.new(self.class.scenario_table_text, html_table_data).html
 
     optimum_scenario = find_optimum_kwp(scenarios, round_optimum_kwp(optimum_kwp))
     promote_optimum_variables(optimum_scenario)
@@ -88,6 +116,46 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     (kwp * 2.0).round(0) / 2.0
   end
 
+  def self.scenario_table_text
+    [
+      'Capacity(kWp)',
+      'Panels',
+      'Area (m2)',
+      'Annual self consumed solar electricity (kWh)',
+      'Annual exported solar electricity (kWh)',
+      'Annual output from panels (kWh)',
+      'Reduction in mains consumption',
+      'Annual saving',
+      'Annual saving (CO2)',
+      'Estimated capital cost',
+      'Payback years'
+    ]
+  end
+
+  def format_scenarios_into_table(scenarios, medium = :html)
+    rows = scenarios.map do |scenario|
+      [
+        format_t(scenario[:kwp],                         :kwp,     medium),
+        format_t(scenario[:panels],                      :panels,  medium),
+        format_t(scenario[:area],                        :m2,      medium),
+        format_t(scenario[:solar_consumed_onsite_kwh],   :kwh,     medium),
+        format_t(scenario[:exported_kwh],                :kwh,     medium),
+        format_t(scenario[:solar_pv_output_kwh],         :kwh,     medium),
+        format_t(scenario[:reduction_in_mains_percent],  :percent, medium),
+        format_t(scenario[:total_annual_saving_£],       :£,       medium),
+        format_t(scenario[:total_annual_saving_co2],     :co2,     medium),
+        format_t(scenario[:capital_cost_£],              :£,       medium),
+        format_t(scenario[:payback_years],               :years,   medium)
+      ]
+    end
+    rows
+  end
+
+  def format_t(value, unit, medium)
+    return value if medium == :raw
+    FormatEnergyUnit.format(unit, value, medium, false, true)
+  end
+
   def kwp_scenario_including_optimum(optimum_kwp)
     optimum = round_optimum_kwp(optimum_kwp)
     kwp_scenario_ranges.push(optimum).sort.uniq
@@ -120,10 +188,11 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     start_date = asof_date - 365
 
     pv_panels = ConsumptionEstimator.new # (attributes(asof_date, kwp))
-    kwh_totals = estimate_consumption(start_date, asof_date, kwp)
+    kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregate_meter.amr_data, @school, start_date, asof_date, kwp)
 
-    kwh = existing_annual_kwh(start_date, asof_date)
-    £ = existing_annual_£(start_date, asof_date)
+    kwh = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date)
+
+    £   = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date, :£current)
 
     {
       kwp:                          kwp,
@@ -139,22 +208,6 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       solar_pv_output_kwh:          kwh_totals[:solar_pv_output],
       solar_pv_output_co2:          kwh_totals[:solar_pv_output] * blended_co2_per_kwh
     }
-  end
-
-  def estimate_consumption(start_date, asof_date, kwp)
-    pv_panels.annual_predicted_pv_totals_fast(aggregate_meter.amr_data, @school, start_date, asof_date, kwp)
-  end
-
-  def existing_annual_kwh(start_date, end_date)
-    aggregate_meter.amr_data.kwh_date_range(start_date, end_date)
-  end
-
-  def existing_annual_£(start_date, end_date)
-    aggregate_meter.amr_data.kwh_date_range(start_date, end_date, :£current)
-  end
-
-  def pv_panels
-    ConsumptionEstimator.new
   end
 
   def number_of_panels(kwp)
