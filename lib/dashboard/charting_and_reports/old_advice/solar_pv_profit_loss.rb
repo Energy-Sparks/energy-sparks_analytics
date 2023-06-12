@@ -30,7 +30,11 @@ class SolarPVProfitLoss
   end
 
   def annual_solar_pv_kwh
-    annual_solar_pv_consumed_onsite_kwh + annual_exported_solar_pv_kwh
+    #report using data from the generation meter, rather than adding up the other
+    #figures. This aligns this class with what the charts and the change in
+    #solar pv benchmark use
+    #annual_solar_pv_consumed_onsite_kwh + annual_exported_solar_pv_kwh
+    last_years_kwh(sub_meter(:generation))[:kwh]
   end
 
   def annual_saving_from_solar_pv_percent
@@ -67,7 +71,7 @@ class SolarPVProfitLoss
 
     kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
     co2 = meter.amr_data.kwh_date_range(start_date, end_date, :co2)
-    
+
     {
       start_date:             start_date,
       end_date:               end_date,
@@ -123,7 +127,7 @@ class SolarPVProfitLoss
       next unless SolarPVPanels::SUBMETER_TYPES.include?(meter.name) # no storage heaters
 
       kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh).magnitude
- 
+
       profit_loss.push(
         {
           name: meter.name,
