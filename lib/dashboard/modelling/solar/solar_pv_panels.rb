@@ -240,25 +240,6 @@ class SolarPVPanels
         unless self_consume_x48.nil?
           exported_x48 = export_amr.one_days_data_x48(date)
           generated_x48 = pv_amr.one_days_data_x48(date)
-
-          if date == Date.new(2022,8,14)
-            puts "========== HERE ========== "
-            puts "MPAN: #{mpan}"
-            puts "Unoccupied?: #{unoccupied?(meter_collection, date)}"
-            puts "Baseload: #{yesterday_baseload_kw(date, mains_amr)}"
-            puts "MAINS"
-            puts mains_amr.days_kwh_x48(date).inspect
-            puts "SOLAR PV"
-            puts pv_amr.days_kwh_x48(date).inspect
-            puts "EXPORT"
-            puts export_amr.days_kwh_x48(date).inspect
-            puts "SELF CONSUME"
-            puts self_consume_x48.inspect
-            puts "NORMALISED SELF CONSUME"
-            puts normalise_self_consumption(self_consume_x48, exported_x48, generated_x48).inspect
-            puts "========== HERE ========== "
-          end
-
           self_consume_x48 = normalise_self_consumption(self_consume_x48, exported_x48, generated_x48)
           self_consumption_amr.add(date, one_day_reading(mpan, date, 'SOLO', self_consume_x48))
         end
@@ -330,8 +311,10 @@ class SolarPVPanels
 
     #adjust each period
     normalised_self_consume_x48 = self_consume_x48.map.with_index do |self_kwh, hh|
-      #calculate adjustment
+      #calculate revised self consumption using the adjustment value
       adjusted_kwh = self_kwh > 0 ? self_kwh - adjustment : 0.0
+      #cannot be negative
+      adjusted_kwh = 0.0 if adjusted_kwh < 0.0
       #adjusted value should not be lower than generation
       [adjusted_kwh, generated_x48[hh]].min
     end
