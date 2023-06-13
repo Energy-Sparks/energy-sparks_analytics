@@ -279,6 +279,7 @@ class SolarPVPanels
       if unoccupied
         #if school is unoccupied and we have some solar generation
         solar_pv_on           = generation_kwh > 0.0
+
         self_consumption_kwh  = solar_pv_on ? [unoccupied_appliance_kwh - mains_kwh, 0.0].max : 0.0
         self_x48[hh_i] = self_consumption_kwh
       else
@@ -295,6 +296,8 @@ class SolarPVPanels
   #Post-processing step to normalise the calculated self-consumption. Will not
   #be required once we are able to do half-hourly offsets
   def normalise_self_consumption(self_consume_x48, exported_x48, generated_x48)
+    return generated_x48 if exported_x48.all? { |hh| hh == 0.0 }
+
     #calculate total of (self consume - exported - generation)
     #we want this to be zero ideally, so if not, we will adjust the self consumption
     cross_check_total = self_consume_x48.map.with_index do |self_kwh, hh|
@@ -308,8 +311,10 @@ class SolarPVPanels
 
     #adjust each period
     normalised_self_consume_x48 = self_consume_x48.map.with_index do |self_kwh, hh|
-      #calculate adjustment
+      #calculate revised self consumption using the adjustment value
       adjusted_kwh = self_kwh > 0 ? self_kwh - adjustment : 0.0
+      #cannot be negative
+      adjusted_kwh = 0.0 if adjusted_kwh < 0.0
       #adjusted value should not be lower than generation
       [adjusted_kwh, generated_x48[hh]].min
     end
