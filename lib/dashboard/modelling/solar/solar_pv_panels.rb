@@ -240,6 +240,25 @@ class SolarPVPanels
         unless self_consume_x48.nil?
           exported_x48 = export_amr.one_days_data_x48(date)
           generated_x48 = pv_amr.one_days_data_x48(date)
+
+          if date == Date.new(2022,8,14)
+            puts "========== HERE ========== "
+            puts "MPAN: #{mpan}"
+            puts "Unoccupied?: #{unoccupied?(meter_collection, date)}"
+            puts "Baseload: #{yesterday_baseload_kw(date, mains_amr)}"
+            puts "MAINS"
+            puts mains_amr.days_kwh_x48(date).inspect
+            puts "SOLAR PV"
+            puts pv_amr.days_kwh_x48(date).inspect
+            puts "EXPORT"
+            puts export_amr.days_kwh_x48(date).inspect
+            puts "SELF CONSUME"
+            puts self_consume_x48.inspect
+            puts "NORMALISED SELF CONSUME"
+            puts normalise_self_consumption(self_consume_x48, exported_x48, generated_x48).inspect
+            puts "========== HERE ========== "
+          end
+
           self_consume_x48 = normalise_self_consumption(self_consume_x48, exported_x48, generated_x48)
           self_consumption_amr.add(date, one_day_reading(mpan, date, 'SOLO', self_consume_x48))
         end
@@ -279,6 +298,7 @@ class SolarPVPanels
       if unoccupied
         #if school is unoccupied and we have some solar generation
         solar_pv_on           = generation_kwh > 0.0
+
         self_consumption_kwh  = solar_pv_on ? [unoccupied_appliance_kwh - mains_kwh, 0.0].max : 0.0
         self_x48[hh_i] = self_consumption_kwh
       else
@@ -295,6 +315,8 @@ class SolarPVPanels
   #Post-processing step to normalise the calculated self-consumption. Will not
   #be required once we are able to do half-hourly offsets
   def normalise_self_consumption(self_consume_x48, exported_x48, generated_x48)
+    return generated_x48 if exported_x48.all? { |hh| hh == 0.0 }
+
     #calculate total of (self consume - exported - generation)
     #we want this to be zero ideally, so if not, we will adjust the self consumption
     cross_check_total = self_consume_x48.map.with_index do |self_kwh, hh|
