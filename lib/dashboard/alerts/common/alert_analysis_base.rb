@@ -265,11 +265,9 @@ class AlertAnalysisBase < ContentBase
 
   def assign_commmon_saving_variables(one_year_saving_£:, capital_cost:, one_year_saving_co2:)
     @one_year_saving_£ = as_range(one_year_saving_£)
-    #TODO one_year_saving_£ can never be nil
     @ten_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : Range.new(@one_year_saving_£.first * 10.0, @one_year_saving_£.last * 10.0)
 
     #PRIORITY
-    #TODO one_year_saving_£ can never be nil
     @average_one_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : ((@one_year_saving_£.first + @one_year_saving_£.last) / 2.0)
     @average_ten_year_saving_£ = @average_one_year_saving_£ * 10.0
 
@@ -279,7 +277,6 @@ class AlertAnalysisBase < ContentBase
 
     @capital_cost = as_range(capital_cost)
     #PRIORITY - dashboard only
-    #TODO capital_cost can never be nil
     @average_capital_cost = @capital_cost.nil? ? 0.0 : ((@capital_cost.first + @capital_cost.last)/ 2.0)
 
     @average_payback_years = @average_one_year_saving_£ == 0.0 ? 0.0 : @average_capital_cost / @average_one_year_saving_£
