@@ -86,6 +86,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     #set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£], optimum_scenario[:total_annual_saving_co2])
 
     assign_commmon_saving_variables(
+      one_year_saving_kwh: optimum_scenario[:reduction_in_mains_kwh],
       one_year_saving_£: @one_year_saving_£current,
       capital_cost: optimum_scenario[:capital_cost_£],
       one_year_saving_co2: optimum_scenario[:total_annual_saving_co2])
@@ -207,6 +208,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       existing_annual_£:            £,
       new_mains_consumption_kwh:    kwh_totals[:new_mains_consumption],
       new_mains_consumption_£:      kwh_totals[:new_mains_consumption_£],
+      reduction_in_mains_kwh:       (kwh - kwh_totals[:new_mains_consumption]),
       reduction_in_mains_percent:   (kwh - kwh_totals[:new_mains_consumption]) / kwh,
       solar_consumed_onsite_kwh:    kwh_totals[:solar_consumed_onsite],
       exported_kwh:                 kwh_totals[:exported],
