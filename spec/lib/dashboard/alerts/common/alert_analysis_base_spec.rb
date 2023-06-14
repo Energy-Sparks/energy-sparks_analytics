@@ -3,7 +3,7 @@ require 'dashboard'
 
 #Custom subclass for testing assigning of variables in base class methods.
 #For most complex tests use a proper double
-class CustomAlert < AlertAnalysisBase
+class CustomAnalysisAlert < AlertAnalysisBase
   def initialize(meter_collection, report_type)
     super(meter_collection, report_type)
   end
@@ -16,7 +16,7 @@ describe AlertAnalysisBase do
 
   context '#set_savings_capital_costs_payback' do
     let(:meter_collection)  { double('meter-collection') }
-    let(:alert)             { CustomAlert.new(meter_collection, 'analysis-test')}
+    let(:alert)             { CustomAnalysisAlert.new(meter_collection, 'analysis-test')}
 
     before(:each) do
       allow(meter_collection).to receive(:aggregated_heat_meters).and_return(nil)
