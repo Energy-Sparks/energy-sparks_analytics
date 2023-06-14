@@ -62,6 +62,7 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
 
     #set_savings_capital_costs_payback(warm_weather_heating_days_all_days_£current, 0.0, warm_weather_heating_days_all_days_co2)
     assign_commmon_saving_variables(
+      one_year_saving_kwh: warm_weather_heating_days_all_days_kwh,
       one_year_saving_£: warm_weather_heating_days_all_days_£current,
       capital_cost: 0.0,
       one_year_saving_co2: warm_weather_heating_days_all_days_co2)

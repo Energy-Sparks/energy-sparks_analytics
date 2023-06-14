@@ -134,10 +134,11 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
 
     @percent_change_in_consumption = ((@last_weeks_consumption_kwh - @week_befores_consumption_kwh) / @week_befores_consumption_kwh)
 
+    saving_kwh  = average_school_days_in_year * (@last_weeks_consumption_kwh - @week_befores_consumption_kwh) / days_in_week
     saving_£    = average_school_days_in_year * (@last_weeks_consumption_£   - @week_befores_consumption_£)   / days_in_week
     saving_co2  = average_school_days_in_year * (@last_weeks_consumption_co2 - @week_befores_consumption_co2) / days_in_week
     #set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil, saving_co2)
-    assign_commmon_saving_variables(one_year_saving_£: saving_£, one_year_saving_co2: saving_co2)
+    assign_commmon_saving_variables(one_year_saving_kwh: saving_kwh, one_year_saving_£: saving_£, one_year_saving_co2: saving_co2)
 
     @rating = calculate_rating_from_range(-0.05, 0.15, @percent_change_in_consumption)
     @status = @signifcant_increase_in_electricity_consumption ? :bad : :good

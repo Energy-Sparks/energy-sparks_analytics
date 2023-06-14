@@ -99,6 +99,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
 
     #set_savings_capital_costs_payback(Range.new(0.0, @one_year_optimum_start_saving_£current), Range.new(0.0, 700.0), @one_year_optimum_start_saving_co2)
     assign_commmon_saving_variables(
+      one_year_saving_kwh: @one_year_optimum_start_saving_kwh,
       one_year_saving_£: Range.new(0.0, @one_year_optimum_start_saving_£current),
       capital_cost: Range.new(0.0, 700.0),
       one_year_saving_co2: @one_year_optimum_start_saving_co2)

@@ -395,7 +395,9 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     raise_calculation_error_if_missing(percent_difference_from_average_per_floor_area: @percent_difference_from_average_per_floor_area)
 
     #set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil, @one_year_saving_versus_exemplar_co2)
-    assign_commmon_saving_variables(one_year_saving_£: @one_year_saving_versus_exemplar_£,
+    assign_commmon_saving_variables(
+      one_year_saving_kwh: @one_year_saving_versus_exemplar_kwh,
+      one_year_saving_£: @one_year_saving_versus_exemplar_£,
       one_year_saving_co2: @one_year_saving_versus_exemplar_co2)
 
     # rating: benchmark value = 4.0, exemplar = 10.0
