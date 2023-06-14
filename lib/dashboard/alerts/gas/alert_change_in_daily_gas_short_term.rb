@@ -189,7 +189,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     heating_weeks = @heating_model.number_of_heating_days / days_in_week
 
     saving_kwh = heating_weeks * @predicted_changein_kwh
-    saving_kwh = 0.0 is saving_kwh.nan?
+    saving_kwh = 0.0 if saving_kwh.nan?
 
     saving_£ = heating_weeks * @predicted_change_in_cost
     saving_£ = 0.0 if saving_£.nan?
