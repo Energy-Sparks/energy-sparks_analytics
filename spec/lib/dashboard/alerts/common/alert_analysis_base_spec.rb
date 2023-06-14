@@ -23,19 +23,19 @@ describe AlertAnalysisBase do
     end
 
     it 'assigns one_year_saving_co2' do
-      alert.send(:assign_commmon_saving_variables, one_year_saving_£: 0.0, capital_cost: 0.0, one_year_saving_co2: 100.0)
+      alert.send(:assign_commmon_saving_variables, one_year_saving_£: 0.0, one_year_saving_co2: 100.0)
       expect(alert.one_year_saving_co2).to eq(100.0)
       expect(alert.ten_year_saving_co2).to eq(1000.0)
     end
 
     it 'assigns average_one_year_saving_£' do
-      alert.send(:assign_commmon_saving_variables, one_year_saving_£: nil, capital_cost: 0.0, one_year_saving_co2: 0.0)
+      alert.send(:assign_commmon_saving_variables, one_year_saving_£: nil, one_year_saving_co2: 0.0)
       expect(alert.one_year_saving_£).to eq(nil)
       expect(alert.ten_year_saving_£).to eq(0.0)
       expect(alert.average_one_year_saving_£).to eq 0.0
       expect(alert.average_ten_year_saving_£).to eq 0.0
 
-      alert.send(:assign_commmon_saving_variables, one_year_saving_£: 100.0, capital_cost: 0.0, one_year_saving_co2: 0.0)
+      alert.send(:assign_commmon_saving_variables, one_year_saving_£: 100.0, one_year_saving_co2: 0.0)
       expect(alert.one_year_saving_£).to eq(Range.new(100.0, 100.0))
       expect(alert.ten_year_saving_£).to eq(Range.new(1000.0, 1000.0))
       expect(alert.average_one_year_saving_£).to eq 100.0
@@ -43,7 +43,7 @@ describe AlertAnalysisBase do
     end
 
     it 'assigns average_one_year_saving_£ using ranges' do
-      alert.send(:assign_commmon_saving_variables, one_year_saving_£: Range.new(100.0,200.0), capital_cost: 0.0, one_year_saving_co2: 0.0)
+      alert.send(:assign_commmon_saving_variables, one_year_saving_£: Range.new(100.0,200.0), one_year_saving_co2: 0.0)
       expect(alert.one_year_saving_£).to eq(Range.new(100.0, 200.0))
       expect(alert.ten_year_saving_£).to eq(Range.new(1000.0, 2000.0))
       expect(alert.average_one_year_saving_£).to eq 150.0
@@ -51,7 +51,7 @@ describe AlertAnalysisBase do
     end
 
     it 'assigns average_capital_cost' do
-      alert.send(:assign_commmon_saving_variables, one_year_saving_£: 0.0, capital_cost: nil, one_year_saving_co2: 0.0)
+      alert.send(:assign_commmon_saving_variables, one_year_saving_£: 0.0, one_year_saving_co2: 0.0)
       expect(alert.capital_cost).to eq(nil)
       expect(alert.average_capital_cost).to eq 0.0
 
@@ -74,7 +74,13 @@ describe AlertAnalysisBase do
       expect(alert.average_payback_years).to eq 2.0
     end
 
-    it 'assigns one_year_saving_kwh'
+    it 'assigns one_year_saving_kwh' do
+      alert.send(:assign_commmon_saving_variables, one_year_saving_kwh: 100.0, one_year_saving_£: 0.0, one_year_saving_co2: 100.0)
+      expect(alert.one_year_saving_kwh).to eq(100.0)
+
+      alert.send(:assign_commmon_saving_variables, one_year_saving_£: 0.0, one_year_saving_co2: 100.0)
+      expect(alert.one_year_saving_kwh).to eq(nil)
+    end
   end
 
   context '#set_savings_capital_costs_payback' do
@@ -88,50 +94,32 @@ describe AlertAnalysisBase do
     it 'assigns one_year_saving_co2' do
       alert.send(:set_savings_capital_costs_payback, 0.0, 0.0, 100.0)
       expect(alert.one_year_saving_co2).to eq(100.0)
-      expect(alert.ten_year_saving_co2).to eq(1000.0)
     end
 
     it 'assigns average_one_year_saving_£' do
       alert.send(:set_savings_capital_costs_payback, 100.0, 0.0, 0.0)
       expect(alert.one_year_saving_£).to eq(Range.new(100.0, 100.0))
-      expect(alert.ten_year_saving_£).to eq(Range.new(1000.0, 1000.0))
-      expect(alert.average_one_year_saving_£).to eq 100.0
-      expect(alert.average_ten_year_saving_£).to eq 1000.0
     end
 
     it 'assigns average_one_year_saving_£ using ranges' do
       alert.send(:set_savings_capital_costs_payback, Range.new(100.0,200.0), 0.0, 0.0)
       expect(alert.one_year_saving_£).to eq(Range.new(100.0, 200.0))
-      expect(alert.ten_year_saving_£).to eq(Range.new(1000.0, 2000.0))
-      expect(alert.average_one_year_saving_£).to eq 150.0
-      expect(alert.average_ten_year_saving_£).to eq 1500.0
     end
 
     it 'assigns average_capital_cost' do
       alert.send(:set_savings_capital_costs_payback, 0.0, 100.0, 0.0)
       expect(alert.capital_cost).to eq(Range.new(100.0, 100.0))
-      expect(alert.average_capital_cost).to eq 100.0
-
-      alert.send(:set_savings_capital_costs_payback, 0.0, nil, 0.0)
-      expect(alert.capital_cost).to eq(nil)
-      expect(alert.average_capital_cost).to eq 0.0
     end
 
     it 'assigns average_capital_cost with ranges' do
       alert.send(:set_savings_capital_costs_payback, 0.0, Range.new(100.0,200.0), 0.0)
       expect(alert.capital_cost).to eq(Range.new(100.0, 200.0))
-      expect(alert.average_capital_cost).to eq 150.0
     end
 
     it 'assigns average_payback_years' do
-      alert.send(:set_savings_capital_costs_payback, 0.0, 0.0, 0.0)
-      expect(alert.average_payback_years).to eq 0.0
-
       alert.send(:set_savings_capital_costs_payback, 100.0, 200.0, 0.0)
       expect(alert.average_payback_years).to eq 2.0
     end
-
-    it 'assigns one_year_saving_kwh'
   end
 
 end

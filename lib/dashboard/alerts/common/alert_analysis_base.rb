@@ -22,6 +22,7 @@ class AlertAnalysisBase < ContentBase
 
   attr_reader :capital_cost, :one_year_saving_£, :ten_year_saving_£, :payback_years
   attr_reader :one_year_saving_co2, :ten_year_saving_co2
+  attr_reader :one_year_saving_kwh
   attr_reader :average_capital_cost, :average_one_year_saving_£, :average_payback_years
   attr_reader :average_ten_year_saving_£
   attr_reader :error_message, :backtrace
@@ -163,6 +164,10 @@ class AlertAnalysisBase < ContentBase
       description: 'School URN',
       units:  Integer
     },
+    one_year_saving_kwh: {
+      description: 'Estimated one year kwh reduction range',
+      units: :kwh
+    },
     one_year_saving_£: {
       description: 'Estimated one year saving range',
       units: :£_range
@@ -263,22 +268,20 @@ class AlertAnalysisBase < ContentBase
     @help_url = ALERT_HELP_URL + '#' + bookmark
   end
 
-  def assign_commmon_saving_variables(one_year_saving_£:, capital_cost: nil, one_year_saving_co2:)
+  def assign_commmon_saving_variables(one_year_saving_kwh: nil, one_year_saving_£:, capital_cost: nil, one_year_saving_co2:)
     @one_year_saving_£ = as_range(one_year_saving_£)
     @ten_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : Range.new(@one_year_saving_£.first * 10.0, @one_year_saving_£.last * 10.0)
 
-    #PRIORITY
     @average_one_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : ((@one_year_saving_£.first + @one_year_saving_£.last) / 2.0)
     @average_ten_year_saving_£ = @average_one_year_saving_£ * 10.0
 
-    #PRIORITY
     @one_year_saving_co2 = one_year_saving_co2
     @ten_year_saving_co2 = one_year_saving_co2 * 10.0
 
-    @capital_cost = as_range(capital_cost)
-    #PRIORITY - dashboard only
-    @average_capital_cost = @capital_cost.nil? ? 0.0 : ((@capital_cost.first + @capital_cost.last)/ 2.0)
+    @one_year_saving_kwh = one_year_saving_kwh
 
+    @capital_cost = as_range(capital_cost)
+    @average_capital_cost = @capital_cost.nil? ? 0.0 : ((@capital_cost.first + @capital_cost.last)/ 2.0)
     @average_payback_years = @average_one_year_saving_£ == 0.0 ? 0.0 : @average_capital_cost / @average_one_year_saving_£
   end
 
