@@ -264,7 +264,7 @@ class AlertAnalysisBase < ContentBase
   end
 
   def assign_commmon_saving_variables(one_year_saving_£:, capital_cost:, one_year_saving_co2:)
-    @one_year_saving_£ = one_year_saving_£.is_a?(Float) ? Range.new(one_year_saving_£, one_year_saving_£) : one_year_saving_£
+    @one_year_saving_£ = as_range(one_year_saving_£)
     @ten_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : Range.new(@one_year_saving_£.first * 10.0, @one_year_saving_£.last * 10.0)
 
     #PRIORITY
@@ -275,7 +275,7 @@ class AlertAnalysisBase < ContentBase
     @one_year_saving_co2 = one_year_saving_co2
     @ten_year_saving_co2 = one_year_saving_co2 * 10.0
 
-    @capital_cost = capital_cost.is_a?(Float) ? Range.new(capital_cost, capital_cost) : capital_cost
+    @capital_cost = as_range(capital_cost)
     #PRIORITY - dashboard only
     @average_capital_cost = @capital_cost.nil? ? 0.0 : ((@capital_cost.first + @capital_cost.last)/ 2.0)
 
@@ -284,6 +284,10 @@ class AlertAnalysisBase < ContentBase
 
   def set_savings_capital_costs_payback(one_year_saving_£, capital_cost, one_year_saving_co2)
     assign_commmon_saving_variables(one_year_saving_£: one_year_saving_£, capital_cost: capital_cost, one_year_saving_co2: one_year_saving_co2)
+  end
+
+  private def as_range(value)
+    value.is_a?(Float) ? Range.new(value, value) : value
   end
 
   def pupils
