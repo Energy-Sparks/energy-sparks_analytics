@@ -263,7 +263,7 @@ class AlertAnalysisBase < ContentBase
     @help_url = ALERT_HELP_URL + '#' + bookmark
   end
 
-  def assign_commmon_saving_variables(one_year_saving_£:, capital_cost:, one_year_saving_co2:)
+  def assign_commmon_saving_variables(one_year_saving_£:, capital_cost: nil, one_year_saving_co2:)
     @one_year_saving_£ = as_range(one_year_saving_£)
     @ten_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : Range.new(@one_year_saving_£.first * 10.0, @one_year_saving_£.last * 10.0)
 

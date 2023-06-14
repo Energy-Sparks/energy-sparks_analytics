@@ -85,7 +85,8 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     @annual_hotwater_poor_insulation_heatloss_estimate_percent = savings_percent
 
     one_year_saving_£ = Range.new(@annual_hotwater_poor_insulation_heatloss_estimate_£ * 0.7, @annual_hotwater_poor_insulation_heatloss_estimate_£ * 1.3)
-    set_savings_capital_costs_payback(one_year_saving_£, nil, @annual_hotwater_poor_insulation_heatloss_estimate_co2)
+    #set_savings_capital_costs_payback(one_year_saving_£, nil, @annual_hotwater_poor_insulation_heatloss_estimate_co2)
+    assign_commmon_saving_variables(one_year_saving_£: one_year_saving_£, one_year_saving_co2: @annual_hotwater_poor_insulation_heatloss_estimate_co2)
   end
 
   private def calculate(asof_date)

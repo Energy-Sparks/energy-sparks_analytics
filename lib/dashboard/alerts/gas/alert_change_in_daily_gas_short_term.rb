@@ -194,7 +194,8 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     saving_co2 = heating_weeks * (@predicted_this_week_co2 - @predicted_last_week_co2)
     saving_co2 = 0.0 if saving_co2.nan?
 
-    set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil, saving_co2)
+    #set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil, saving_co2)
+    assign_commmon_saving_variables(one_year_saving_£: saving_£, one_year_saving_co2: saving_co2)
 
     # PH, 16Aug2019 - as this alert is being deprecated, make more fault tolerant: St Louis school only
     @difference_in_actual_versus_predicted_change_percent = 0.0 if @difference_in_actual_versus_predicted_change_percent.nan?

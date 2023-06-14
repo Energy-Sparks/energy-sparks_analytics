@@ -97,7 +97,8 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
     @high_annual_saving = @annual_total_standing_charge - (sorted_standing_charges.first * 365.0)
     one_year_saving_£ = Range.new(low_annual_saving, @high_annual_saving)
     capital_cost = Range.new(COST_OF_1_METER_CONSOLIDATION_£, COST_OF_1_METER_CONSOLIDATION_£ * (sorted_standing_charges.length - 1))
-    set_savings_capital_costs_payback(one_year_saving_£, capital_cost, 0.0)
+    #set_savings_capital_costs_payback(one_year_saving_£, capital_cost, 0.0)
+    assign_commmon_saving_variables(one_year_saving_£: one_year_saving_£, capital_cost: capital_cost, one_year_saving_co2: 0.0)
     @rating = number_of_live_meters <= 1 ? 10.0 : 0.0
   end
   alias_method :analyse_private, :calculate
@@ -146,4 +147,3 @@ class AlertGasMeterConsolidationOpportunity < AlertMeterConsolidationOpportunity
     @school.heat_meters
   end
 end
-

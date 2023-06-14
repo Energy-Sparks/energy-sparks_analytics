@@ -78,7 +78,8 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
       @asc_limit_kw = aggregate_asc_limit_kw(@opportunities)
       @maximum_kw_meter_period_kw = aggregate_peak_kw(@opportunities)
       annual_saving_£ = aggregate_annual_saving_£(@opportunities)
-      set_savings_capital_costs_payback(Range.new(annual_saving_£, annual_saving_£), nil, 0.0)
+      #set_savings_capital_costs_payback(Range.new(annual_saving_£, annual_saving_£), nil, 0.0)
+      assign_commmon_saving_variables(one_year_saving_£: annual_saving_£, one_year_saving_co2: 0.0)
       @rating = calculate_rating_from_range(400.0, 3000.0, annual_saving_£)
     else
       @rating = 10.0

@@ -99,7 +99,8 @@ class AlertThermostaticControl < AlertGasModelBase
     @potential_saving_kwh, @potential_saving_£ = calculate_annual_heating_deviance_from_model(asof_date)
     @potential_saving_co2 = gas_co2(@potential_saving_kwh)
 
-    set_savings_capital_costs_payback(@potential_saving_£, 1000.0, @potential_saving_co2) # suggested £1,000 cost
+    #set_savings_capital_costs_payback(@potential_saving_£, 1000.0, @potential_saving_co2) # suggested £1,000 cost
+    assign_commmon_saving_variables(one_year_saving_£: @potential_saving_£, capital_cost: 1000.0, one_year_saving_co2: @potential_saving_co2) # suggested £1,000 cost
 
     @rating = r2_rating_out_of_10
 

@@ -132,7 +132,8 @@ class AlertHeatingOnSchoolDaysDeprecated < AlertHeatingDaysBase
     @one_year_saving_reduced_days_to_exemplar_co2 = gas_co2(@one_year_saving_reduced_days_to_exemplar_kwh)
 
     one_year_saving_£ = Range.new(@one_year_saving_reduced_days_to_average_£, @one_year_saving_reduced_days_to_exemplar_£)
-    set_savings_capital_costs_payback(one_year_saving_£, nil, @one_year_saving_reduced_days_to_exemplar_co2)
+    #set_savings_capital_costs_payback(one_year_saving_£, nil, @one_year_saving_reduced_days_to_exemplar_co2)
+    assign_commmon_saving_variables(one_year_saving_£: one_year_saving_£, one_year_saving_co2: @one_year_saving_reduced_days_to_exemplar_co2)
 
     @rating = statistics.school_day_heating_rating_out_of_10(days)
 

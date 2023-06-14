@@ -60,7 +60,11 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
 
     calculate_adhoc_values(asof_date)
 
-    set_savings_capital_costs_payback(warm_weather_heating_days_all_days_£current, 0.0, warm_weather_heating_days_all_days_co2)
+    #set_savings_capital_costs_payback(warm_weather_heating_days_all_days_£current, 0.0, warm_weather_heating_days_all_days_co2)
+    assign_commmon_saving_variables(
+      one_year_saving_£: warm_weather_heating_days_all_days_£current,
+      capital_cost: 0.0,
+      one_year_saving_co2: warm_weather_heating_days_all_days_co2)
 
     @rating = calculate_rating_from_range(0.03, 0.12, percent_of_annual_heating)
 

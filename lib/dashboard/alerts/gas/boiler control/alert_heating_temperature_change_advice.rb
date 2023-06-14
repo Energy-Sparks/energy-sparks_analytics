@@ -61,7 +61,8 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @annual_saving_1_C_change_kwh *= (365 / (asof_date - start_date)) # scale to 1 year
     @annual_saving_1_C_change_£   = @annual_saving_1_C_change_kwh * aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
     @annual_saving_1_C_change_co2 = @annual_saving_1_C_change_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    set_savings_capital_costs_payback(Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£), nil, @annual_saving_1_C_change_co2)
+    #set_savings_capital_costs_payback(Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£), nil, @annual_saving_1_C_change_co2)
+    assign_commmon_saving_variables(one_year_saving_£: @annual_saving_1_C_change_£, one_year_saving_co2: @annual_saving_1_C_change_co2)
 
     @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = 1000.0 * heating_model.average_heating_b_kwh_per_1_C_per_day / floor_area(asof_date - 365, asof_date)
     @rating = @annual_saving_1_C_change_£ > MIN_REPORTED_SENSITIVITY_£ ? 5.0 : 10.0

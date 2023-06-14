@@ -82,8 +82,13 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     promote_optimum_variables(optimum_scenario)
 
     @one_year_saving_£current = optimum_scenario[:total_annual_saving_£]
-    savings_range = Range.new(@one_year_saving_£current, @one_year_saving_£current)
-    set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£], optimum_scenario[:total_annual_saving_co2])
+    #savings_range = Range.new(@one_year_saving_£current, @one_year_saving_£current)
+    #set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£], optimum_scenario[:total_annual_saving_co2])
+
+    assign_commmon_saving_variables(
+      one_year_saving_£: @one_year_saving_£current,
+      capital_cost: optimum_scenario[:capital_cost_£],
+      one_year_saving_co2: optimum_scenario[:total_annual_saving_co2])
 
     @rating = 5.0
   end
@@ -153,7 +158,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
 
   def format_t(value, unit, medium)
     return value if medium == :raw
-    FormatEnergyUnit.format(unit, value, medium, false, true) 
+    FormatEnergyUnit.format(unit, value, medium, false, true)
   end
 
   def kwp_scenario_including_optimum(optimum_kwp)

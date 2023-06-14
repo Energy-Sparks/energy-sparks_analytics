@@ -235,7 +235,8 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     potential_savings_£current  = 52.0 * (@last_weekend_cost_£current   - @average_weekend_gas_£current)
     potential_savings_co2 = 52.0 * (@last_weekend_cost_co2 - @average_weekend_gas_co2)
 
-    set_savings_capital_costs_payback(potential_savings_£current, 0.0, potential_savings_co2)
+    #set_savings_capital_costs_payback(potential_savings_£current, 0.0, potential_savings_co2)
+    assign_commmon_saving_variables(one_year_saving_£: potential_savings_£current, capital_cost: 0.0, one_year_saving_co2: potential_savings_co2)
 
     @rating = @last_weekend_cost_£current < MAX_COST ? 10.0 : combined_rating
 
