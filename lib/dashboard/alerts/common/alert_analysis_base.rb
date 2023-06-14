@@ -270,14 +270,12 @@ class AlertAnalysisBase < ContentBase
     Range.new(min_saving, max_saving)
   end
 
-  #RENAME
-  #CHANGE to named parameters
   #EXTRACT Float to Range
   #Simplify calls to provide Float unless actual difference
   #Remove nil parameters
   #ADD kwh saving parameter
   #Declare and set variable
-  def set_savings_capital_costs_payback(one_year_saving_£, capital_cost, one_year_saving_co2)
+  def assign_commmon_saving_variables(one_year_saving_£:, capital_cost:, one_year_saving_co2:)
     @one_year_saving_£ = one_year_saving_£.is_a?(Float) ? Range.new(one_year_saving_£, one_year_saving_£) : one_year_saving_£
     @ten_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : Range.new(@one_year_saving_£.first * 10.0, @one_year_saving_£.last * 10.0)
 
@@ -294,6 +292,10 @@ class AlertAnalysisBase < ContentBase
     @average_capital_cost = @capital_cost.nil? ? 0.0 : ((@capital_cost.first + @capital_cost.last)/ 2.0)
 
     @average_payback_years = @average_one_year_saving_£ == 0.0 ? 0.0 : @average_capital_cost / @average_one_year_saving_£
+  end
+
+  def set_savings_capital_costs_payback(one_year_saving_£, capital_cost, one_year_saving_co2)
+    assign_commmon_saving_variables(one_year_saving_£: one_year_saving_£, capital_cost: capital_cost, one_year_saving_co2: one_year_saving_co2)
   end
 
   def pupils
