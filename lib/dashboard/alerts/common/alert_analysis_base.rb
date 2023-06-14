@@ -263,18 +263,6 @@ class AlertAnalysisBase < ContentBase
     @help_url = ALERT_HELP_URL + '#' + bookmark
   end
 
-  def calculate_payback_years_deprecated
-    return (0.0..0.0) if one_year_saving_£.nil? || capital_cost.nil? || capital_cost == (0.0..0.0)
-    min_saving = one_year_saving_£.last.nil? ? 0.0 : capital_cost.first / one_year_saving_£.last
-    max_saving = one_year_saving_£.first.nil? ?  0.0 : capital_cost.last / one_year_saving_£.first
-    Range.new(min_saving, max_saving)
-  end
-
-  #EXTRACT Float to Range
-  #Simplify calls to provide Float unless actual difference
-  #Remove nil parameters
-  #ADD kwh saving parameter
-  #Declare and set variable
   def assign_commmon_saving_variables(one_year_saving_£:, capital_cost:, one_year_saving_co2:)
     @one_year_saving_£ = one_year_saving_£.is_a?(Float) ? Range.new(one_year_saving_£, one_year_saving_£) : one_year_saving_£
     @ten_year_saving_£ = @one_year_saving_£.nil? ? 0.0 : Range.new(@one_year_saving_£.first * 10.0, @one_year_saving_£.last * 10.0)
