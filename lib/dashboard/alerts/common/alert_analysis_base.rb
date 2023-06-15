@@ -285,10 +285,6 @@ class AlertAnalysisBase < ContentBase
     @average_payback_years = @average_one_year_saving_£ == 0.0 ? 0.0 : @average_capital_cost / @average_one_year_saving_£
   end
 
-  def set_savings_capital_costs_payback(one_year_saving_£, capital_cost, one_year_saving_co2)
-    assign_commmon_saving_variables(one_year_saving_£: one_year_saving_£, capital_cost: capital_cost, one_year_saving_co2: one_year_saving_co2)
-  end
-
   private def as_range(value)
     value.is_a?(Float) ? Range.new(value, value) : value
   end

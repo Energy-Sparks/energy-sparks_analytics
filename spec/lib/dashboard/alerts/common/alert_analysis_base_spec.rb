@@ -83,43 +83,4 @@ describe AlertAnalysisBase do
     end
   end
 
-  context '#set_savings_capital_costs_payback' do
-    let(:meter_collection)  { double('meter-collection') }
-    let(:alert)             { CustomAnalysisAlert.new(meter_collection, 'analysis-test')}
-
-    before(:each) do
-      allow(meter_collection).to receive(:aggregated_heat_meters).and_return(nil)
-    end
-
-    it 'assigns one_year_saving_co2' do
-      alert.send(:set_savings_capital_costs_payback, 0.0, 0.0, 100.0)
-      expect(alert.one_year_saving_co2).to eq(100.0)
-    end
-
-    it 'assigns average_one_year_saving_£' do
-      alert.send(:set_savings_capital_costs_payback, 100.0, 0.0, 0.0)
-      expect(alert.one_year_saving_£).to eq(Range.new(100.0, 100.0))
-    end
-
-    it 'assigns average_one_year_saving_£ using ranges' do
-      alert.send(:set_savings_capital_costs_payback, Range.new(100.0,200.0), 0.0, 0.0)
-      expect(alert.one_year_saving_£).to eq(Range.new(100.0, 200.0))
-    end
-
-    it 'assigns average_capital_cost' do
-      alert.send(:set_savings_capital_costs_payback, 0.0, 100.0, 0.0)
-      expect(alert.capital_cost).to eq(Range.new(100.0, 100.0))
-    end
-
-    it 'assigns average_capital_cost with ranges' do
-      alert.send(:set_savings_capital_costs_payback, 0.0, Range.new(100.0,200.0), 0.0)
-      expect(alert.capital_cost).to eq(Range.new(100.0, 200.0))
-    end
-
-    it 'assigns average_payback_years' do
-      alert.send(:set_savings_capital_costs_payback, 100.0, 200.0, 0.0)
-      expect(alert.average_payback_years).to eq 2.0
-    end
-  end
-
 end
