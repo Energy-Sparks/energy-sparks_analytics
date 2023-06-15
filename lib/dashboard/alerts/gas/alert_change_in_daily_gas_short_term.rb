@@ -197,7 +197,6 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     saving_co2 = heating_weeks * @predicted_change_in_co2
     saving_co2 = 0.0 if saving_co2.nan?
 
-    #set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil, saving_co2)
     assign_commmon_saving_variables(
       one_year_saving_kwh: saving_kwh,
       one_year_saving_£: saving_£,

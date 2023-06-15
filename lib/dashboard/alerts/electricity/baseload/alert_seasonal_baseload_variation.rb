@@ -106,7 +106,6 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     @annual_cost_£current = @annual_cost_kwh * blended_baseload_rate_£current_per_kwh
     @annual_co2           = @annual_cost_kwh * blended_co2_per_kwh
 
-    #set_savings_capital_costs_payback(Range.new(@annual_cost_£current, @annual_cost_£ ), nil, @annual_co2)
     assign_commmon_saving_variables(
       one_year_saving_kwh: @annual_cost_kwh,
       one_year_saving_£: Range.new(@annual_cost_£current, @annual_cost_£ ),

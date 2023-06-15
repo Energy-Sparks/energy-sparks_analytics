@@ -212,7 +212,6 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
 
     @saving_in_annual_costs_through_10_percent_baseload_reduction = @last_year_baseload_£current * 0.1
 
-    #set_savings_capital_costs_payback(Range.new(@next_year_change_in_baseload_£current, @next_year_change_in_baseload_£current), nil, @next_year_change_in_baseload_co2)
     assign_commmon_saving_variables(
       one_year_saving_kwh: @next_year_change_in_baseload_kwh,
       one_year_saving_£: @next_year_change_in_baseload_£current,

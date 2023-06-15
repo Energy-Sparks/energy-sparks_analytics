@@ -185,7 +185,6 @@ class AlertLongTermTrend < AlertAnalysisBase
 
     @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_kwh_temp_adj)
 
-    #set_savings_capital_costs_payback(Range.new(year_change_£, year_change_£), nil, @year_change_co2)
     assign_commmon_saving_variables(one_year_saving_kwh: year_change_kwh, one_year_saving_£: year_change_£, one_year_saving_co2: @year_change_co2)
   end
   alias_method :analyse_private, :calculate

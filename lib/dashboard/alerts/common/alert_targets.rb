@@ -405,7 +405,6 @@ class AlertTargetBase < AlertAnalysisBase
     potential_saving_co2 = previous_year_co2 - current_year_target_co2
     potential_saving_kwh = previous_year_kwh - current_year_target_kwh
 
-    #set_savings_capital_costs_payback(potential_savings_range, nil, potential_saving_co2)
     assign_commmon_saving_variables(one_year_saving_kwh: potential_saving_kwh, one_year_saving_£: potential_savings_range, one_year_saving_co2: potential_saving_co2)
   end
   alias_method :analyse_private, :calculate

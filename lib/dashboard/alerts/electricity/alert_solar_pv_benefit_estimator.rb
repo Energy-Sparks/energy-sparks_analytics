@@ -82,8 +82,6 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     promote_optimum_variables(optimum_scenario)
 
     @one_year_saving_£current = optimum_scenario[:total_annual_saving_£]
-    #savings_range = Range.new(@one_year_saving_£current, @one_year_saving_£current)
-    #set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£], optimum_scenario[:total_annual_saving_co2])
 
     assign_commmon_saving_variables(
       one_year_saving_kwh: optimum_scenario[:reduction_in_mains_kwh],

@@ -154,7 +154,6 @@ class AlertTurnHeatingOff < AlertGasModelBase
 
     calculate_forecast_benefit(@today)
 
-    #set_savings_capital_costs_payback(@future_saving_£, 0.0, @future_saving_co2)
     assign_commmon_saving_variables(
       one_year_saving_kwh: @future_saving_kwh,
       one_year_saving_£: @future_saving_£,

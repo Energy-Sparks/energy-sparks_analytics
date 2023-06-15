@@ -242,7 +242,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     set_equivalence_variables(self.class.equivalence_template_variables)
 
-    #set_savings_capital_costs_payback(@difference_£current, 0.0, @difference_co2)
     assign_commmon_saving_variables(
       one_year_saving_kwh: @difference_kwh,
       one_year_saving_£: @difference_£current,
