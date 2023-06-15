@@ -27,6 +27,7 @@ describe AlertSolarPVBenefitEstimator do
       school_activation_date: '',
       school_creation_date: '2020-10-08',
       urn: '654321',
+      one_year_saving_kwh: '57,000 kWh',
       one_year_saving_£: '£9,000',
       one_year_saving_co2: '12,000 kg CO2',
       ten_year_saving_co2: '120,000 kg CO2',
@@ -162,6 +163,7 @@ describe AlertSolarPVBenefitEstimator do
     alert.calculate(Date.new(2022, 7, 12))
     expect(BenchmarkMetrics.pricing).to eq(current_pricing)
     expect(alert.text_template_variables).to eq(default_pricing_template_variables)
+    expect(alert.text_template_variables[:one_year_saving_kwh]).to eq('57,000 kWh')
     expect(alert.text_template_variables[:one_year_saving_£current]).to eq('£9,000')
     expect(alert.text_template_variables[:one_year_saving_£]).to eq('£9,000')
     expect(alert.text_template_variables[:average_one_year_saving_£]).to eq('£9,000')

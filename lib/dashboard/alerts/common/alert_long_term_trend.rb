@@ -6,7 +6,7 @@ class AlertLongTermTrend < AlertAnalysisBase
   attr_reader :this_year_co2, :last_year_co2, :year_change_co2, :percent_change_co2
   attr_reader :last_year_co2_temp_adj, :year_change_co2_temp_adj, :percent_change_co2_temp_adj
   attr_reader :degreeday_adjustment, :degreedays_this_year, :degreedays_last_year
-  
+
   attr_reader :this_year_kwh, :last_year_kwh, :last_year_kwh_temp_adj
   attr_reader :year_change_kwh, :year_change_kwh_temp_adj
   attr_reader :percent_change_kwh, :percent_change_kwh_temp_adj
@@ -185,7 +185,7 @@ class AlertLongTermTrend < AlertAnalysisBase
 
     @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_kwh_temp_adj)
 
-    set_savings_capital_costs_payback(Range.new(year_change_£, year_change_£), nil, @year_change_co2)
+    assign_commmon_saving_variables(one_year_saving_kwh: year_change_kwh, one_year_saving_£: year_change_£, one_year_saving_co2: @year_change_co2)
   end
   alias_method :analyse_private, :calculate
 
