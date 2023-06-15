@@ -242,7 +242,12 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     set_equivalence_variables(self.class.equivalence_template_variables)
 
-    set_savings_capital_costs_payback(@difference_£current, 0.0, @difference_co2)
+    assign_commmon_saving_variables(
+      one_year_saving_kwh: @difference_kwh,
+      one_year_saving_£: @difference_£current,
+      capital_cost: 0.0,
+      one_year_saving_co2: @difference_co2)
+
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
     @bookmark_url = add_book_mark_to_base_url(url_bookmark)

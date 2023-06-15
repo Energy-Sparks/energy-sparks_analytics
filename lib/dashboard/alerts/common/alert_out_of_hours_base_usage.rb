@@ -190,7 +190,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @potential_saving_£   = @potential_saving_kwh * @fuel_cost_current
     @potential_saving_co2 = @potential_saving_kwh * co2_intensity_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil, @potential_saving_co2)
+    assign_commmon_saving_variables(one_year_saving_kwh: @potential_saving_kwh, one_year_saving_£: @potential_saving_£, one_year_saving_co2: @potential_saving_co2)
 
     @rating = calculate_rating_from_range(good_out_of_hours_use_percent, bad_out_of_hours_use_percent, out_of_hours_percent)
 
