@@ -1469,7 +1469,6 @@ module AnalyseHeatingAndHotWater
     def winter_heating_samples
       if SCHOOLDAYHEATINGMODELTYPES.any? { |model_type| model(model_type).nil? || !model(model_type).valid? }
         logger.warn 'Not all winter heating models are valid, returning 0.0'
-        #SCHOOLDAYHEATINGMODELTYPES.each { |model_type| puts model_type if model(model_type).nil? || !model(model_type).valid? }
         0.0
       else
         SCHOOLDAYHEATINGMODELTYPES.map { |model_type| model(model_type).samples }.sum
