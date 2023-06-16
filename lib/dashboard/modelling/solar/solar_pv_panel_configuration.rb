@@ -23,6 +23,10 @@ class SolarPVPanelConfiguration
 
   def degraded_capacity_on_date_kw(date, override_key)
     degraded_capacity = 0.0
+    #select panel capacities where they were installed on the given date
+    #and we're configured to override. Note: this is called for both
+    #:solar_pv and :solar_pv_override meter attributes. The former has no
+    #override attributes, so we default to true if not set.
     panel_set_capacities = @config_by_date_range.select do |dates, config|
       date >= dates.first &&
       date <= dates.last  &&
