@@ -15,12 +15,18 @@ module SolarPhotovoltaics
     end
 
     def create_model
-      calculate_potential_benefits_estimates
+      #find the optimum payback period
+      optimum_kwp = calculate_optimum_kwp(@asof_date)
+      #calculate costs/benefits for range of scenarios, including the optimum
+      #sets @scenarios
+      calculate_scenarios(@asof_date, optimum_kwp)
+      #sets @optimum_kwp, @optimum_payback_years, @optimum_mains_reduction_percent
+      set_optimum_values(optimum_kwp)
 
       OpenStruct.new(
-        optimum_kwp: optimum_kwp,
-        optimum_payback_years: optimum_payback_years,
-        optimum_mains_reduction_percent: optimum_mains_reduction_percent,
+        optimum_kwp: @optimum_kwp,
+        optimum_payback_years: @optimum_payback_years,
+        optimum_mains_reduction_percent: @optimum_mains_reduction_percent,
         scenarios: @scenarios
       )
     end
@@ -40,39 +46,18 @@ module SolarPhotovoltaics
       @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregated_electricity_meters, @asof_date)
     end
 
-    def calculate_potential_benefits_estimates
-      # (use_max_meter_date_if_less_than_asof_date: false)
-      # @max_asofdate = aggregated_electricity_meters.amr_data.end_date
-      # date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : @asof_date
-      date = @asof_date
-
-      calculate_optimum_payback_for(date)
-      calculate_range_of_scenarios_for(date)
-      calculate_savings
-    end
-
     def aggregated_electricity_meters
       @aggregated_electricity_meters ||= @meter_collection.aggregated_electricity_meters
     end
 
-    # rubocop:disable Metrics/MethodLength
-    def calculate_savings
+    def set_optimum_values(optimum_kwp)
       optimum_scenario = find_optimum_kwp(@scenarios, round_optimum_kwp(optimum_kwp))
       @optimum_kwp = optimum_scenario[:kwp]
       @optimum_payback_years = optimum_scenario[:payback_years]
       @optimum_mains_reduction_percent = optimum_scenario[:reduction_in_mains_percent]
-      @one_year_saving_£current = optimum_scenario[:total_annual_saving_£]
-
-      savings_range = Range.new(@one_year_saving_£current, @one_year_saving_£current)
-      set_savings_capital_costs_payback(
-        savings_range,
-        optimum_scenario[:capital_cost_£],
-        optimum_scenario[:total_annual_saving_co2]
-      )
     end
-    # rubocop:enable Metrics/MethodLength
 
-    def calculate_range_of_scenarios_for(date)
+    def calculate_scenarios(date, optimum_kwp)
       @scenarios = []
 
       kwp_scenario_including_optimum(optimum_kwp).each do |kwp|
@@ -104,31 +89,9 @@ module SolarPhotovoltaics
       rows.select { |row| row[:kwp] == optimum_kwp }[0]
     end
 
-    # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity, Layout/LineLength, Lint/FloatComparison
-    def set_savings_capital_costs_payback(one_year_saving_£, capital_cost, one_year_saving_co2)
-      # Note: this code is copied from existing code in AlertAnalysisBase and needs refactoring (see rubocop comment)
-      one_year_saving_£ = Range.new(one_year_saving_£, one_year_saving_£) if one_year_saving_£.is_a?(Float)
-
-      @one_year_saving_co2 = one_year_saving_co2
-      @ten_year_saving_co2 = one_year_saving_co2 * 10.0
-
-      capital_cost = Range.new(capital_cost, capital_cost) if capital_cost.is_a?(Float)
-      @capital_cost = capital_cost
-      @average_capital_cost = capital_cost.nil? ? 0.0 : ((capital_cost.first + capital_cost.last) / 2.0)
-
-      @one_year_saving_£ = one_year_saving_£
-      @ten_year_saving_£ = one_year_saving_£.nil? ? 0.0 : Range.new(one_year_saving_£.first * 10.0, one_year_saving_£.last * 10.0)
-      @average_one_year_saving_£ = one_year_saving_£.nil? ? 0.0 : ((one_year_saving_£.first + one_year_saving_£.last) / 2.0)
-      @average_ten_year_saving_£ = @average_one_year_saving_£ * 10.0
-
-      @average_payback_years = @one_year_saving_£.nil? || @one_year_saving_£ == 0.0 || @average_capital_cost.nil? ? 0.0 : @average_capital_cost / @average_one_year_saving_£
-    end
-    # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity, Layout/LineLength, Lint/FloatComparison
-
-    def calculate_optimum_payback_for(date)
+    def calculate_optimum_kwp(date)
       optimum = Minimiser.minimize(1, max_possible_kwp) { |kwp| payback(kwp, date) }
-      @optimum_kwp = optimum.x_minimum
-      @optimum_payback_years = optimum.f_minimum
+      optimum.x_minimum
     end
 
     def payback(kwp, date)
@@ -140,10 +103,10 @@ module SolarPhotovoltaics
     def calculate_solar_pv_benefit(date, kwp)
       # Note: this code is copied from existing code in AlertSolarPVBenefitEstimator and needs refactoring (see rubocop comment)
       start_date = date - 365
-      kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregated_electricity_meters.amr_data, @meter_collection, start_date, date, kwp)
+      kwh_totals = estimate_consumption(start_date, date, kwp)
 
-      kwh = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, date)
-      £ = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, date, :£current)
+      kwh = existing_annual_kwh(start_date, date)
+      £ = existing_annual_£(start_date, date)
 
       {
         kwp: kwp,
@@ -162,8 +125,20 @@ module SolarPhotovoltaics
     end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Layout/LineLength, Naming/VariableNumber
 
+    def existing_annual_kwh(start_date, end_date)
+      aggregated_electricity_meters.amr_data.kwh_date_range(start_date, end_date)
+    end
+
+    def existing_annual_£(start_date, end_date)
+      aggregated_electricity_meters.amr_data.kwh_date_range(start_date, end_date, :£current)
+    end
+
+    def estimate_consumption(start_date, date, kwp)
+      pv_panels.annual_predicted_pv_totals_fast(aggregated_electricity_meters.amr_data, @meter_collection, start_date, date, kwp)
+    end
+
     def pv_panels
-      SolarPVPanelsNewBenefit.new
+      ConsumptionEstimator.new
     end
 
     def blended_co2_per_kwh
@@ -197,12 +172,9 @@ module SolarPhotovoltaics
 
     # rubocop:disable Lint/FloatComparison
     def capital_costs(kwp)
-      # using analysis of ebay offerings (x20)
-      # pending feedback to request (28Oct2019) for feedback on
-      # real prices from BWCE and FreCo
-      # old value: kwp == 0.0 ? 0.0 : (850.0 + 1200.0 * kwp)
-      # PH 18Nov2019: reduced cost of larger installations following advice from PC/BWCE
-      kwp == 0.0 ? 0.0 : (-0.8947 * kwp**2 + 793.86 * kwp + 1600)
+      # Costs estimated using range of data provided by Egni, BWCE, Ebay
+      # See internal analysis spreadsheet. Updated 2023-06-09
+      kwp == 0.0 ? 0.0 : (1584 * kwp**0.854)
     end
     # rubocop:enable Lint/FloatComparison
 
