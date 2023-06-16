@@ -126,7 +126,11 @@ class AlertHotWaterEfficiency < AlertGasModelBase
 
       one_year_saving_£ = one_year_saving_calculation
       capital_costs_£ = @existing_gas_capex..@point_of_use_electric_capex
-      set_savings_capital_costs_payback(one_year_saving_£, electric_point_of_use_hotwater_costs, @electric_hot_water_saving_co2)
+
+      assign_commmon_saving_variables(
+        one_year_saving_£: one_year_saving_£,
+        capital_cost: electric_point_of_use_hotwater_costs,
+        one_year_saving_co2: @electric_hot_water_saving_co2)
 
       @rating = calculate_rating_from_range(0.6, 0.05, @existing_gas_efficiency)
 

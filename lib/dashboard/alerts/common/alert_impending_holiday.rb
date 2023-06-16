@@ -255,9 +255,11 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     @last_year_holiday = same_holiday_previous_year(@holiday_period)
     set_last_year_holiday_consumption_variables(@last_year_holiday.start_date, @last_year_holiday.end_date, @last_year_holiday.nil?)
 
-    potential_saving_kwh = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
+    potential_saving_kwh = nil_to_zero(@electricity_potential_saving_kwh) + nil_to_zero(@gas_potential_saving_kwh)
+    potential_saving_£ = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
     potential_saving_co2 = nil_to_zero(@electricity_potential_saving_co2) + nil_to_zero(@gas_potential_saving_co2)
-    set_savings_capital_costs_payback(potential_saving_kwh, 0.0, potential_saving_co2)
+
+    assign_commmon_saving_variables(one_year_saving_kwh: potential_saving_kwh, one_year_saving_£: potential_saving_£, capital_cost: 0.0, one_year_saving_co2: potential_saving_co2)
 
     @saving_kwh = potential_saving_kwh
     @saving_co2 = potential_saving_co2

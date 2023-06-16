@@ -27,6 +27,7 @@ describe AlertSolarPVBenefitEstimator do
       school_activation_date: '',
       school_creation_date: '2020-10-08',
       urn: '654321',
+      one_year_saving_kwh: '70,000 kWh',
       one_year_saving_£: '£11,000',
       one_year_saving_co2: '15,000 kg CO2',
       ten_year_saving_co2: '150,000 kg CO2',

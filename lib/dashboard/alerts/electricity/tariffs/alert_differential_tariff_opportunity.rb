@@ -72,7 +72,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
 
     @differential_tariff_opportunity_table, _total_saving = calculate_differential_tariff_opportunity_table(saving_info_by_meter)
 
-    set_savings_capital_costs_payback(Range.new(@total_potential_savings_£, @total_potential_savings_£), nil, 0.0)
+    assign_commmon_saving_variables(one_year_saving_£: @total_potential_savings_£, one_year_saving_co2: 0.0)
 
     @rating = calculate_rating_from_range(100.0, 1000.0, @total_potential_savings_£)
   end
