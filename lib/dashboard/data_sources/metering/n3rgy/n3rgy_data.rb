@@ -228,8 +228,8 @@ module MeterReadingsFeeds
 
     def available_date_range(dates)
       if dates
-        start_date = Date.parse(dates['start']) if dates['start']
-        end_date = Date.parse(dates['end']) if dates['end']
+        start_date = DateTime.parse(dates['start']) if dates['start']
+        end_date = DateTime.parse(dates['end']) if dates['end']
         if start_date && end_date
           return (start_date.next_day..end_date)
         end
