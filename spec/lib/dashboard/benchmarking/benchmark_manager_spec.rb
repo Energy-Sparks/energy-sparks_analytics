@@ -35,7 +35,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
               electricity_targets: 'Progress against electricity target',
               recent_change_in_baseload: 'Recent change in baseload',
               seasonal_baseload_variation: 'Seasonal baseload variation',
-              weekday_baseload_variation: 'Weekday baseload variation'
+              weekday_baseload_variation: 'Weekday baseload variation',
+              annual_change_in_electricity_out_of_hours_use: 'Annual change in electricity used out of school hours'
             }
           },
           {
@@ -57,7 +58,9 @@ describe Benchmarking::BenchmarkManager, type: :service do
               hot_water_efficiency: 'Hot Water Efficiency',
               storage_heater_consumption_during_holiday: 'Storage heater use during current holiday',
               thermostat_sensitivity: 'Annual saving through 1C reduction in thermostat temperature',
-              thermostatic_control: 'Quality of thermostatic control'
+              thermostatic_control: 'Quality of thermostatic control',
+              annual_change_in_gas_out_of_hours_use: 'Annual change in gas used out of school hours',
+              annual_change_in_storage_heater_out_of_hours_use: 'Annual change in storage heater usage out of school hours'
             }
           },
           {
@@ -65,7 +68,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             description: "These benchmarks compare schools' solar PV production and the benefits of installing solar.",
             benchmarks: {
               change_in_solar_pv_since_last_year: 'Annual change in solar PV production and resulting CO2 savings',
-              solar_pv_benefit_estimate: 'Benefit of solar PV installation'
+              solar_pv_benefit_estimate: 'Benefit of solar PV installation',
+              solar_generation_summary: 'Solar generation summary'
             }
           },
           {
@@ -113,7 +117,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
               electricity_targets: 'Progress against electricity target',
               recent_change_in_baseload: 'Recent change in baseload',
               seasonal_baseload_variation: 'Seasonal baseload variation',
-              weekday_baseload_variation: 'Weekday baseload variation'
+              weekday_baseload_variation: 'Weekday baseload variation',
+              annual_change_in_electricity_out_of_hours_use: 'Annual change in electricity used out of school hours'
             }
           },
           {
@@ -135,7 +140,9 @@ describe Benchmarking::BenchmarkManager, type: :service do
               hot_water_efficiency: 'Hot Water Efficiency',
               storage_heater_consumption_during_holiday: 'Storage heater use during current holiday',
               thermostat_sensitivity: 'Annual saving through 1C reduction in thermostat temperature',
-              thermostatic_control: 'Quality of thermostatic control'
+              thermostatic_control: 'Quality of thermostatic control',
+              annual_change_in_gas_out_of_hours_use: 'Annual change in gas used out of school hours',
+              annual_change_in_storage_heater_out_of_hours_use: 'Annual change in storage heater usage out of school hours'
             }
           },
           {
@@ -143,7 +150,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             description: "These benchmarks compare schools' solar PV production and the benefits of installing solar.",
             benchmarks: {
               change_in_solar_pv_since_last_year: 'Annual change in solar PV production and resulting CO2 savings',
-              solar_pv_benefit_estimate: 'Benefit of solar PV installation'
+              solar_pv_benefit_estimate: 'Benefit of solar PV installation',
+              solar_generation_summary: 'Solar generation summary'
             }
           },
           {
@@ -191,7 +199,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
               electricity_targets: 'Progress against electricity target',
               recent_change_in_baseload: 'Recent change in baseload',
               seasonal_baseload_variation: 'Seasonal baseload variation',
-              weekday_baseload_variation: 'Weekday baseload variation'
+              weekday_baseload_variation: 'Weekday baseload variation',
+              annual_change_in_electricity_out_of_hours_use: 'Annual change in electricity used out of school hours'
             }
           },
           {
@@ -213,7 +222,9 @@ describe Benchmarking::BenchmarkManager, type: :service do
               hot_water_efficiency: 'Hot Water Efficiency',
               storage_heater_consumption_during_holiday: 'Storage heater use during current holiday',
               thermostat_sensitivity: 'Annual saving through 1C reduction in thermostat temperature',
-              thermostatic_control: 'Quality of thermostatic control'
+              thermostatic_control: 'Quality of thermostatic control',
+              annual_change_in_gas_out_of_hours_use: 'Annual change in gas used out of school hours',
+              annual_change_in_storage_heater_out_of_hours_use: 'Annual change in storage heater usage out of school hours'
             }
           },
           {

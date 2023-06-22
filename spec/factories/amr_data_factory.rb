@@ -16,12 +16,18 @@ FactoryBot.define do
       transient do
         day_count { 7 }
         end_date { Date.today }
+        kwh_data_x48 { nil }
       end
 
       after(:build) do |amr_data, evaluator|
         evaluator.day_count.times do |n|
           date = evaluator.end_date - n
-          amr_data.add(date, build(:one_day_amr_reading, date: date))
+          if evaluator.kwh_data_x48.nil?
+            reading = build(:one_day_amr_reading, date: date)
+          else
+            reading = build(:one_day_amr_reading, date: date, kwh_data_x48: evaluator.kwh_data_x48)
+          end
+          amr_data.add(date, reading)
         end
       end
     end

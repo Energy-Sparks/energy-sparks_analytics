@@ -70,7 +70,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       weekends_kwh:         { description: 'Annual weekend kwh usage',           units: fuel_kwh },
       community_kwh:        { description: 'Annual community kwh usage',         units: fuel_kwh },
       total_annual_kwh:     { description: 'Annual kwh usage',                   units: fuel_kwh },
-      out_of_hours_kwh:     { description: 'Annual kwh out of hours usage',      units: fuel_kwh },
+      out_of_hours_kwh:     { description: 'Annual kwh out of hours usage',      units: fuel_kwh, benchmark_code: 'aook' },
 
       schoolday_open_percent:   { description: 'Annual school day open percent usage',    units: :percent, benchmark_code: 'sdop' },
       schoolday_closed_percent: { description: 'Annual school day closed percent usage',  units: :percent, benchmark_code: 'sdcp' },
@@ -98,7 +98,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       holidays_co2:               { description: 'Annual holiday emissions',           units: :co2 },
       weekends_co2:               { description: 'Annual weekend emissions',           units: :co2 },
       community_co2:              { description: 'Annual community emissions',         units: :co2 },
-      out_of_hours_co2:           { description: 'Annual out of hours emissions',      units: :co2 },
+      out_of_hours_co2:           { description: 'Annual out of hours emissions',      units: :co2,  benchmark_code: 'aooc' },
 
       good_out_of_hours_use_percent: {
         description: 'Good/Exemplar out of hours use percent (suggested benchmark comparison)',
@@ -190,7 +190,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @potential_saving_£   = @potential_saving_kwh * @fuel_cost_current
     @potential_saving_co2 = @potential_saving_kwh * co2_intensity_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil, @potential_saving_co2)
+    assign_commmon_saving_variables(one_year_saving_kwh: @potential_saving_kwh, one_year_saving_£: @potential_saving_£, one_year_saving_co2: @potential_saving_co2)
 
     @rating = calculate_rating_from_range(good_out_of_hours_use_percent, bad_out_of_hours_use_percent, out_of_hours_percent)
 
