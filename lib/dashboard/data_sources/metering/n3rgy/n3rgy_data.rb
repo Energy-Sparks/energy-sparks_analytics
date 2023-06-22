@@ -79,12 +79,16 @@ module MeterReadingsFeeds
 
     def tariffs_available_date_range(mpxn, fuel_type)
       result = api.get_tariff_data(mpxn: mpxn, fuel_type: fuel_type)
-      available_date_range(result['availableCacheRange'])
+      # available_date_range(result['availableCacheRange'])
+# result['availableCacheRange']
+      result
     end
 
     def readings_available_date_range(mpxn, fuel_type)
       result = api.get_consumption_data(mpxn: mpxn, fuel_type: fuel_type)
-      available_date_range(result['availableCacheRange'])
+      # available_date_range(result['availableCacheRange'])
+# result['availableCacheRange']
+      result      
     end
 
     # PH test
