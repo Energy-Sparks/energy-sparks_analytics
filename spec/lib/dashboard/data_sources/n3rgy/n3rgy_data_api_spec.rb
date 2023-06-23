@@ -168,7 +168,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
 
     it 'adds dates' do
       stubs.get("/123456789100/electricity/consumption/1") do |env|
-        expect(env.params).to eql("start" => "20200101", "end" => "20200102")
+        expect(env.params).to eql("start" => "202001010000", "end" => "202001020000")
         [200, {}, response.to_json]
       end
       date = Date.parse("2020-01-01")

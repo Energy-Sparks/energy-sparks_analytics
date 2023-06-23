@@ -114,7 +114,7 @@ module MeterReadingsFeeds
     end
 
     def url_date(date)
-      date.strftime('%Y%m%d')
+      date.strftime('%Y%m%d%H%M')
     end
 
     def error_message(response)

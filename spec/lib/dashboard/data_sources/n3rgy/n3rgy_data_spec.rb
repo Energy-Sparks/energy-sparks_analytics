@@ -126,10 +126,10 @@ describe MeterReadingsFeeds::N3rgyData do
 
           it 'returns available date range with adjusted start date' do
             date_range = api.tariffs_available_date_range(mpxn, fuel_type)
-            expect(date_range.first.class).to eq(Date)
-            expect(date_range.first.to_s).to eq('2018-12-25')
-            expect(date_range.last.class).to eq(Date)
-            expect(date_range.last.to_s).to eq('2021-02-05')
+            expect(date_range.first.class).to eq(DateTime)
+            expect(date_range.first.to_s).to eq('2018-12-25T00:00:00+00:00')
+            expect(date_range.last.class).to eq(DateTime)
+            expect(date_range.last.to_s).to eq('2021-02-05T00:00:00+00:00')
           end
 
           it 'deduplicates standing charges' do
@@ -229,10 +229,10 @@ describe MeterReadingsFeeds::N3rgyData do
 
         it 'returns available date range with adjusted start date' do
           date_range = api.readings_available_date_range(mpxn, fuel_type)
-          expect(date_range.first.class).to eq(Date)
-          expect(date_range.first.to_s).to eq('2018-12-25')
-          expect(date_range.last.class).to eq(Date)
-          expect(date_range.last.to_s).to eq('2019-05-16')
+          expect(date_range.first.class).to eq(DateTime)
+          expect(date_range.first.to_s).to eq('2018-12-25T23:30:00+00:00')
+          expect(date_range.last.class).to eq(DateTime)
+          expect(date_range.last.to_s).to eq('2019-05-16T02:30:00+00:00')
         end
       end
 
