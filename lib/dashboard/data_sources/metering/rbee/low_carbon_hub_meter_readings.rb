@@ -24,11 +24,17 @@ class LowCarbonHubMeterReadings
 
   # return a 3 key hash[solar_pv electricity exported_solar_pv] => { mpan_mprn: 1234, readings: OneDayAMRReading[], missing_readings: DateTime[] }
   def download(meter_id, urn, start_date, end_date)
+    start_date = @rbee.first_connection_date(meter_id) if start_date.nil?
+    end_date = @rbee.last_connection_date(meter_id) if end_date.nil?
+
     data = @rbee.smart_meter_data(meter_id, start_date, end_date)
     convert_raw_readings_to_meter_readings(data, urn, start_date, end_date)
   end
 
   def download_by_component(meter_id, component, synthetic_mpan, start_date, end_date)
+    start_date = @rbee.first_connection_date(meter_id) if start_date.nil?
+    end_date = @rbee.last_connection_date(meter_id) if end_date.nil?
+
     raw_data = @rbee.smart_meter_data_by_component(meter_id, start_date, end_date, component)
     actual_start = start_date || first_meter_reading_date(meter_id)
     {

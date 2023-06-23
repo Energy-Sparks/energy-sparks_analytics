@@ -90,7 +90,6 @@ class RbeeSolarPV
   # as margin of 1 hour required for UTC to BST/GMT conversion
   def smart_meter_data(meter_id, start_date, end_date, datetime = Time.now.utc)
     data = {}
-    start_date = first_connection_date(meter_id) if start_date.nil?
     raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
     (start_date..end_date).each_slice(6) do |six_days|
       data = data.deep_merge(smart_meter_data_6_days(meter_id, six_days.first, six_days.last, datetime))
@@ -119,7 +118,6 @@ class RbeeSolarPV
   def smart_meter_data_by_component(meter_id, start_date, end_date, component = nil, datetime = Time.now.utc)
     raise InvalidComponent, "Component = #{component}" unless COMPONENTS.include?(component)
     data = {}
-    start_date = first_connection_date(meter_id) if start_date.nil?
     raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
     (start_date..end_date).each_slice(6) do |six_days|
       data = data.deep_merge(smart_meter_data_6_days_by_component(meter_id, component, six_days.first, six_days.last, datetime))
