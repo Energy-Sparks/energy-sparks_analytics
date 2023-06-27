@@ -72,7 +72,7 @@ module SolarPhotovoltaics
 
     def kwp_scenario_including_optimum(optimum_kwp)
       optimum = round_optimum_kwp(optimum_kwp)
-      kwp_scenario_ranges.push(optimum).sort.uniq {|s| s.to_f }
+      kwp_scenario_ranges.push(optimum).sort.uniq(&:to_f)
     end
 
     def round_optimum_kwp(kwp)
