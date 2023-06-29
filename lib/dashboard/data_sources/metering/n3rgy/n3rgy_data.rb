@@ -99,7 +99,7 @@ module MeterReadingsFeeds
       DateTime.strptime(end_date, '%Y%m%d%H%M')
     end
 
-    private
+    # private
 
     def consumption_data(mpxn, fuel_type, start_date, end_date)
       readings = []
