@@ -23,7 +23,7 @@ module MeterReadingsFeeds
       else
         readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
       end
-      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date, true, nil)
+      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date.to_date, end_date.to_date, readings_by_date, true, nil)
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
