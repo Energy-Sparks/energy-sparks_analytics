@@ -99,8 +99,6 @@ module MeterReadingsFeeds
       DateTime.strptime(end_date, '%Y%m%d%H%M')
     end
 
-    # private
-
     def consumption_data(mpxn, fuel_type, start_date, end_date)
       readings = []
       (start_date..end_date).each_slice(90) do |date_range_max_90days|
@@ -143,6 +141,8 @@ module MeterReadingsFeeds
         prices:           prices
       }
     end
+
+    private
 
     def deduplicate_standing_charges(ary)
       N3rgyDataDeduplicator.deduplicate_standing_charges(ary)
