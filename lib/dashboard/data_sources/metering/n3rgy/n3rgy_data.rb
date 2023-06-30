@@ -38,7 +38,7 @@ module MeterReadingsFeeds
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
       charges_by_date = tariff_details[:standing_charges].to_h
       prices_by_date = tariff_details[:prices].to_h
-      tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
+      tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date.to_date, end_date.to_date, prices_by_date)
       {
         kwh_tariffs:      deduplicate_prices(tariff_readings[:readings]),
         standing_charges: charges_by_date,
