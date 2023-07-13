@@ -644,18 +644,8 @@ class ValidateAMRData
   # corrected to kWh properly at source
   def scale_amr_data(start_date, end_date, scale)
     logger.info "Rescaling data between #{start_date} and #{end_date} by #{scale}"
-    # case where another correction has changed data prior to configured correction
-    start_date = @amr_data.start_date if @amr_data.start_date > start_date
-    (start_date..end_date).each do |date|
-      if @amr_data.date_exists?(date) && @amr_data.substitution_type(date) != 'S31M'
-        new_data_x48 = []
-        (0..47).each do |halfhour_index|
-          new_data_x48.push(@amr_data.kwh(date, halfhour_index) * scale)
-        end
-        scaled_data = OneDayAMRReading.new(meter_id, date, 'S31M', nil, DateTime.now, new_data_x48)
-        @amr_data.add(date, scaled_data)
-      end
-    end
+    rescaler = Corrections::Rescaler.new(@amr_data, @meter_id)
+    @amr_data = rescaler.perform(start_date: start_date, end_date: end_date, scale: scale)
   end
 
   def correct_holidays_with_adjacent_academic_years
