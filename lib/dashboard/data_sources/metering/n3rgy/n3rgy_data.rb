@@ -23,7 +23,7 @@ module MeterReadingsFeeds
       else
         readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
       end
-      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date, true, nil)
+      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date.to_date, end_date.to_date, readings_by_date, true, nil)
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
@@ -38,7 +38,7 @@ module MeterReadingsFeeds
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
       charges_by_date = tariff_details[:standing_charges].to_h
       prices_by_date = tariff_details[:prices].to_h
-      tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
+      tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date.to_date, end_date.to_date, prices_by_date)
       {
         kwh_tariffs:      deduplicate_prices(tariff_readings[:readings]),
         standing_charges: charges_by_date,
@@ -99,8 +99,6 @@ module MeterReadingsFeeds
       DateTime.strptime(end_date, '%Y%m%d%H%M')
     end
 
-    private
-
     def consumption_data(mpxn, fuel_type, start_date, end_date)
       readings = []
       (start_date..end_date).each_slice(90) do |date_range_max_90days|
@@ -143,6 +141,8 @@ module MeterReadingsFeeds
         prices:           prices
       }
     end
+
+    private
 
     def deduplicate_standing_charges(ary)
       N3rgyDataDeduplicator.deduplicate_standing_charges(ary)
