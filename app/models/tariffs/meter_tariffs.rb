@@ -19,6 +19,9 @@ require 'date'
 class MeterTariffs
   extend Logging
 
+  # TODO: This is only referenced by the +accounting_tariff_availability_coverage+ method
+  # could be private
+  #
   # stats for rating adult dashboard costs pages, by availability of accounting tariff data
   def self.accounting_tariff_availability_statistics(start_date, end_date, meters)
     missing_meter_stats = Hash.new{ |hash, key| hash[key] = { days_tariffs: 0, days_data: 0 } }
@@ -35,6 +38,7 @@ class MeterTariffs
     missing_meter_stats
   end
 
+  #TODO remove: this is unused across the code base
   def self.accounting_tariffs_available_for_period?(start_date, end_date, meters)
     meters.each do |meter|
       # some meters may not extent over period of aggregate if deprecated
@@ -47,6 +51,8 @@ class MeterTariffs
     true
   end
 
+  #TODO: this was used in old financial advice information on charts, but not used on
+  #new advice pages which use TariffInformationService.
   def self.accounting_tariff_availability_coverage(start_date, end_date, meters)
     stats = accounting_tariff_availability_statistics(start_date, end_date, meters)
     # can't use sum directly because of Ruby lib statssample sum issue
