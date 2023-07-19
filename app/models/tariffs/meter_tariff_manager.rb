@@ -1,7 +1,7 @@
-# MeterTariffManager: manages all the tariffs associated with a given meter
-#                     these tariffs are either generated from the DCC or manually edited by the user
-#                     the managers main job is to select the right type of tariff for a given date
-#                     there is potentially a complex hierarchy of these tariffs to select from
+# Manages all the tariffs associated with a given meter
+# these tariffs are either generated from the DCC or manually edited by the user
+# the managers main job is to select the right type of tariff for a given date
+# there is potentially a complex hierarchy of these tariffs to select from
 #
 # Economic Tariffs: each meter has a system wide economic tariff
 # - which can be used for both differential and non-differential cost calculations
@@ -13,7 +13,6 @@
 # - merge tariff        - used to add tariff information e.g. DUOS rates not available on the DCC
 #
 # Summary: the manager selects the most relevant tariff for a given date
-#
 class MeterTariffManager
   include Logging
   MAX_DAYS_BACKDATE_TARIFF = 30
@@ -35,6 +34,11 @@ class MeterTariffManager
     backdate_dcc_tariffs(meter)
   end
 
+  #Calculate the economic cost for a given date and one days worth
+  # of half-hourly consumption
+  #
+  # Returns a hash which can be used to a OneDaysCostData object
+  # TODO: could just create that directly?
   def economic_cost(date, kwh_x48)
     differential_tariff = differential_tariff_on_date?(date)
     t = if differential_tariff
@@ -59,6 +63,11 @@ class MeterTariffManager
     raise_and_log_error(EconomicCostCalculationError, "Unable to calculate economic cost for mpxn #{@mpxn} on #{date}. Differential tariff: #{differential_tariff}")
   end
 
+  #Calculate the accounting cost for a given date and one days worth
+  # of half-hourly consumption
+  #
+  # Returns a hash which can be used to a OneDaysCostData object
+  # TODO: could just create that directly?
   def accounting_cost(date, kwh_x48)
     tariff = accounting_tariff_for_date(date)
 
@@ -67,7 +76,7 @@ class MeterTariffManager
     tariff.costs(date, kwh_x48)
   end
 
-  # used by meter consolidation tariff; attempt real tariff, otherwise default indicative
+  # Only used by meter consolidation tariff; attempt real tariff, otherwise default indicative
   def meter_standing_charge_£_per_day(date)
     tariff = calculate_accounting_tariff_for_date(date, true)
     return @indicative_standing_charge.daily_standing_charge_£_per_day if tariff.nil?
@@ -75,6 +84,7 @@ class MeterTariffManager
     c[:standing_charges].values.sum
   end
 
+  #Determine whether there are any differential tariffs within the specified date range
   def any_differential_tariff?(start_date, end_date)
     # slow, TODO(PH, 30Mar2021) speed up by scanning tariff date ranges
     # this is now more complex as there are now potentially multiple tariffs on
@@ -82,6 +92,7 @@ class MeterTariffManager
     (start_date..end_date).any? { |date| differential_tariff_on_date?(date) }
   end
 
+  #Determine whether there's a differential tariff for a specific date
   def differential_tariff_on_date?(date)
     override = differential_override(date)
     if override.nil?
@@ -92,6 +103,7 @@ class MeterTariffManager
     end
   end
 
+  #TODO: unused, remove
   def most_recent_contiguous_real_accounting_tariffs
     return nil if @accounting_tariffs.nil? || @accounting_tariffs.empty?
 
@@ -112,17 +124,23 @@ class MeterTariffManager
     }
   end
 
+  # Find the accounting tariff for the given date
+  # Caches the calculation of the accounting tariff
   def accounting_tariff_for_date(date)
     @accounting_tariff_cache       ||= {}
     @accounting_tariff_cache[date] ||= calculate_accounting_tariff_for_date(date)
   end
 
+  #Does this meter have time-varying economic tariffs?
   def economic_tariffs_change_over_time?
     # probably only works on real meters, not aggregate meters
     check_economic_tariff_type
     @economic_tariff.class == EconomicTariffChangeOverTime
   end
 
+  # Find all the tariffs for the underlying meters for a specific date range
+  # TODO: only called within this class, so could be private
+  #
   # meter => { date_ranges => tariffs }
   def tariffs_within_date_range(start_date, end_date)
     start_date, end_date = default_nil_date_ranges(start_date, end_date)
@@ -135,6 +153,7 @@ class MeterTariffManager
     end.to_h
   end
 
+  # Find the most recent date that the tariffs were last changed
   def last_tariff_change_date(start_date = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
     change_dates = tariff_change_dates_in_period(start_date, end_date)
     return nil if change_dates.empty?
@@ -142,6 +161,7 @@ class MeterTariffManager
     change_dates.last
   end
 
+  # Find all the dates when the tariff changes within the period
   def tariff_change_dates_in_period(start_date  = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
     start_date, end_date = default_nil_date_ranges(start_date, end_date)
 
@@ -154,6 +174,7 @@ class MeterTariffManager
     change_dates_with_in_range = change_dates.reject { |d| d < start_date || d > end_date }
   end
 
+  #DEBUG only
   def formatted_constituent_meter_tariffs(start_date, end_date)
     constituent_meters.map do |constituent_meter|
       mpxn_str = constituent_meter.mpxn.to_s[0...16].ljust(16)
@@ -174,11 +195,14 @@ class MeterTariffManager
     end
   end
 
+  #DEBUG only
   def print_formatted_constitiuent_meter_tariffs(start_date, end_date)
     data = formatted_constituent_meter_tariffs(start_date, end_date)
     ap data.map { |r| r.map(&:join) }.flatten
   end
 
+  # Have the economic tariffs changed within this date range?
+  #
   # e.g. aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(Date.new(2022,8,22), Date.new(2022,10,22))
   def meter_tariffs_differ_within_date_range?(start_date, end_date)
     constituent_meters.any? do |meter|
@@ -186,6 +210,7 @@ class MeterTariffManager
     end
   end
 
+  # Have the economic tariffs changed between these date ranges?
   def meter_tariffs_changes_between_periods?(period1, period2)
     constituent_meters.any? do |meter|
       meter.meter_tariffs.economic_tariff.meter_tariffs_changes_between_periods?(period1, period2)
@@ -200,6 +225,17 @@ class MeterTariffManager
     [start_date, end_date]
   end
 
+  #Determine the accounting tariff for a given day
+  #
+  #This is the method that does main work of finding the right accounting tariff
+  #to use for a given date.
+  #
+  #By default it will:
+  # - look first for an "override tariff" (accounting_tariff_generic_override) for that day,
+  #   returning the first
+  # - find the real (non-default) accounting tariff for the date, preferring weekend/weekday tariffs if available
+  #   this includes checking smart meter tariffs
+  # - find the default accounting tariff for that day
   def calculate_accounting_tariff_for_date(date, ignore_defaults = false)
     override = override_tariff(date)
     return override unless override.nil?
@@ -214,6 +250,8 @@ class MeterTariffManager
     return nil if accounting_tariff.nil?
 
     merge = merge_tariff(date)
+    #FIXME: this wont work as its expecting the tariff to be a Hash not an instance
+    #of AccountingTariff? And there's no equivalent merge method implemented?
     return accounting_tariff.deep_merge(merge) unless merge.nil?
 
     accounting_tariff
@@ -261,15 +299,34 @@ class MeterTariffManager
     @differential_tariff_override.any? { |dr, tf| date >= dr.first && date <= dr.last && tf }
   end
 
+  #Create the collections of models that represent the different categories of tariff for this
+  #meter
   def pre_process_tariff_attributes(meter)
+    #Creates either an EconomicTariff or an EconomicTariffChangeOverTime instance from the
+    #economic tariff. The latter will end up using a number of meter attributes.
     @economic_tariff = pre_process_economic_tariffs(meter)
+    #Create an AccountingTariff for each accounting tariff attribute, separating out those that are defaults
     @accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), false) || []
     @default_accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), true) || []
+
+    #Create GenericAccountingTariff for these three types of accounting tariff
+    #
+    #accounting_tariff_generic => are either "manually_entered" or "dcc".
+    #however we only see to have data from DCC via user tariffs
     @accounting_tariffs += preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic)) || []
+    #Can be created manually, but none seem to exist in the production database
     @override_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_override)) || []
+    #None of these exist in database currently.
     @merge_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_merge)) || []
+
+    #Rework the overrides to use a Range of dates
+    #None of these exist in database currently.
     @differential_tariff_override = process_economic_tariff_override(meter.attributes(:economic_tariff_differential_accounting_tariff))
+
+    #For meter consolidation alert
     @indicative_standing_charge = MeterIndicativeStandingCharge.new(meter, meter.attributes(:indicative_standing_charge))
+
+    #Validate the accounting tariffs to raise an exception if there are overlaps
     check_tariffs
   end
 
@@ -283,6 +340,8 @@ class MeterTariffManager
     end
   end
 
+  #TODO: this seems unnecessary, the economic tariff object can only be one of the two
+  #types being checked.
   def check_economic_tariff_type
     economic_tariff_classes = [EconomicTariff, EconomicTariffChangeOverTime]
     unless economic_tariff_classes.include?(@economic_tariff.class)
@@ -302,6 +361,7 @@ class MeterTariffManager
     end.to_h
   end
 
+  #Loop over the accounting tariffs to select those are that marked as default (or not)
   def preprocess_accounting_tariffs(meter, accounting_tariffs, default)
     return [] if accounting_tariffs.nil?
 
@@ -324,6 +384,14 @@ class MeterTariffManager
   # have no DCC tariff and default to default accounting tariffs
   # in this circumstance, unless overridden backdate the existing DCC tariff
   # to the start of the meter readings, so the default is no longer used
+  #
+  # NOTE: as n3rgy no longer hold archived tariffs, then we'll only ever have
+  # the tariffs from the point that we begin loading data. So this may be more
+  # common than it was before
+  #
+  # TODO: this could be done in the application. When the DCC tariffs or readings are loaded for a
+  # meter, the start date of the tariff could be adjusted once. Or the adjustment could
+  # happen when the data is loaded and past to the analytics.
   def backdate_dcc_tariffs(meter)
     return if dcc_tariffs.empty?
 
@@ -378,6 +446,12 @@ class MeterTariffManager
     end
   end
 
+  # NOTE: we've only encountered these tariffs in the n3rgy sandbox so far
+  # While our API client attempts to process them, but there's no support for them in
+  # the application database (AFAICT). So only route to get this into the system currently
+  # is via manual input. Might be best to revisit this and ensure we have proper end-to-end
+  # support in place.
+  #
   # weekday/weekend tariffs are typically represented by 2 tariffs within a given supply contract
   # i.e. have same or very similar start and end dates, but are differentiated by having
   # [:weekday] or [:weekend] flags set, ultimately only 1 of the 2 tariffs is used depending on the date
