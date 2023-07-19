@@ -74,7 +74,7 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     @average_school_day_last_year_kw_per_pupil = @average_school_day_last_year_kw / pupil_count
     @average_school_day_last_year_kw_per_floor_area = @average_school_day_last_year_kw / floor_area(asof_date - 365, asof_date)
 
-    benchmark_kw_m2 = BenchmarkMetrics.benchmark_peak_kw(pupil_count, school_type)
+    benchmark_kw = BenchmarkMetrics.benchmark_peak_kw(pupil_count, school_type)
     @exemplar_kw = BenchmarkMetrics.exemplar_peak_kw(pupil_count, school_type)
 
     potential_saving = consumption_above_exemplar_peak(asof_date, @exemplar_kw)
@@ -83,7 +83,10 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_exemplar_£    = potential_saving[:£]
     @one_year_saving_versus_exemplar_co2  = potential_saving[:co2]
 
-    @rating = calculate_rating_from_range(benchmark_kw_m2, 0.02, @average_school_day_last_year_kw_per_floor_area)
+    # rating: benchmark value = 4.0, exemplar = 10.0
+    percent_from_benchmark_to_exemplar = (@average_school_day_last_year_kw - benchmark_kw) / (@exemplar_kw - benchmark_kw)
+    uncapped_rating = percent_from_benchmark_to_exemplar * (10.0 - 4.0) + 4.0
+    @rating = [[uncapped_rating, 10.0].min, 0.0].max.round(2)
 
     assign_commmon_saving_variables(
       one_year_saving_kwh: @one_year_saving_versus_exemplar_kwh,
