@@ -76,14 +76,6 @@ class MeterTariffManager
     tariff.costs(date, kwh_x48)
   end
 
-  # Only used by meter consolidation tariff; attempt real tariff, otherwise default indicative
-  def meter_standing_charge_£_per_day(date)
-    tariff = calculate_accounting_tariff_for_date(date, true)
-    return @indicative_standing_charge.daily_standing_charge_£_per_day if tariff.nil?
-    c = tariff.costs(date, AMRData.one_day_zero_kwh_x48)
-    c[:standing_charges].values.sum
-  end
-
   #Determine whether there are any differential tariffs within the specified date range
   def any_differential_tariff?(start_date, end_date)
     # slow, TODO(PH, 30Mar2021) speed up by scanning tariff date ranges
@@ -322,9 +314,6 @@ class MeterTariffManager
     #Rework the overrides to use a Range of dates
     #None of these exist in database currently.
     @differential_tariff_override = process_economic_tariff_override(meter.attributes(:economic_tariff_differential_accounting_tariff))
-
-    #For meter consolidation alert
-    @indicative_standing_charge = MeterIndicativeStandingCharge.new(meter, meter.attributes(:indicative_standing_charge))
 
     #Validate the accounting tariffs to raise an exception if there are overlaps
     check_tariffs

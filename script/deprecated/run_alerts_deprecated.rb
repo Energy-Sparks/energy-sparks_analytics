@@ -18,8 +18,6 @@ class RunAlerts2
     AlertHeatingOnNonSchoolDays                   => 'NonHeatingDays',
     AlertHeatingOnSchoolDays                      => 'HeatingDays',
     AlertThermostaticControl                      => 'Thermostatic',
-    AlertElectricityMeterConsolidationOpportunity => 'MeterConsolidElectric',
-    AlertGasMeterConsolidationOpportunity         => 'MeterConsolidGas',
     AlertMeterASCLimit                            => 'ASCLimit',
     AlertDifferentialTariffOpportunity            => 'DiffTariffOpp',
     AlertSchoolWeekComparisonElectricity          => 'SchWeekElectric',
@@ -222,9 +220,7 @@ class RunAlerts2
       elsif result_type == :front_end_template_table_data
         data.delete_if { |key, _value| key.to_s.include?('weather_forecast_table') }
       end
-    elsif alert_type == AlertGasMeterConsolidationOpportunity ||
-          alert_type == AlertElectricityMeterConsolidationOpportunity ||
-          alert_type == AlertDifferentialTariffOpportunity ||
+    elsif alert_type == AlertDifferentialTariffOpportunity ||
           alert_type == AlertMeterASCLimit
       data.delete(:max_asofdate)
       raw_variables_for_saving_key = alert_type.to_s + ':' + 'max_asofdate'
