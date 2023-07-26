@@ -84,39 +84,6 @@ class MeterTariffManager
     (start_date..end_date).any? { |date| differential_tariff_on_date?(date) }
   end
 
-  #Determine whether there's a differential tariff for a specific date
-  #Only used in this class, could be private
-  def differential_tariff_on_date?(date)
-    override = differential_override(date)
-    if override.nil?
-      accounting_tariff = accounting_tariff_for_date(date)
-      !accounting_tariff.nil? && accounting_tariff.differential?(date)
-    else
-      override
-    end
-  end
-
-  #TODO: unused, remove
-  def most_recent_contiguous_real_accounting_tariffs
-    return nil if @accounting_tariffs.nil? || @accounting_tariffs.empty?
-
-    reverse_sorted_tariffs = @accounting_tariffs.sort { |t1, t2| t2.tariff[:end_date] <=> t1.tariff[:end_date] }
-
-    grouped_tariffs = reverse_sorted_tariffs.slice_when { |prev, curr| prev.tariff[:end_date] < prev.tariff[:start_date] - 1 }.to_a
-
-    most_recent_contiguous_tariff_group = grouped_tariffs[0]
-
-    start_date = most_recent_contiguous_tariff_group.last.tariff[:start_date]
-    end_date   = most_recent_contiguous_tariff_group.first.tariff[:end_date]
-
-    {
-      start_date: start_date,
-      end_date:   end_date,
-      days:       (end_date - start_date + 1).to_i,
-      tariffs:    most_recent_contiguous_tariff_group.reverse
-    }
-  end
-
   # Find the accounting tariff for the given date
   # Caches the calculation of the accounting tariff
   def accounting_tariff_for_date(date)
@@ -129,21 +96,6 @@ class MeterTariffManager
     # probably only works on real meters, not aggregate meters
     check_economic_tariff_type
     @economic_tariff.class == EconomicTariffChangeOverTime
-  end
-
-  # Find all the tariffs for the underlying meters for a specific date range
-  # TODO: only called within this class, so could be private
-  #
-  # meter => { date_ranges => tariffs }
-  def tariffs_within_date_range(start_date, end_date)
-    start_date, end_date = default_nil_date_ranges(start_date, end_date)
-
-    constituent_meters.map do |constituent_meter|
-      [
-        constituent_meter,
-        constituent_meter.meter_tariffs.economic_tariff.tariffs_within_date_range(start_date, end_date)
-      ]
-    end.to_h
   end
 
   # Find the most recent date that the tariffs were last changed
@@ -167,33 +119,6 @@ class MeterTariffManager
     change_dates_with_in_range = change_dates.reject { |d| d < start_date || d > end_date }
   end
 
-  #DEBUG only
-  def formatted_constituent_meter_tariffs(start_date, end_date)
-    constituent_meters.map do |constituent_meter|
-      mpxn_str = constituent_meter.mpxn.to_s[0...16].ljust(16)
-      name_str = constituent_meter.name[0...15].ljust(15)
-      meter_description = "#{mpxn_str} #{name_str}"
-      differential_test = (start_date..end_date).any? { |date| constituent_meter.meter_tariffs.differential_tariff_on_date?(date) }
-      tariffs_in_range = constituent_meter.meter_tariffs.economic_tariff.tariffs_within_date_range(start_date, end_date)
-
-      rs = MeterTariff.rates_text(tariffs_in_range, differential_test)
-
-      rs.map.with_index do |(dr, t), i|
-        [
-          (i == 0 ? meter_description : '')[0...32].ljust(32),
-          (dr.nil? ? '' : dr[0...25]).ljust(25),
-          t
-        ]
-      end
-    end
-  end
-
-  #DEBUG only
-  def print_formatted_constitiuent_meter_tariffs(start_date, end_date)
-    data = formatted_constituent_meter_tariffs(start_date, end_date)
-    ap data.map { |r| r.map(&:join) }.flatten
-  end
-
   # Have the economic tariffs changed within this date range?
   #
   # e.g. aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(Date.new(2022,8,22), Date.new(2022,10,22))
@@ -211,6 +136,31 @@ class MeterTariffManager
   end
 
   private
+
+  #Determine whether there's a differential tariff for a specific date
+  def differential_tariff_on_date?(date)
+    override = differential_override(date)
+    if override.nil?
+      accounting_tariff = accounting_tariff_for_date(date)
+      !accounting_tariff.nil? && accounting_tariff.differential?(date)
+    else
+      override
+    end
+  end
+
+  # Find all the tariffs for the underlying meters for a specific date range
+  #
+  # meter => { date_ranges => tariffs }
+  def tariffs_within_date_range(start_date, end_date)
+    start_date, end_date = default_nil_date_ranges(start_date, end_date)
+
+    constituent_meters.map do |constituent_meter|
+      [
+        constituent_meter,
+        constituent_meter.meter_tariffs.economic_tariff.tariffs_within_date_range(start_date, end_date)
+      ]
+    end.to_h
+  end
 
   def default_nil_date_ranges(start_date, end_date)
     start_date = MeterTariff::MIN_DEFAULT_START_DATE if start_date.nil?
