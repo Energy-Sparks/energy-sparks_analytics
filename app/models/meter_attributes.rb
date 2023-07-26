@@ -520,21 +520,6 @@ class MeterAttributes
     )
   end
 
-  class EconomicTariffDifferentialType < MeterAttributeTypes::AttributeBase
-    id  :economic_tariff_differential_accounting_tariff
-    key :economic_tariff_differential_accounting_tariff
-
-    name 'Differential tariff'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date:      MeterAttributeTypes::Date.define(required: true),
-        end_date:        MeterAttributeTypes::Date.define,
-        differential:    MeterAttributeTypes::Boolean.define(required: true),
-      }
-    )
-  end
-
   def self.default_tariff_rates
     {
       standing_charge: MeterAttributeTypes::Hash.define(

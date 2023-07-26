@@ -137,13 +137,8 @@ class MeterTariffManager
 
   #Determine whether there's a differential tariff for a specific date
   def differential_tariff_on_date?(date)
-    override = differential_override(date)
-    if override.nil?
-      accounting_tariff = accounting_tariff_for_date(date)
-      !accounting_tariff.nil? && accounting_tariff.differential?(date)
-    else
-      override
-    end
+    accounting_tariff = accounting_tariff_for_date(date)
+    !accounting_tariff.nil? && accounting_tariff.differential?(date)
   end
 
   # Find all the tariffs for the underlying meters for a specific date range
@@ -209,12 +204,6 @@ class MeterTariffManager
     tariffs[0]
   end
 
-  def differential_override(date)
-    return nil if @differential_tariff_override.empty?
-
-    @differential_tariff_override.any? { |dr, tf| date >= dr.first && date <= dr.last && tf }
-  end
-
   #Create the collections of models that represent the different categories of tariff for this
   #meter
   def pre_process_tariff_attributes(meter)
@@ -249,18 +238,6 @@ class MeterTariffManager
     unless economic_tariff_classes.include?(@economic_tariff.class)
       raise EnergySparksUnexpectedStateException, "Economic tariff must one of #{economic_tariff_classes.join(' ')} got #{@economic_tariff.class.name}"
     end
-  end
-
-  def process_economic_tariff_override(differential_overrides)
-    return {} if differential_overrides.nil?
-
-    differential_overrides.map do |override|
-      end_date = override[:end_date] || Date.new(2050, 1, 1)
-      [
-        override[:start_date]..end_date,
-        override[:differential]
-      ]
-    end.to_h
   end
 
   #Loop over the accounting tariffs to select those are that marked as default (or not)
