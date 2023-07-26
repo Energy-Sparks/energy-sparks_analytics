@@ -7,10 +7,8 @@
 # - which can be used for both differential and non-differential cost calculations
 # - to work out whether its differential or not the code below looks up the meters accounting tariff
 # Accounting Tariffs
-# - there are potentially multiple of these for a given day, the manager decided which:
+# - there are potentially multiple of these for a given day, the manager decided which will be used:
 # - accounting_tariff
-# - override tariff     - highest precedence typically used to override bad data from dcc, only applies to generic
-# - merge tariff        - used to add tariff information e.g. DUOS rates not available on the DCC
 #
 # Summary: the manager selects the most relevant tariff for a given date
 class MeterTariffManager
@@ -174,29 +172,14 @@ class MeterTariffManager
   #to use for a given date.
   #
   #By default it will:
-  # - look first for an "override tariff" (accounting_tariff_generic_override) for that day,
-  #   returning the first
   # - find the real (non-default) accounting tariff for the date, preferring weekend/weekday tariffs if available
   #   this includes checking smart meter tariffs
   # - find the default accounting tariff for that day
   def calculate_accounting_tariff_for_date(date, ignore_defaults = false)
-    override = override_tariff(date)
-    return override unless override.nil?
-
     return nil if @accounting_tariffs.nil?
-
     accounting_tariff = find_tariff(date)
-
     accounting_tariff = find_default_tariff(date) if !ignore_defaults && accounting_tariff.nil?
-
-    # this should only happen for when ignore_defaults = true; meter consolidation alert
-    return nil if accounting_tariff.nil?
-
-    merge = merge_tariff(date)
-    #FIXME: this wont work as its expecting the tariff to be a Hash not an instance
-    #of AccountingTariff? And there's no equivalent merge method implemented?
-    return accounting_tariff.deep_merge(merge) unless merge.nil?
-
+    #may be nil if ignore_defaults = true
     accounting_tariff
   end
 
@@ -226,16 +209,6 @@ class MeterTariffManager
     tariffs[0]
   end
 
-  def override_tariff(date)
-    override = @override_tariffs.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
-    override.empty? ? nil : override[0]
-  end
-
-  def merge_tariff(date)
-    override = @merge_tariffs.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
-    override.empty? ? nil : override[0]
-  end
-
   def differential_override(date)
     return nil if @differential_tariff_override.empty?
 
@@ -252,19 +225,8 @@ class MeterTariffManager
     @accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), false) || []
     @default_accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), true) || []
 
-    #Create GenericAccountingTariff for these three types of accounting tariff
-    #
-    #accounting_tariff_generic => are either "manually_entered" or "dcc".
-    #however we only see to have data from DCC via user tariffs
+    #Create GenericAccountingTariff for tariffs from the DCC
     @accounting_tariffs += preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic)) || []
-    #Can be created manually, but none seem to exist in the production database
-    @override_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_override)) || []
-    #None of these exist in database currently.
-    @merge_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_merge)) || []
-
-    #Rework the overrides to use a Range of dates
-    #None of these exist in database currently.
-    @differential_tariff_override = process_economic_tariff_override(meter.attributes(:economic_tariff_differential_accounting_tariff))
 
     #Validate the accounting tariffs to raise an exception if there are overlaps
     check_tariffs

@@ -823,22 +823,6 @@ class MeterAttributes
     structure MeterAttributes.generic_accounting_tariff
   end
 
-  class AccountingGenericTariffOverride < MeterAttributeTypes::AttributeBase
-    id :accounting_tariff_generic_override
-    aggregate_over :accounting_tariff_generic_override
-    name 'Accounting tariff override (generic + DCC)'
-
-    structure MeterAttributes.generic_accounting_tariff
-  end
-
-  class AccountingGenericTariffMerge < MeterAttributeTypes::AttributeBase
-    id :accounting_tariff_generic_merge
-    aggregate_over :accounting_tariff_generic_merge
-    name 'Accounting tariff merge (generic + DCC)'
-
-    structure MeterAttributes.generic_accounting_tariff
-  end
-
   def self.all
     constants.inject({}) do |collection, constant_name|
       constant = const_get(constant_name)
