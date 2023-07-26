@@ -66,7 +66,7 @@ class MeterTariffManager
   #Calculate the accounting cost for a given date and one days worth
   # of half-hourly consumption
   #
-  # Returns a hash which can be used to a OneDaysCostData object
+  # Returns a hash which can be used to create a OneDaysCostData object
   # TODO: could just create that directly?
   def accounting_cost(date, kwh_x48)
     tariff = accounting_tariff_for_date(date)
@@ -85,6 +85,7 @@ class MeterTariffManager
   end
 
   #Determine whether there's a differential tariff for a specific date
+  #Only used in this class, could be private
   def differential_tariff_on_date?(date)
     override = differential_override(date)
     if override.nil?
