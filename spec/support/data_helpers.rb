@@ -998,9 +998,6 @@ module EnergySparksAnalyticsDataHelpers
           'eloo_aoo€' => 41_019.274999999994,
           'eloo_esv€' => 17_566.910750000003,
           'eloo_ratg' => 1.3,
-          'emtc_mets' => 3,
-          'emtc_sav£' => 2190.0,
-          'emtc_ratg' => 0.0,
           'dtaf_sav£' => 0.0,
           'dtaf_ratg' => 10.0,
           'eswc_difk' => 316.1999999999989,
@@ -1196,10 +1193,7 @@ module EnergySparksAnalyticsDataHelpers
           's22e_cp£k' => 0.15,
           's22e_pp£k' => 0.15000000000000002,
           's22e_cppp' => false,
-          's22e_ratg' => 6.8,
-          'gmtc_mets' => 4,
-          'gmtc_sav£' => 2190.0,
-          'gmtc_ratg' => 0.0
+          's22e_ratg' => 6.8
         }
       }
     }

@@ -545,8 +545,6 @@ class AlertAnalysisBase < ContentBase
 #      AlertHeatingOnSchoolDays                                    => 'htsd', deprecated
       AlertThermostaticControl                                    => 'httc',
       AlertWeekendGasConsumptionShortTerm                         => 'gswe',
-      AlertElectricityMeterConsolidationOpportunity               => 'emtc',
-      AlertGasMeterConsolidationOpportunity                       => 'gmtc',
       AlertMeterASCLimit                                          => 'masc',
       AlertDifferentialTariffOpportunity                          => 'dtaf',
       AlertSchoolWeekComparisonElectricity                        => 'eswc',

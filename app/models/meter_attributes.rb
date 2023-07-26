@@ -153,7 +153,7 @@ class MeterAttributes
     )
   end
 
-  
+
   def self.time_of_day_range
     MeterAttributeTypes::Hash.define(
       required: false,
@@ -531,19 +531,6 @@ class MeterAttributes
         start_date:      MeterAttributeTypes::Date.define(required: true),
         end_date:        MeterAttributeTypes::Date.define,
         differential:    MeterAttributeTypes::Boolean.define(required: true),
-      }
-    )
-  end
-
-  class IndicativeStandingCharge < MeterAttributeTypes::AttributeBase
-    id  :indicative_standing_charge
-    key :indicative_standing_charge
-
-    name 'Indicative standing charge'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        rate:         MeterAttributeTypes::Float.define(hint: 'daily rate')
       }
     )
   end
