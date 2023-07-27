@@ -520,21 +520,6 @@ class MeterAttributes
     )
   end
 
-  class EconomicTariffDifferentialType < MeterAttributeTypes::AttributeBase
-    id  :economic_tariff_differential_accounting_tariff
-    key :economic_tariff_differential_accounting_tariff
-
-    name 'Differential tariff'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date:      MeterAttributeTypes::Date.define(required: true),
-        end_date:        MeterAttributeTypes::Date.define,
-        differential:    MeterAttributeTypes::Boolean.define(required: true),
-      }
-    )
-  end
-
   def self.default_tariff_rates
     {
       standing_charge: MeterAttributeTypes::Hash.define(
@@ -819,22 +804,6 @@ class MeterAttributes
     id :accounting_tariff_generic
     aggregate_over :accounting_tariff_generic
     name 'Accounting tariff (generic + DCC)'
-
-    structure MeterAttributes.generic_accounting_tariff
-  end
-
-  class AccountingGenericTariffOverride < MeterAttributeTypes::AttributeBase
-    id :accounting_tariff_generic_override
-    aggregate_over :accounting_tariff_generic_override
-    name 'Accounting tariff override (generic + DCC)'
-
-    structure MeterAttributes.generic_accounting_tariff
-  end
-
-  class AccountingGenericTariffMerge < MeterAttributeTypes::AttributeBase
-    id :accounting_tariff_generic_merge
-    aggregate_over :accounting_tariff_generic_merge
-    name 'Accounting tariff merge (generic + DCC)'
 
     structure MeterAttributes.generic_accounting_tariff
   end
