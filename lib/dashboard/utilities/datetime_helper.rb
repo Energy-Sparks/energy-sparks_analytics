@@ -97,6 +97,19 @@ module DateTimeHelper
     result
   end
 
+  # For this method the time_of_day_range specified here is exclusive, i.e.
+  # the end of the range is not part of the weighted period
+  #
+  # e.g. a range end of 23:30 will not include the final half-hourly period of a day
+  #
+  # To specify a full day, the end range must be 24:00.
+  #
+  # FIXME:
+  # Unlike weighted_x48_vector_fast_inclusive the method does not support overnight
+  # ranges, e.g. a range of 23:00-02.00, will just produce invalid output. This means
+  # AccountingTariff and EconomicTariff that specify these ranges will produce invalid
+  # results. They should use the other method.
+  #
   # return a vector for a single time range (as per weighted_x48_vector_multiple_ranges)
   # performance could be improved, currently takes 0.000007 seconds or 150,000 per second or 15ms for an average meter
   def self.weighted_x48_vector_single_range(time_of_day_range, weight = 1.0)
@@ -119,6 +132,23 @@ module DateTimeHelper
     result
   end
 
+
+  # For this method the time_of_day_range specified here is inclusive, i.e.
+  # the end of the range is not part of the weighted period
+  #
+  # e.g. a range end of 23:30 will include the final half-hourly period of a day.
+  # That should be used to specify a full day.
+  #
+  # FIXME:
+  # Unlike `weighted_x48_vector_single_range` an end range of 24:00 will produce
+  # invalid results, as the array with have 49 elements.
+  #
+  # Also unlike `weighted_x48_vector_single_range` overnight ranges are supported
+  # So a range of 23:00..02:00 is valid and will produce the expected output.
+  #
+  # This also means an end range of 00:00 will add a weight to the first half-hourly
+  # period of the day. Care needs to be taken here as this might not be what was
+  # expected from a night time range of: 22:00..00:00.
   def self.weighted_x48_vector_fast_inclusive(time_of_day_range, weight)
     arr_x48 = Array.new(48, 0.0)
     hh_index_start  = time_of_day_range.first.to_halfhour_index
