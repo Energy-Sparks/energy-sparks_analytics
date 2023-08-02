@@ -760,7 +760,7 @@ class MeterAttributes
       structure: {
         start_date: MeterAttributeTypes::Date.define,
         end_date:   MeterAttributeTypes::Date.define,
-        source:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:dcc, :manually_entered]),
+        source:     MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:dcc, :manually_entered]),
         name:       MeterAttributeTypes::String.define,
         type:       MeterAttributeTypes::Symbol.define(required: true, allowed_values: %i[flat differential differential_tiered]),
         sub_type:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:weekday_weekend]),
@@ -795,7 +795,9 @@ class MeterAttributes
           }.merge(MeterAttributes.default_tariff_rates)
         ),
         asc_limit_kw:           MeterAttributeTypes::Float.define,
-        climate_change_levy:    MeterAttributeTypes::Boolean.define
+        climate_change_levy:    MeterAttributeTypes::Boolean.define,
+        tariff_holder:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:meter, :school, :school_group, :site_settings]),
+        created_at:      MeterAttributeTypes::DateTime.define(required: false)
       }
     )
   end
