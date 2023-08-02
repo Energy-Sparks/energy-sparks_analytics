@@ -37,6 +37,21 @@ describe GenericTariffManager, type: :service do
     context 'with smart meter tariffs' do
       it 'backdates the tariffs to the amr start date'
     end
+    context 'smart meter tariffs' do
+      #amr data will be 1st - 31st Jan
+      let(:amr_end_date)       { Date.new(2023,1,31) }
+
+      #set tariff to start after the meter data
+      let(:start_date)         { Date.new(2023, 1, 15) }
+      let(:end_date)           { Date.new(2050, 1, 1) }
+
+      let(:accounting_tariff)  { create_accounting_tariff_generic(start_date: start_date, end_date: end_date, source: :dcc, rates: rates, tariff_holder: :meter) }
+
+      let(:tariff) { service.meter_tariffs.first }
+      it 'backdates the tariffs to the amr start date' do
+        expect(tariff.tariff[:start_date]).to eq amr_end_date - 30
+      end
+    end
   end
 
   context '.find_tariff_for_date' do
