@@ -189,6 +189,13 @@ module MeterAttributeTypes
     end
   end
 
+  class DateTime < AttributeType
+    self.type = :date_time
+    def _parse(input)
+      ::DateTime.parse(input)
+    end
+  end
+
   class Hash < AttributeType
     self.type = :hash
 
