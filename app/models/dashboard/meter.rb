@@ -184,7 +184,11 @@ module Dashboard
       @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
       # Centrica attributes(:open_close_times)
       # @community_opening_times = SchoolOpenCloseTimes.new(@meter_collection, self)
-      @meter_tariffs = MeterTariffManager.new(self)
+      @meter_tariffs = create_tariff_manager
+    end
+
+    private def create_tariff_manager
+      MeterTariffManager.new(self)
     end
 
     # Centrica
