@@ -15,14 +15,16 @@ class GenericTariffManager
     backdate_dcc_tariffs(meter)
   end
 
+  #Original method name used by MeterTariffManager
+  def accounting_tariff_for_date(date)
+    find_tariff_for_date(date)
+  end
+
+  #Find tariff for a specific date
+  #Caches the calculation of the accounting tariff
   def find_tariff_for_date(date)
-    found_tariffs = nil
-    @list_of_all_tariffs.each do |list|
-      found_tariffs = search_tariffs(list, date)
-      break if found_tariffs.any?
-    end
-    return nil unless found_tariffs.any?
-    sort_by_most_recent(found_tariffs).first
+    @tariff_cache       ||= {}
+    @tariff_cache[date] ||= search_tariffs_by_date(date)
   end
 
   #TODO exceptions?
@@ -34,15 +36,23 @@ class GenericTariffManager
     tariff = find_tariff_for_date(date)&.costs(date, kwh_x48)
   end
 
+  #Determine whether there are any differential tariffs within the specified date range
   def any_differential_tariff?(start_date, end_date)
+    # slow, TODO(PH, 30Mar2021) speed up by scanning tariff date ranges
+    # this is now more complex as there are now potentially multiple tariffs on
+    # a date with different rules
+    (start_date..end_date).any? { |date| differential_tariff_on_date?(date) }
   end
 
-  def accounting_tariff_for_date(date)
-  end
-
+  #Does this meter have time-varying economic tariffs?
+  #TODO: will need to check to see if there's any start/end dates on tariffs
   def economic_tariffs_change_over_time?
   end
 
+  #TODO all of the following end up checking the constituent_meters and their
+  #economic tariff
+
+  # Find the most recent date that the tariffs were last changed
   def last_tariff_change_date(start_date = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
   end
 
@@ -57,7 +67,18 @@ class GenericTariffManager
 
   private
 
-  def search_tariffs(list, date)
+  # Searches the tariffs to find the right one for the given date
+  def search_tariffs_by_date(date)
+    found_tariffs = nil
+    @list_of_all_tariffs.each do |list|
+      found_tariffs = search_list_of_tariffs(list, date)
+      break if found_tariffs.any?
+    end
+    return nil unless found_tariffs.any?
+    sort_by_most_recent(found_tariffs).first
+  end
+
+  def search_list_of_tariffs(list, date)
     list.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
   end
 
@@ -130,5 +151,12 @@ class GenericTariffManager
     def dcc_tariffs
       @dcc_tariffs ||= @meter_tariffs.select { |t| t.dcc? }.sort{ |a, b| a.tariff[:start_date] <=> b.tariff[:start_date]}
     end
+
+    #Determine whether there's a differential tariff for a specific date
+    def differential_tariff_on_date?(date)
+      tariff = find_tariff_for_date(date)
+      !tariff.nil? && tariff.differential?(date)
+    end
+
   end
 end

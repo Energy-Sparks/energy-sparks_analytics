@@ -51,6 +51,14 @@ describe GenericTariffManager, type: :service do
     end
   end
 
+  context '.accounting_tariff_for_date' do
+    let(:search_date)     { end_date }
+    let(:found_tariff)    { service.accounting_tariff_for_date(search_date) }
+    it 'supports old method name' do
+      expect(found_tariff).to_not be_nil
+    end
+  end
+
   context '.find_tariff_for_date' do
     let(:search_date)     { end_date }
     let(:found_tariff)    { service.find_tariff_for_date(search_date) }
@@ -183,6 +191,31 @@ describe GenericTariffManager, type: :service do
       let(:rates)           { create_flat_rate(rate: 0.15, standing_charge: 1.0) }
       it 'includes the charge' do
         expect(accounting_cost[:standing_charges]).to eq({standing_charge: 1.0})
+      end
+    end
+  end
+
+  context '.any_differential_tariff' do
+    context 'with flat rate' do
+      it 'returns false' do
+        expect(service.any_differential_tariff?(start_date, end_date)).to be false
+      end
+    end
+    context 'with differential' do
+      let(:rates) { create_differential_rate }
+      it 'returns true' do
+        expect(service.any_differential_tariff?(start_date, end_date)).to be true
+      end
+    end
+
+    context 'when an inherited tariff is differential' do
+      let(:school)          { create_accounting_tariff_generic(tariff_holder: :school, start_date: start_date, end_date: end_date, rates: create_differential_rate) }
+      let(:meter_tariff)    { create_accounting_tariff_generic(tariff_holder: :meter, start_date: start_date + 15) }
+      let(:meter_attributes) {
+        {:accounting_tariff_generic=> [school, meter_tariff]}
+      }
+      it 'returns true' do
+        expect(service.any_differential_tariff?(start_date, end_date)).to be true
       end
     end
   end
