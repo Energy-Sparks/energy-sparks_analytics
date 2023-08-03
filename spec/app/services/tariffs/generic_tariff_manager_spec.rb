@@ -34,9 +34,6 @@ describe GenericTariffManager, type: :service do
   end
 
   context '#initialize' do
-    context 'with smart meter tariffs' do
-      it 'backdates the tariffs to the amr start date'
-    end
     context 'smart meter tariffs' do
       #amr data will be 1st - 31st Jan
       let(:amr_end_date)       { Date.new(2023,1,31) }

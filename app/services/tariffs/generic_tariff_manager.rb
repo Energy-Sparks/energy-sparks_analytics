@@ -25,35 +25,13 @@ class GenericTariffManager
     sort_by_most_recent(found_tariffs).first
   end
 
-  #TODO this should be moved elsewhere, similar to AccountingTariff
   #TODO exceptions?
   def economic_cost(date, kwh_x48)
-    tariff = find_tariff_for_date(date)
-    #TODO this is different to original?
-    return nil unless tariff
-    #TODO borrowed from generic accounting tariff
-    t = if tariff.flat_tariff?(date)
-        {
-          rates_x48: {
-            MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff.tariff[:rates][:flat_rate][:rate])
-          },
-          differential: false
-        }
-      else
-        {
-          rates_x48: tariff.tariff.rate_types.map { |type| tariff.weighted_costs(kwh_x48, type)}.inject(:merge),
-          differential: true
-        }
-      end
-
-    t.merge( { standing_charges: {}, system_wide: true, default: true } )
+    tariff = find_tariff_for_date(date)&.economic_costs(date, kwh_x48)
   end
 
-  #TODO this will not return exactly same structure, e.g. no system/default values
   def accounting_cost(date, kwh_x48)
-    tariff = find_tariff_for_date(date)
-    return nil if tariff.nil?
-    tariff.costs(date, kwh_x48)
+    tariff = find_tariff_for_date(date)&.costs(date, kwh_x48)
   end
 
   def any_differential_tariff?(start_date, end_date)
