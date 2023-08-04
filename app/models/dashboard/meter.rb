@@ -188,7 +188,11 @@ module Dashboard
     end
 
     private def create_tariff_manager
-      MeterTariffManager.new(self)
+      use_new_energy_tariffs? ? GenericTariffManager.new(self) : MeterTariffManager.new(self)
+    end
+
+    def use_new_energy_tariffs?
+      ENV["FEATURE_FLAG_USE_NEW_ENERGY_TARIFFS"] == 'true'
     end
 
     # Centrica

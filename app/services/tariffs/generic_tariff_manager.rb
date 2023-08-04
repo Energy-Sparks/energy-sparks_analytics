@@ -203,48 +203,47 @@ class GenericTariffManager
         raise "Unknown tariff holder type"
       end
     end
+  end
 
-    # tariffs for new SMETS2 meters are often setup several days after
-    # kWh data has started recording, the earlier kWh readings therefore
-    # have no DCC tariff and default to default accounting tariffs
-    # in this circumstance, unless overridden backdate the existing DCC tariff
-    # to the start of the meter readings, so the default is no longer used
-    #
-    # NOTE: as n3rgy no longer hold archived tariffs, then we'll only ever have
-    # the tariffs from the point that we begin loading data. So this may be more
-    # common than it was before
-    #
-    # TODO: this could be done in the application. When the DCC tariffs or readings are loaded for a
-    # meter, the start date of the tariff could be adjusted once. Or the adjustment could
-    # happen when the data is loaded and past to the analytics.
-    def backdate_dcc_tariffs(meter)
-      return if @meter_tariffs.empty? || dcc_tariffs.empty?
+  # tariffs for new SMETS2 meters are often setup several days after
+  # kWh data has started recording, the earlier kWh readings therefore
+  # have no DCC tariff and default to default accounting tariffs
+  # in this circumstance, unless overridden backdate the existing DCC tariff
+  # to the start of the meter readings, so the default is no longer used
+  #
+  # NOTE: as n3rgy no longer hold archived tariffs, then we'll only ever have
+  # the tariffs from the point that we begin loading data. So this may be more
+  # common than it was before
+  #
+  # TODO: this could be done in the application. When the DCC tariffs or readings are loaded for a
+  # meter, the start date of the tariff could be adjusted once. Or the adjustment could
+  # happen when the data is loaded and past to the analytics.
+  def backdate_dcc_tariffs(meter)
+    return if @meter_tariffs.empty? || dcc_tariffs.empty?
 
-      #if meter.amr_data.nil?
-      #  logger.info 'Nil amr data - for benchmark/exemplar(?) dcc meter - not backdating dcc tariffs'
-      #  return
-      #end
+    #if meter.amr_data.nil?
+    #  logger.info 'Nil amr data - for benchmark/exemplar(?) dcc meter - not backdating dcc tariffs'
+    #  return
+    #end
 
-      days_gap = dcc_tariffs.first.tariff[:start_date] - meter.amr_data.start_date
+    days_gap = dcc_tariffs.first.tariff[:start_date] - meter.amr_data.start_date
 
-      override_days = meter.meter_attributes[:backdate_tariff].first[:days] if meter.meter_attributes.key?(:backdate_tariff)
+    override_days = meter.meter_attributes[:backdate_tariff].first[:days] if meter.meter_attributes.key?(:backdate_tariff)
 
-      if override_days.nil?
-        dcc_tariffs.first.backdate_tariff(meter.amr_data.start_date) if days_gap.between?(1, MAX_DAYS_BACKDATE_TARIFF)
-      else
-        dcc_tariffs.first.backdate_tariff(dcc_tariffs.first.tariff[:start_date] - override_days)
-      end
+    if override_days.nil?
+      dcc_tariffs.first.backdate_tariff(meter.amr_data.start_date) if days_gap.between?(1, MAX_DAYS_BACKDATE_TARIFF)
+    else
+      dcc_tariffs.first.backdate_tariff(dcc_tariffs.first.tariff[:start_date] - override_days)
     end
+  end
 
-    def dcc_tariffs
-      @dcc_tariffs ||= @meter_tariffs.select { |t| t.dcc? }.sort{ |a, b| a.tariff[:start_date] <=> b.tariff[:start_date]}
-    end
+  def dcc_tariffs
+    @dcc_tariffs ||= @meter_tariffs.select { |t| t.dcc? }.sort{ |a, b| a.tariff[:start_date] <=> b.tariff[:start_date]}
+  end
 
-    #Determine whether there's a differential tariff for a specific date
-    def differential_tariff_on_date?(date)
-      tariff = find_tariff_for_date(date)
-      !tariff.nil? && tariff.differential?(date)
-    end
-
+  #Determine whether there's a differential tariff for a specific date
+  def differential_tariff_on_date?(date)
+    tariff = find_tariff_for_date(date)
+    !tariff.nil? && tariff.differential?(date)
   end
 end
