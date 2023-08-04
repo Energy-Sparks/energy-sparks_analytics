@@ -45,23 +45,78 @@ class GenericTariffManager
   end
 
   #Does this meter have time-varying economic tariffs?
-  #TODO: will need to check to see if there's any start/end dates on tariffs
+  #
+  #This is currently used by the aggregation code. If this is false then we
+  #assume that its fine to set the "current economic cost" to the "economic cost"
+  #schedule, as there isn't any difference over time.
+  #
+  #Equivalent here is to check if we have multiple tariffs at any level, starting
+  #from top-down. If we do, then they will differ by date. If there's a single one
+  #at any level, we assume it covers all time.
+  #
+  #This is close enough for the moment, pending further optimisation.
   def economic_tariffs_change_over_time?
+    @list_of_all_tariffs.reverse.each do |list|
+      return true if list.size > 1
+    end
+    false
   end
 
-  #TODO all of the following end up checking the constituent_meters and their
-  #economic tariff
-
-  # Find the most recent date that the tariffs were last changed
+  # Returns the date of the last change in tariff within the
+  # specified date range.
+  #
+  # If tariff has not changed within period, then returns nil.
+  #
+  # Will also return nil if no tariffs found at all within period.
+  #
+  # Otherwise returns the start date of the most recent tariff
   def last_tariff_change_date(start_date = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
+    prev_tariff = nil
+    found_tariff = nil
+    end_date.downto(start_date).each do |date|
+      found_tariff = find_tariff_for_date(date)
+      prev_tariff = found_tariff if prev_tariff.nil?
+      break if found_tariff != prev_tariff
+    end
+    #no tariffs found at all
+    return nil if prev_tariff.nil? && found_tariff.nil?
+    #tariff unchanged in period
+    return nil if prev_tariff == found_tariff
+    #tariff changed, so return start unless its the minimum date
+    prev_tariff.start_date == MeterTariff::MIN_DEFAULT_START_DATE ? nil : prev_tariff.start_date
   end
 
+  # Find all the dates when the tariff changes within the period
+  #
+  # AlertEconomicTariffCalculations
+  # Costs::EconomicTariffsChangeCaveatsService
   def tariff_change_dates_in_period(start_date  = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
+    prev_tariff = nil
+    found_tariff = nil
+    list_of_tariffs = []
+    end_date.downto(start_date).each do |date|
+      found_tariff = find_tariff_for_date(date)
+      prev_tariff = found_tariff if prev_tariff.nil?
+      list_of_tariffs << found_tariff if (!found_tariff.nil? && found_tariff != prev_tariff)
+      prev_tariff = found_tariff
+    end
+    return list_of_tariffs.map{ |t| t.end_date + 1 }
   end
 
+  # Costs::EconomicTariffsChangeCaveatsService
+  # AlertBaseloadBase, change text
+  # ContentBase, generic text
+  # Old co2 advice, old dashboard analysis advice
   def meter_tariffs_differ_within_date_range?(start_date, end_date)
   end
 
+  # Used:
+  # ContentBase, generic text
+  #
+  # The original implementation calls:
+  # .meter_tariffs.economic_tariff.tariffs_differ_within_date_range?
+  #
+  # This meter tariff met
   def meter_tariffs_changes_between_periods?(period1, period2)
   end
 

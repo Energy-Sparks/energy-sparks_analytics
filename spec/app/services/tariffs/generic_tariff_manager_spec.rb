@@ -220,5 +220,213 @@ describe GenericTariffManager, type: :service do
     end
   end
 
+  context '.last_tariff_change_date' do
+    let(:t1_start_date)  { Date.new(2022,1,1) }
+    let(:t1_end_date)    { Date.new(2022,12,31) }
+
+    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+
+    let(:t2_start_date)  { Date.new(2023,1,1) }
+    let(:t2_end_date)    { Date.new(2023,12,31) }
+
+    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+
+    let(:meter_attributes) {
+      {:accounting_tariff_generic=> [tariff_1, tariff_2]}
+    }
+
+    let(:search_start_date)     { Date.new(2023, 4, 1)  }
+    let(:search_end_date)       { Date.new(2023, 4, 30) }
+
+    let(:change_date)     { service.last_tariff_change_date(search_start_date, search_end_date) }
+
+    context 'searching within range of latest tariff' do
+      it 'there was no change' do
+        expect(change_date).to eq nil
+      end
+    end
+
+    context 'searching beyond range of latest tariff' do
+      let(:search_start_date)     { Date.new(2024, 1, 1)  }
+      let(:search_end_date)       { Date.new(2024, 12, 31) }
+
+      it 'there was no change' do
+        expect(change_date).to eq nil
+      end
+    end
+
+    context 'searching with range overlapping latest tariff' do
+      let(:search_start_date)     { Date.new(2023, 10, 1)  }
+      let(:search_end_date)       { Date.new(2024, 1, 31) }
+
+      it 'returns no change' do
+        expect(change_date).to eq nil
+      end
+    end
+
+    context 'searching with range overlapping change of tariffs' do
+      let(:search_start_date)     { Date.new(2022, 10, 1)  }
+      let(:search_end_date)       { Date.new(2023, 1, 31) }
+
+      it 'returns latest tariff' do
+        expect(change_date).to eq t2_start_date
+      end
+    end
+
+    context 'searching within range of previous tariff' do
+      let(:search_start_date)     { Date.new(2022, 4, 1)  }
+      let(:search_end_date)       { Date.new(2022, 4, 30) }
+
+      it 'find previous tariff date' do
+        expect(change_date).to eq nil
+      end
+    end
+
+    context 'searching outside range of first tariff' do
+      let(:search_start_date)     { Date.new(2021, 1, 1) }
+      let(:search_end_date)       { Date.new(2021, 1, 31) }
+
+      it 'returns nil' do
+        expect(change_date).to eq nil
+      end
+    end
+
+    context 'across both tariffs' do
+      let(:search_start_date)     { Date.new(2021, 1, 1) }
+      let(:search_end_date)       { Date.new(2024, 1, 1) }
+
+      it 'returns latest tariff' do
+        expect(change_date).to eq t2_start_date
+      end
+    end
+
+    context 'within open ended tariff' do
+      let(:t1_start_date)         { nil }
+      let(:t2_end_date)           { nil }
+      let(:search_start_date)     { Date.new(2021, 1, 1) }
+      let(:search_end_date)       { Date.new(2024, 1, 1) }
+
+      it 'returns latest tariff' do
+        expect(change_date).to eq t2_start_date
+      end
+    end
+
+    context 'searching before MIN_DEFAULT_START_DATE' do
+      let(:t1_start_date)         { nil }
+      let(:t2_end_date)           { nil }
+      let(:search_start_date)     { Date.new(1999, 1, 1) }
+      let(:search_end_date)       { Date.new(2021, 1, 1) }
+
+      it 'returns nil' do
+        expect(change_date).to eq nil
+      end
+    end
+
+  end
+
+  context '.tariff_change_dates_in_period' do
+    let(:t1_start_date)  { Date.new(2022,1,1) }
+    let(:t1_end_date)    { Date.new(2022,12,31) }
+
+    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+
+    let(:t2_start_date)  { Date.new(2023,1,1) }
+    let(:t2_end_date)    { Date.new(2023,12,31) }
+
+    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+
+    let(:meter_attributes) {
+      {:accounting_tariff_generic=> [tariff_1, tariff_2]}
+    }
+
+    let(:search_start_date)     { Date.new(2023, 4, 1)  }
+    let(:search_end_date)       { Date.new(2023, 4, 30) }
+
+    let(:change_dates)     { service.tariff_change_dates_in_period(search_start_date, search_end_date) }
+
+    context 'searching within range of latest tariff' do
+      it 'there was no change' do
+        expect(change_dates).to eq []
+      end
+    end
+
+    context 'searching beyond range of latest tariff' do
+      let(:search_start_date)     { Date.new(2024, 1, 1)  }
+      let(:search_end_date)       { Date.new(2024, 12, 31) }
+
+      it 'there was no change' do
+        expect(change_dates).to eq []
+      end
+    end
+
+    context 'searching with range overlapping latest tariff' do
+      let(:search_start_date)     { Date.new(2023, 10, 1)  }
+      let(:search_end_date)       { Date.new(2024, 1, 31) }
+
+      it 'returns no change' do
+        expect(change_dates).to eq []
+      end
+    end
+
+    context 'searching with range overlapping a change of tariffs' do
+      let(:search_start_date)     { Date.new(2022, 12, 1)  }
+      let(:search_end_date)       { Date.new(2023, 1, 31) }
+
+      it 'returns start of latest tariff' do
+        expect(change_dates).to eq [t2_start_date]
+      end
+    end
+
+    context 'searching within range of previous tariff' do
+      let(:search_start_date)     { Date.new(2022, 4, 1)  }
+      let(:search_end_date)       { Date.new(2022, 4, 30) }
+
+      it 'find previous tariff date' do
+        expect(change_dates).to eq []
+      end
+    end
+
+    context 'searching outside range of first tariff' do
+      let(:search_start_date)     { Date.new(2021, 1, 1) }
+      let(:search_end_date)       { Date.new(2021, 1, 31) }
+
+      it 'returns nil' do
+        expect(change_dates).to eq []
+      end
+    end
+
+    context 'across both tariffs' do
+      let(:search_start_date)     { Date.new(2021, 1, 1) }
+      let(:search_end_date)       { Date.new(2024, 1, 1) }
+
+      it 'returns latest tariffs' do
+        expect(change_dates).to eq [t2_start_date]
+      end
+    end
+
+    context 'within open ended tariff' do
+      let(:t1_start_date)         { nil }
+      let(:t2_end_date)           { nil }
+      let(:search_start_date)     { Date.new(2021, 1, 1) }
+      let(:search_end_date)       { Date.new(2024, 1, 1) }
+
+      it 'returns latest tariff' do
+        expect(change_dates).to eq [t2_start_date]
+      end
+    end
+
+    context 'searching before MIN_DEFAULT_START_DATE' do
+      let(:t1_start_date)         { nil }
+      let(:t2_end_date)           { nil }
+      let(:search_start_date)     { Date.new(1999, 1, 1) }
+      let(:search_end_date)       { Date.new(2021, 1, 1) }
+
+      it 'returns nil' do
+        expect(change_dates).to eq []
+      end
+    end
+
+  end
+
   it 'fulfils the contract of the old tariff manager'
 end

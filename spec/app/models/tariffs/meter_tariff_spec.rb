@@ -23,6 +23,7 @@ describe MeterTariff do
   context '.default?' do
     context 'with default key' do
       it 'identifies default' do
+        pry
         expect(meter_tariff.default?).to eq false
         tariff_attribute[:default] = true
         expect(meter_tariff.default?).to eq true

@@ -4,6 +4,15 @@ class GenericAccountingTariff < AccountingTariff
   def initialize(meter, tariff)
     super(meter, tariff)
     remove_climate_change_levy_from_standing_charges
+    default_missing_dates
+  end
+
+  def start_date
+    @tariff[:start_date]
+  end
+
+  def end_date
+    @tariff[:end_date]
   end
 
   #TODO should just check the :type of tariff
@@ -120,6 +129,11 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   private
+
+  def default_missing_dates
+    @tariff[:start_date] = MIN_DEFAULT_START_DATE if !@tariff.key?(:start_date) || @tariff[:start_date].nil?
+    @tariff[:end_date] = MAX_DEFAULT_END_DATE if !@tariff.key?(:end_date) || @tariff[:end_date].nil?
+  end
 
   def defaulted_tariff?
     %i[site_settings school_group].include?(tariff[:tariff_holder])

@@ -97,6 +97,19 @@ class MeterTariff
     "#{rate[:from]} to #{rate[:to]}".freeze
   end
 
+  #FIXME this and the following methods don't really make sense for
+  #MeterTariff, AccountingTariff, GenericAccountingTariff, EconomicTariff
+  #as there's only one @tariff that the instance wraps. In that context
+  #the tariff cannot change within a date range, or between periods, and
+  #the code doesn't check the actual tariff periods.
+  #
+  #EconomicTariffChangeOverTime overrides this method to return the
+  #list of tariffs it provides. In this context it makes sense to ask for
+  #the tariffs within a time period, as they may be several that apply
+  #between a given set of dates.
+  #
+  #These methods can be removed once we've introduced the new generic
+  #tariff manager as it will handle this functionality.
   def tariffs_by_date_range
     {
       MIN_DEFAULT_START_DATE..MAX_DEFAULT_END_DATE => @tariff[:rates]
