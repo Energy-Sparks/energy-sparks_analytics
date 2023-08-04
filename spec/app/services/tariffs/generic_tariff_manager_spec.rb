@@ -428,5 +428,75 @@ describe GenericTariffManager, type: :service do
 
   end
 
+  context '.tariffs_differ_within_date_range?' do
+    let(:t1_start_date)  { Date.new(2022,1,1) }
+    let(:t1_end_date)    { Date.new(2022,12,31) }
+
+    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+
+    let(:t2_start_date)  { Date.new(2023,1,1) }
+    let(:t2_end_date)    { Date.new(2023,12,31) }
+
+    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+
+    let(:meter_attributes) {
+      {:accounting_tariff_generic=> [tariff_1, tariff_2]}
+    }
+
+    let(:search_start_date)     { Date.new(2023, 4, 1)  }
+    let(:search_end_date)       { Date.new(2023, 4, 30) }
+
+    let(:changed) { service.tariffs_differ_within_date_range?(search_start_date, search_end_date) }
+
+    context 'when there has been no change' do
+      it 'returns false' do
+        expect(changed).to eq false
+      end
+    end
+
+    context 'when there has been a change' do
+      let(:search_start_date)     { Date.new(2022, 12, 1)  }
+      let(:search_end_date)       { Date.new(2023, 2, 1) }
+
+      it 'returns true' do
+        expect(changed).to eq true
+      end
+    end
+
+  end
+
+  context '.tariffs_change_between_periods?' do
+    let(:t1_start_date)  { Date.new(2022,1,1) }
+    let(:t1_end_date)    { Date.new(2022,12,31) }
+
+    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+
+    let(:t2_start_date)  { Date.new(2023,1,1) }
+    let(:t2_end_date)    { Date.new(2023,12,31) }
+
+    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+
+    let(:meter_attributes) {
+      {:accounting_tariff_generic=> [tariff_1, tariff_2]}
+    }
+
+    let(:first_period)    { Date.new(2023, 2, 1)..Date.new(2023, 3, 1)}
+    let(:second_period)   { Date.new(2023, 3, 1)..Date.new(2023, 4, 1)}
+    let(:changed) { service.tariffs_change_between_periods?(first_period, second_period) }
+
+    context 'with no change' do
+      it 'returns false' do
+        expect(changed).to eq false
+      end
+    end
+
+    context 'with a change' do
+      let(:first_period)    { Date.new(2022, 2, 1)..Date.new(2022, 3, 1)}
+      it 'returns false' do
+        expect(changed).to eq true
+      end
+    end
+
+  end
   it 'fulfils the contract of the old tariff manager'
 end

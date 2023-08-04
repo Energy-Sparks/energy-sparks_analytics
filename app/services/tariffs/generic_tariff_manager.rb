@@ -91,15 +91,7 @@ class GenericTariffManager
   # AlertEconomicTariffCalculations
   # Costs::EconomicTariffsChangeCaveatsService
   def tariff_change_dates_in_period(start_date  = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
-    prev_tariff = nil
-    found_tariff = nil
-    list_of_tariffs = []
-    end_date.downto(start_date).each do |date|
-      found_tariff = find_tariff_for_date(date)
-      prev_tariff = found_tariff if prev_tariff.nil?
-      list_of_tariffs << found_tariff if (!found_tariff.nil? && found_tariff != prev_tariff)
-      prev_tariff = found_tariff
-    end
+    list_of_tariffs = find_tariffs_between_dates(start_date, end_date)
     return list_of_tariffs.map{ |t| t.end_date + 1 }
   end
 
@@ -108,16 +100,29 @@ class GenericTariffManager
   # ContentBase, generic text
   # Old co2 advice, old dashboard analysis advice
   def meter_tariffs_differ_within_date_range?(start_date, end_date)
+    constituent_meters.any? do |meter|
+      meter.meter_tariffs.tariffs_differ_within_date_range?(start_date, end_date)
+    end
+  end
+
+  def tariffs_differ_within_date_range?(start_date, end_date)
+    last_tariff_change_date(start_date, end_date) != nil
   end
 
   # Used:
   # ContentBase, generic text
-  #
-  # The original implementation calls:
-  # .meter_tariffs.economic_tariff.tariffs_differ_within_date_range?
-  #
-  # This meter tariff met
   def meter_tariffs_changes_between_periods?(period1, period2)
+    constituent_meters.any? do |meter|
+      meter.meter_tariffs.tariffs_change_between_periods?(period1, period2)
+    end
+  end
+
+  def tariffs_change_between_periods?(period1, period2)
+    period1_tariffs = find_all_tariffs_between_dates(period1.first, period1.last)
+    period2_tariffs = find_all_tariffs_between_dates(period2.first, period2.last)
+    puts period1_tariffs.inspect
+    puts period2_tariffs.inspect
+    period1_tariffs != period2_tariffs
   end
 
   private
@@ -145,6 +150,34 @@ class GenericTariffManager
       b_created = b.tariff[:created_at]
       a_created && b_created ? b_created <=> a_created : a_created ? -1 : 1
     end
+  end
+
+  def find_tariffs_between_dates(start_date, end_date)
+    prev_tariff = nil
+    found_tariff = nil
+    list_of_tariffs = []
+    end_date.downto(start_date).each do |date|
+      found_tariff = find_tariff_for_date(date)
+      prev_tariff = found_tariff if prev_tariff.nil?
+      list_of_tariffs << found_tariff if (!found_tariff.nil? && found_tariff != prev_tariff)
+      prev_tariff = found_tariff
+    end
+    list_of_tariffs
+  end
+
+  #TODO combine this with the above, there's only one part
+  #that is different: found_tariff != prev_tariff
+  def find_all_tariffs_between_dates(start_date, end_date)
+    prev_tariff = nil
+    found_tariff = nil
+    list_of_tariffs = []
+    end_date.downto(start_date).each do |date|
+      found_tariff = find_tariff_for_date(date)
+      prev_tariff = found_tariff if prev_tariff.nil?
+      list_of_tariffs << found_tariff if (!found_tariff.nil?)
+      prev_tariff = found_tariff
+    end
+    list_of_tariffs.uniq
   end
 
   def tariff_attributes
