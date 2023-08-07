@@ -120,8 +120,6 @@ class GenericTariffManager
   def tariffs_change_between_periods?(period1, period2)
     period1_tariffs = find_all_tariffs_between_dates(period1.first, period1.last)
     period2_tariffs = find_all_tariffs_between_dates(period2.first, period2.last)
-    puts period1_tariffs.inspect
-    puts period2_tariffs.inspect
     period1_tariffs != period2_tariffs
   end
 

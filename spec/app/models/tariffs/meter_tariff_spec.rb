@@ -28,9 +28,6 @@ describe MeterTariff do
         expect(meter_tariff.default?).to eq true
       end
     end
-    context 'with tariff holder' do
-      it 'interprets default'
-    end
   end
 
   context '.dcc' do
