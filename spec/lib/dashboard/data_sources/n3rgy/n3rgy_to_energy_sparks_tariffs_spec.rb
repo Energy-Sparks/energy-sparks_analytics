@@ -39,6 +39,7 @@ describe N3rgyToEnergySparksTariffs do
             start_date: day,
             end_date: day,
             name: 'Tariff from DCC SMETS2 meter',
+            tariff_holder: :meter,
             rates: {
               flat_rate: {
                 per:    :kwh,
@@ -78,6 +79,7 @@ describe N3rgyToEnergySparksTariffs do
             start_date: day,
             end_date: day,
             name: 'Tariff from DCC SMETS2 meter',
+            tariff_holder: :meter,
             rates: {
               rate0: {
                 from: TimeOfDay30mins.new(0, 0),
@@ -126,6 +128,7 @@ describe N3rgyToEnergySparksTariffs do
             start_date: day,
             end_date: day,
             name: 'Tariff from DCC SMETS2 meter',
+            tariff_holder: :meter,
             rates: {
               rate0: {
                 from: TimeOfDay30mins.new(0, 0),
@@ -173,6 +176,7 @@ describe N3rgyToEnergySparksTariffs do
             start_date: day,
             end_date: day,
             name: 'Tariff from DCC SMETS2 meter',
+            tariff_holder: :meter,
             rates: {
               rate0: {
                 from: TimeOfDay30mins.new(0, 0),
