@@ -57,16 +57,14 @@ class CostsBase < HalfHourlyData
 
   # combine OneDaysCostData[] into single aggregate OneDaysCostData
   def self.combined_day_costs(costs)
-    combined = {
+    OneDaysCostData.new(
       rates_x48:        merge_costs_x48(costs.map(&:all_costs_x48)),
       standing_charges: combined_standing_charges(costs),
       differential:     costs.any?{ |c| c.differential_tariff? },
       system_wide:      combined_system_wide(costs),
       default:          combined_default(costs),
       tariff:           costs.map { |c| c.tariff }
-    }
-
-    OneDaysCostData.new(combined)
+    )
   end
 
   def self.combined_system_wide(costs)
@@ -162,9 +160,6 @@ class CostsBase < HalfHourlyData
     raise EnergySparksNotEnoughDataException, "Doing costs calculation for date #{date} meter start_date #{meter.amr_data.start_date}" if date < meter.amr_data.start_date
     kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
     costs(tariff_date(date), meter, kwh_x48)
-    #return nil if c.nil?
-    #one_day_cost = OneDaysCostData.new(c)
-    #one_day_cost
   end
 
   #Log summary of costs for a day
