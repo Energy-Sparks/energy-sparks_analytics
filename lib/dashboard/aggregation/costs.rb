@@ -153,15 +153,6 @@ class CostsBase < HalfHourlyData
     cost_hh_£
   end
 
-  #Unused?
-  public def calculate_tariff(meter)
-    (amr_data.start_date..amr_data.end_date).each do |date|
-      one_day_cost = calculate_tariff_for_date(date, meter)
-      add(date, one_day_cost)
-    end
-    logger.info "Created #{costs_summary}"
-  end
-
   # Calculate the cost for a given date
   #
   # @param Date date the date to calculate. Used to lookup consumption and tariff data
@@ -174,14 +165,6 @@ class CostsBase < HalfHourlyData
     return nil if c.nil?
     one_day_cost = OneDaysCostData.new(c)
     one_day_cost
-  end
-
-  #Return total cost for a date and consumption values
-  #Unused?
-  public def calculate_x48_kwh_cost(date, kwh_x48)
-    c = costs(date, meter, kwh_x48)
-    raise EnergySparksUnexpectedStateException, "x48 cost for #{date}" if c.nil?
-    OneDaysCostData.new(c).one_day_total_cost
   end
 
   #Log summary of costs for a day
