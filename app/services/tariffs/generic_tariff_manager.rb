@@ -193,7 +193,7 @@ class GenericTariffManager
       when :site_settings
         @system_tariffs << tariff
       else
-        raise "Unknown tariff holder type"
+        raise "Unknown tariff holder type: #{attribute[:tariff_holder]}"
       end
     end
   end
