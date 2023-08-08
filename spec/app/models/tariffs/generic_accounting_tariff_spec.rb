@@ -153,15 +153,15 @@ describe GenericAccountingTariff do
 
     context 'with flat rate' do
       it 'calculates the expected cost' do
-        expect(accounting_cost[:differential]).to eq false
-        expect(accounting_cost[:standing_charges]).to eq({})
-        expect(accounting_cost[:rates_x48]['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
+        expect(accounting_cost.differential_tariff?).to eq false
+        expect(accounting_cost.standing_charges).to eq({})
+        expect(accounting_cost.all_costs_x48['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
       end
 
       context 'with a standing charge when available' do
         let(:rates) { create_flat_rate(rate: 0.15, standing_charge: 1.0) }
         it 'includes the charge' do
-          expect(accounting_cost[:standing_charges]).to eq({standing_charge: 1.0})
+          expect(accounting_cost.standing_charges).to eq({standing_charge: 1.0})
         end
       end
 
@@ -177,7 +177,7 @@ describe GenericAccountingTariff do
         }
         let(:rates) { create_flat_rate(other_charges: other_charges) }
         it 'includes the charge' do
-          expect(accounting_cost[:rates_x48]['Feed in tariff levy']).to eq Array.new(48, 0.01 * levy_rate)
+          expect(accounting_cost.all_costs_x48['Feed in tariff levy']).to eq Array.new(48, 0.01 * levy_rate)
         end
       end
 
@@ -187,7 +187,7 @@ describe GenericAccountingTariff do
 
         it 'includes the charge' do
           #value is from ClimateChangeLevy
-          expect(accounting_cost[:rates_x48][:climate_change_levy__2023_24]).to eq Array.new(48, 0.01 * 0.00775)
+          expect(accounting_cost.all_costs_x48[:climate_change_levy__2023_24]).to eq Array.new(48, 0.01 * 0.00775)
         end
       end
 
@@ -202,9 +202,9 @@ describe GenericAccountingTariff do
         let(:rates) { create_flat_rate(other_charges: other_charges) }
         it 'includes the charges' do
           #check it calculates and we have non-zero values for each period
-          expect(accounting_cost[:rates_x48][:duos_green].sum).to_not be 0.0
-          expect(accounting_cost[:rates_x48][:duos_amber].sum).to_not be 0.0
-          expect(accounting_cost[:rates_x48][:duos_green].sum).to_not be 0.0
+          expect(accounting_cost.all_costs_x48[:duos_green].sum).to_not be 0.0
+          expect(accounting_cost.all_costs_x48[:duos_amber].sum).to_not be 0.0
+          expect(accounting_cost.all_costs_x48[:duos_green].sum).to_not be 0.0
         end
       end
 
@@ -235,7 +235,26 @@ describe GenericAccountingTariff do
         }
         let(:rates) { create_flat_rate(other_charges: other_charges) }
         it 'adds them to standing charges' do
-          expect(accounting_cost[:standing_charges][:data_collection_dcda_agent_charge]).to eq(0.5)
+          expect(accounting_cost.standing_charges[:data_collection_dcda_agent_charge]).to eq(0.5)
+        end
+      end
+
+      context 'with vat' do
+        let(:vat)     { "10%" }
+        let(:tariff_attribute) { create_accounting_tariff_generic(start_date: start_date, end_date: end_date, type: tariff_type, rates: rates, vat: vat) }
+
+        it 'calculates vat' do
+          expect(accounting_cost.all_costs_x48[:"vat@10%"]).to eq Array.new(48, 0.01 * 0.15 * 0.10)
+        end
+
+        context 'and a standing charge' do
+          let(:rates) { create_flat_rate(rate: 0.15, standing_charge: 1.0) }
+
+          it 'calculates vat' do
+            usage_plus_vat = (0.01 * 0.15 * 0.10)
+            standing_charge_plus_vat_x48 = (1.0 * 0.10 ) / 48
+            expect(accounting_cost.all_costs_x48[:"vat@10%"]).to eq Array.new(48, usage_plus_vat + standing_charge_plus_vat_x48)
+          end
         end
       end
     end
@@ -245,10 +264,10 @@ describe GenericAccountingTariff do
       let(:rates) { create_differential_rate(day_rate: 0.30, night_rate: 0.15, standing_charge: nil) }
 
       it 'calculates the expected cost' do
-        expect(accounting_cost[:differential]).to eq true
-        expect(accounting_cost[:standing_charges]).to eq({})
-        expect(accounting_cost[:rates_x48]['07:00 to 23:30']).to eq Array.new(14, 0.0) + Array.new(34, 0.01 * 0.15)
-        expect(accounting_cost[:rates_x48]['00:00 to 06:30']).to eq Array.new(14, 0.01 * 0.30) + Array.new(34, 0.0)
+        expect(accounting_cost.differential_tariff?).to eq true
+        expect(accounting_cost.standing_charges).to eq({})
+        expect(accounting_cost.all_costs_x48['07:00 to 23:30']).to eq Array.new(14, 0.0) + Array.new(34, 0.01 * 0.15)
+        expect(accounting_cost.all_costs_x48['00:00 to 06:30']).to eq Array.new(14, 0.01 * 0.30) + Array.new(34, 0.0)
       end
     end
   end
@@ -257,19 +276,19 @@ describe GenericAccountingTariff do
     let(:economic_cost)  { accounting_tariff.economic_costs(end_date, kwh_data_x48) }
 
     it 'calculates the expected cost' do
-      expect(economic_cost[:differential]).to eq false
-      expect(economic_cost[:standing_charges]).to eq({})
-      expect(economic_cost[:rates_x48]['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
+      expect(economic_cost.differential_tariff?).to eq false
+      expect(economic_cost.standing_charges).to eq({})
+      expect(economic_cost.all_costs_x48['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
     end
     context 'with differential rate' do
       let(:tariff_type) { :differential }
       let(:rates) { create_differential_rate(day_rate: 0.30, night_rate: 0.15, standing_charge: nil) }
 
       it 'calculates the expected cost' do
-        expect(economic_cost[:differential]).to eq true
-        expect(economic_cost[:standing_charges]).to eq({})
-        expect(economic_cost[:rates_x48]['07:00 to 23:30']).to eq Array.new(14, 0.0) + Array.new(34, 0.01 * 0.15)
-        expect(economic_cost[:rates_x48]['00:00 to 06:30']).to eq Array.new(14, 0.01 * 0.30) + Array.new(34, 0.0)
+        expect(economic_cost.differential_tariff?).to eq true
+        expect(economic_cost.standing_charges).to eq({})
+        expect(economic_cost.all_costs_x48['07:00 to 23:30']).to eq Array.new(14, 0.0) + Array.new(34, 0.01 * 0.15)
+        expect(economic_cost.all_costs_x48['00:00 to 06:30']).to eq Array.new(14, 0.01 * 0.30) + Array.new(34, 0.0)
       end
     end
   end

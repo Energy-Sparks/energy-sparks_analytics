@@ -52,49 +52,37 @@ class GenericAccountingTariff < AccountingTariff
   #Calculates use the "economic costs" for usage on a specific date
   #Applies the flat or differential rates but ignores all other charges
   def economic_costs(date, kwh_x48)
-    c = if flat_tariff?(date)
-          {
-            rates_x48: {
-              MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
-            },
-            differential: false
-          }
-        else
-          {
-            rates_x48: rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge),
-            differential: true
-          }
-        end
-    c.merge!({standing_charges: {}, system_wide: system_wide?, default: default?, tariff: self})
+    OneDaysCostData.new(
+      rates_x48: basic_costs(date, kwh_x48),
+      differential: differential?(date),
+      standing_charges: {},
+      system_wide: system_wide?,
+      default: default?,
+      tariff: self
+    )
   end
 
   #Calculate the full economic costs for usage on a specific date
   def costs(date, kwh_x48)
-    c = if flat_tariff?(date)
-          {
-            rates_x48: {
-              MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
-            },
-            differential: false
-          }
-        else
-          {
-            rates_x48: rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge),
-            differential: true
-          }
-        end
+    rates_x48 = basic_costs(date, kwh_x48)
+    #add the additional cost components into the rates_x48 hash
+    rates_x48.merge!(rate_per_kwh_standing_charges(kwh_x48))
+    rates_x48.merge!(climate_change_level_costs(date, kwh_x48)) if climate_change_levy?
+    rates_x48.merge!(duos_costs(date, kwh_x48)) if has_duos_charge?
 
-    c[:rates_x48].merge!(rate_per_kwh_standing_charges(kwh_x48))
+    standing_charges = standing_charges(date, kwh_x48.sum)
 
-    c[:rates_x48].merge!(climate_change_level_costs(date, kwh_x48)) if climate_change_levy?
+    #add VAT to rates_x48 hash
+    rates_x48.merge!(apply_vat(rates_x48, standing_charges)) if vat > 0.0
 
-    c[:rates_x48].merge!(duos_costs(date, kwh_x48)) if has_duos_charge?
-
-    c.merge!(common_data(date, kwh_x48))
-
-    c.deep_merge!(apply_vat(c)) if vat > 0.0
-
-    c
+    OneDaysCostData.new(
+      rates_x48: rates_x48,
+      differential: differential?(date),
+      standing_charges: standing_charges,
+      system_wide: system_wide?,
+      default: default?,
+      tariff: self
+    )
   end
 
   #this was private in base class
@@ -129,6 +117,17 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   private
+
+  def basic_costs(date, kwh_x48)
+    flat_rate = flat_tariff?(date)
+    if flat_rate
+      {
+        MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
+      }
+    else
+      rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge)
+    end
+  end
 
   def default_missing_dates
     @tariff[:start_date] = MIN_DEFAULT_START_DATE if !@tariff.key?(:start_date) || @tariff[:start_date].nil?
@@ -181,21 +180,20 @@ class GenericAccountingTariff < AccountingTariff
     end
   end
 
-  def apply_vat(costs)
+  def apply_vat(rates_vat_x48, standing_charges)
     # spread standing charge VAT across every half hour
     # so can see as one value in charts and tabular user presentation
-    vat_x48 = AMRData.fast_add_x48_x_x48(rates_vat_x48(costs), standing_charge_daily_vat_x48(costs))
-
-    { rates_x48: { vat_description.to_sym => vat_x48 } }
+    vat_x48 = AMRData.fast_add_x48_x_x48(rates_vat_x48(rates_vat_x48), standing_charge_daily_vat_x48(standing_charges))
+    { vat_description.to_sym => vat_x48 }
   end
 
-  def standing_charge_daily_vat_x48(costs)
-    vat_daily = costs[:standing_charges].values.sum * vat
+  def standing_charge_daily_vat_x48(standing_charges)
+    vat_daily = standing_charges.values.sum * vat
     AMRData.single_value_kwh_x48(vat_daily / 48.0)
   end
 
-  def rates_vat_x48(costs)
-    rates_x48 = AMRData.fast_add_multiple_x48_x_x48(costs[:rates_x48].values)
+  def rates_vat_x48(rates_vat_x48)
+    rates_x48 = AMRData.fast_add_multiple_x48_x_x48(rates_vat_x48.values)
     AMRData.fast_multiply_x48_x_scalar(rates_x48, vat)
   end
 

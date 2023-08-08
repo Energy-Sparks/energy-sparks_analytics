@@ -88,9 +88,9 @@ describe MeterTariffManager do
   context '.economic_cost' do
     let(:economic_cost) { meter_tariff_manager.economic_cost(amr_end_date, kwh_data_x48)}
     it 'calculates the expected cost' do
-      expect(economic_cost[:differential]).to eq false
-      expect(economic_cost[:standing_charges]).to eq({})
-      expect(economic_cost[:rates_x48]['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
+      expect(economic_cost.differential_tariff?).to eq false
+      expect(economic_cost.standing_charges).to eq({})
+      expect(economic_cost.all_costs_x48['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
     end
   end
 
@@ -98,9 +98,9 @@ describe MeterTariffManager do
     let(:accounting_cost) { meter_tariff_manager.accounting_cost(amr_end_date, kwh_data_x48)}
 
     it 'calculates the expected cost' do
-      expect(accounting_cost[:differential]).to eq false
-      expect(accounting_cost[:standing_charges]).to eq({standing_charge: 1.0})
-      expect(accounting_cost[:rates_x48]['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
+      expect(accounting_cost.differential_tariff?).to eq false
+      expect(accounting_cost.standing_charges).to eq({standing_charge: 1.0})
+      expect(accounting_cost.all_costs_x48['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
     end
 
     context 'and there are multiple tariffs' do
@@ -127,9 +127,9 @@ describe MeterTariffManager do
       }
 
       it 'selects the right tariff and calculates the expected cost' do
-        expect(accounting_cost[:differential]).to eq false
-        expect(accounting_cost[:standing_charges]).to eq({standing_charge: 1.5})
-        expect(accounting_cost[:rates_x48]['flat_rate']).to eq Array.new(48, 0.01 * 0.30)
+        expect(accounting_cost.differential_tariff?).to eq false
+        expect(accounting_cost.standing_charges).to eq({standing_charge: 1.5})
+        expect(accounting_cost.all_costs_x48['flat_rate']).to eq Array.new(48, 0.01 * 0.30)
       end
 
     end

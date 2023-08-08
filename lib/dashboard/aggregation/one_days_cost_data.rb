@@ -7,13 +7,13 @@ class OneDaysCostData
   # either a single tariff, or an array for combined meters
   attr_reader :tariff
 
-  def initialize(costs)
-    @all_costs_x48    = costs[:rates_x48]
-    @standing_charges = costs[:standing_charges]
-    @differential     = costs[:differential]
-    @system_wide      = costs[:system_wide]
-    @default          = costs[:default]
-    @tariff           = costs[:tariff]
+  def initialize(rates_x48:, standing_charges:, differential:, system_wide:, default:, tariff: )
+    @all_costs_x48    = rates_x48 #costs[:rates_x48]
+    @standing_charges = standing_charges #costs[:standing_charges]
+    @differential     = differential #costs[:differential]
+    @system_wide      = system_wide #costs[:system_wide]
+    @default          = default #costs[:default]
+    @tariff           = tariff #costs[:tariff]
 
     @total_standing_charge = standing_charges.empty? ? 0.0 : standing_charges.values.sum
     @one_day_total_cost = total_x48_costs + @total_standing_charge

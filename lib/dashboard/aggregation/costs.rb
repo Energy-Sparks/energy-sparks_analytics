@@ -161,10 +161,10 @@ class CostsBase < HalfHourlyData
   public def calculate_tariff_for_date(date, meter)
     raise EnergySparksNotEnoughDataException, "Doing costs calculation for date #{date} meter start_date #{meter.amr_data.start_date}" if date < meter.amr_data.start_date
     kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
-    c = costs(tariff_date(date), meter, kwh_x48)
-    return nil if c.nil?
-    one_day_cost = OneDaysCostData.new(c)
-    one_day_cost
+    costs(tariff_date(date), meter, kwh_x48)
+    #return nil if c.nil?
+    #one_day_cost = OneDaysCostData.new(c)
+    #one_day_cost
   end
 
   #Log summary of costs for a day
