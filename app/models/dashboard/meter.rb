@@ -45,7 +45,7 @@ module Dashboard
       set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       @constituent_meters = [self]
-      logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+      logger.info "Created new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
     def mpxn
