@@ -478,12 +478,16 @@ class AggregateDataService
   #So all meters in a school will inherit the same tariffs, so this will always
   #be returning true currently.
   def all_economic_tariffs_identical?(list_of_meters)
-    #TEMPORARY do something better here, e.g. compare whether meters have
-    #their own tariffs, rather than just sharing same school/group/system tariffs
-    return true if ENV["FEATURE_FLAG_USE_NEW_ENERGY_TARIFFS"] == 'true'
-
     return true if list_of_meters.length == 1
 
+    #Check whether any of the meters have their own tariffs, rather than
+    #just sharing the same school/group/system tariffs.
+    if ENV["FEATURE_FLAG_USE_NEW_ENERGY_TARIFFS"] == 'true'
+      list_of_meters.any? {|meter| meter.meter_tariffs.meter_tariffs.any? }
+      return true
+    end
+
+    #relies on original MeterTariffManager
     economic_tariffs = list_of_meters.map { |meter| meter.meter_tariffs.economic_tariff }
     economic_tariffs.uniq { |t| [t.tariff, t.tariff]}.count == 1
   end
