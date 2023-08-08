@@ -34,6 +34,7 @@ class N3rgyToEnergySparksTariffs
       start_date:       overlap_dates.first,
       end_date:         overlap_dates.last,
       name:             'Tariff from DCC SMETS2 meter',
+      tariff_holder:    :meter
     }
     tariff.merge(convert_rates(kwh_rate, standing_charge.values.first))
   end
