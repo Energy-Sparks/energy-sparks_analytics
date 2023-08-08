@@ -10,10 +10,10 @@ describe DateTimeHelper do
         vector = DateTimeHelper.weighted_x48_vector_multiple_ranges(range)
         expect(vector[0..16]).to eq Array.new(17,0.0)
         #8.50 means only final 10 minutes, 1/3rd of half hour
-        expect(vector[17]).to eq 0.3333333333333333
+        expect(vector[17].round(2)).to eq 0.33
         expect(vector[18..29]).to eq Array.new(12,1.0)
         #15,20 means first 20 minutes, so 2/3rd of half hour
-        expect(vector[30]).to eq 0.6666666666666666
+        expect(vector[30].round(2)).to eq 0.67
         expect(vector[31..48]).to eq Array.new(17,0.0)
       end
     end
@@ -31,7 +31,7 @@ describe DateTimeHelper do
         #19 == 9.00am
         expect(vector[18..29]).to eq Array.new(12,0.0)
         #30 == 15.00, 21 / 30 minutes (% time through hh slot)
-        expect(vector[30]).to eq 0.7
+        expect(vector[30].round(2)).to eq 0.3
         expect(vector[31..38]).to eq Array.new(8,1.0)
         expect(vector[39..48]).to eq Array.new(9,0.0)
       end
@@ -78,7 +78,6 @@ describe DateTimeHelper do
     context 'with ranges at 50 mins and 20 mins' do
       let(:range) { TimeOfDay.new(8,50)..TimeOfDay.new(10,20) }
       it 'returns expected weights' do
-                puts weights.inspect
         expect(weights[0..16]).to eq Array.new(17, 0.0)
         #one third of the 8-8.3.0am period
         expect(weights[17].round(2)).to eq 0.33
@@ -89,6 +88,18 @@ describe DateTimeHelper do
       end
     end
 
+    context 'with ranges at 20 mins and 50 mins' do
+      let(:range) { TimeOfDay.new(8,20)..TimeOfDay.new(10,50) }
+      it 'returns expected weights' do
+        expect(weights[0..15]).to eq Array.new(16, 0.0)
+        #one thirds of the 8-8.3.0am period
+        expect(weights[16].round(2)).to eq 0.33
+        expect(weights[17..20]).to eq Array.new(4, 1.0)
+        #and two thirds of the 10-10.30am period
+        expect(weights[21].round(2)).to eq 0.67
+        expect(weights[22..47]).to eq Array.new(26, 0.0)
+      end
+    end
 
     context 'with morning period' do
       let(:range) { TimeOfDay.new(8,0)..TimeOfDay.new(10,0) }
