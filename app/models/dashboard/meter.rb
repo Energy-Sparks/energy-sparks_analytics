@@ -45,7 +45,7 @@ module Dashboard
       set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       @constituent_meters = [self]
-      logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+      logger.info "Created new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
     def mpxn
@@ -184,7 +184,15 @@ module Dashboard
       @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
       # Centrica attributes(:open_close_times)
       # @community_opening_times = SchoolOpenCloseTimes.new(@meter_collection, self)
-      @meter_tariffs = MeterTariffManager.new(self)
+      @meter_tariffs = create_tariff_manager
+    end
+
+    private def create_tariff_manager
+      use_new_energy_tariffs? ? GenericTariffManager.new(self) : MeterTariffManager.new(self)
+    end
+
+    def use_new_energy_tariffs?
+      ENV["FEATURE_FLAG_USE_NEW_ENERGY_TARIFFS"] == 'true'
     end
 
     # Centrica

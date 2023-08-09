@@ -59,20 +59,11 @@ class AccountingCostsParameterised < AccountingCosts
     end
   end
 
-  def self.create_costs(meter)
-    AccountingCostsParameterised.new(meter)
-  end
 end
 
 class AccountingCostsPreAggregated < AccountingCosts
   # always precalculated so don't calculate on the fly
   def one_days_cost_data(date)
     self[date]
-  end
-
-  def self.create_costs(meter)
-    costs = AccountingCostsPreAggregated.new(meter)
-    costs.calculate_tariff(amr_data, fuel_type, default_energy_purchaser)
-    costs
   end
 end

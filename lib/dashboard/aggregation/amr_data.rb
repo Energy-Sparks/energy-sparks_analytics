@@ -35,14 +35,13 @@ class AMRData < HalfHourlyData
 
   def set_economic_tariff(meter)
     logger.info "Creating an economic costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
-    @economic_tariff = EconomicCostsParameterised.create_costs(meter)
-    # @current_economic_tariff = @economic_tariff
+    @economic_tariff = EconomicCostsParameterised.new(meter)
   end
 
   def set_current_economic_tariff(meter)
     logger.info "Setting current economic tariff for meter #{meter.name}"
     if meter.meter_tariffs.economic_tariffs_change_over_time?
-      @current_economic_tariff = CurrentEconomicCostsParameterised.create_costs(meter)
+      @current_economic_tariff = CurrentEconomicCostsParameterised.new(meter)
     else
       # there no computational benefit in doing this,
       # given the tariff for amr_data.end_date is always re-looked up rather than cached
@@ -53,7 +52,7 @@ class AMRData < HalfHourlyData
 
   def set_accounting_tariff(meter)
     logger.info "Creating parameterised accounting costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
-    @accounting_tariff = AccountingCostsParameterised.create_costs(meter)
+    @accounting_tariff = AccountingCostsParameterised.new(meter)
   end
 
   def set_economic_tariff_schedule(tariff)

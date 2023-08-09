@@ -1,7 +1,7 @@
 # probably due to be replaced by a fixed charge per day from April 2023
 #
 class TNUOSCharges < MaxMonthlyDemandChargesBase
-  class MissingTNUoSDataForThisYear < StandardError; end 
+  class MissingTNUoSDataForThisYear < StandardError; end
 
   YEAR_18_19 = Date.new(2018, 4, 1)..Date.new(2019, 3, 31)
   YEAR_19_20 = Date.new(2019, 4, 1)..Date.new(2020, 3, 31)
@@ -48,7 +48,7 @@ class TNUOSCharges < MaxMonthlyDemandChargesBase
       { zone: 11, name: 'South East', rate_£_per_kw: 56.11085, nhh: 7.945653},
       { zone: 12, name: 'London', rate_£_per_kw: 59.175788, nhh: 6.291396},
       { zone: 13, name: 'Southern', rate_£_per_kw: 57.338781, nhh: 7.586023},
-      { zone: 14, name: 'South Western', rate_£_per_kw: 55.686678, nhh: 7.767486},      
+      { zone: 14, name: 'South Western', rate_£_per_kw: 55.686678, nhh: 7.767486},
     ],
     YEAR_20_21 => [
       { zone: 1, name: 'Northern Scotland', rate_£_per_kw: 21.126849, nhh: 2.742642},
@@ -64,7 +64,7 @@ class TNUOSCharges < MaxMonthlyDemandChargesBase
       { zone: 11, name: 'South East', rate_£_per_kw: 56.501849, nhh: 7.511337},
       { zone: 12, name: 'London', rate_£_per_kw: 59.267002, nhh: 5.828242},
       { zone: 13, name: 'Southern', rate_£_per_kw: 57.772417, nhh: 7.136303},
-      { zone: 14, name: 'South Western', rate_£_per_kw: 57.020402, nhh: 7.608806}, 
+      { zone: 14, name: 'South Western', rate_£_per_kw: 57.020402, nhh: 7.608806},
     ],
     YEAR_21_22 => [
       { zone: 1, name: 'Northern Scotland', rate_£_per_kw: 20.376396, nhh: 2.723726},
@@ -80,7 +80,7 @@ class TNUOSCharges < MaxMonthlyDemandChargesBase
       { zone: 11, name: 'South East', rate_£_per_kw: 56.772103, nhh: 7.73898},
       { zone: 12, name: 'London', rate_£_per_kw: 59.18635, nhh: 6.378699},
       { zone: 13, name: 'Southern', rate_£_per_kw: 58.865203, nhh: 7.574864},
-      { zone: 14, name: 'South Western', rate_£_per_kw: 61.676796, nhh: 8.488355},      
+      { zone: 14, name: 'South Western', rate_£_per_kw: 61.676796, nhh: 8.488355},
     ],
   }
   # guesswork, https://en.wikipedia.org/wiki/Meter_Point_Administration_Number map
@@ -93,7 +93,7 @@ class TNUOSCharges < MaxMonthlyDemandChargesBase
      6 => 13,
      7 => 11,
      8 => 14, # Midlands versus West midlands?
-     9 => 10, 
+     9 => 10,
     10 => 21,
     11 => 19,
     12 => 12,

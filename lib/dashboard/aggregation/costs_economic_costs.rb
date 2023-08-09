@@ -60,10 +60,6 @@ end
 #
 # "parameterised representation of economic costs until after agggregation to reduce memory footprint"
 class EconomicCostsParameterised < EconomicCosts
-  def self.create_costs(meter)
-    self.new(meter)
-  end
-
   # Returns the costs for a specific date
   # @param Date date
   # @return OneDaysCostData
@@ -120,19 +116,7 @@ class EconomicCostsPreAggregated < EconomicCosts
     self[date]
   end
 
-  #Unused? There is no parameterised variable or method
-  def self.create_costs(meter)
-    costs = EconomicCostsPreAggregated.new(meter)
-    costs.calculate_tariff unless parameterised
-    costs
-  end
 end
 
 class CurrentEconomicCostsPreAggregated < EconomicCostsPreAggregated
-  #Unused? There is no parameterised variable or method
-  def self.create_costs(meter)
-    costs = CurrentEconomicCostsPreAggregated.new(meter)
-    costs.calculate_tariff unless parameterised
-    costs
-  end
 end

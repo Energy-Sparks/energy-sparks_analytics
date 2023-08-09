@@ -446,8 +446,8 @@ class AggregateDataService
 
     calculate_carbon_emissions_for_meter(combined_meter, fuel_type)
 
-    has_differential_meter = any_component_meter_differential?(list_of_meters, fuel_type, combined_meter.amr_data.start_date, combined_meter.amr_data.end_date)
-    economic_tariffs_differ = !all_economic_tariffs_identical?(list_of_meters)
+    has_differential_meter = any_component_meter_differential?(list_of_meters, fuel_type, combined_meter.amr_data.start_date, combined_meter.amr_data.end_date) #true if any differential accounting, mostly false atm
+    economic_tariffs_differ = !all_economic_tariffs_identical?(list_of_meters) #always false
     has_time_variant_economic_tariffs = any_time_variant_economic_tariffs?(list_of_meters)
 
     log "Aggregation service time variant #{has_time_variant_economic_tariffs}"
@@ -461,7 +461,7 @@ class AggregateDataService
     combined_meter
   end
 
-  #Returns true if there are any differential tariffs for any meters in the provided list, within
+  #Returns true if there are any differential accounting tariffs for any meters in the provided list, within
   #the specified date range.
   def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
     return false if fuel_type == :gas
@@ -473,9 +473,20 @@ class AggregateDataService
   end
 
   #Returns true if all economic tariffs for the list of meters are identical.
+  #
+  #Currently, economic tariffs and time varying tariffs are not set "below" School.
+  #So all meters in a school will inherit the same tariffs, so this will always
+  #be returning true currently.
   def all_economic_tariffs_identical?(list_of_meters)
     return true if list_of_meters.length == 1
 
+    #Check whether any of the meters have their own tariffs, rather than
+    #just sharing the same school/group/system tariffs.
+    if ENV["FEATURE_FLAG_USE_NEW_ENERGY_TARIFFS"] == 'true'
+      return !list_of_meters.any? {|meter| meter.meter_tariffs.meter_tariffs.any? }
+    end
+
+    #relies on original MeterTariffManager
     economic_tariffs = list_of_meters.map { |meter| meter.meter_tariffs.economic_tariff }
     economic_tariffs.uniq { |t| [t.tariff, t.tariff]}.count == 1
   end
