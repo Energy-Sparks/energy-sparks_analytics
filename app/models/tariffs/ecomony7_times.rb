@@ -17,7 +17,6 @@ class Economy7Times
   # https://sse.co.uk/help/energy/daylight-saving-time states economy 7 stays on GMT all year round?
 
   DEFAULT_TIMES = TimeOfDay.new( 0,  0)..TimeOfDay.new( 7,  0)
-  private_constant :DEFAULT_TIMES
 
   NIGHTTIME = { # there seems to be some ambiguity, varies between suppliers?
     10 => { times: TimeOfDay.new(23,  0)..TimeOfDay.new( 7,  0), region: :eastern           },
