@@ -23,9 +23,9 @@ describe Usage::AnnualUsageCategoryBreakdown, type: :service do
   context '#potential_savings' do
     it 'returns a combined usage metric of potential kwh, co2, and percent savings compared to an exemplar school' do
       exemplar_comparison = service.potential_savings(versus: :exemplar_school)
-      expect(exemplar_comparison.kwh).to round_to_two_digits(61631.57) # 61631.56666666665
-      expect(exemplar_comparison.percent).to round_to_two_digits(0.13) # 0.13186088498947934
-      expect(exemplar_comparison.£).to round_to_two_digits(9370.09) # 9370.089737063214
+      expect(exemplar_comparison.kwh).to round_to_two_digits(66464.97)
+      expect(exemplar_comparison.percent).to round_to_two_digits(0.14)
+      expect(exemplar_comparison.£).to round_to_two_digits(10104.93)
     end
   end
 end

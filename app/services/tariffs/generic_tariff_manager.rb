@@ -90,7 +90,7 @@ class GenericTariffManager
   # Costs::EconomicTariffsChangeCaveatsService
   def tariff_change_dates_in_period(start_date  = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
     list_of_tariffs = find_tariffs_between_dates(start_date, end_date)
-    return list_of_tariffs.map{ |t| t.end_date + 1 }
+    list_of_tariffs.map{ |t| t.end_date + 1 }
   end
 
   # Costs::EconomicTariffsChangeCaveatsService
@@ -146,7 +146,6 @@ class GenericTariffManager
     end
   end
 
-
   #All tariffs used within a specific date range, in reverse order
   def find_tariffs_between_dates(start_date, end_date)
     prev_tariff = nil
@@ -160,7 +159,6 @@ class GenericTariffManager
     end
     list_of_tariffs
   end
-
 
   #All tariffs used within date, regardlss of whether they have been
   #applied 1 or more times.
