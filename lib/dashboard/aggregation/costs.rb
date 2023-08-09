@@ -40,6 +40,36 @@ class CostsBase < HalfHourlyData
   #calculates are done on request.
   attr_accessor :post_aggregation_state
 
+  # Processes the tariff and consumption data for a list of meters, to calculate the
+  # combined costs which are them associated with an aggregate meter
+  #
+  # @param Dashboard::Meter combined_meter the aggregate meter to which the combined costs will be added
+  # @param Array list_of_meters the individual meters whose costs and tariffs will be processed
+  # @param Date combined_start_date start date of range
+  # @param Date combined_end_date end date of range
+  # @param Symbol either :economic_tariff or :current_economic_tariff
+  # @param cost_schedule a subclass of CostsBase
+  def self.combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, cost_schedule_type, cost_schedule)
+    Logging.logger.info "Combining #{cost_schedule_type} from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
+
+    (combined_start_date..combined_end_date).each do |date|
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
+
+      #If provide block returns true then we'll skip the cost calculation
+      #for this date
+      skip = false
+      if block_given?
+        skip = yield(date, list_of_meters_on_date)
+      end
+      next if skip
+
+      list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.send(cost_schedule_type).one_days_cost_data(date) }
+      cost_schedule.add(date, OneDaysCostData.combine_costs(list_of_days_economic_costs))
+    end
+    Logging.logger.info "Created combined meter cost schedule #{cost_schedule.costs_summary}"
+    cost_schedule
+  end
+
   #@param Dashboard::Meter meter the meter whose costs this schedule describes
   def initialize(meter)
     super(:amr_data_accounting_tariff)

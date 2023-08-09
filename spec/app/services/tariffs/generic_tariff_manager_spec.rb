@@ -579,6 +579,4 @@ describe GenericTariffManager, type: :service do
       end
     end
   end
-
-  it 'fulfils the contract of the old tariff manager'
 end

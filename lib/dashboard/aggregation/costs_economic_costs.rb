@@ -3,8 +3,8 @@ class EconomicCosts < CostsBase
     meter.meter_tariffs.economic_cost(date, days_kwh_x48)
   end
 
-  # Processes the tariff and consumption data for a list of meters, to calculate the combined costs which are them associated
-  # with an aggregate meter
+  # Processes the tariff and consumption data for a list of meters, to
+  # calculate the combined economic costs for an aggregate meter
   #
   # @param Dashboard::Meter combined_meter the aggregate meter to which the combined costs will be added
   # @param Array list_of_meters the individual meters whose costs and tariffs will be processed
@@ -12,43 +12,19 @@ class EconomicCosts < CostsBase
   # @param Date combined_end_date end date of range
   # @return EconomicCostsPreAggregated
   def self.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    Logging.logger.info "Combining economic costs from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
-
-    combined_economic_costs = EconomicCostsPreAggregated.new(combined_meter)
-
-    (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
-      list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.economic_tariff.one_days_cost_data(date) }
-      combined_economic_costs.add(date, OneDaysCostData.combine_costs(list_of_days_economic_costs))
-    end
-
-    Logging.logger.info "Created combined meter economic #{combined_economic_costs.costs_summary}"
-    combined_economic_costs
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :economic_tariff, EconomicCostsPreAggregated.new(combined_meter))
   end
 
-  # TODO(PH, 30Nov2022) merge into code above
+  # Processes the tariff and consumption data for a list of meters, to
+  # calculate the combined current economic costs for an aggregate meter
   #
-  # Processes the tariff and consumption data for a list of meters, to calculate the combined costs which are them associated
-  # with an aggregate meter
-  #
-  # @param Dashboard::Meter combined_meter the aggregate meter to which the combined economic costs will be added
+  # @param Dashboard::Meter combined_meter the aggregate meter to which the combined costs will be added
   # @param Array list_of_meters the individual meters whose costs and tariffs will be processed
   # @param Date combined_start_date start date of range
   # @param Date combined_end_date end date of range
   # @return CurrentEconomicCostsPreAggregated
   def self.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    Logging.logger.info "Combining current economic costs from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
-
-    combined_economic_costs = CurrentEconomicCostsPreAggregated.new(combined_meter)
-
-    (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
-      list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.current_economic_tariff.one_days_cost_data(date) }
-      combined_economic_costs.add(date, OneDaysCostData.combine_costs(list_of_days_economic_costs))
-    end
-
-    Logging.logger.info "Created current combined meter economic #{combined_economic_costs.costs_summary}"
-    combined_economic_costs
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :current_economic_tariff, CurrentEconomicCostsPreAggregated.new(combined_meter))
   end
 end
 

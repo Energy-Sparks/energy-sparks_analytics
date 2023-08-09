@@ -39,6 +39,8 @@ group :development do
   # For profiling code
   gem 'ruby-prof'
   gem "benchmark-memory"
+  gem 'climate_control'
+
 end
 
 # For tests
