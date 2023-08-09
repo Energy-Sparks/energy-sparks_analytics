@@ -1,6 +1,5 @@
 class OneDaysCostData
   attr_reader :standing_charges, :total_standing_charge, :one_day_total_cost
-  attr_reader :bill_components, :bill_component_costs_per_day
   attr_reader :all_costs_x48
   # these could be true, false or :mixed
   attr_reader :system_wide, :default
@@ -17,7 +16,6 @@ class OneDaysCostData
 
     @total_standing_charge = standing_charges.empty? ? 0.0 : standing_charges.values.sum
     @one_day_total_cost = total_x48_costs + @total_standing_charge
-    calculate_day_bill_components
   end
 
   def to_s
@@ -42,6 +40,14 @@ class OneDaysCostData
 
   def rates_at_half_hour(halfhour_index)
     @all_costs_x48.map { |type, £_x48| [type, £_x48[halfhour_index]] }.to_h
+  end
+
+  def bill_components
+    @bill_components ||= @all_costs_x48.keys.concat(@standing_charges.keys)
+  end
+
+  def bill_component_costs_per_day
+    @bill_component_costs_per_day ||= calculate_bill_component_costs_per_day
   end
 
   # used for storage heater disaggregation
@@ -101,9 +107,8 @@ class OneDaysCostData
 
   private
 
-  def calculate_day_bill_components
-    @bill_component_costs_per_day = @all_costs_x48.transform_values{ |£_x48| £_x48.sum }
-    @bill_component_costs_per_day.merge!(standing_charges)
-    @bill_components = @bill_component_costs_per_day.keys
+  def calculate_bill_component_costs_per_day
+    bill_component_costs_per_day = @all_costs_x48.transform_values{ |£_x48| £_x48.sum }
+    bill_component_costs_per_day.merge!(standing_charges)
   end
 end
