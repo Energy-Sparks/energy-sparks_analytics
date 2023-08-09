@@ -34,12 +34,12 @@ class AMRData < HalfHourlyData
   end
 
   def set_economic_tariff(meter)
-    logger.info "Creating an economic costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
+    logger.info "Creating an economic cost schedule for #{meter.mpan_mprn} #{meter.fuel_type}"
     @economic_tariff = CachingEconomicCosts.new(meter)
   end
 
   def set_current_economic_tariff(meter)
-    logger.info "Setting current economic tariff for meter #{meter.name}"
+    logger.info "Creating current economic cost schedule for meter #{meter.name}"
     if meter.meter_tariffs.economic_tariffs_change_over_time?
       @current_economic_tariff = CachingCurrentEconomicCosts.new(meter)
     else
@@ -51,7 +51,7 @@ class AMRData < HalfHourlyData
   end
 
   def set_accounting_tariff(meter)
-    logger.info "Creating parameterised accounting costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
+    logger.info "Creating accounting cost schedule for meter #{meter.mpan_mprn} #{meter.fuel_type}"
     @accounting_tariff = CachingAccountingCosts.new(meter)
   end
 
@@ -60,12 +60,12 @@ class AMRData < HalfHourlyData
   end
 
   def set_current_economic_tariff_schedule(tariff)
-    logger.info  "Setting current economic tariff schedule"
+    logger.info  "Setting current economic cost schedule"
     @current_economic_tariff = tariff
   end
 
   def set_current_economic_tariff_schedule_to_economic_tariff
-    logger.info "Setting current economic tariff schedule to economic tariff"
+    logger.info "Setting current economic cost schedule to existing economic cost schedule"
     @current_economic_tariff = @economic_tariff
   end
 
