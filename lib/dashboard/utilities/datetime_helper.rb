@@ -120,8 +120,8 @@ module DateTimeHelper
     result = []
     (0..47).each do |halfhour_index|
       value = 0.0
-      if  halfhour_index == start_halfhour_index
-        value =  start_excess_minutes_percent > 0.0 ? start_excess_minutes_percent : 1.0
+      if halfhour_index == start_halfhour_index
+        value =  start_excess_minutes_percent > 0.0 ? (1.0 - start_excess_minutes_percent) : 1.0
       elsif halfhour_index > start_halfhour_index && halfhour_index < end_halfhour_index
         value = 1.0
       elsif halfhour_index == end_halfhour_index
