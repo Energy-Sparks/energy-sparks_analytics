@@ -254,7 +254,7 @@ GEM
     tzinfo-data (1.2022.3)
       tzinfo (>= 1.0.0)
     unicode-display_width (2.1.0)
-    write_xlsx (1.11.0)
+    write_xlsx (1.11.1)
       rubyzip (>= 1.0.0)
     zeitwerk (2.6.8)
 
