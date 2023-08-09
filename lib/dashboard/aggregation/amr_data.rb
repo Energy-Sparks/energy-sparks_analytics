@@ -36,7 +36,6 @@ class AMRData < HalfHourlyData
   def set_economic_tariff(meter)
     logger.info "Creating an economic costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
     @economic_tariff = EconomicCostsParameterised.new(meter)
-    # @current_economic_tariff = @economic_tariff
   end
 
   def set_current_economic_tariff(meter)
