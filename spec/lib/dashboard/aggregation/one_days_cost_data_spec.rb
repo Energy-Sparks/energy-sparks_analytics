@@ -2,11 +2,15 @@ require 'spec_helper'
 
 describe OneDaysCostData do
 
-  context '.combine_costs' do
-    it 'combines rates'
-    it 'combines standing charges'
-    it 'identifies differential'
-    it 'updates tariff list'
+  context '#combine_costs' do
+    let(:costs)     { build_list(:one_days_cost, 5) }
+    let(:combined)  { OneDaysCostData.combine_costs(costs) }
+    it 'combines rates' do
+      expect(combined.all_costs_x48['flat_rate']).to eq AMRData.fast_add_multiple_x48_x_x48(costs.map {|c| c.all_costs_x48['flat_rate']})
+    end
+    it 'combines standing charges' do
+      expect(combined.total_standing_charge).to eq 5.0
+    end
   end
 
   context '.bill_components' do
