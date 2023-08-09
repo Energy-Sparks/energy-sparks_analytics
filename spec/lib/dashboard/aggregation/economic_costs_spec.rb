@@ -56,7 +56,7 @@ describe EconomicCosts do
     let(:expected_total_cost) { (0.01 * 0.15) * 48 * 2 }
 
     it 'has expected type' do
-      expect(combined_costs).to be_a EconomicCostsPreAggregated
+      expect(combined_costs).to be_a EconomicCostsPrecalculated
     end
 
     it 'has expected numbers of days' do
@@ -95,7 +95,7 @@ describe EconomicCosts do
     let(:expected_total_cost) { (0.01 * 1.5) * 48 * 2 }
 
     it 'has expected type' do
-      expect(combined_costs).to be_a CurrentEconomicCostsPreAggregated
+      expect(combined_costs).to be_a CurrentEconomicCostsPrecalculated
     end
 
     it 'has expected numbers of days' do

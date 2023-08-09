@@ -56,7 +56,7 @@ describe AccountingCosts do
     let(:expected_total_cost) { (0.01 * 0.15 * 48 * 2) + 2.0 }
 
     it 'has expected type' do
-      expect(combined_costs).to be_a AccountingCostsPreAggregated
+      expect(combined_costs).to be_a AccountingCostsPrecalculated
     end
 
     it 'has expected numbers of days' do
@@ -83,7 +83,7 @@ describe AccountingCosts do
       end
 
       it 'has expected type' do
-        expect(combined_costs).to be_a AccountingCostsPreAggregated
+        expect(combined_costs).to be_a AccountingCostsPrecalculated
       end
 
       it 'has skipped the calculation' do

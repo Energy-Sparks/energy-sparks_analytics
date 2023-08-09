@@ -1,4 +1,4 @@
-class EconomicCosts < CostsBase
+class EconomicCosts < CostSchedule
   protected def costs(date, meter, days_kwh_x48)
     meter.meter_tariffs.economic_cost(date, days_kwh_x48)
   end
@@ -10,9 +10,9 @@ class EconomicCosts < CostsBase
   # @param Array list_of_meters the individual meters whose costs and tariffs will be processed
   # @param Date combined_start_date start date of range
   # @param Date combined_end_date end date of range
-  # @return EconomicCostsPreAggregated
+  # @return EconomicCostsPrecalculated
   def self.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :economic_tariff, EconomicCostsPreAggregated.new(combined_meter))
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :economic_tariff, EconomicCostsPrecalculated.new(combined_meter))
   end
 
   # Processes the tariff and consumption data for a list of meters, to
@@ -22,9 +22,9 @@ class EconomicCosts < CostsBase
   # @param Array list_of_meters the individual meters whose costs and tariffs will be processed
   # @param Date combined_start_date start date of range
   # @param Date combined_end_date end date of range
-  # @return CurrentEconomicCostsPreAggregated
+  # @return CurrentEconomicCostsPrecalculated
   def self.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :current_economic_tariff, CurrentEconomicCostsPreAggregated.new(combined_meter))
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :current_economic_tariff, CurrentEconomicCostsPrecalculated.new(combined_meter))
   end
 end
 
@@ -35,7 +35,7 @@ end
 # and stored. So the series is calculated and built on demand.
 #
 # "parameterised representation of economic costs until after agggregation to reduce memory footprint"
-class EconomicCostsParameterised < EconomicCosts
+class CachingEconomicCosts < EconomicCosts
   # Returns the costs for a specific date
   # @param Date date
   # @return OneDaysCostData
@@ -57,7 +57,7 @@ end
 
 # Extends the default economic costs class to force calculations to always
 # use the tariff data for the latest meter date.
-class CurrentEconomicCostsParameterised < EconomicCostsParameterised
+class CachingCurrentEconomicCosts < CachingEconomicCosts
   # for current economic tariffs, don't use time varying tariffs
   # but use the most recent tariff
   #
@@ -71,11 +71,11 @@ class CurrentEconomicCostsParameterised < EconomicCostsParameterised
 end
 
 # This implementation relies on the one_days_cost_data having been explicitly
-# added to the schedule of data, rather than being calculated (and possibly cached)
+# added to the schedule of data (via +add+), rather than being calculated (and possibly cached)
 # on the fly. It's used where we are creating a schedule of costs for a combined
 # meter and there are a variety of tariffs used by the underlying meters. Reduces
 # the calculation overheads.
-class EconomicCostsPreAggregated < EconomicCosts
+class EconomicCostsPrecalculated < EconomicCosts
 
   #Return total cost for a day.
   #See OneDaysCostData#one_day_total_cost
@@ -94,5 +94,5 @@ class EconomicCostsPreAggregated < EconomicCosts
 
 end
 
-class CurrentEconomicCostsPreAggregated < EconomicCostsPreAggregated
+class CurrentEconomicCostsPrecalculated < EconomicCostsPrecalculated
 end

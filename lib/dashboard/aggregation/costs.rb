@@ -1,10 +1,11 @@
 require_relative '../utilities/half_hourly_data'
 require_relative '../utilities/half_hourly_loader'
 
-# Maintains cost data for a range of dates
+# Maintains a schedule of cost data
 # Used in parallel to AMRData for a meter
 #
-# Each day refers to 48 x half hour costs, plus standing charges
+# Each day refers to OneDaysCostData instance which holds a series of
+# 48 x half hourly costs, plus standing charges
 #
 # Extended by other classes to adjust logic based on two main categories
 # of tariff: economic costs, accounting costs
@@ -12,15 +13,15 @@ require_relative '../utilities/half_hourly_loader'
 # accounting costs, contain lots of standing charges
 #
 # HalfHourlyData
-#  CostsBase
+#  CostSchedule
 #    EconomicCosts
-#      EconomicCostsParameterised
-#        CurrentEconomicCostsParameterised
-#    EconomicCostsPreAggregated
-#        CurrentEconomicCostsPreAggregated
+#      CachingEconomicCosts
+#        CachingCurrentEconomicCosts
+#    EconomicCostsPrecalculated
+#        CurrentEconomicCostsPrecalculated
 #    AccountingCosts
-#      AccountingCostsParameterised
-#      AccountingCostsPreAggregated
+#      CachingAccountingCosts
+#      AccountingCostsPrecalculated
 #
 # Sub classes implement:
 # costs(date, meter, days_kwh_x48)
@@ -28,7 +29,7 @@ require_relative '../utilities/half_hourly_loader'
 #
 # and may override:
 # one_day_total_cost(date)
-class CostsBase < HalfHourlyData
+class CostSchedule < HalfHourlyData
   attr_reader :meter, :fuel_type, :amr_data, :fuel_type
 
   #This class is initially false but will be set to true at the end
@@ -48,7 +49,7 @@ class CostsBase < HalfHourlyData
   # @param Date combined_start_date start date of range
   # @param Date combined_end_date end date of range
   # @param Symbol either :economic_tariff or :current_economic_tariff
-  # @param cost_schedule a subclass of CostsBase
+  # @param cost_schedule a subclass of CostSchedule
   def self.combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, cost_schedule_type, cost_schedule)
     Logging.logger.info "Combining #{cost_schedule_type} from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
 
@@ -66,7 +67,7 @@ class CostsBase < HalfHourlyData
       list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.send(cost_schedule_type).one_days_cost_data(date) }
       cost_schedule.add(date, OneDaysCostData.combine_costs(list_of_days_economic_costs))
     end
-    Logging.logger.info "Created combined meter cost schedule #{cost_schedule.costs_summary}"
+    Logging.logger.info "Created combined cost schedule #{cost_schedule.costs_summary}"
     cost_schedule
   end
 
@@ -140,7 +141,7 @@ class CostsBase < HalfHourlyData
   # @param Dashboard::Meter meter the meter whose tariff and consumption data will be used
   # @return OneDaysCostData
   public def calculate_tariff_for_date(date, meter)
-    raise EnergySparksNotEnoughDataException, "Doing costs calculation for date #{date} meter start_date #{meter.amr_data.start_date}" if date < meter.amr_data.start_date
+    raise EnergySparksNotEnoughDataException, "Doing cost calculations for date #{date} meter start_date #{meter.amr_data.start_date}" if date < meter.amr_data.start_date
     kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
     costs(tariff_date(date), meter, kwh_x48)
   end
@@ -223,6 +224,6 @@ class CostsBase < HalfHourlyData
   # @param Dashboard::Meter meter the meter whose tariff information is to be retrieved
   # @param Array _days_kwh_x48 the consumption to use to calculate costs
   protected def costs(_date, _meter, _days_kwh_x48)
-    raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class for CostsBase: costs')
+    raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class for CostSchedule: costs')
   end
 end

@@ -1,4 +1,4 @@
-class AccountingCosts < CostsBase
+class AccountingCosts < CostSchedule
   protected def costs(date, meter, days_kwh_x48)
     meter.meter_tariffs.accounting_cost(date, days_kwh_x48)
   end
@@ -13,9 +13,9 @@ class AccountingCosts < CostsBase
   # @param Array list_of_meters the individual meters whose costs and tariffs will be processed
   # @param Date combined_start_date start date of range
   # @param Date combined_end_date end date of range
-  # @return AccountingCostsPreAggregated
+  # @return AccountingCostsPrecalculated
   def self.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :accounting_tariff, AccountingCostsPreAggregated.new(combined_meter)) do |date, list_of_meters_on_date|
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :accounting_tariff, AccountingCostsPrecalculated.new(combined_meter)) do |date, list_of_meters_on_date|
       missing_accounting_costs = list_of_meters_on_date.select { |m| !m.amr_data.date_exists_by_type?(date, :accounting_cost) }
       missing_accounting_costs.length > 0
     end
@@ -34,7 +34,7 @@ class AccountingCosts < CostsBase
   end
 end
 
-class AccountingCostsParameterised < AccountingCosts
+class CachingAccountingCosts < AccountingCosts
   # returns a x48 array of half hourly costs, only caches post aggregation, and front end cache
   def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
@@ -60,7 +60,7 @@ class AccountingCostsParameterised < AccountingCosts
 
 end
 
-class AccountingCostsPreAggregated < AccountingCosts
+class AccountingCostsPrecalculated < AccountingCosts
   # always precalculated so don't calculate on the fly
   def one_days_cost_data(date)
     self[date]
