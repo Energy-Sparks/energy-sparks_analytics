@@ -55,53 +55,6 @@ class CostsBase < HalfHourlyData
     @bill_component_types_internal.keys
   end
 
-  # combine OneDaysCostData[] into single aggregate OneDaysCostData
-  def self.combined_day_costs(costs)
-    OneDaysCostData.new(
-      rates_x48:        merge_costs_x48(costs.map(&:all_costs_x48)),
-      standing_charges: combined_standing_charges(costs),
-      differential:     costs.any?{ |c| c.differential_tariff? },
-      system_wide:      combined_system_wide(costs),
-      default:          combined_default(costs),
-      tariff:           costs.map { |c| c.tariff }
-    )
-  end
-
-  def self.combined_system_wide(costs)
-    return true  if costs.all? { |c| c.system_wide == true }
-    return false if costs.all? { |c| c.system_wide != true }
-    :mixed
-  end
-
-  def self.combined_default(costs)
-    return true  if costs.all? { |c| c.default == true }
-    return false if costs.all? { |c| c.default != true }
-    :mixed
-  end
-
-  # merge array of hashes of x48 costs
-  def self.merge_costs_x48(arr_of_type_to_costs_x48)
-    totals_x48_by_type = Hash.new{ |h, k| h[k] = [] }
-
-    arr_of_type_to_costs_x48.each do |type_to_costs_x48|
-      type_to_costs_x48.each do |type, c_x48|
-        totals_x48_by_type[type].push(c_x48)
-      end
-    end
-
-    totals_x48_by_type.transform_values{ |c_x48_array| AMRData.fast_add_multiple_x48_x_x48(c_x48_array) }
-  end
-
-  def self.combined_standing_charges(costs)
-    combined_standing_charges = Hash.new(0.0)
-    costs.each do |cost|
-      cost.standing_charges.each do |type, value|
-        combined_standing_charges[type] += value
-      end
-    end
-    combined_standing_charges
-  end
-
   # Scale the standing charges across the entire range of days
   #
   # See OneDaysCostData#scale_standing_charges

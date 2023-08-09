@@ -19,7 +19,7 @@ class EconomicCosts < CostsBase
     (combined_start_date..combined_end_date).each do |date|
       list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
       list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.economic_tariff.one_days_cost_data(date) }
-      combined_economic_costs.add(date, combined_day_costs(list_of_days_economic_costs))
+      combined_economic_costs.add(date, OneDaysCostData.combine_costs(list_of_days_economic_costs))
     end
 
     Logging.logger.info "Created combined meter economic #{combined_economic_costs.costs_summary}"
@@ -44,7 +44,7 @@ class EconomicCosts < CostsBase
     (combined_start_date..combined_end_date).each do |date|
       list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
       list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.current_economic_tariff.one_days_cost_data(date) }
-      combined_economic_costs.add(date, combined_day_costs(list_of_days_economic_costs))
+      combined_economic_costs.add(date, OneDaysCostData.combine_costs(list_of_days_economic_costs))
     end
 
     Logging.logger.info "Created current combined meter economic #{combined_economic_costs.costs_summary}"

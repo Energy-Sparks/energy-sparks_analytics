@@ -15,7 +15,7 @@ class AccountingCosts < CostsBase
       # silently skip calculation
       next if missing_accounting_costs.length > 0
       list_of_days_accounting_costs = list_of_meters_on_date.map { |m| m.amr_data.accounting_tariff.one_days_cost_data(date) }
-      combined_accounting_costs.add(date, combined_day_costs(list_of_days_accounting_costs))
+      combined_accounting_costs.add(date, OneDaysCostData.combine_costs(list_of_days_accounting_costs))
     end
 
     Logging.logger.info "Created combined meter accounting #{combined_accounting_costs.costs_summary}"
