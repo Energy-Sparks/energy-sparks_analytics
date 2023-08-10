@@ -58,11 +58,7 @@ class CostSchedule < HalfHourlyData
 
       #If provide block returns true then we'll skip the cost calculation
       #for this date
-      skip = false
-      if block_given?
-        skip = yield(date, list_of_meters_on_date)
-      end
-      next if skip
+      next if block_given? && yield(date, list_of_meters_on_date)
 
       list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.send(cost_schedule_type).one_days_cost_data(date) }
       cost_schedule.add(date, OneDaysCostData.combine_costs(list_of_days_economic_costs))
