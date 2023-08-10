@@ -326,6 +326,8 @@ class ValidateAMRData
     check_date_exists(fix_start_date, :readings_start_date)
     logger.debug "Fixing start date to #{fix_start_date} for #{@meter_id}"
     substitute_data_x48 = @amr_data.one_days_data_x48(fix_start_date)
+    #Setting start date will truncate earlier data. Application will end up
+    #storing the FIXS reading as the earliest reading. Prior data will be deleted
     @amr_data.add(fix_start_date, OneDayAMRReading.new(meter_id, fix_start_date, 'FIXS', nil, DateTime.now, substitute_data_x48))
     @amr_data.set_start_date(fix_start_date)
   end
@@ -343,6 +345,8 @@ class ValidateAMRData
     check_date_exists(fix_end_date, :readings_end_date)
     logger.debug "Fixing end date to #{fix_end_date}"
     substitute_data_x48 = @amr_data.one_days_data_x48(fix_end_date)
+    #Setting end date will truncate earlier data. Application will end up
+    #storing the FIXE reading as the latest reading. Later data will be deleted
     @amr_data.add(fix_end_date, OneDayAMRReading.new(meter_id, fix_end_date, 'FIXE', nil, DateTime.now, substitute_data_x48))
     @amr_data.set_end_date(fix_end_date)
   end
@@ -880,6 +884,8 @@ class ValidateAMRData
       end
       if gap_count > @max_days_missing_data && !in_meter_correction_period?(date)
         min_date = first_bad_date + 1
+        #Setting start date will truncate earlier data. Application will end up
+        #storing the LGAP reading as the earliest reading. Prior data will be deleted
         @amr_data.set_start_date(min_date)
         msg =  'Ignoring all data before ' + min_date.strftime(FSTRDEF)
         msg += ' as gap of more than ' + @max_days_missing_data.to_s + ' days '

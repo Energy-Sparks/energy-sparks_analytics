@@ -70,9 +70,6 @@ class AggregateDataService
   def aggregate_heat_and_electricity_meters
     log 'Aggregate Meters'
     bm = Benchmark.realtime do
-      #adjust meter start/end dates if needed
-      set_long_gap_boundary_on_all_meters
-
       #aggregate heat meters
       aggregate_heat_meters
 
@@ -144,25 +141,6 @@ class AggregateDataService
     ].compact.each do |meter|
       oc_breakdown = AMRDataCommunityOpenCloseBreakdown.new(meter, @meter_collection.open_close_times)
       meter.amr_data.open_close_breakdown = oc_breakdown
-    end
-  end
-
-  #2023 (LD): this looks to be unnecessary. Do some further tests and remove
-  #
-  #set_long_gap_boundary will try and adjust the amr data start/end to the
-  #date of an LGAP, FIXS, FIXE reading if it can find one
-  #
-  #But in the validation step, setting these readings will result in the AMR data before
-  #or after the data to be removed from the AmrData object. The application removes any
-  #validated data that isn't part of this range.
-  #
-  # So there's never any data provided outside of these dates and we're doing an
-  # unnecessary scan of all meter data in case we find one of these readings. But
-  # they will already be the start or end of provided meter data range
-  def set_long_gap_boundary_on_all_meters
-    @meter_collection.all_meters.each do |meter|
-      log "Considering setting long gap boundaries on #{meter.mpan_mprn}?"
-      meter.amr_data.set_long_gap_boundary
     end
   end
 
