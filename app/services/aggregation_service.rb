@@ -293,8 +293,7 @@ class AggregateDataService
   # @param Dashboard::Meter combined_meter the existing aggregate meter of this type (if there is one)
   # @param Array list_of_meters the list of meters to aggregate
   # @param Symbol type the fuel type being aggregated
-  # @param boolean copy_amr_data whether to copy the AMR data to the aggregate meter? Looks to be unused now?
-  def aggregate_main_meters(combined_meter, list_of_meters, type, copy_amr_data = false)
+  def aggregate_main_meters(combined_meter, list_of_meters, type)
     log "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map { |sm| sm.sub_meters.length }.sum} sub meters"
     aggregate_meters(combined_meter, list_of_meters, type)
   end
