@@ -752,10 +752,8 @@ class ValidateAMRData
 
   #Replace any missing weekend dates with zero data
   def replace_missing_weekend_data_with_zero
-    replaced_dates = [] #unused, beyond loop
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if DateTimeHelper.weekend?(date) && @amr_data.date_missing?(date)
-        replaced_dates.push(date)
         zero_data = Array.new(48, 0.0)
         missing_weekend_data = OneDayAMRReading.new(meter_id, date, 'MWKE', nil, DateTime.now, zero_data)
         @amr_data.add(date, missing_weekend_data)
@@ -771,12 +769,10 @@ class ValidateAMRData
   # @param Date end_date set to +nil+ to use meter end date
   def replace_missing_data_with_zero(start_date, end_date)
     logger.info "Replacing missing data between #{start_date} and #{end_date} with zero"
-    replaced_dates = [] #unused, beyond loop
     start_date = start_date.nil? ? @amr_data.start_date : start_date
     end_date = end_date.nil? ? @amr_data.end_date : end_date
     (start_date..end_date).each do |date|
       if @amr_data.date_missing?(date)
-        replaced_dates.push(date)
         zero_data = Array.new(48, 0.0)
         missing_data_zero_in_date_range = OneDayAMRReading.new(meter_id, date, 'MDTZ', nil, DateTime.now, zero_data)
         @amr_data.add(date, missing_data_zero_in_date_range)
