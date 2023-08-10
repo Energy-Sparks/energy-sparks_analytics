@@ -169,9 +169,9 @@ describe GenericTariffManager, type: :service do
     let(:economic_cost)   { service.economic_cost(amr_end_date, kwh_data_x48) }
 
     it 'calculates the expected cost' do
-      expect(economic_cost[:differential]).to eq false
-      expect(economic_cost[:standing_charges]).to eq({})
-      expect(economic_cost[:rates_x48]['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
+      expect(economic_cost.differential_tariff?).to eq false
+      expect(economic_cost.standing_charges).to eq({})
+      expect(economic_cost.all_costs_x48['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
     end
 
   end
@@ -182,15 +182,15 @@ describe GenericTariffManager, type: :service do
     let(:accounting_cost) { service.accounting_cost(amr_end_date, kwh_data_x48)}
 
     it 'calculates the expected cost' do
-      expect(accounting_cost[:differential]).to eq false
-      expect(accounting_cost[:standing_charges]).to eq({})
-      expect(accounting_cost[:rates_x48]['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
+      expect(accounting_cost.differential_tariff?).to eq false
+      expect(accounting_cost.standing_charges).to eq({})
+      expect(accounting_cost.all_costs_x48['flat_rate']).to eq Array.new(48, 0.01 * 0.15)
     end
 
     context 'with a standing charge when available' do
       let(:rates)           { create_flat_rate(rate: 0.15, standing_charge: 1.0) }
       it 'includes the charge' do
-        expect(accounting_cost[:standing_charges]).to eq({standing_charge: 1.0})
+        expect(accounting_cost.standing_charges).to eq({standing_charge: 1.0})
       end
     end
   end
@@ -579,6 +579,4 @@ describe GenericTariffManager, type: :service do
       end
     end
   end
-
-  it 'fulfils the contract of the old tariff manager'
 end

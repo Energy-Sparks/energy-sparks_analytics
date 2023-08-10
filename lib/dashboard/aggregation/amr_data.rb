@@ -22,9 +22,9 @@ class AMRData < HalfHourlyData
 
   def set_post_aggregation_state
     @carbon_emissions.post_aggregation_state        = true if @carbon_emissions.is_a?(CarbonEmissionsParameterised)
-    @economic_tariff.post_aggregation_state         = true if @economic_tariff.is_a?(EconomicCostsParameterised)
-    @current_economic_tariff.post_aggregation_state = true if @current_economic_tariff.is_a?(CurrentEconomicCostsParameterised)
-    @accounting_tariff.post_aggregation_state       = true if @accounting_tariff.is_a?(AccountingCostsParameterised)
+    @economic_tariff.post_aggregation_state         = true if @economic_tariff.is_a?(CachingEconomicCosts)
+    @current_economic_tariff.post_aggregation_state = true if @current_economic_tariff.is_a?(CachingCurrentEconomicCosts)
+    @accounting_tariff.post_aggregation_state       = true if @accounting_tariff.is_a?(CachingAccountingCosts)
   end
 
   def set_tariffs(meter)
@@ -34,14 +34,14 @@ class AMRData < HalfHourlyData
   end
 
   def set_economic_tariff(meter)
-    logger.info "Creating an economic costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
-    @economic_tariff = EconomicCostsParameterised.new(meter)
+    logger.info "Creating an economic cost schedule for #{meter.mpan_mprn} #{meter.fuel_type}"
+    @economic_tariff = CachingEconomicCosts.new(meter)
   end
 
   def set_current_economic_tariff(meter)
-    logger.info "Setting current economic tariff for meter #{meter.name}"
+    logger.info "Creating current economic cost schedule for meter #{meter.name}"
     if meter.meter_tariffs.economic_tariffs_change_over_time?
-      @current_economic_tariff = CurrentEconomicCostsParameterised.new(meter)
+      @current_economic_tariff = CachingCurrentEconomicCosts.new(meter)
     else
       # there no computational benefit in doing this,
       # given the tariff for amr_data.end_date is always re-looked up rather than cached
@@ -51,8 +51,8 @@ class AMRData < HalfHourlyData
   end
 
   def set_accounting_tariff(meter)
-    logger.info "Creating parameterised accounting costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
-    @accounting_tariff = AccountingCostsParameterised.new(meter)
+    logger.info "Creating accounting cost schedule for meter #{meter.mpan_mprn} #{meter.fuel_type}"
+    @accounting_tariff = CachingAccountingCosts.new(meter)
   end
 
   def set_economic_tariff_schedule(tariff)
@@ -60,12 +60,12 @@ class AMRData < HalfHourlyData
   end
 
   def set_current_economic_tariff_schedule(tariff)
-    logger.info  "Setting current economic tariff schedule"
+    logger.info  "Setting current economic cost schedule"
     @current_economic_tariff = tariff
   end
 
   def set_current_economic_tariff_schedule_to_economic_tariff
-    logger.info "Setting current economic tariff schedule to economic tariff"
+    logger.info "Setting current economic cost schedule to existing economic cost schedule"
     @current_economic_tariff = @economic_tariff
   end
 

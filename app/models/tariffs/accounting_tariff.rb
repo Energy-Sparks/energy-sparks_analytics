@@ -40,7 +40,8 @@ class AccountingTariff < EconomicTariff
 
     t[:rates_x48].merge!(rate_per_kwh_standing_charges(kwh_x48))
 
-    t.merge(common_data(date, kwh_x48))
+    t.merge!(common_data(date, kwh_x48))
+    OneDaysCostData.new(t)
   end
 
   def common_data(date, kwh_x48)

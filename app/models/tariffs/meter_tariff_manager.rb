@@ -56,7 +56,8 @@ class MeterTariffManager
           }
         end
 
-    t.merge( { standing_charges: {}, system_wide: true, default: true } )
+    t.merge!( { standing_charges: {}, system_wide: true, default: true, tariff: @economic_tariff } )
+    OneDaysCostData.new(t)
   rescue => e
     raise_and_log_error(EconomicCostCalculationError, "Unable to calculate economic cost for mpxn #{@mpxn} on #{date}. Differential tariff: #{differential_tariff}")
   end

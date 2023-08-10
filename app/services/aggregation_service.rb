@@ -514,7 +514,7 @@ class AggregateDataService
     start_date = combined_meter.amr_data.start_date # use combined meter start and end dates to conform with (deprecated) meter aggregation rules
     end_date = combined_meter.amr_data.end_date
 
-    log "Creating economic & accounting costs for combined meter #{mpan_mprn} fuel #{combined_meter.fuel_type} with #{list_of_meters.length} meters from #{start_date} to #{end_date}"
+    log "Creating economic & accounting cost schedules for combined meter #{mpan_mprn} fuel #{combined_meter.fuel_type} with #{list_of_meters.length} meters from #{start_date} to #{end_date}"
 
     set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differing_tariffs)
     set_current_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differing_tariffs, has_time_variant_economic_tariffs)
@@ -526,11 +526,11 @@ class AggregateDataService
   def set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differing_tariffs)
     mpan_mprn = combined_meter.mpan_mprn
     if has_differing_tariffs # so need pre aggregated economic costs as kwh to £ no longer additive
-      log 'Creating a multiple economic costs for differential tariff meter'
+      log 'Combining multiple economic costs for a differential tariff meter'
       economic_costs = EconomicCosts.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
     else
-      log 'Creating a parameterised economic cost meter'
-      economic_costs = EconomicCostsParameterised.new(combined_meter)
+      log 'Creating a caching economic cost schedule for meter'
+      economic_costs = CachingEconomicCosts.new(combined_meter)
     end
     combined_meter.amr_data.set_economic_tariff_schedule(economic_costs)
   end
@@ -539,11 +539,11 @@ class AggregateDataService
     if has_time_variant_economic_tariffs
       mpan_mprn = combined_meter.mpan_mprn
       if has_differing_tariffs # so need pre aggregated economic costs as kwh to £ no longer additive
-        log "Creating a multiple combined current economic costs for meter #{combined_meter.fuel_type}"
+        log "Combining multiple current economic costs for meter #{combined_meter.fuel_type}"
         economic_costs = EconomicCosts.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
       else
-        log 'Creating a parameterised combined current economic cost meter'
-        economic_costs = CurrentEconomicCostsParameterised.new(combined_meter)
+        log 'Creating a caching current economic cost schedule for meter'
+        economic_costs = CachingCurrentEconomicCosts.new(combined_meter)
       end
       combined_meter.amr_data.set_current_economic_tariff_schedule(economic_costs)
     else
