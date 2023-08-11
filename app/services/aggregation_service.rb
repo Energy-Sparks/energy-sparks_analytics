@@ -218,26 +218,6 @@ class AggregateDataService
     combined_meter.sub_meters.each { |t, m| log "   #{t}: #{m}" }
   end
 
-  # TODO: this appears to be unused
-  #
-  # if an electricity meter is split up into a storage and non-storage version
-  # we need to artificially split up the standing charges
-  # in any account scenario these probably need re-aggregating for any bill
-  # reconciliation if kept seperate for these purposes
-  def proportion_out_accounting_standing_charges(meter1, meter2)
-    total_kwh_meter1 = meter1.amr_data.accounting_tariff.total_costs
-    total_kwh_meter2 = meter2.amr_data.accounting_tariff.total_costs
-    percent_meter1 = total_kwh_meter1 / (total_kwh_meter1 + total_kwh_meter2)
-    meter1.amr_data.accounting_tariff.scale_standing_charges(percent_meter1)
-    meter2.amr_data.accounting_tariff.scale_standing_charges(1.0 - percent_meter1)
-  end
-
-  # TODO: this appears to be unused
-  def lookup_synthetic_meter(type)
-    meter_id = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type)
-    @meter_collection.meter?(meter_id, true)
-  end
-
   # Carry out the aggregation process for gas meters
   #
   # Triggers calculation of carbon emissions and costs for each meter, and
@@ -252,24 +232,6 @@ class AggregateDataService
     log 'Aggregating electricity meters'
     calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
-    # assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
-  end
-
-  # TODO: this appears to be unused
-  #
-  # pv and storage heater meters alter the meter data, but for
-  # P&L purposes we need an unaltered copy of the original meter
-  def create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
-    if @meter_collection.solar_pv_panels? || @meter_collection.storage_heaters?
-      calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
-      unaltered_aggregate_meter = aggregate_main_meters(nil, @electricity_meters, :electricity, true)
-      # assign_unaltered_electricity_meter(unaltered_aggregate_meter)
-    end
-  end
-
-  # TODO: this appears to be unused
-  def assign_unaltered_electricity_meter_deprecated(meter)
-    @meter_collection.unaltered_aggregated_electricity_meters ||= meter
   end
 
   #Creates a name, id, total floor area and total number of pupils based on
@@ -309,46 +271,9 @@ class AggregateDataService
   # @param Dashboard::Meter combined_meter the existing aggregate meter of this type (if there is one)
   # @param Array list_of_meters the list of meters to aggregate
   # @param Symbol type the fuel type being aggregated
-  # @param boolean copy_amr_data whether to copy the AMR data to the aggregate meter? Looks to be unused now?
-  def aggregate_main_meters(combined_meter, list_of_meters, type, copy_amr_data = false)
+  def aggregate_main_meters(combined_meter, list_of_meters, type)
     log "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map { |sm| sm.sub_meters.length }.sum} sub meters"
-    aggregate_meters(combined_meter, list_of_meters, type, copy_amr_data)
-    # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
-    # combine_sub_meters_deprecated(combined_meter, list_of_meters)
-  end
-
-  # rubocop:enable Layout/LineLength
-  #
-  # TODO: this now appears to be unused. Only called if +aggregate_meters+ has +copy_amr_data+ flag.
-  # That flag is only set in +create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters_+ which is never called?
-  #
-  # Creates a copy of an existing +Dashboard::Meter+, along with its underlying +AMRData+
-  #
-  # For pv, storage heater meters about to be disaggregated
-  #
-  # @param Dashboard::Meter meter the meter to copy
-  # @return Dashboard::Meter
-  def copy_meter_and_amr_data(meter)
-    log "Creating cloned copy of meter #{meter.mpan_mprn}"
-    new_meter = nil
-    bm = Benchmark.realtime do
-      new_meter = Dashboard::Meter.new(
-        meter_collection: @meter_collection,
-        amr_data: AMRData.copy_amr_data(meter.amr_data),
-        type: meter.fuel_type,
-        identifier: meter.mpan_mprn,
-        name: meter.name,
-        floor_area: meter.floor_area,
-        number_of_pupils: meter.number_of_pupils,
-        meter_attributes: meter.meter_attributes
-      )
-      calculate_meter_carbon_emissions_and_costs(new_meter, :electricity)
-      new_meter.amr_data.set_post_aggregation_state
-    end
-    calc_text = "Copied meter and amr data in #{bm.round(3)} seconds"
-    log calc_text
-    puts calc_text
-    new_meter
+    aggregate_meters(combined_meter, list_of_meters, type)
   end
 
   # Aggregates a list of meters with the same fuel type.
@@ -368,13 +293,11 @@ class AggregateDataService
   # @param boolean copy_amr_data whether to copy the AMR data to the aggregate meter? Looks to be unused now?
   # @return nil if list of meters is nil or empty, a Dashboard::Meter if list contains single entry, the existing combined meter,
   # or a new +Dashboard::AggregateMeter+
-  def aggregate_meters(combined_meter, list_of_meters, fuel_type, copy_amr_data = false)
+  def aggregate_meters(combined_meter, list_of_meters, fuel_type)
     return nil if list_of_meters.nil? || list_of_meters.empty?
 
     if list_of_meters.length == 1
       meter = list_of_meters.first
-      #Note this call only seem to happen from a deprecated method?
-      meter = copy_meter_and_amr_data(meter) if copy_amr_data
       log "Single meter of type #{fuel_type} - using as combined meter from #{meter.amr_data.start_date} to #{meter.amr_data.end_date} rather than creating new one"
       return meter
     end
@@ -535,29 +458,6 @@ class AggregateDataService
       log format('%-24.24s %-18.18s %s to %s', meter.display_name, meter.id, meter.amr_data.start_date.to_s, meter.amr_data.end_date)
       aggregation_rules = meter.attributes(:aggregation)
       log "                Meter has aggregation rules #{aggregation_rules}" unless aggregation_rules.nil?
-    end
-  end
-
-  # TODO: this appears to be unused
-  def group_sub_meters_by_fuel_type(list_of_meters)
-    sub_meter_types = {}
-    list_of_meters.each do |meter|
-      meter.sub_meters.each do |sub_meter|
-        fuel_type = meter.fuel_type
-        sub_meter_types[fuel_type] = [] unless sub_meter_types.key?(fuel_type)
-        sub_meter_types[fuel_type].push(sub_meter)
-      end
-    end
-    sub_meter_types
-  end
-
-  # TODO: this appears to be unused
-  def combine_sub_meters_deprecated(parent_meter, list_of_meters)
-    sub_meter_types = group_sub_meters_by_fuel_type(list_of_meters)
-
-    sub_meter_types.each do |fuel_type, sub_meters|
-      combined_meter = aggregate_meters(parent_meter, sub_meters, fuel_type)
-      parent_meter.sub_meters.push(combined_meter)
     end
   end
 
