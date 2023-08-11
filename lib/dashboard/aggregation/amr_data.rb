@@ -607,27 +607,6 @@ class AMRData < HalfHourlyData
     data
   end
 
-  # long gaps are demarked by a single LGAP meter reading - the last day of the gap
-  # data held in the database doesn't store the date as part of its meta data so its
-  # set here by calling this function after all meter readings are loaded
-  def set_long_gap_boundary
-    override_start_date = nil
-    override_end_date = nil
-    (start_date..end_date).each do |date|
-      one_days_data = self[date]
-      override_start_date = date if !one_days_data.nil? && (one_days_data.type == 'LGAP' || one_days_data.type == 'FIXS')
-      override_end_date = date if !one_days_data.nil? && one_days_data.type == 'FIXE'
-    end
-    unless override_start_date.nil?
-      logger.info "Overriding start_date of amr data from #{self.start_date} to #{override_start_date}"
-      set_start_date(override_start_date)
-    end
-    unless override_end_date.nil?
-      logger.info "Overriding end_date of amr data from #{self.end_date} to #{override_end_date}"
-      set_end_date(override_end_date) unless override_end_date.nil?
-    end
-  end
-
   def summarise_bad_data
     date, one_days_data = self.first
     logger.info '=' * 80
