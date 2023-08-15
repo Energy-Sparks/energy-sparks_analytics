@@ -192,7 +192,7 @@ module Dashboard
     end
 
     def use_new_energy_tariffs?
-      ENV["FEATURE_FLAG_USE_NEW_ENERGY_TARIFFS"] == 'true'
+      ENV["FEATURE_FLAG_NEW_ENERGY_TARIFF_EDITOR"] == 'true'
     end
 
     # Centrica
