@@ -383,7 +383,7 @@ class AggregateDataService
 
     #Check whether any of the meters have their own tariffs, rather than
     #just sharing the same school/group/system tariffs.
-    if ENV["FEATURE_FLAG_USE_NEW_ENERGY_TARIFFS"] == 'true'
+    if ENV["FEATURE_FLAG_NEW_ENERGY_TARIFF_EDITOR"] == 'true'
       return !list_of_meters.any? {|meter| meter.meter_tariffs.meter_tariffs.any? }
     end
 
