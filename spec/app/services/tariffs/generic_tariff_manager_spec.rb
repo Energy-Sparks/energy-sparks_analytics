@@ -415,6 +415,18 @@ describe GenericTariffManager, type: :service do
       end
     end
 
+    context 'with a tariff with min/max defaults and another tariff' do
+      let(:t1_start_date)         { MeterTariff::MIN_DEFAULT_START_DATE }
+      let(:t1_end_date)           { MeterTariff::MAX_DEFAULT_END_DATE }
+
+      let(:search_start_date)     { Date.new(2021, 1, 1) }
+      let(:search_end_date)       { Date.new(2024, 1, 1) }
+
+      it 'returns just the most recent tariff' do
+        expect(change_dates).to eq [t2_end_date+1]
+      end
+    end
+
     context 'searching before MIN_DEFAULT_START_DATE' do
       let(:t1_start_date)         { nil }
       let(:t2_end_date)           { nil }
