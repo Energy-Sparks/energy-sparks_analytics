@@ -176,7 +176,7 @@ class TargetDates
     total_days = end_date - start_date + 1
     synthetic_days = (start_date..end_date).count{ |date| date < benchmark_start_date && date >= synthetic_benchmark_start_date }
     
-    return 0.0 if total_days.nil? || total_days == 0
+    return 0.0 if total_days.nil? || total_days == 0.0
 
     (synthetic_days / total_days).to_f
   end
