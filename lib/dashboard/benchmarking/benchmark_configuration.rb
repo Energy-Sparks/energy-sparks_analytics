@@ -179,7 +179,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentEnergyPerPupil,
         name:     'Annual energy use per pupil',
         columns:  [
-          tariff_changed_school_name(AdviceBenchmark),
+          tariff_changed_school_name('AdviceBenchmark'),
           { data: ->{ elba_kpup },          name: :last_year_electricity_kwh_pupil, units: :kwh, chart_data: true },
           { data: ->{ gsba_kpup },          name: :last_year_gas_kwh_pupil, units: :kwh, chart_data: true },
           { data: ->{ shan_kpup },          name: :last_year_storage_heater_kwh_pupil, units: :kwh, chart_data: true },
@@ -712,7 +712,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentElectricityOutOfHoursUsage,
         name:     'Electricity out of hours use',
         columns:  [
-          tariff_changed_school_name(AdviceElectricityOutHours),
+          tariff_changed_school_name('AdviceElectricityOutHours'),
           { data: ->{ eloo_sdop },  name: :school_day_open,              units: :percent, chart_data: true },
           { data: ->{ eloo_sdcp },  name: :school_day_closed,            units: :percent, chart_data: true },
           { data: ->{ eloo_holp },  name: :holiday,                      units: :percent, chart_data: true },
@@ -733,7 +733,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInBaseloadSinceLastYear,
         name:     'Last week\'s baseload versus average of last year (% difference)',
         columns:  [
-          tariff_changed_school_name(AdviceBaseload),
+          tariff_changed_school_name('AdviceBaseload'),
           { data: ->{ elbc_bspc }, name: :change_in_baseload_last_week_v_year_pct, units: :percent, chart_data: true},
           { data: ->{ elbc_blly }, name: :average_baseload_last_year_kw, units: :kw},
           { data: ->{ elbc_bllw }, name: :average_baseload_last_week_kw, units: :kw},
@@ -753,7 +753,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentBaseloadPerPupil,
         name:     'Baseload per pupil',
         columns:  [
-          tariff_changed_school_name(AdviceBaseload),
+          tariff_changed_school_name('AdviceBaseload'),
           { data: ->{ elbb_blpp * 1000.0 }, name: :baseload_per_pupil_w, units: :w, chart_data: true},
           { data: ->{ elbb_lygb },  name: :last_year_cost_of_baseload, units: :£},
           { data: ->{ elbb_lykw },  name: :average_baseload_kw, units: :w},
@@ -773,7 +773,7 @@ module Benchmarking
         benchmark_class: BenchmarkSeasonalBaseloadVariation,
         name:     'Seasonal baseload variation',
         columns:  [
-          tariff_changed_school_name(AdviceBaseload),
+          tariff_changed_school_name('AdviceBaseload'),
           { data: ->{ sblv_sblp }, name: :percent_increase_on_winter_baseload_over_summer, units: :relative_percent, chart_data: true},
           { data: ->{ sblv_smbl },  name: :summer_baseload_kw, units: :kw},
           { data: ->{ sblv_wtbl },  name: :winter_baseload_kw, units: :kw},
@@ -791,7 +791,7 @@ module Benchmarking
         benchmark_class: BenchmarkWeekdayBaseloadVariation,
         name:     'Weekday baseload variation',
         columns:  [
-          tariff_changed_school_name(AdviceBaseload),
+          tariff_changed_school_name('AdviceBaseload'),
           { data: ->{ iblv_sblp },  name: :variation_in_baseload_between_days_of_week, units: :relative_percent, chart_data: true},
           { data: ->{ iblv_mnbk },  name: :min_average_weekday_baseload_kw, units: :kw},
           { data: ->{ iblv_mxbk },  name: :max_average_weekday_baseload_kw, units: :kw},
@@ -811,7 +811,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentPeakElectricityPerFloorArea,
         name:     'Peak school day electricity comparison kW/floor area',
         columns:  [
-          tariff_changed_school_name(AdviceElectricityIntraday),
+          tariff_changed_school_name('AdviceElectricityIntraday'),
           { data: ->{ epkb_kwfa * 1000.0 },  name: :w_floor_area,    units: :w, chart_data: true },
           { data: ->{ epkb_kwsc },  name: :average_peak_kw,  units: :kw },
           { data: ->{ epkb_kwex },  name: :exemplar_peak_kw, units: :kw },
@@ -828,7 +828,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentSolarPVBenefit,
         name:     'Benefit of estimated optimum size solar PV installation',
         columns:  [
-          tariff_changed_school_name(AdviceSolarPV),
+          tariff_changed_school_name('AdviceSolarPV'),
           { data: ->{ sole_opvk },  name: :size_kwp,    units: :kwp},
           { data: ->{ sole_opvy },  name: :payback_years,  units: :years },
           { data: ->{ sole_opvp },  name: :reduction_in_mains_consumption_pct, units: :percent },
@@ -844,7 +844,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentHeatingPerFloorArea,
         name:     'Annual heating cost per floor area',
         columns:  [
-          tariff_changed_school_name(AdviceGasAnnual),
+          tariff_changed_school_name('AdviceGasAnnual'),
           { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: :last_year_heating_costs_per_floor_area, units: :£, chart_data: true },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: :last_year_cost_£, units: :£},
           { data: ->{ sum_data([gsba_s€ex, shan_s€ex], true) },  name: :saving_if_matched_exemplar_school, units: :£ },
@@ -863,7 +863,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentGasOutOfHoursUsage,
         name:     'Gas: out of hours use',
         columns:  [
-          tariff_changed_school_name(AdviceGasOutHours),
+          tariff_changed_school_name('AdviceGasOutHours'),
           { data: ->{ gsoo_sdop },  name: :school_day_open,              units: :percent, chart_data: true },
           { data: ->{ gsoo_sdcp },  name: :school_day_closed,            units: :percent, chart_data: true },
           { data: ->{ gsoo_holp },  name: :holiday,                      units: :percent, chart_data: true },
@@ -1698,7 +1698,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentAnnualChangeInElectricityOutOfHoursUsage,
         name:     'Annual change in electricity use out of hours',
         columns:  [
-          tariff_changed_school_name(AdviceElectricityOutHours),
+          tariff_changed_school_name('AdviceElectricityOutHours'),
 
           { data: ->{ elop_aook },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
           { data: ->{ eloo_aook },  name: :last_year_out_of_hours_kwh,  units: :kwh },
@@ -1729,7 +1729,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentAnnualChangeInGasOutOfHoursUsage,
         name:     'Annual change in gas use out of hours',
         columns:  [
-          tariff_changed_school_name(AdviceGasOutHours),
+          tariff_changed_school_name('AdviceGasOutHours'),
 
           { data: ->{ gsop_aook },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
           { data: ->{ gsoo_aook },  name: :last_year_out_of_hours_kwh,  units: :kwh },
@@ -1760,7 +1760,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentAnnualChangeInStorageHeaterOutOfHoursUsage,
         name:     'Annual change in storage heater use out of hours',
         columns:  [
-          tariff_changed_school_name(AdviceStorageHeaters),
+          tariff_changed_school_name('AdviceStorageHeaters'),
 
           { data: ->{ shop_aook },  name: :previous_year_out_of_hours_kwh,  units: :kwh },
           { data: ->{ shoo_aook },  name: :last_year_out_of_hours_kwh,  units: :kwh },
