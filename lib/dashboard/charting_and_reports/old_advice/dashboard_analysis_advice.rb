@@ -170,8 +170,6 @@ class DashboardChartAdviceBase
           TargetingAndTrackingAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :intraday_line_school_days_reduced_data_versus_benchmarks
       AdviceElectricitySchoolDayIntradayBenchmarkChart.new(school, chart_definition, chart_data, chart_symbol)
-    when :group_by_week_electricity_versus_benchmark
-      AdviceElectricityAnnualBenchmarkChart.new(school, chart_definition, chart_data, chart_symbol)
     else
       res = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
       res = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?

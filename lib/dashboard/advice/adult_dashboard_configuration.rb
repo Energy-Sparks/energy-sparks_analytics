@@ -1,16 +1,13 @@
 require_rel './*.rb'
-require_rel './costs/*.rb'
 require_rel './../alerts/*/*.rb'
 require_rel './../alerts/*/*/*.rb'
 
 class DashboardConfiguration
   ADULT_DASHBOARD_GROUPS = {
     electric_group: %i[
-      electric_target
       underlying_electricity_meters_breakdown
     ],
     gas_group: %i[
-      gas_target
       underlying_gas_meters_breakdown
     ],
     boiler_control_group: %i[
