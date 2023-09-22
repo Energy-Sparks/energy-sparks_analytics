@@ -7,7 +7,7 @@ require 'hashdiff'
 class ReportConfigSupport
   include Logging
   attr_reader :schools, :chart_manager, :school
-  attr_accessor :worksheet_charts, :excel_name 
+  attr_accessor :worksheet_charts, :excel_name
 
   def initialize
 
@@ -87,14 +87,6 @@ class ReportConfigSupport
     retval
   end
 
-  def do_all_schools(suppress_debug = false)
-    @schools.keys.each do |school_name|
-      load_school(school_name, suppress_debug)
-      do_all_standard_pages_for_school
-    end
-    report_failed_charts
-  end
-
   def report_failed_charts
     puts '=' * 100
     puts 'Failed charts'
@@ -134,7 +126,7 @@ class ReportConfigSupport
     @school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
 
     @chart_manager = ChartManager.new(@school)
-    
+
     @school # needed to run simulator
   end
 
@@ -143,27 +135,6 @@ class ReportConfigSupport
       puts bm
     end
     @benchmarks = []
-  end
-
-  def do_all_standard_pages_for_school(chart_override = nil, name_override = nil)
-    @worksheet_charts = {}
-
-    meter_collection_config = @school.report_group
-    
-    report_config = @schools[@school_name]
-
-    if report_config != meter_collection_config
-      puts "Mismatch in report config #{report_config} versus #{meter_collection_config}"
-    end
-    report_config = meter_collection_config if report_config.nil?
-    
-    report_groups = DashboardConfiguration::DASHBOARD_FUEL_TYPES[report_config]
-
-    report_groups.each do |report_page|
-      do_one_page(report_page, false, chart_override, name_override)
-    end
-
-    save_excel_and_html
   end
 
   def save_excel_and_html

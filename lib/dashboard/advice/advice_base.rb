@@ -269,10 +269,6 @@ class AdviceBase < ContentBase
     html.gsub(/[ \t\f\v]{2,}/, ' ').gsub(/^ $/, '').gsub(/\n+|\r+/, "\n").squeeze("\n").strip
   end
 
-  def self.config_base
-    DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:adult_analysis_page]
-  end
-
   def self.parse_date(date)
     date.is_a?(String) ? Date.parse(date) : date
   end
