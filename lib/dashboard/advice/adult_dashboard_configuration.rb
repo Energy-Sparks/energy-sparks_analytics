@@ -10,7 +10,6 @@ class DashboardConfiguration
     electric_group: %i[
       electric_annual
       electric_out_of_hours
-      baseload
       electric_target
       electric_long_term_progress
       electric_recent_progress
@@ -29,9 +28,6 @@ class DashboardConfiguration
       gas_profit_loss
     ],
     boiler_control_group: %i[
-      boiler_control_morning_start_time
-      boiler_control_seasonal
-      boiler_control_thermostatic
       boiler_control_frost
     ],
     hotwater_group: %i[
@@ -47,7 +43,7 @@ class DashboardConfiguration
   }.freeze
 
   ADULT_DASHBOARD_GROUP_CONFIGURATIONS = {
-    benchmark: { 
+    benchmark: {
       name:                   'How your school\'s energy consumption compares with other schools',
       content_class:          AdviceBenchmark,
       excel_worksheet_name:   'Benchmark',
@@ -63,11 +59,11 @@ class DashboardConfiguration
           summary:                              :summary
         },
         AlertGasAnnualVersusBenchmark         => { gas_rating: :rating, gas_last_year_£: :last_year_£ },
-        AlertElectricityAnnualVersusBenchmark => { 
+        AlertElectricityAnnualVersusBenchmark => {
           electric_rating: :rating,
           electric_last_year_£: :last_year_£
         },
-        AlertStorageHeaterAnnualVersusBenchmark => { 
+        AlertStorageHeaterAnnualVersusBenchmark => {
           storage_heater_rating: :rating,
           storage_heater_last_year_£: :last_year_£
         }
@@ -134,29 +130,6 @@ class DashboardConfiguration
         fuel_type:          :electricity
       }
     },
-    baseload: {
-      name:                   'Your electricity baseload',
-      content_class:           AdviceBaseload,
-      excel_worksheet_name:   'Baseload',
-      # these charts aren't automatically interpreted, but picked
-      # out of this list by AdviceBaseload code:
-      charts: %i[
-        baseload_lastyear
-        baseload
-        baseload_versus_benchmarks
-      ],
-      promoted_variables: {
-        AlertElectricityBaseloadVersusBenchmark => {
-          rating:                             :rating,
-          one_year_saving_versus_exemplar_£_local:  :one_year_saving_versus_exemplar_£,
-          one_year_saving_versus_benchmark_£_local: :one_year_saving_versus_benchmark_£,
-          average_baseload_last_year_kw:      :average_baseload_last_year_kw,
-          exemplar_per_pupil_kw:              :exemplar_per_pupil_kw,
-          benchmark_per_pupil_kw:             :benchmark_per_pupil_kw,
-          annual_baseload_percent:            :annual_baseload_percent,
-          summary:                            :summary
-        }
-      },
       meter_breakdown: {
         presentation_style: :flat, # :structured || :flat
         user_type:          { user_role: :analytics },
@@ -259,14 +232,14 @@ class DashboardConfiguration
         fuel_type:          :electricity
       }
     },
-    electricity_profit_loss: {   
+    electricity_profit_loss: {
       name:                   'Electricity Costs',
       content_class:           AdviceElectricityCosts,
       excel_worksheet_name:   'ElectCosts',
       charts: %i[],
       promoted_variables: {}
     },
-    gas_annual: {   
+    gas_annual: {
       name:                   'Overview of annual gas consumption',
       content_class:          AdviceGasAnnual,
       excel_worksheet_name:   'GasAnnual',
@@ -295,9 +268,9 @@ class DashboardConfiguration
         user_type:          { user_role: :analytics },
         charts:             %i[ group_by_week_gas ],
         fuel_type:          :gas
-      } 
+      }
     },
-    gas_out_of_hours: {   
+    gas_out_of_hours: {
       name:                   'Your gas use out of school hours',
       content_class:           AdviceGasOutHours,
       excel_worksheet_name:   'GasOutOfHours',
@@ -319,9 +292,9 @@ class DashboardConfiguration
         user_type:          { user_role: :analytics },
         charts:             %i[ gas_by_day_of_week_tolerant gas_heating_season_intraday ],
         fuel_type:          :gas
-      } 
+      }
     },
-    gas_long_term_progress:  {   
+    gas_long_term_progress:  {
       name:                   'Gas: long term',
       content_class:           AdviceGasLongTerm,
       excel_worksheet_name:   'GasLongTerm',
@@ -342,7 +315,7 @@ class DashboardConfiguration
         }
       },
     },
-    gas_recent_progress: {   
+    gas_recent_progress: {
       name:                   'Gas: recent',
       content_class:           AdviceGasRecent,
       excel_worksheet_name:   'GasRecent',
@@ -367,7 +340,7 @@ class DashboardConfiguration
       },
 =end
     },
-    gas_target: {   
+    gas_target: {
       name:                   'Setting and tracking targets for your gas',
       content_class:           AdviceTargetsGas,
       excel_worksheet_name:   'TargetGas',
@@ -406,84 +379,12 @@ class DashboardConfiguration
         fuel_type:          :gas
       }
     },
-    gas_profit_loss: {   
+    gas_profit_loss: {
       name:                   'Gas Costs',
       content_class:           AdviceGasCosts,
       excel_worksheet_name:   'GasCosts',
       charts: %i[],
       promoted_variables: {}
-    },
-    boiler_control_morning_start_time: {
-      name:                   'Morning start time',
-      content_class:           AdviceGasBoilerMorningStart,
-      excel_worksheet_name:   'GasStartTime',
-      charts: %i[
-        gas_heating_season_intraday_up_to_1_year
-        optimum_start
-      ],
-      promoted_variables: {
-        AlertHeatingComingOnTooEarly => {
-          rating:         :rating,
-          one_year_optimum_start_saving_£:        :one_year_optimum_start_saving_£,
-          one_year_optimum_start_saving_£current: :one_year_optimum_start_saving_£current
-        }
-      },
-      meter_breakdown: {
-        presentation_style: :flat, # :structured || :flat
-        user_type:          { user_role: nil }, # permission for all users
-        charts:             [ 
-          :gas_heating_season_intraday_up_to_1_year,
-          { type: :html,           method:  :boiler_start_time_analysis,                user_type: { user_role: :analytics } },
-          { type: :chart_name,     content: :boiler_start_time,                         user_type: { user_role: :analytics } },
-          { type: :chart_name,     content: :boiler_start_time_up_to_one_year,          user_type: { user_role: :analytics } },
-          { type: :chart_name,     content: :boiler_start_time_up_to_one_year_no_frost, user_type: { user_role: :analytics } }
-        ],
-        fuel_type:          :gas
-      }
-    },
-    boiler_control_seasonal: {
-      name:                   'Seasonal Control',
-      content_class:           AdviceGasBoilerSeasonalControl,
-      excel_worksheet_name:   'GasSeasonalControl',
-      charts: %i[
-        heating_on_off_by_week
-      ],
-      promoted_variables: {
-        AlertSeasonalHeatingSchoolDays => {
-          rating:         :rating,
-          one_year_saving_£: :one_year_saving_£
-        }
-      },
-      meter_breakdown: {
-        presentation_style: :flat, # :structured || :flat
-        user_type:          { user_role: :analytics },
-        charts:             %i[ heating_on_off_by_week ],
-        fuel_type:          :gas
-      }
-    },
-    boiler_control_thermostatic: {
-      name:                   'Thermostatic Control',
-      content_class:           AdviceGasThermostaticControl,
-      excel_worksheet_name:   'GasThermostatic',
-      charts: %i[
-        thermostatic_up_to_1_year
-        thermostatic_control_large_diurnal_range
-        cusum
-      ],
-      promoted_variables: {
-        AlertThermostaticControl => {
-          rating:         :rating,
-        },
-        AlertHeatingSensitivityAdvice => {
-          annual_saving_1_C_change_£: :annual_saving_1_C_change_£
-        }
-      },
-      meter_breakdown: {
-        presentation_style: :flat, # :structured || :flat
-        user_type:          { user_role: :analytics },
-        charts:             %i[ thermostatic_up_to_1_year ],
-        fuel_type:          :gas
-      }
     },
     boiler_control_frost: {
       name:                   'Frost',
@@ -526,7 +427,7 @@ class DashboardConfiguration
       promoted_variables: {
       },
     },
-    storage_heater_target: {   
+    storage_heater_target: {
       name:                   'Setting and tracking targets for your storage heaters',
       content_class:           AdviceTargetsStorageHeaters,
       excel_worksheet_name:   'TargetStorageHeater',
