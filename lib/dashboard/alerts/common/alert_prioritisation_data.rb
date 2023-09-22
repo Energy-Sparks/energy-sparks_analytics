@@ -191,10 +191,6 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
   def calculate_private(asof_date)
     @days_to_next_holiday = calculate_days_to_next_holiday(asof_date)
     @days_from_last_holiday = calculate_days_to_previous_holiday(asof_date)
-    temperatures = AverageHistoricOrForecastTemperatures.new(@school)
-    # @average_temperature_last_week = temperatures.calculate_average_temperature_for_week_following(asof_date - 7)
-    # @average_forecast_temperature_next_week = temperatures.calculate_average_temperature_for_week_following(asof_date)
-
     @annual_electricity_kwh     = annual_kwh(@school.aggregated_electricity_meters, :electricity,     asof_date, :kwh)
     @annual_gas_kwh             = annual_kwh(@school.aggregated_heat_meters,        :gas,             asof_date, :kwh)
     @annual_storage_heater_kwh  = annual_kwh(@school.storage_heater_meter,          :storage_heaters, asof_date, :kwh)
