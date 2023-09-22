@@ -4,9 +4,6 @@
 # media  = [ MultiMediaDetail(type, content).........MultiMediaDetail(type, content)]
 # so for example charts and html can be mixed in backend and presented to front end for display
 
-class MultiMediaPage < Array  # holding class for storing the mixed media
-end
-
 class MultiMediaDetail
   attr_reader :type
   attr_accessor :content

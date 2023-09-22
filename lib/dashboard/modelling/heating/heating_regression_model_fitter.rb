@@ -6,7 +6,7 @@ class HeatingRegressionModelFitter
   attr_reader :meter_collection, :doc
   def initialize(meter_collection)
     @meter_collection = meter_collection
-    @doc = MultiMediaPage.new
+    @doc = []
     @chart_manager = ChartManager.new(@meter_collection)
 =begin
     @add_extra_markup = ENV['School Dashboard Advice'] == 'Include Header and Body'

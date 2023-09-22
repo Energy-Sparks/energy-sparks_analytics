@@ -6,18 +6,6 @@ require 'html-table'
 require 'erb'
 
 class DashboardEnergyAdvice
-  def initialize
-  end
-
-  def self.advice(school, chart_definition, chart_data, chart_symbol)
-    case chart_symbol
-    when :benchmark
-      advice = BenchmarkComparisonAdvice(school, chart_definition, chart_data, chart_symbol)
-    else
-      raise EnergySparksUnexpectedStateException.new("Dashboard advice requested for unsupported chart #{chart_symbol}")
-    end
-    advice.generate_advice(:energy_expert)
-  end
 end
 
 class DashboardChartAdviceBase
@@ -117,8 +105,6 @@ class DashboardChartAdviceBase
       HeatingThermostaticDiurnalRangeAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     when :optimum_start
       HeatingOptimumStartAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
-    when :hotwater
-      HotWaterAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     when :electricity_simulator_pie
       ElectricitySimulatorBreakdownAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_simulator_pie_detail_page
@@ -166,15 +152,10 @@ class DashboardChartAdviceBase
     when  :intraday_line_school_days_6months_simulator,
           :intraday_line_school_days_6months_simulator_submeters
           SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
-    when  :targeting_and_tracking_monthly_electricity
-          TargetingAndTrackingAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :intraday_line_school_days_reduced_data_versus_benchmarks
       AdviceElectricitySchoolDayIntradayBenchmarkChart.new(school, chart_definition, chart_data, chart_symbol)
     else
       res = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
-      res = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
-      res = DashboardEnergyAdvice.storage_heater_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
-      res = DashboardEnergyAdvice.co2_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
       res
     end
   end
@@ -2239,73 +2220,6 @@ class HeatingOptimumStartAdvice < DashboardChartAdviceBase
   end
 end
 
-#==============================================================================
-class HotWaterAdvice < DashboardChartAdviceBase
-  attr_reader :fuel_type, :fuel_type_str
-  def initialize(school, chart_definition, chart_data, chart_symbol, chart_type)
-    super(school, chart_definition, chart_data, chart_symbol)
-    @chart_type = chart_type
-  end
-
-  def generate_advice
-    if @school.aggregated_heat_meters.heating_only?
-      no_hotwater_advice
-      return
-    end
-
-    advice = HotWaterInvestmentAnalysisText.new(@school)
-
-    header_template = %{
-      <%= @body_start %>
-        <% if @chart_type == :hotwater %>
-          <%= advice.introductory_hot_water_text_1 %>
-          <%= advice.introductory_hot_water_text_2_with_efficiency_estimate %>
-          <%= advice.introductory_hot_water_text_3_circulatory_inefficiency %>
-          <%= advice.introductory_hot_water_text_4_analysis_intro %>
-          <%= advice.estimate_of_boiler_efficiency_header %>
-          <%= advice.estimate_of_boiler_efficiency_text_1_chart_explanation %>
-        <% end %>
-      <%= @body_end %>
-    }.gsub(/^  /, '')
-
-    @header_advice = generate_html(header_template, binding)
-
-    footer_template = %{
-      <%= @body_start %>
-        <% if @chart_type == :hotwater %>
-          <%= advice.estimate_of_boiler_efficiency_text_2_summary_table_info %>
-          <%= advice.daytype_breakdown_table(:html) %>
-          <%= advice.estimate_heat_required_text_header %>
-          <%= advice.estimate_heat_required_text_1_calculation %>
-          <%= advice.estimate_heat_required_text_2_comparison %>
-          <%= advice.investment_choice_header %>
-          <%= advice.investment_choice_text_1_2_choices %>
-          <%= advice.investment_choice_text_2_table_intro %>
-          <%= advice.investment_table(:html) %>
-          <%= advice.investment_choice_text_3_accuracy_caveat %>
-          <%= advice.investment_choice_text_4_improved_boiler_control_benefit %>
-          <%= advice.investment_choice_text_5_point_of_use_electric_benefit %>
-        <% end %>
-      <%= @body_end %>
-    }.gsub(/^  /, '')
-    # <%= advice.investment_choice_text_5_further_guidance %>
-    @footer_advice = generate_html(footer_template, binding)
-  end
-
-  def no_hotwater_advice
-    header_template = %{
-      <%= @body_start %>
-        <p>
-          <strong>This school appears to not use gas for hot water, so no advice is provided.</strong>
-        </p>
-      <%= @body_end %>
-    }.gsub(/^  /, '')
-
-    @header_advice = generate_html(header_template, binding)
-
-    @footer_advice = nil_advice
-  end
-end
 
 #==============================================================================
 class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
