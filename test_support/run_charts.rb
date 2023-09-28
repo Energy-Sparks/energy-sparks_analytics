@@ -87,7 +87,7 @@ class RunAnalyticsTest
     failed_charts.each do |failed_chart|
       short_backtrace = failed_chart.key?(:backtrace) && !failed_chart[:backtrace].nil? ? failed_chart[:backtrace][0].split('/').last : 'no backtrace'
       tolerate_failure = failed_chart.fetch(:tolerate_failure, false) ? 'ok   ' : 'notok'
-      puts sprintf('%-15.15s %s %-85.85s %-35.35s %-80.80s %-20.20s', 
+      puts sprintf('%-15.15s %s %-85.85s %-35.35s %-80.80s %-20.20s',
         failed_chart[:school_name], tolerate_failure, failed_chart[:chart_name], failed_chart[:message], short_backtrace,
         shorten_type(failed_chart[:type]))
       puts failed_chart[:backtrace] if detail == :detailed
@@ -210,24 +210,13 @@ class RunAnalyticsTest
 
   def run_config_component(config_component)
     if config_component.is_a?(Symbol) && config_component == :dashboard
-      run_dashboard
+      #run_dashboard
     elsif config_component.is_a?(Hash) && config_component.keys[0] == :adhoc_worksheet
       run_single_dashboard_page(config_component.values[0])
     elsif config_component.is_a?(Hash) && config_component.keys[0] == :pupils_dashboard
       run_recursive_dashboard_page(config_component.values[0])
     elsif config_component.is_a?(Hash) && config_component.keys[0] == :adults_dashboard
       run_flat_dashboard
-    end
-  end
-
-  def run_dashboard
-    logger.info "Running dashboard charts for #{@school.name} dashboard type #{@school.report_group}"
-    logger.info "Dashboard type #{@school.report_group}"
-
-    report_groups = DashboardConfiguration::DASHBOARD_FUEL_TYPES[@school.report_group]
-
-    report_groups.each do |page_name|
-      run_single_dashboard_page(DashboardConfiguration::DASHBOARD_PAGE_GROUPS[page_name])
     end
   end
 
@@ -260,7 +249,7 @@ class RunAnalyticsTest
     end
   end
 
-  def self.charts_on_pages_recursive(page,  pages) 
+  def self.charts_on_pages_recursive(page,  pages)
     if page.is_a?(Hash)
       pages.push([page[:charts]].flatten.compact)
       if page.key?(:sub_pages)

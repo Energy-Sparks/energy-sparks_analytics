@@ -64,14 +64,14 @@ class DashboardConfiguration
     pupil_analysis_page: {
       name:   'Pupil Analysis',
       sub_pages:  [
-        {                    
+        {
           name:     'Electricity',
           sub_pages:  [
             { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_electricity_kwh] },
             { name: 'Cost',   charts: %i[pupil_dashboard_group_by_week_electricity_£] },
             { name: 'CO2',    charts: %i[pupil_dashboard_group_by_week_electricity_co2] },
             { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_electricity] },
-            { 
+            {
               name: 'Bar',
               sub_pages: [
                 { name: 'Bench',   charts: %i[pupil_dashboard_electricity_benchmark] },
@@ -80,22 +80,22 @@ class DashboardConfiguration
               ]
             },
             {
-              name: 'Line',  
+              name: 'Line',
               sub_pages: [
                 { name: 'Base',   charts: %i[pupil_dashboard_baseload_lastyear] },
                 { name: '7days',  charts: %i[pupil_dashboard_intraday_line_electricity_last7days] }
               ]
             }
           ],
-        },                 
-        {                    
+        },
+        {
           name:     'Gas',
           sub_pages:  [
             { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_gas_kwh] },
             { name: 'Cost',   charts: %i[pupil_dashboard_group_by_week_gas_£] },
             { name: 'CO2',    charts: %i[pupil_dashboard_group_by_week_gas_co2] },
             { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_gas] },
-            { 
+            {
               name: 'Bar',
               sub_pages: [
                 { name: 'Bench',   charts: %i[pupil_dashboard_gas_benchmark] },
@@ -106,14 +106,14 @@ class DashboardConfiguration
             { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_gas_last7days] }
           ],
         },
-        {                    
+        {
           name:     'Storage Heaters',
           sub_pages:  [
             { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_storage_heaters_kwh] },
             { name: 'Cost',   charts: %i[pupil_dashboard_group_by_week_storage_heaters_£] },
             { name: 'CO2',    charts: %i[pupil_dashboard_group_by_week_storage_heaters_co2] },
             { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_storage_heaters] },
-            { 
+            {
               name: 'Bar',
               sub_pages: [
                 { name: 'Bench',   charts: %i[pupil_dashboard_storage_heaters_benchmark] },
@@ -124,13 +124,13 @@ class DashboardConfiguration
             { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_storage_heaters_last7days] },
           ],
         },
-        {                    
+        {
           name:     'Electricity+Solar PV',
           sub_pages:  [
             { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_electricity_kwh] },
             { name: 'Solar',  charts: %i[pupil_dashboard_solar_pv_monthly] },
             { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_electricity] },
-            { 
+            {
               name: 'Bar',
               sub_pages: [
                 { name: 'Bench',   charts: %i[pupil_dashboard_solar_pv_benchmark] },
@@ -139,14 +139,14 @@ class DashboardConfiguration
               ]
             },
             {
-              name: 'Line',  
+              name: 'Line',
               sub_pages: [
                 { name: 'Base',   charts: %i[pupil_dashboard_baseload_lastyear] },
                 { name: '7days',  charts: %i[pupil_dashboard_intraday_line_electricity_last7days] }
               ]
             }
           ],
-        } 
+        }
       ],
     },
 #======================================================================================================
@@ -406,48 +406,4 @@ class DashboardConfiguration
                               ],
                               },
 }.freeze
-
-  DASHBOARD_FUEL_TYPES = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
-    electric_only:
-                        %i[
-                            main_dashboard_electric
-                            electricity_detail
-                            cost_electricity_only
-                        ],
-    gas_only:
-                        %i[
-                            main_dashboard_gas
-                            gas_detail
-                            boiler_control
-                        ],
-    electric_and_gas:
-                        %i[
-                            main_dashboard_electric_and_gas
-                            electricity_detail
-                            gas_detail
-                            boiler_control
-                            carbon_emissions
-                            cost
-                        ],
-    electric_and_storage_heaters:
-                        %i[
-                            main_dashboard_electric
-                            electricity_detail
-                            storage_heaters
-                        ],
-    electric_and_gas_and_solar_pv:
-                        %i[
-                            main_dashboard_electric_and_gas_and_solar
-                            electricity_detail
-                            gas_detail
-                            boiler_control
-                            solar_pv
-                        ],
-    electric_and_solar_pv:
-                        %i[
-                            main_dashboard_electric_solar
-                            electricity_detail
-                            solar_pv
-                        ],
-  }.freeze
 end

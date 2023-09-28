@@ -48,3 +48,9 @@ class AdviceBoilerHeatingBase < AdviceGasBase
     aggregate_meter.amr_data.end_date
   end
 end
+
+class AdviceGasBoilerFrost < AdviceBoilerHeatingBase
+  def rating
+    5.0
+  end
+end

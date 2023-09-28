@@ -1,6 +1,6 @@
 class AdviceMeterBreakdownBase < AdviceBase
   def enough_data
-    :enough 
+    :enough
   end
 
   def relevance
@@ -83,7 +83,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     text = %{
       <p>
         Having multiple meters can help you understand your energy use better,
-        however, there is a significant standing charge for each meter of more than 
+        however, there is a significant standing charge for each meter of more than
         &pound; 1,000 per year, so there is potential for saving by consolidating meters.
       <p>
     }
@@ -111,7 +111,7 @@ class AdviceMeterBreakdownBase < AdviceBase
       total     = total_row(rows)
       header    = columns.values.map{ |v| v[:name] }
       row_units = columns.values.map{ |v| v[:datatype] }
-      
+
       if has_annual_change?
       end
 
@@ -124,7 +124,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     def columns
       cols = {
         name:                   { name: 'Meter Name',       datatype: String },
-        kwh:                    { name: 'Kwh',              datatype: :kwh }, 
+        kwh:                    { name: 'Kwh',              datatype: :kwh },
         £:                      { name: 'Cost',             datatype: :£ },
         percent:                { name: 'Percent',          datatype: :percent },
         annual_percent_change:  { name: 'Annual change',    datatype: :comparison_percent }
@@ -166,7 +166,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     end
 
     def total_row(table)
-      
+
       data = data_column_types.map do |datatype|
         [
           datatype,
@@ -203,7 +203,7 @@ class AdviceMeterBreakdownBase < AdviceBase
       this_year_start_date     = @end_date              - 363 # 52 weeks
       previous_year_end_date   = this_year_start_date - 1
       previous_year_start_date = previous_year_end_date - 363 # 52 weeks
-      
+
       whole_aggregate_previous_year = @aggregate_meter.amr_data.start_date <= previous_year_start_date
 
       # calculate annual change but only if aggregate and individual meter cover whole of previous year
@@ -230,4 +230,13 @@ class AdviceMeterBreakdownBase < AdviceBase
       (this_year_kwh - previous_year_kwh) / previous_year_kwh
     end
   end
+end
+
+class AdviceElectricityMeterBreakdownBase < AdviceMeterBreakdownBase
+  protected def aggregate_meter; @school.aggregated_electricity_meters end
+  protected def underlying_meters; @school.electricity_meters end
+end
+class AdviceGasMeterBreakdownBase < AdviceMeterBreakdownBase
+  protected def aggregate_meter; @school.aggregated_heat_meters end
+  protected def underlying_meters; @school.heat_meters end
 end

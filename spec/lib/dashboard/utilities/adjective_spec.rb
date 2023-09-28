@@ -43,4 +43,15 @@ describe Adjective do
       expect(Adjective.adjective_for(-1)).to eq "lower"
     end
   end
+
+  context '#warm_weather_on_days_adjective' do
+    it 'returns expected ratings' do
+      expect(Adjective.warm_weather_on_days_adjective(1)).to eq 'excellent'
+      expect(Adjective.warm_weather_on_days_adjective(7)).to eq 'good'
+      expect(Adjective.warm_weather_on_days_adjective(14)).to eq 'above average'
+      expect(Adjective.warm_weather_on_days_adjective(20)).to eq 'poor'
+      expect(Adjective.warm_weather_on_days_adjective(100)).to eq 'very poor'
+    end
+  end
+
 end

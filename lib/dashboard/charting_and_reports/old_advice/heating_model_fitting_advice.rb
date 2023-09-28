@@ -5,55 +5,53 @@ class DashboardEnergyAdvice
 
   def self.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     case chart_type
-    when :group_by_week_gas_model_fitting_one_year
+    when :group_by_week_gas_model_fitting_one_year #expert analysis
       ModelFittingIntroductionAndOneYearWeeklyGas.new(school, chart_definition, chart_data, chart_symbol)
-    when :group_by_week_gas_model_fitting_unlimited
+    when :group_by_week_gas_model_fitting_unlimited #expert analysis
       ModelFittingOneWeekUnlimitedGas.new(school, chart_definition, chart_data, chart_symbol)
-    when :gas_by_day_of_week_model_fitting
+    when :gas_by_day_of_week_model_fitting #expert analysis
       ModelFittingGasByDayOfWeek.new(school, chart_definition, chart_data, chart_symbol)
-    when :gas_longterm_trend_model_fitting
+    when :gas_longterm_trend_model_fitting #expert analysis
       ModelFittingAnnualGasConsumptionTrends.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant
+    when :thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant #expert analysis
       HeatingNonHeatingSeparationIntroAndCovidModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :seasonal_simple_school_day_non_heating_regression_covid_tolerant
+    when :seasonal_simple_school_day_non_heating_regression_covid_tolerant #expert analysis
       SeasonalHeatingNonHeatingSeparationCovidModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_regression_simple_school_day_non_heating_regression
+    when :thermostatic_regression_simple_school_day_non_heating_regression #expert analysis
       HeatingNonHeatingSeparationRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :seasonal_simple_school_day_non_heating_regression
+    when :seasonal_simple_school_day_non_heating_regression #expert analysis
       SeasonalHeatingNonHeatingSeparationRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_regression_simple_school_day_non_heating_non_regression
+    when :thermostatic_regression_simple_school_day_non_heating_non_regression #expert analysis
       HeatingNonHeatingSeparationNonRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :seasonal_simple_school_day_non_heating_non_regression
+    when :seasonal_simple_school_day_non_heating_non_regression #expert analysis
       SeasonalHeatingNonHeatingSeparationNonRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_regression_simple_school_day
+    when :thermostatic_regression_simple_school_day #expert analysis
       ModelFittingIntroductionAndCategorisation.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_regression_simple_all
+    when :thermostatic_regression_simple_all #expert analysis
       ModelFittingSimpleAllCategorisations.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_regression_thermally_massive_school_day
+    when :thermostatic_regression_thermally_massive_school_day #expert analysis
       ModelFittingThermallMassiveModelSchoolDay.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_regression_thermally_massive_all
+    when :thermostatic_regression_thermally_massive_all #expert analysis
       ModelFittingThermallMassiveModelAllCategorisations.new(school, chart_definition, chart_data, chart_symbol)
-    when :cusum_weekly_best_model
+    when :cusum_weekly_best_model #expert analysis
       ModelFittingModellingDecision.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_winter_holiday_best
+    when :thermostatic_winter_holiday_best #expert analysis
       ModelFittingWinterHolidayHeating.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_winter_weekend_best
+    when :thermostatic_winter_weekend_best #expert analysis
       ModelFittingWinterWeekendHeating.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_summer_school_day_holiday_best
+    when :thermostatic_summer_school_day_holiday_best #expert analysis
       ModelFittingSummerSchoolDayAndHoliday.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_summer_weekend_best
+    when :thermostatic_summer_weekend_best #expert analysis
       ModelFittingSummerWeekend.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_non_best
+    when :thermostatic_non_best #expert analysis
       ModelFittingMinimalDailyConsumption.new(school, chart_definition, chart_data, chart_symbol)
-    when :cusum_simple
+    when :cusum_simple #expert analysis
       ModelFittingCUSUMAnalysisSimpleModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :cusum_thermal_mass
+    when :cusum_thermal_mass #expert analysis
       ModelFittingCUSUMAnalysisThermallMassiveModel.new(school, chart_definition, chart_data, chart_symbol)
-    when :heating_on_off_by_week
+    when :heating_on_off_by_week #expert analysis
       ModelFittingSplittingHeatingAndNonHeating.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_model_by_week
-      ModelFittingSplittingIntoCategories.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic_model_categories_pie_chart
+    when :thermostatic_model_categories_pie_chart #expert analysis
       ModelFittingSplittingIntoCategoriesPieChart.new(school, chart_definition, chart_data, chart_symbol)
     else
       nil
@@ -753,7 +751,7 @@ class DashboardEnergyAdvice
         <p>
             This first chart uses a model which samples school day consumption
             in June, July and August avoiding the COVID lockdown in 2020 if
-            data is available: 
+            data is available:
         </p>
       }
     end
@@ -795,7 +793,7 @@ class DashboardEnergyAdvice
 
   class HeatingNonHeatingSeparationRegressionModel < HeatingNonHeatingSeparationAdviceBase
     def model_type; :temperature_sensitive_regression_model end
-    
+
     def vanilla_regression_model_chart_explanation_html
       %{
         <p>

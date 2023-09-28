@@ -74,7 +74,7 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
 
   def warm_weather_heating_days_adjective
     return "" if @warm_weather_heating_days_all_days_days.nil?
-    AdviceGasBoilerSeasonalControl.warm_weather_on_days_adjective(@warm_weather_heating_days_all_days_days)
+    Adjective.warm_weather_on_days_adjective(@warm_weather_heating_days_all_days_days)
   end
 
   def self.dynamic_template_variables
