@@ -46,7 +46,7 @@ module HotWater
       # return nil if last_summer_hol.nil?
       # return nil if amr_data.end_date < last_summer_hol.start_date + date_margin || amr_data.start_date > last_summer_hol.start_date - date_margin
 
-      last_summer_hol.start_date + date_margin
+      last_summer_hol.start_date + AnalyseHeatingAndHotWater::HotwaterModel::DATE_MARGIN
     end
 
     def investment_analysis
