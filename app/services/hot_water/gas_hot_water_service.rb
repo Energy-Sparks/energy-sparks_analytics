@@ -15,6 +15,17 @@ module HotWater
       )
     end
 
+    # the analysis relies on having hot water running exclusively before and during the holidays
+    # this analysis won't work if these basic conditions aren't met
+    def data_available_from
+
+# @meter_collection.holidays
+# holidays.find_summer_holiday_before(running_date)
+
+
+      enough_data? ? nil : 
+    end
+
     def enough_data?
       investment_analysis.enough_data?
     rescue
