@@ -15,15 +15,8 @@ module HotWater
       )
     end
 
-    # the analysis relies on having hot water running exclusively before and during the holidays
-    # this analysis won't work if these basic conditions aren't met
     def data_available_from
-
-# @meter_collection.holidays
-# holidays.find_summer_holiday_before(running_date)
-
-
-      enough_data? ? nil : 
+      enough_data? ? nil : find_data_available_from
     end
 
     def enough_data?
@@ -35,6 +28,26 @@ module HotWater
     end
 
     private
+
+    def find_data_available_from
+      # The analysis relies on having hot water running exclusively before and during the holidays
+      # see: AnalyseHeatingAndHotWater::HotwaterModel#find_period_before_and_during_summer_holidays
+      amr_data = @meter_collection.aggregated_heat_meters
+      holidays = @meter_collection.holidays
+
+      # holidays.find_summer_holiday_before(running_date)
+
+
+      running_date = amr_data.end_date
+      last_summer_hol = holidays.find_summer_holiday_before(running_date)
+
+      # date_margin = AnalyseHeatingAndHotWater::HotwaterModel::DATE_MARGIN
+
+      # return nil if last_summer_hol.nil?
+      # return nil if amr_data.end_date < last_summer_hol.start_date + date_margin || amr_data.start_date > last_summer_hol.start_date - date_margin
+
+      last_summer_hol.start_date + date_margin
+    end
 
     def investment_analysis
       @investment_analysis ||= AnalyseHeatingAndHotWater::HotWaterInvestmentAnalysis.new(@meter_collection)
