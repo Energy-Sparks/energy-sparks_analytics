@@ -11,6 +11,12 @@ module Usage
       @fuel_type = fuel_type
     end
 
+    def annual_out_of_hours_kwh
+      build_usage_category_usage_metrics!
+      calculate_kwh!
+      { out_of_hours: @out_of_hours.kwh, total_annual: total_annual_kwh }
+    end
+
     # Calculates a breakdown of the annual usage over the last twelve months
     # Broken down by usage during school day open, closed, weekends and holidays
     #
@@ -50,11 +56,11 @@ module Usage
       calculate_pounds_sterling!
       calculate_co2!
 
-      assign_and_return_usage_category_breakdown
+      build_usage_category_breakdown
     end
 
-    def assign_and_return_usage_category_breakdown
-      Usage::AnnualUsageCategoryBreakdown.new(
+    def build_usage_category_breakdown
+      @usage_category_breakdown ||= Usage::AnnualUsageCategoryBreakdown.new(
         holiday: @holiday,
         school_day_closed: @school_day_closed,
         school_day_open: @school_day_open,
