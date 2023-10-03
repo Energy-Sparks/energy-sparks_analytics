@@ -76,11 +76,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
             name: 'Date limited comparisons',
             description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
-              autumn_term_2021_2022_energy_comparison: 'Autumn Term 2021 versus 2022 energy use',
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
-              layer_up_powerdown_day_november_2022: 'Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)',
-              sept_nov_2021_2022_energy_comparison: 'September to November 2021 versus 2022 energy use',
-              easter_shutdown_2023_energy_comparison: 'Easter shutdown 2023 comparison'
             }
           }
         ]
@@ -158,11 +154,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
             name: 'Date limited comparisons',
             description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
-              autumn_term_2021_2022_energy_comparison: 'Autumn Term 2021 versus 2022 energy use',
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
-              layer_up_powerdown_day_november_2022: 'Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)',
-              sept_nov_2021_2022_energy_comparison: 'September to November 2021 versus 2022 energy use',
-              easter_shutdown_2023_energy_comparison: 'Easter shutdown 2023 comparison'
             }
           }
         ]

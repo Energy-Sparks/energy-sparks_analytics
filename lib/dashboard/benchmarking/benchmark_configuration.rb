@@ -148,7 +148,7 @@ module Benchmarking
         :solar_generation_summary
       ],
       date_limited_comparisons: [
-        :change_in_energy_use_since_joined_energy_sparks,
+        :change_in_energy_use_since_joined_energy_sparks
       ]
     }
 
