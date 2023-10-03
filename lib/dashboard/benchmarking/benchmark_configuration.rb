@@ -148,11 +148,7 @@ module Benchmarking
         :solar_generation_summary
       ],
       date_limited_comparisons: [
-        :layer_up_powerdown_day_november_2022,
-        :change_in_energy_use_since_joined_energy_sparks,
-        :autumn_term_2021_2022_energy_comparison,
-        :sept_nov_2021_2022_energy_comparison,
-        :easter_shutdown_2023_energy_comparison
+        :change_in_energy_use_since_joined_energy_sparks
       ]
     }
 
