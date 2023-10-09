@@ -10,6 +10,8 @@ class AMRData < HalfHourlyData
   def initialize(type)
     super(type)
     @total = {}
+    @post_aggregation = false
+    @kwh_date_range_cache = {}
   end
 
   def self.copy_amr_data(original_amr_data, sd = original_amr_data.start_date, ed = original_amr_data.end_date)
@@ -25,6 +27,7 @@ class AMRData < HalfHourlyData
     @economic_tariff.post_aggregation_state         = true if @economic_tariff.is_a?(CachingEconomicCosts)
     @current_economic_tariff.post_aggregation_state = true if @current_economic_tariff.is_a?(CachingCurrentEconomicCosts)
     @accounting_tariff.post_aggregation_state       = true if @accounting_tariff.is_a?(CachingAccountingCosts)
+    @post_aggregation = true
   end
 
   def set_tariffs(meter)
@@ -388,12 +391,22 @@ class AMRData < HalfHourlyData
     check_type(type)
 
     return open_close_breakdown.kwh_date_range(date1, date2, type, community_use: community_use) unless community_use.nil?
-
     return one_day_kwh(date1, type) if date1 == date2
+
+    if @post_aggregation
+      cache_key = {d1: date1, d2: date2, t: type, c: community_use}
+      return @kwh_date_range_cache[cache_key] if @kwh_date_range_cache.key?(cache_key)
+    end
+
     total_kwh = 0.0
     (date1..date2).each do |date|
       total_kwh += one_day_kwh(date, type)
     end
+
+    if @post_aggregation
+      @kwh_date_range_cache[cache_key] = total_kwh
+    end
+
     total_kwh
   end
 
