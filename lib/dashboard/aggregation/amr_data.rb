@@ -140,26 +140,6 @@ class AMRData < HalfHourlyData
     end
   end
 
-  # performance benefit in collatin the information
-  private def calculate_information_date_range_deprecated(start_date, end_date)
-    kwh = kwh_date_range(start_date, end_date, :kwh)
-    £   = kwh_date_range(start_date, end_date, :£)
-    co2 = kwh_date_range(start_date, end_date, :co2)
-
-    {
-      kwh:                      kwh,
-      co2:                      co2,
-      £:                        £,
-      co2_intensity_kw_per_kwh: co2 / kwh,
-      blended_£_per_kwh:        £ / kwh
-    }
-  end
-
-  def information_date_range_deprecated(start_date, end_date)
-    @cached_information ||= {}
-    @cached_information[start_date..end_date] ||= calculate_information_date_range_deprecated(start_date, end_date)
-  end
-
   def blended_£_per_kwh_date_range(start_date, end_date)
     @blended_£_per_kwh_date_range ||= {}
     @blended_£_per_kwh_date_range[start_date..end_date] ||= calculate_blended_£_per_kwh_date_range(start_date, end_date)
@@ -572,17 +552,6 @@ class AMRData < HalfHourlyData
     date_divisor = (date2 - date1 + 1)
     return 0.0 if date_divisor.zero?
     baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / date_divisor / 24.0
-  end
-
-  def baseload_£_economic_cost_date_range_deprecated(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
-    total_£ = 0.0
-
-    (date1..date2).each do |date|
-      bl_kw = baseload_kw(date, sheffield_solar_pv)
-      total_£ += @economic_tariff.calculate_baseload_cost(date, bl_kw)
-    end
-
-    total_£
   end
 
   def economic_cost_for_x48_kwhs(date, kwh_x48)
