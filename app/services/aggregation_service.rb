@@ -80,9 +80,10 @@ class AggregateDataService
       #results for each aggregate meter
       process_community_usage_open_close_times
 
-      #set flags on amr data to indicate aggregation process
-      #has been completed
-      set_post_aggregation_state_on_all_meters
+      #notify meter collection that aggregation is complete
+      #carries out clean-up and sets flags on amr data to indicate aggregation process
+      #has been completed and caching can be enabled
+      @meter_collection.notify_aggregation_complete!
     end
     calc_text = "Calculated meter aggregation for |#{format('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds"
 
@@ -149,17 +150,6 @@ class AggregateDataService
     @meter_collection.solar_pv_panels? && @meter_collection.electricity_meters.length > 1
   end
 
-  # Set flags on each meter to indicate aggregation process has
-  # been completed.
-  #
-  # allows parameterised carbon/cost objects to cache data post
-  # aggregation, reducing memory footprint in front end cache prior to this
-  # while maintaining charting performance once out of cache
-  def set_post_aggregation_state_on_all_meters
-    @meter_collection.all_meters.each do |meter|
-      meter.amr_data.set_post_aggregation_state
-    end
-  end
 
   #Run the validation process on a list of meters.
   #
