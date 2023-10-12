@@ -1,11 +1,13 @@
 FactoryBot.define do
   factory :meter_collection, class: MeterCollection do
     transient do
+      start_date              { Date.yesterday - 7 }
+      end_date                { Date.yesterday }
       school                  { build(:school) }
       holidays                { build(:holidays, :with_academic_year) }
-      temperatures            { build(:temperatures) }
-      solar_pv                { build(:solar_pv) }
-      grid_carbon_intensity   { build(:grid_carbon_intensity) }
+      temperatures            { build(:temperatures, :with_days, start_date: start_date, end_date: end_date) }
+      solar_pv                { build(:solar_pv, :with_days, start_date: start_date, end_date: end_date) }
+      grid_carbon_intensity   { build(:grid_carbon_intensity, :with_days, start_date: start_date, end_date: end_date) }
       pseudo_meter_attributes { {} }
       solar_irradiation       { nil }
     end
@@ -17,23 +19,17 @@ FactoryBot.define do
       pseudo_meter_attributes: pseudo_meter_attributes) }
 
     trait :with_electricity_meter do
-      transient do
-        amr_data          { build(:amr_data, :with_date_range) }
-      end
-
       after(:build) do |meter_collection, evaluator|
-        meter = build(:meter, meter_collection: meter_collection, type: :electricity, amr_data: evaluator.amr_data)
+        amr_data = build(:amr_data, :with_date_range, start_date: evaluator.start_date, end_date: evaluator.end_date)
+        meter = build(:meter, meter_collection: meter_collection, type: :electricity, amr_data: amr_data)
         meter_collection.add_electricity_meter(meter)
       end
     end
 
     trait :with_gas_meter do
-      transient do
-        amr_data          { build(:amr_data, :with_date_range) }
-      end
-
       after(:build) do |meter_collection, evaluator|
-        meter = build(:meter, meter_collection: meter_collection, type: :gas, amr_data: evaluator.amr_data)
+        amr_data = build(:amr_data, :with_date_range, start_date: evaluator.start_date, end_date: evaluator.end_date)
+        meter = build(:meter, meter_collection: meter_collection, type: :gas, amr_data: amr_data)
         meter_collection.add_heat_meter(meter)
       end
     end
