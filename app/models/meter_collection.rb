@@ -503,14 +503,14 @@ class MeterCollection
   #subsequent analysis.
   private def clean_up_schedule_data!
     earliest_date = first_combined_meter_date
-    unless earliest_date.nil?
-      grid_carbon_intensity.set_start_date(earliest_date)
-      solar_pv.set_start_date(earliest_date)
-      solar_irradiation.set_start_date(earliest_date)
+    return if earliest_date.nil?
 
-      #we need a bit more temperature data for targets, so adjust date by one year
-      earliest_date = earliest_date - (365 + TargetMeterTemperatureCompensatedDailyDayTypeBase::TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
-      temperatures.set_start_date(earliest_date)
-    end
+    grid_carbon_intensity.set_start_date(earliest_date)
+    solar_pv.set_start_date(earliest_date)
+    solar_irradiation.set_start_date(earliest_date)
+
+    #we need a bit more temperature data for targets, so adjust date by one year
+    earliest_date = earliest_date - (365 + TargetMeterTemperatureCompensatedDailyDayTypeBase::TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
+    temperatures.set_start_date(earliest_date)
   end
 end
