@@ -1,8 +1,15 @@
 require_relative './meter_tariff'
 
-class GenericAccountingTariff < AccountingTariff
+class GenericAccountingTariff < MeterTariff
+  include Logging
+  class OverlappingTimeRanges < StandardError; end
+  class IncompleteTimeRanges < StandardError; end
+  class TimeRangesNotOn30MinuteBoundary  < StandardError; end
+  class UnexpectedRateType < StandardError; end
+
   def initialize(meter, tariff)
     super(meter, tariff)
+    check_differential_times(all_times) if differential?(nil)
     remove_climate_change_levy_from_standing_charges
     default_missing_dates
   end
@@ -15,18 +22,16 @@ class GenericAccountingTariff < AccountingTariff
     @tariff[:end_date]
   end
 
-  #TODO should just check the :type of tariff
   def differential?(_date)
-    !flat_tariff?(_date)
+    @tariff[:type] == :differential
   end
 
-  #TODO should just check the :type of tariff
   def flat_tariff?(_date)
-    rate_types.all? { |type| flat_rate_type?(type) }
+    @tariff[:type] == :flat
   end
 
   def rate_type?(type)
-    super(type) || rate_rate_type?(type) || tiered_rate_type?(type)
+    type == :flat_rate || rate_rate_type?(type) || tiered_rate_type?(type)
   end
 
   def duos_type?(type)
@@ -38,7 +43,7 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def standard_standing_charge_type?(type)
-    super(type) && !climate_change_levy_type?(type) && !duos_type?(type)
+    !rate_type?(type) && !climate_change_levy_type?(type) && !duos_type?(type)
   end
 
   def climate_change_levy?
@@ -103,6 +108,20 @@ class GenericAccountingTariff < AccountingTariff
     end
   end
 
+  # non per kWh standing charges
+  def standing_charges(date, days_kwh)
+    standing_charge = {}
+    tariff[:rates].each do |standing_charge_type, rate|
+      if tnuos_type?(standing_charge_type) && rate == true
+        standing_charge[standing_charge_type] = tnuos_cost(date)
+      elsif standard_standing_charge_type?(standing_charge_type) && rate[:per] != :kwh
+        dr = daily_rate(date, rate[:per], rate[:rate], days_kwh, standing_charge_type)
+        standing_charge[standing_charge_type] = dr unless dr.nil?
+      end
+    end
+    standing_charge
+  end
+
   #override this to also check the new attributes which will replace the
   #older setting. Treats site wide and school group tariffs as defaults
   #so school and meter specific tariffs are not defaults
@@ -113,10 +132,67 @@ class GenericAccountingTariff < AccountingTariff
   #override this to also check the new attributes which will replace the
   #older setting
   def system_wide?
-    super || tariff[:tariff_holder] == :site_settings
+    tariff[:system_wide] == true || tariff[:tariff_holder] == :site_settings
+  end
+
+  def availability_type?(type)
+    %i[agreed_availability_charge excess_availability_charge].include?(type)
   end
 
   private
+
+  # apply per kWh 'standing charges' per half hour
+  def rate_per_kwh_standing_charges(kwh_x48)
+    rates = tariff[:rates].select do |standing_charge_type, rate|
+      !tnuos_type?(standing_charge_type) &&
+      standard_standing_charge_type?(standing_charge_type) &&
+      rate[:per] == :kwh
+    end
+
+    rates.map do |standing_charge_type, rate|
+      [
+        standing_charge_type.to_s.humanize,
+        AMRData.fast_multiply_x48_x_scalar(kwh_x48, rate[:rate])
+      ]
+    end.to_h
+  end
+
+
+    def agreed_supply_capacity_calculator
+      @agreed_supply_capacity_calculator ||= AgreedSupplyCapacityCharge.new(@amr_data, @tariff)
+    end
+
+    def agreed_supply_capacity_daily_cost(date)
+      agreed_supply_capacity_calculator.agreed_supply_capacity_daily_cost(date)
+    end
+
+    def excess_supply_capacity_daily_cost(date)
+      agreed_supply_capacity_calculator.excess_supply_capacity_daily_cost(date)
+    end
+
+
+  def daily_rate(date, per, rate, days_kwh, type)
+    case per
+    when :day
+      rate
+    when :month
+      rate / DateTimeHelper.days_in_month(date)
+    when :quarter
+      rate / DateTimeHelper.days_in_quarter(date)
+    when :kva
+      if type == :agreed_availability_charge
+        agreed_supply_capacity_daily_cost(date)
+      elsif type == :excess_availability_charge
+        excess_supply_capacity_daily_cost(date)
+      else # reactive charges - unknown as not provided by AMR meter feeds, and not passed through DCC yet (June2021)
+        0.0
+      end
+    when :kwh
+      raise UnexpectedRateType, 'Unexpected internal error: unit rate type kwh should be handled as x48 rather than scalar'
+    else
+      raise UnexpectedRateType, "Unexpected unit rate type for tariff #{per}"
+    end
+  end
 
   def basic_costs(date, kwh_x48)
     flat_rate = flat_tariff?(date)
@@ -145,6 +221,7 @@ class GenericAccountingTariff < AccountingTariff
   def flat_rate_type?(type)
     type == :flat_rate
   end
+
 
   def weekend_type?
     tariff.key?(:weekend)
@@ -196,6 +273,8 @@ class GenericAccountingTariff < AccountingTariff
     rates_x48 = AMRData.fast_add_multiple_x48_x_x48(rates_vat_x48.values)
     AMRData.fast_multiply_x48_x_scalar(rates_x48, vat)
   end
+
+
 
   #reformats value from front end
   def vat_description
@@ -305,6 +384,19 @@ class GenericAccountingTariff < AccountingTariff
     end
   end
 
+  def check_differential_times(time_ranges)
+    check_time_ranges_on_30_minute_boundaries(time_ranges)
+    check_complete_time_ranges(time_ranges)
+    check_overlapping_time_ranges(time_ranges)
+  end
+
+  def check_complete_time_ranges(time_ranges)
+    if count_rates_every_half_hour(time_ranges).any?{ |v| v == 0 }
+      tr_debug = time_ranges_compact_summary(time_ranges)
+      raise_and_log_error(IncompleteTimeRanges, "Incomplete differential tariff time of day ranges #{@mpxn}:  #{tr_debug}", time_ranges)
+    end
+  end
+
   def check_time_ranges_on_30_minute_boundaries(time_ranges)
     time_of_days = [time_ranges.map(&:first), time_ranges.map(&:last)].flatten
     if time_of_days.any?{ |tod| !tod.on_30_minute_interval? }
@@ -317,6 +409,28 @@ class GenericAccountingTariff < AccountingTariff
       tr_debug = time_ranges_compact_summary(time_ranges)
       raise_and_log_error(OverlappingTimeRanges, "Overlapping differential tariff time of day ranges #{@mpxn}:  #{tr_debug}", time_ranges)
     end
+  end
+
+  def count_rates_every_half_hour(time_ranges)
+    @count_rates_every_half_hour ||= calculate_count_rates_every_half_hour(time_ranges)
+  end
+
+  # given multiple time ranges coering a day
+  # returns x48 of count of overall time range coverage
+  # e.g. 0 value = missing, 2+ = duplicate/overlap
+  def calculate_count_rates_every_half_hour(time_ranges)
+    tr_masks = time_ranges.map{ |tr| DateTimeHelper.weighted_x48_vector_fast_inclusive(tr, 1) }
+    AMRData.fast_add_multiple_x48_x_x48(tr_masks)
+  end
+
+  def time_ranges_compact_summary(time_ranges)
+    time_ranges.map(&:to_s).join(', ')
+  end
+
+  def raise_and_log_error(exception, message, data)
+    logger.info message
+    logger.info data
+    raise exception, message
   end
 
   #unused?
@@ -338,4 +452,6 @@ class GenericAccountingTariff < AccountingTariff
   def weekend_weekday_differential_type?(type)
     type.to_s.match?(/^weekend_rate[0-9]$/) || type.to_s.match?(/^weekday_rate[0-9]$/)
   end
+
+
 end

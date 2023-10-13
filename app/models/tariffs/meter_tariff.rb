@@ -142,6 +142,3 @@ class MeterTariff
     trs1.values != trs2.values
   end
 end
-
-class EconomicTariff < MeterTariff
-end

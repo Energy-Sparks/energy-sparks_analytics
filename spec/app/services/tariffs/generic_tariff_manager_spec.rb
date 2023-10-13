@@ -6,8 +6,9 @@ describe GenericTariffManager, type: :service do
   let(:start_date)  { Date.today - 30 }
 
   let(:rates)       { create_flat_rate }
+  let(:tariff_type) { :flat }
 
-  let(:accounting_tariff) { create_accounting_tariff_generic(start_date: start_date, end_date: end_date, rates: rates, tariff_holder: :site_settings) }
+  let(:accounting_tariff) { create_accounting_tariff_generic(start_date: start_date, end_date: end_date, type: tariff_type, rates: rates, tariff_holder: :site_settings) }
 
   let(:meter_attributes) {
     {:accounting_tariff_generic=> [accounting_tariff]}
@@ -194,6 +195,7 @@ describe GenericTariffManager, type: :service do
       end
     end
     context 'with differential' do
+      let(:tariff_type) { :differential }
       let(:rates) { create_differential_rate }
       it 'returns true' do
         expect(service.any_differential_tariff?(start_date, end_date)).to be true
@@ -201,7 +203,8 @@ describe GenericTariffManager, type: :service do
     end
 
     context 'when an inherited tariff is differential' do
-      let(:school)          { create_accounting_tariff_generic(tariff_holder: :school, start_date: start_date, end_date: end_date, rates: create_differential_rate) }
+      let(:tariff_type) { :differential }
+      let(:school)          { create_accounting_tariff_generic(tariff_holder: :school, start_date: start_date, end_date: end_date, type: tariff_type, rates: create_differential_rate) }
       let(:meter_tariff)    { create_accounting_tariff_generic(tariff_holder: :meter, start_date: start_date + 15) }
       let(:meter_attributes) {
         {:accounting_tariff_generic=> [school, meter_tariff]}
