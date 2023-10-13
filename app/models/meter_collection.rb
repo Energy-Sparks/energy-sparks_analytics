@@ -482,4 +482,35 @@ class MeterCollection
   def is_school_usually_open?(_date, time_of_day)
     time_of_day >= @cached_open_time && time_of_day < @cached_close_time
   end
+
+  # Notify meter collection that aggregation process is over.
+  # Allows for any post aggregation clean-up to be carried out.
+  def notify_aggregation_complete!
+    clean_up_schedule_data!
+
+    # Set flags on each meter to indicate aggregation process has
+    # been completed.
+    #
+    # allows parameterised carbon/cost objects to cache data post
+    # aggregation, reducing memory footprint in front end cache prior to this
+    # while maintaining charting performance once out of cache
+    all_meters.each do |meter|
+      meter.amr_data.set_post_aggregation_state
+    end
+  end
+
+  #Clip the schedule data to the earliest date that we need for charting or
+  #subsequent analysis.
+  private def clean_up_schedule_data!
+    earliest_date = first_combined_meter_date
+    return if earliest_date.nil?
+
+    grid_carbon_intensity.set_start_date(earliest_date)
+    solar_pv.set_start_date(earliest_date)
+    solar_irradiation.set_start_date(earliest_date)
+
+    #we need a bit more temperature data for targets, so adjust date by one year
+    earliest_date = earliest_date - (365 + TargetMeterTemperatureCompensatedDailyDayTypeBase::TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
+    temperatures.set_start_date(earliest_date)
+  end
 end
