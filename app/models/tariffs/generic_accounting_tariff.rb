@@ -1,24 +1,23 @@
-require_relative './meter_tariff'
-
 class GenericAccountingTariff
-  attr_reader :tariff, :fuel_type
+  include Logging
+
+  class OverlappingTimeRanges < StandardError; end
+  class IncompleteTimeRanges < StandardError; end
+  class TimeRangesNotOn30MinuteBoundary  < StandardError; end
+  class UnexpectedRateType < StandardError; end
 
   MIN_DEFAULT_START_DATE = Date.new(2008, 1, 1)
   MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
   FLAT_RATE = 'flat_rate'.freeze
 
-  include Logging
-  class OverlappingTimeRanges < StandardError; end
-  class IncompleteTimeRanges < StandardError; end
-  class TimeRangesNotOn30MinuteBoundary  < StandardError; end
-  class UnexpectedRateType < StandardError; end
+  attr_reader :tariff, :fuel_type
 
   def initialize(meter, tariff)
     @mpxn       = meter.mpxn
     @amr_data   = meter.amr_data
     @fuel_type  = meter.fuel_type
     @tariff     = tariff
-    check_differential_times(all_times) if differential?(nil)
+    check_differential_times(all_times) if differential?
     remove_climate_change_levy_from_standing_charges
     default_missing_dates
   end
@@ -31,36 +30,39 @@ class GenericAccountingTariff
     @tariff[:end_date]
   end
 
-  def differential?(_date)
+  def differential?
     @tariff[:type] == :differential
   end
 
-  def flat_tariff?(_date)
+  def flat_tariff?
     @tariff[:type] == :flat
-  end
-
-  def rate_type?(type)
-    type == :flat_rate || rate_rate_type?(type) || tiered_rate_type?(type)
-  end
-
-  def duos_type?(type)
-    type.to_s.match?(/^duos/)
-  end
-
-  def tnuos_type?(type)
-    type == :tnuos
-  end
-
-  def standard_standing_charge_type?(type)
-    !rate_type?(type) && !climate_change_levy_type?(type) && !duos_type?(type)
   end
 
   def climate_change_levy?
     @climate_change_levy
   end
 
-  def tiered_rate_type?(type)
-    type.to_s.match?(/^tiered_rate[0-9]$/)
+  #Treats site wide and school group tariffs as defaults
+  #so school and meter specific tariffs are not defaults
+  def default?
+    defaulted_tariff?
+  end
+
+  def dcc?
+    @tariff[:source] == :dcc
+  end
+
+  def system_wide?
+    tariff[:system_wide] == true || tariff[:tariff_holder] == :site_settings
+  end
+
+  def backdate_tariff(start_date)
+    logger.info "Backdating (DCC) tariff for #{@mpxn} start date to #{start_date}"
+    @tariff[:start_date] = start_date
+  end
+
+  def in_date_range?(date)
+    date >= @tariff[:start_date] && date <= @tariff[:end_date]
   end
 
   #Calculates use the "economic costs" for usage on a specific date
@@ -68,7 +70,7 @@ class GenericAccountingTariff
   def economic_costs(date, kwh_x48)
     OneDaysCostData.new(
       rates_x48: basic_costs(date, kwh_x48),
-      differential: differential?(date),
+      differential: differential?,
       standing_charges: {},
       system_wide: system_wide?,
       default: default?,
@@ -76,7 +78,7 @@ class GenericAccountingTariff
     )
   end
 
-  #Calculate the full economic costs for usage on a specific date
+  #Calculate the full accounting costs for usage on a specific date
   def costs(date, kwh_x48)
     rates_x48 = basic_costs(date, kwh_x48)
     #add the additional cost components into the rates_x48 hash
@@ -91,7 +93,7 @@ class GenericAccountingTariff
 
     OneDaysCostData.new(
       rates_x48: rates_x48,
-      differential: differential?(date),
+      differential: differential?,
       standing_charges: standing_charges,
       system_wide: system_wide?,
       default: default?,
@@ -99,14 +101,7 @@ class GenericAccountingTariff
     )
   end
 
-  #this was private in base class
-  def all_times
-    rate_types.map { |rt| times(rt) }
-  end
-
-  def times(type)
-    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
-  end
+  private
 
   # returns a hash, whereas other parent classes just return the value
   # because a single tier type might return a dffierent sub type for
@@ -115,7 +110,7 @@ class GenericAccountingTariff
     if tiered_rate_type?(type)
       calculate_tiered_costs_x48(type, kwh_x48)
     else
-      weights = DateTimeHelper.weighted_x48_vector_fast_inclusive(times(type), rate(nil, type))
+      weights = DateTimeHelper.weighted_x48_vector_fast_inclusive(times(type), rate(type))
       cost_x48 = AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
       { differential_rate_name(type) => cost_x48 }
     end
@@ -135,45 +130,41 @@ class GenericAccountingTariff
     standing_charge
   end
 
-  #override this to also check the new attributes which will replace the
-  #older setting. Treats site wide and school group tariffs as defaults
-  #so school and meter specific tariffs are not defaults
-  def default?
-    defaulted_tariff?
-  end
-
-  def dcc?
-    @tariff[:source] == :dcc
-  end
-
-  #override this to also check the new attributes which will replace the
-  #older setting
-  def system_wide?
-    tariff[:system_wide] == true || tariff[:tariff_holder] == :site_settings
+  def rate(type)
+    @tariff[:rates][type][:rate]
   end
 
   def availability_type?(type)
     %i[agreed_availability_charge excess_availability_charge].include?(type)
   end
 
-  def backdate_tariff(start_date)
-    logger.info "Backdating (DCC) tariff for #{@mpxn} start date to #{start_date}"
-    @tariff[:start_date] = start_date
+  def tiered_rate_type?(type)
+    type.to_s.match?(/^tiered_rate[0-9]$/)
   end
 
-  def in_date_range?(date)
-    date >= @tariff[:start_date] && date <= @tariff[:end_date]
+  def all_times
+    rate_types.map { |rt| times(rt) }
   end
 
-  def rate(_date, type)
-    @tariff[:rates][type][:rate]
+  def times(type)
+    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
   end
 
-  def tariff_on_date(_date)
-    @tariff[:rates]
+  def rate_type?(type)
+    type == :flat_rate || rate_rate_type?(type) || tiered_rate_type?(type)
   end
 
-  private
+  def duos_type?(type)
+    type.to_s.match?(/^duos/)
+  end
+
+  def tnuos_type?(type)
+    type == :tnuos
+  end
+
+  def standard_standing_charge_type?(type)
+    !rate_type?(type) && !climate_change_levy_type?(type) && !duos_type?(type)
+  end
 
   # apply per kWh 'standing charges' per half hour
   def rate_per_kwh_standing_charges(kwh_x48)
@@ -191,19 +182,17 @@ class GenericAccountingTariff
     end.to_h
   end
 
+  def agreed_supply_capacity_calculator
+    @agreed_supply_capacity_calculator ||= AgreedSupplyCapacityCharge.new(@amr_data, @tariff)
+  end
 
-    def agreed_supply_capacity_calculator
-      @agreed_supply_capacity_calculator ||= AgreedSupplyCapacityCharge.new(@amr_data, @tariff)
-    end
+  def agreed_supply_capacity_daily_cost(date)
+    agreed_supply_capacity_calculator.agreed_supply_capacity_daily_cost(date)
+  end
 
-    def agreed_supply_capacity_daily_cost(date)
-      agreed_supply_capacity_calculator.agreed_supply_capacity_daily_cost(date)
-    end
-
-    def excess_supply_capacity_daily_cost(date)
-      agreed_supply_capacity_calculator.excess_supply_capacity_daily_cost(date)
-    end
-
+  def excess_supply_capacity_daily_cost(date)
+    agreed_supply_capacity_calculator.excess_supply_capacity_daily_cost(date)
+  end
 
   def daily_rate(date, per, rate, days_kwh, type)
     case per
@@ -229,7 +218,7 @@ class GenericAccountingTariff
   end
 
   def basic_costs(date, kwh_x48)
-    flat_rate = flat_tariff?(date)
+    flat_rate = flat_tariff?
     if flat_rate
       {
         FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
@@ -255,7 +244,6 @@ class GenericAccountingTariff
   def flat_rate_type?(type)
     type == :flat_rate
   end
-
 
   def weekend_type?
     tariff.key?(:weekend)
@@ -307,8 +295,6 @@ class GenericAccountingTariff
     rates_x48 = AMRData.fast_add_multiple_x48_x_x48(rates_vat_x48.values)
     AMRData.fast_multiply_x48_x_scalar(rates_x48, vat)
   end
-
-
 
   #reformats value from front end
   def vat_description
@@ -470,26 +456,5 @@ class GenericAccountingTariff
     logger.info data
     raise exception, message
   end
-
-  #unused?
-  def rate?(_date)
-    rate_types.any? { |type| type.to_s.match?(/^rate[0-9]$/) }
-  end
-
-  #unused?
-  def tiered?(_date)
-    rate_types.any? { |type| type.to_s.match?(/^tiered_rate[0-9]$/) }
-  end
-
-  #unused?
-  def create_weekday_weekend_type_rates(type, rates)
-    rates.map { |r| "#{type}_#{r}".to_sym }
-  end
-
-  #unused?
-  def weekend_weekday_differential_type?(type)
-    type.to_s.match?(/^weekend_rate[0-9]$/) || type.to_s.match?(/^weekday_rate[0-9]$/)
-  end
-
 
 end

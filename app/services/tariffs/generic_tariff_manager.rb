@@ -249,6 +249,6 @@ class GenericTariffManager
   #Determine whether there's a differential tariff for a specific date
   def differential_tariff_on_date?(date)
     tariff = find_tariff_for_date(date)
-    !tariff.nil? && tariff.differential?(date)
+    !tariff.nil? && tariff.differential?
   end
 end

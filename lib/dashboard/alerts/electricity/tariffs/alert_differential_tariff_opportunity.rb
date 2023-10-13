@@ -159,7 +159,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
   end
 
   private def latest_economic_tariff_rates(meter, date)
-    meter.meter_tariffs.economic_tariff.tariff_on_date(date)
+    meter.meter_tariffs.economic_tariff.tariff[:rates]
   end
 
   private def calculate_differential_and_non_differential_costs(meter, asof_date)

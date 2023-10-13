@@ -89,16 +89,16 @@ describe GenericAccountingTariff do
   context '.differential?' do
     context 'with flat rate' do
       it 'identifies the type of tariff' do
-        expect(accounting_tariff.differential?(nil)).to be false
-        expect(accounting_tariff.flat_tariff?(nil)).to be true
+        expect(accounting_tariff.differential?).to be false
+        expect(accounting_tariff.flat_tariff?).to be true
       end
     end
     context 'with differential ' do
       let(:tariff_type)       { :differential }
       let(:rates)             { create_differential_rate }
       it 'identifies the type of tariff' do
-        expect(accounting_tariff.differential?(nil)).to be true
-        expect(accounting_tariff.flat_tariff?(nil)).to be false
+        expect(accounting_tariff.differential?).to be true
+        expect(accounting_tariff.flat_tariff?).to be false
       end
     end
   end
