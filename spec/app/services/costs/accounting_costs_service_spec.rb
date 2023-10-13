@@ -17,9 +17,9 @@ describe Costs::AccountingCostsService, type: :service do
 
   it 'returns the expected values' do
     annual_costs = service.annual_cost
-    expect(annual_costs.£).to be_within(0.01).of(74306.06)
+    expect(annual_costs.£).to be_within(0.01).of(62593.02)
     expect(annual_costs.days.to_i).to eq 366
-    expect(annual_costs.start_date).to eq Date.new(2021,7,13)
-    expect(annual_costs.end_date).to eq Date.new(2022,7,13)
+    expect(annual_costs.start_date).to eq Date.new(2022,10,11)
+    expect(annual_costs.end_date).to eq Date.new(2023,10,11)
   end
 end

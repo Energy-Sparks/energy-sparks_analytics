@@ -16,20 +16,20 @@ describe Baseload::IntraweekBaseloadService, type: :service do
     it 'calculates the variation' do
       intraweek_variation = service.intraweek_variation
       expect(intraweek_variation.min_day).to eq 6
-      expect(intraweek_variation.max_day).to eq 4
-      expect(intraweek_variation.min_day_kw).to round_to_two_digits(22.17)
-      expect(intraweek_variation.max_day_kw).to round_to_two_digits(25.30)
-      expect(intraweek_variation.percent_intraday_variation).to round_to_two_digits(0.14)
-      expect(intraweek_variation.annual_cost_kwh).to round_to_two_digits(17775.79)
+      expect(intraweek_variation.max_day).to eq 1
+      expect(intraweek_variation.min_day_kw).to be_within(0.01).of(21.62)
+      expect(intraweek_variation.max_day_kw).to be_within(0.01).of(23.57)
+      expect(intraweek_variation.percent_intraday_variation).to be_within(0.01).of(0.09)
+      expect(intraweek_variation.annual_cost_kwh).to be_within(0.01).of(11051.89)
     end
   end
 
   context '#estimated_costs' do
     it 'calculates the costs' do
       costs = service.estimated_costs
-      expect(costs.kwh).to round_to_two_digits(17775.79)
-      expect(costs.co2).to round_to_two_digits(3365.01)
-      expect(costs.£).to round_to_two_digits(2655.35)
+      expect(costs.kwh).to be_within(0.01).of(11051.89)
+      expect(costs.co2).to be_within(0.01).of(1846.51)
+      expect(costs.£).to be_within(0.01).of(1293.45)
     end
   end
 

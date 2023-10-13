@@ -42,13 +42,6 @@ describe AccountingCosts do
     end
   end
 
-  #test using new generic tariff manager
-  around do |example|
-    ClimateControl.modify FEATURE_FLAG_NEW_ENERGY_TARIFF_EDITOR: 'true' do
-      example.run
-    end
-  end
-
   context '#combine_accounting_costs_from_multiple_meters' do
     let(:combined_costs)  { AccountingCosts.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date) }
 
