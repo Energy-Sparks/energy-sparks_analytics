@@ -1,6 +1,12 @@
 require_relative './meter_tariff'
 
-class GenericAccountingTariff < MeterTariff
+class GenericAccountingTariff
+  attr_reader :tariff, :fuel_type
+
+  MIN_DEFAULT_START_DATE = Date.new(2008, 1, 1)
+  MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
+  FLAT_RATE = 'flat_rate'.freeze
+
   include Logging
   class OverlappingTimeRanges < StandardError; end
   class IncompleteTimeRanges < StandardError; end
@@ -8,7 +14,10 @@ class GenericAccountingTariff < MeterTariff
   class UnexpectedRateType < StandardError; end
 
   def initialize(meter, tariff)
-    super(meter, tariff)
+    @mpxn       = meter.mpxn
+    @amr_data   = meter.amr_data
+    @fuel_type  = meter.fuel_type
+    @tariff     = tariff
     check_differential_times(all_times) if differential?(nil)
     remove_climate_change_levy_from_standing_charges
     default_missing_dates
@@ -95,6 +104,10 @@ class GenericAccountingTariff < MeterTariff
     rate_types.map { |rt| times(rt) }
   end
 
+  def times(type)
+    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
+  end
+
   # returns a hash, whereas other parent classes just return the value
   # because a single tier type might return a dffierent sub type for
   # each threshold, so 1 type in but potentially multiple types returned
@@ -126,7 +139,11 @@ class GenericAccountingTariff < MeterTariff
   #older setting. Treats site wide and school group tariffs as defaults
   #so school and meter specific tariffs are not defaults
   def default?
-    super || defaulted_tariff?
+    defaulted_tariff?
+  end
+
+  def dcc?
+    @tariff[:source] == :dcc
   end
 
   #override this to also check the new attributes which will replace the
@@ -137,6 +154,23 @@ class GenericAccountingTariff < MeterTariff
 
   def availability_type?(type)
     %i[agreed_availability_charge excess_availability_charge].include?(type)
+  end
+
+  def backdate_tariff(start_date)
+    logger.info "Backdating (DCC) tariff for #{@mpxn} start date to #{start_date}"
+    @tariff[:start_date] = start_date
+  end
+
+  def in_date_range?(date)
+    date >= @tariff[:start_date] && date <= @tariff[:end_date]
+  end
+
+  def rate(_date, type)
+    @tariff[:rates][type][:rate]
+  end
+
+  def tariff_on_date(_date)
+    @tariff[:rates]
   end
 
   private
@@ -198,7 +232,7 @@ class GenericAccountingTariff < MeterTariff
     flat_rate = flat_tariff?(date)
     if flat_rate
       {
-        MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
+        FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
       }
     else
       rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge)
@@ -302,8 +336,12 @@ class GenericAccountingTariff < MeterTariff
   end
 
   def differential_rate_name(type)
-    ttr = MeterTariff.format_time_range(@tariff[:rates][type])
+    ttr = GenericAccountingTariff.format_time_range(@tariff[:rates][type])
     append_weekday_weekend(ttr)
+  end
+
+  def self.format_time_range(rate)
+    "#{rate[:from]} to #{rate[:to]}".freeze
   end
 
   def append_weekday_weekend(name)
@@ -368,7 +406,7 @@ class GenericAccountingTariff < MeterTariff
   end
 
   def tier_description(tier_name, low_threshold, high_threshold, rate_config)
-    time_range = MeterTariff.format_time_range(rate_config)
+    time_range = format_time_range(rate_config)
     threshold_range = threshhold_range_description(tier_name, low_threshold, high_threshold)
     trtr = "#{time_range}: #{threshold_range}"
     append_weekday_weekend(trtr)
