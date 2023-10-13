@@ -57,7 +57,6 @@ class GenericAccountingTariff
   end
 
   def backdate_tariff(start_date)
-    logger.info "Backdating (DCC) tariff for #{@mpxn} start date to #{start_date}"
     @tariff[:start_date] = start_date
   end
 
@@ -130,6 +129,30 @@ class GenericAccountingTariff
     standing_charge
   end
 
+  # apply per kWh 'standing charges' per half hour
+  def rate_per_kwh_standing_charges(kwh_x48)
+    rates = tariff[:rates].select do |standing_charge_type, rate|
+      !tnuos_type?(standing_charge_type) &&
+      standard_standing_charge_type?(standing_charge_type) &&
+      rate[:per] == :kwh
+    end
+
+    rates.map do |standing_charge_type, rate|
+      [
+        standing_charge_type.to_s.humanize,
+        AMRData.fast_multiply_x48_x_scalar(kwh_x48, rate[:rate])
+      ]
+    end.to_h
+  end
+
+  def all_times
+    rate_types.map { |rt| times(rt) }
+  end
+
+  def times(type)
+    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
+  end
+
   def rate(type)
     @tariff[:rates][type][:rate]
   end
@@ -140,14 +163,6 @@ class GenericAccountingTariff
 
   def tiered_rate_type?(type)
     type.to_s.match?(/^tiered_rate[0-9]$/)
-  end
-
-  def all_times
-    rate_types.map { |rt| times(rt) }
-  end
-
-  def times(type)
-    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
   end
 
   def rate_type?(type)
@@ -164,22 +179,6 @@ class GenericAccountingTariff
 
   def standard_standing_charge_type?(type)
     !rate_type?(type) && !climate_change_levy_type?(type) && !duos_type?(type)
-  end
-
-  # apply per kWh 'standing charges' per half hour
-  def rate_per_kwh_standing_charges(kwh_x48)
-    rates = tariff[:rates].select do |standing_charge_type, rate|
-      !tnuos_type?(standing_charge_type) &&
-      standard_standing_charge_type?(standing_charge_type) &&
-      rate[:per] == :kwh
-    end
-
-    rates.map do |standing_charge_type, rate|
-      [
-        standing_charge_type.to_s.humanize,
-        AMRData.fast_multiply_x48_x_scalar(kwh_x48, rate[:rate])
-      ]
-    end.to_h
   end
 
   def agreed_supply_capacity_calculator
@@ -417,21 +416,21 @@ class GenericAccountingTariff
   def check_complete_time_ranges(time_ranges)
     if count_rates_every_half_hour(time_ranges).any?{ |v| v == 0 }
       tr_debug = time_ranges_compact_summary(time_ranges)
-      raise_and_log_error(IncompleteTimeRanges, "Incomplete differential tariff time of day ranges #{@mpxn}:  #{tr_debug}", time_ranges)
+      raise IncompleteTimeRanges, "Incomplete differential tariff time of day ranges #{@mpxn}:  #{tr_debug}"
     end
   end
 
   def check_time_ranges_on_30_minute_boundaries(time_ranges)
     time_of_days = [time_ranges.map(&:first), time_ranges.map(&:last)].flatten
     if time_of_days.any?{ |tod| !tod.on_30_minute_interval? }
-      raise_and_log_error(TimeRangesNotOn30MinuteBoundary, "Differential tariff time of day rates not on 30 minute interval #{@mpxn}", time_ranges)
+      raise TimeRangesNotOn30MinuteBoundary, "Differential tariff time of day rates not on 30 minute interval #{@mpxn}"
     end
   end
 
   def check_overlapping_time_ranges(time_ranges)
     if count_rates_every_half_hour(time_ranges).any?{ |v| v > 1 }
       tr_debug = time_ranges_compact_summary(time_ranges)
-      raise_and_log_error(OverlappingTimeRanges, "Overlapping differential tariff time of day ranges #{@mpxn}:  #{tr_debug}", time_ranges)
+      raise OverlappingTimeRanges, "Overlapping differential tariff time of day ranges #{@mpxn}:  #{tr_debug}"
     end
   end
 
@@ -449,12 +448,6 @@ class GenericAccountingTariff
 
   def time_ranges_compact_summary(time_ranges)
     time_ranges.map(&:to_s).join(', ')
-  end
-
-  def raise_and_log_error(exception, message, data)
-    logger.info message
-    logger.info data
-    raise exception, message
   end
 
 end
