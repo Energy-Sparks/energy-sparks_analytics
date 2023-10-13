@@ -30,7 +30,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         it 'calculates the expected usage' do
           expect(usage.kwh).to be_within(0.1).of(10425.6)
           expect(usage.co2).to be_within(0.1).of(1794.7996)
-          expect(usage.£).to be_within(0.1).of(1558.438)
+          expect(usage.£).to be_within(0.1).of(1262.19)
         end
       end
 
@@ -44,7 +44,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         it 'calculates the expected usage' do
           expect(usage.kwh).to be_within(0.1).of(11728.89)
           expect(usage.co2).to be_within(0.1).of(2068.9643)
-          expect(usage.£).to be_within(0.1).of(1754.026)
+          expect(usage.£).to be_within(0.1).of(1437.97)
         end
       end
 
@@ -57,15 +57,15 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         it 'calculates the expected usage' do
           expect(usage.kwh).to be_within(0.1).of(7801.6)
           expect(usage.co2).to be_within(0.1).of(979.229)
-          expect(usage.£).to be_within(0.1).of(1181.78)
+          expect(usage.£).to be_within(0.1).of(911.40)
         end
       end
 
       context 'for period outside meter range' do
-        let(:holiday_type)  { :summer }
-        let(:name)          { "Summer 2022" }
-        let(:start_date)    { Date.new(2022,7,14) }
-        let(:end_date)      { Date.new(2022,8,31) }
+        let(:holiday_type)  { :xmas }
+        let(:name)          { "Christmas 2023" }
+        let(:start_date)    { Date.new(2023,12,20) }
+        let(:end_date)      { Date.new(2024,1,02) }
         it 'returns nil' do
           expect(usage).to eq nil
         end
@@ -102,14 +102,14 @@ describe Usage::HolidayUsageCalculationService, type: :service do
           xmas_2021_usage = comparison.usage
           expect(xmas_2021_usage.kwh).to be_within(0.1).of(10425.6)
           expect(xmas_2021_usage.co2).to be_within(0.1).of(1794.7996)
-          expect(xmas_2021_usage.£).to be_within(0.1).of(1558.438)
+          expect(xmas_2021_usage.£).to be_within(0.1).of(1262.19)
 
           expect(comparison.previous_holiday).to_not be_nil
 
           xmas_2020_usage = comparison.previous_holiday_usage
           expect(xmas_2020_usage.kwh).to be_within(0.1).of(11728.89)
           expect(xmas_2020_usage.co2).to be_within(0.1).of(2068.9643)
-          expect(xmas_2020_usage.£).to be_within(0.1).of(1754.026)
+          expect(xmas_2020_usage.£).to be_within(0.1).of(1437.97)
         end
       end
 

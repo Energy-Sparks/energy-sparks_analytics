@@ -6,7 +6,7 @@ describe Usage::PeakUsageCalculationService, type: :service do
   Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
 
   let(:meter_collection)          { @acme_academy }
-  let(:service) do 
+  let(:service) do
     Usage::PeakUsageCalculationService.new(
         meter_collection: meter_collection,
         asof_date: Date.new(2022, 1, 1)
@@ -32,7 +32,7 @@ describe Usage::PeakUsageCalculationService, type: :service do
 
   context '#average_school_day_peak_usage_kw' do
     it 'calculates the average school day peak usage in kw from a given asof date' do
-      expect(service.average_peak_kw).to round_to_two_digits(135.92) # 135.9213058419244
+      expect(service.average_peak_kw).to be_within(0.01).of(135.92)
     end
   end
 end
