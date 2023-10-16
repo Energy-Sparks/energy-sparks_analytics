@@ -14,18 +14,18 @@ describe Usage::AnnualUsageCategoryBreakdown, type: :service do
   context 'total' do
     it 'returns a combined usage metric for total annual kwh and co2' do
       model = service.total
-      expect(model.kwh).to round_to_two_digits(467398.40) # 467398.3999999999
-      expect(model.co2).to round_to_two_digits(88492.64) # 88492.6392
-      expect(model.£).to round_to_two_digits(71060.42) # 71060.41900000001
+      expect(model.kwh).to be_within(0.01).of(408845.4)
+      expect(model.co2).to be_within(0.01).of(68135.42)
+      expect(model.£).to be_within(0.01).of(61326.81)
     end
   end
 
   context '#potential_savings' do
     it 'returns a combined usage metric of potential kwh, co2, and percent savings compared to an exemplar school' do
       exemplar_comparison = service.potential_savings(versus: :exemplar_school)
-      expect(exemplar_comparison.kwh).to round_to_two_digits(66464.97)
-      expect(exemplar_comparison.percent).to round_to_two_digits(0.14)
-      expect(exemplar_comparison.£).to round_to_two_digits(10104.93)
+      expect(exemplar_comparison.kwh).to be_within(0.01).of(56547.26)
+      expect(exemplar_comparison.percent).to be_within(0.01).of(0.14)
+      expect(exemplar_comparison.£).to be_within(0.01).of(8482.09)
     end
   end
 end

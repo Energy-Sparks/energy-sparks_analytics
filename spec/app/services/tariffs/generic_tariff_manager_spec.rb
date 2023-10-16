@@ -25,14 +25,6 @@ describe GenericTariffManager, type: :service do
 
   let(:service)    { GenericTariffManager.new(meter) }
 
-  #TEMPORARY, need to add code to switch in different implementation
-  #Stub the creation of the tariff manager called via the Meter constructor
-  before(:each) do
-    allow_any_instance_of(Dashboard::Meter).to receive(:create_tariff_manager) do
-      nil
-    end
-  end
-
   context '#initialize' do
     context 'smart meter tariffs' do
       #amr data will be 1st - 31st Jan

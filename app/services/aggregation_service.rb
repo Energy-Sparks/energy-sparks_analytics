@@ -370,16 +370,9 @@ class AggregateDataService
   #be returning true currently.
   def all_economic_tariffs_identical?(list_of_meters)
     return true if list_of_meters.length == 1
-
     #Check whether any of the meters have their own tariffs, rather than
     #just sharing the same school/group/system tariffs.
-    if ENV["FEATURE_FLAG_NEW_ENERGY_TARIFF_EDITOR"] == 'true'
-      return !list_of_meters.any? {|meter| meter.meter_tariffs.meter_tariffs.any? }
-    end
-
-    #relies on original MeterTariffManager
-    economic_tariffs = list_of_meters.map { |meter| meter.meter_tariffs.economic_tariff }
-    economic_tariffs.uniq { |t| [t.tariff, t.tariff]}.count == 1
+    return !list_of_meters.any? {|meter| meter.meter_tariffs.meter_tariffs.any? }
   end
 
   #Returns true if there are any "time varying" economic tariffs. i.e. economic

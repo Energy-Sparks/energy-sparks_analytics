@@ -15,18 +15,18 @@ describe Baseload::SeasonalBaseloadService, type: :service do
   context '#seasonal_variation' do
     it 'calculates the variation' do
       seasonal_variation = service.seasonal_variation
-      expect(seasonal_variation.winter_kw).to eq 31.755
-      expect(seasonal_variation.summer_kw).to eq 19.285
-      expect(seasonal_variation.percentage).to round_to_two_digits(0.65)
+      expect(seasonal_variation.winter_kw).to be_within(0.01).of(31.76)
+      expect(seasonal_variation.summer_kw).to be_within(0.01).of(18.305)
+      expect(seasonal_variation.percentage).to be_within(0.01).of(0.735)
     end
   end
 
   context '#estimated_costs' do
     it 'calculates the costs' do
       costs = service.estimated_costs
-      expect(costs.kwh).to round_to_two_digits(55975.8)
-      expect(costs.£).to round_to_two_digits(8361.69)
-      expect(costs.co2).to round_to_two_digits(10596.39)
+      expect(costs.kwh).to be_within(0.01).of(92735.88)
+      expect(costs.£).to be_within(0.01).of(10853.27)
+      expect(costs.co2).to be_within(0.01).of(15493.97)
     end
   end
 

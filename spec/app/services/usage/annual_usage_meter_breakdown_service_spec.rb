@@ -23,34 +23,34 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
         it 'calculates the expected values' do
           usage_breakdown = service.calculate_breakdown
 
-          expect(usage_breakdown.start_date).to eq(Date.new(2021,7,11))
-          expect(usage_breakdown.end_date).to eq(Date.new(2022,7,9))
+          expect(usage_breakdown.start_date).to eq(Date.new(2022,10,9))
+          expect(usage_breakdown.end_date).to eq(Date.new(2023,10,7))
 
           #Old Building
           # mpan 1591058886735
           percent = usage_breakdown.annual_percent_change(1591058886735)
-          expect(format_unit(:relative_percent, percent)).to eq "+10%"
+          expect(format_unit(:relative_percent, percent)).to eq "+0.21%"
           old_building = usage_breakdown.usage(1591058886735)
-          expect(format_unit(:kwh, old_building.kwh)).to eq "100,000"
+          expect(format_unit(:kwh, old_building.kwh)).to eq "99,000"
           #expect(old_building.kwh).to round_to_two_digits(98392.4)
           expect(format_unit(:£, old_building.£)).to eq "&pound;15,000"
-          expect(format_unit(:percent,old_building.percent)).to eq "21&percnt;"
+          expect(format_unit(:percent,old_building.percent)).to eq "24&percnt;"
 
           #New Building
           # mpan, 1580001320420
           percent = usage_breakdown.annual_percent_change(1580001320420)
-          expect(format_unit(:relative_percent, percent)).to eq "+11%"
+          expect(format_unit(:relative_percent, percent)).to eq "-14%"
           new_building = usage_breakdown.usage(1580001320420)
-          expect(format_unit(:kwh, new_building.kwh)).to eq "370,000"
-          expect(format_unit(:£, new_building.£)).to eq "&pound;56,000"
-          expect(format_unit(:percent,new_building.percent)).to eq "79&percnt;"
+          expect(format_unit(:kwh, new_building.kwh)).to eq "310,000"
+          expect(format_unit(:£, new_building.£)).to eq "&pound;47,000"
+          expect(format_unit(:percent,new_building.percent)).to eq "76&percnt;"
 
           #Total
           percent = usage_breakdown.total_annual_percent_change
-          expect(format_unit(:relative_percent, percent)).to eq "+11%"
+          expect(format_unit(:relative_percent, percent)).to eq "-11%"
           total = usage_breakdown.total_usage
-          expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq "470,000"
-          expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq "&pound;71,000"
+          expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq "410,000"
+          expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq "&pound;61,000"
           expect(format_unit(:percent, usage_breakdown.total_usage.percent)).to eq "100&percnt;"
         end
       end
@@ -61,33 +61,31 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
       context 'with two years data' do
         it 'calculates the expected values' do
           usage_breakdown = service.calculate_breakdown
-          expect(usage_breakdown.start_date).to eq(Date.new(2021,7,11))
-          expect(usage_breakdown.end_date).to eq(Date.new(2022,7,9))
+          expect(usage_breakdown.start_date).to eq(Date.new(2022,10,9))
+          expect(usage_breakdown.end_date).to eq(Date.new(2023,10,7))
 
           #Lodge
           percent = usage_breakdown.annual_percent_change(10307706)
-          expect(format_unit(:relative_percent, percent)).to eq "+29%"
+          expect(format_unit(:relative_percent, percent)).to eq "-77%"
           meter = usage_breakdown.usage(10307706)
-          expect(format_unit(:kwh, meter.kwh)).to eq "16,000"
-          #expect(old_building.kwh).to round_to_two_digits(98392.4)
-          expect(format_unit(:£, meter.£)).to eq "&pound;480"
-          expect(format_unit(:percent,meter.percent)).to eq "2.8&percnt;"
+          expect(format_unit(:kwh, meter.kwh)).to eq "3,400"
+          expect(format_unit(:£, meter.£)).to eq "&pound;100"
+          expect(format_unit(:percent,meter.percent)).to eq "0.63&percnt;"
 
           #Art Block
           percent = usage_breakdown.annual_percent_change(10308203)
-          expect(format_unit(:relative_percent, percent)).to eq "-23%"
+          expect(format_unit(:relative_percent, percent)).to eq "-10%"
           meter = usage_breakdown.usage(10308203)
-          expect(format_unit(:kwh, meter.kwh)).to eq "63,000"
-          #expect(old_building.kwh).to round_to_two_digits(98392.4)
-          expect(format_unit(:£, meter.£)).to eq "&pound;1,900"
-          expect(format_unit(:percent,meter.percent)).to eq "11&percnt;"
+          expect(format_unit(:kwh, meter.kwh)).to eq "56,000"
+          expect(format_unit(:£, meter.£)).to eq "&pound;1,700"
+          expect(format_unit(:percent,meter.percent)).to eq "10&percnt;"
 
           #Total
           percent = usage_breakdown.total_annual_percent_change
-          expect(format_unit(:relative_percent, percent)).to eq "-19%"
+          expect(format_unit(:relative_percent, percent)).to eq "-8%"
           total = usage_breakdown.total_usage
-          expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq "580,000"
-          expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq "&pound;17,000"
+          expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq "550,000"
+          expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq "&pound;16,000"
           expect(format_unit(:percent, usage_breakdown.total_usage.percent)).to eq "100&percnt;"
         end
       end

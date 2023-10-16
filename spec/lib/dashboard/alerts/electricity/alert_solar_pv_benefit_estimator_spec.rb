@@ -9,9 +9,9 @@ describe AlertSolarPVBenefitEstimator do
   let(:alert) { AlertSolarPVBenefitEstimator.new(school) }
   let(:default_pricing_template_variables) do
     {
-      optimum_kwp: '90 kWp',
-      optimum_payback_years: '7 years',
-      optimum_mains_reduction_percent: '15%',
+      optimum_kwp: '100 kWp',
+      optimum_payback_years: '8 years',
+      optimum_mains_reduction_percent: '16%',
       one_year_saving_£current: '£11,000',
       relevance: 'relevant',
       analysis_date: '',
@@ -26,8 +26,8 @@ describe AlertSolarPVBenefitEstimator do
       school_name: 'Acme Academy',
       school_activation_date: '',
       school_creation_date: '2020-10-08',
-      urn: '654321',
-      one_year_saving_kwh: '70,000 kWh',
+      urn: '123456',
+      one_year_saving_kwh: '76,000 kWh',
       one_year_saving_£: '£11,000',
       one_year_saving_co2: '15,000 kg CO2',
       ten_year_saving_co2: '150,000 kg CO2',
@@ -35,9 +35,9 @@ describe AlertSolarPVBenefitEstimator do
       average_ten_year_saving_£: '£110,000',
       ten_year_saving_£: '£110,000',
       payback_years: '',
-      average_payback_years: '7 years',
-      capital_cost: '£74,000',
-      average_capital_cost: '£74,000',
+      average_payback_years: '8 years',
+      capital_cost: '£84,000',
+      average_capital_cost: '£84,000',
       timescale: 'year',
       time_of_year_relevance: '5'
     }
@@ -59,11 +59,11 @@ describe AlertSolarPVBenefitEstimator do
     expect(BenchmarkMetrics.pricing).to eq(new_pricing)
     alert.calculate(Date.new(2022, 7, 12))
     expect(alert.text_template_variables).not_to eq(default_pricing_template_variables)
-    expect(alert.text_template_variables[:one_year_saving_£current]).to eq('£29,000')
-    expect(alert.text_template_variables[:one_year_saving_£]).to eq('£29,000')
-    expect(alert.text_template_variables[:average_one_year_saving_£]).to eq('£29,000')
-    expect(alert.text_template_variables[:average_ten_year_saving_£]).to eq('£290,000')
-    expect(alert.text_template_variables[:ten_year_saving_£]).to eq('£290,000')
+    expect(alert.text_template_variables[:one_year_saving_£current]).to eq('£26,000')
+    expect(alert.text_template_variables[:one_year_saving_£]).to eq('£26,000')
+    expect(alert.text_template_variables[:average_one_year_saving_£]).to eq('£26,000')
+    expect(alert.text_template_variables[:average_ten_year_saving_£]).to eq('£260,000')
+    expect(alert.text_template_variables[:ten_year_saving_£]).to eq('£260,000')
     expect(alert.text_template_variables[:capital_cost]).to eq('£170,000')
     expect(alert.text_template_variables[:average_capital_cost]).to eq('£170,000')
   end

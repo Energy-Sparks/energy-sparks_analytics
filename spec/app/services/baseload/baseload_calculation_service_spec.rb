@@ -15,7 +15,7 @@ describe Baseload::BaseloadCalculationService, type: :service do
   context '#average_baseload_kw' do
     it 'calculates baseload for a year' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
-      expect(service.average_baseload_kw).to round_to_two_digits(24.32)
+      expect(service.average_baseload_kw).to be_within(0.01).of(24.32)
     end
 
     it 'calculates baseload for a week' do
@@ -28,8 +28,8 @@ describe Baseload::BaseloadCalculationService, type: :service do
     it 'calculates saving through 1 kw reduction in_baseload' do
       saving = service.saving_through_1_kw_reduction_in_baseload
       expect(saving.kwh).to eq(Baseload::BaseloadCalculationService::KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD)
-      expect(saving.£).to round_to_two_digits(1308.57) # 1308.5721093184443
-      expect(saving.co2).to round_to_two_digits(1658.3) # 1658.295471701968
+      expect(saving.£).to be_within(0.01).of(1025.22)
+      expect(saving.co2).to be_within(0.01).of(1463.58)
     end
   end
 
@@ -38,17 +38,14 @@ describe Baseload::BaseloadCalculationService, type: :service do
       usage = service.annual_baseload_usage
 
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
-      expect(usage.kwh).to round_to_two_digits(213001.8)
-      expect(usage.co2).to round_to_two_digits(40321.91)
-      expect(usage.£).to round_to_two_digits(31818.29)
+      expect(usage.kwh).to be_within(0.01).of(213001.8)
+      expect(usage.co2).to be_within(0.01).of(35587.57)
+      expect(usage.£).to be_within(0.01).of(24928.51)
       expect(usage.percent).to be_nil
     end
     it 'includes percentage if needed' do
       usage = service.annual_baseload_usage(include_percentage: true)
-      expect(usage.kwh).to round_to_two_digits(213001.8)
-      expect(usage.co2).to round_to_two_digits(40321.91)
-      expect(usage.£).to round_to_two_digits(31818.29)
-      expect(usage.percent).to round_to_two_digits(0.47)
+      expect(usage.percent).to be_within(0.01).of(0.47)
     end
   end
 

@@ -14,12 +14,12 @@ describe Baseload::BaseloadBenchmarkingService, type: :service do
   context '#average_baseload_kw' do
     it 'calculates baseload for a benchmark school' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
-      expect( service.average_baseload_kw(compare: :benchmark_school) ).to round_to_two_digits(18.76)
+      expect( service.average_baseload_kw(compare: :benchmark_school) ).to be_within(0.01).of(18.76)
     end
 
     it 'calculated baseload for an exemplar school' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
-      expect( service.average_baseload_kw(compare: :exemplar_school) ).to round_to_two_digits(11.26)
+      expect( service.average_baseload_kw(compare: :exemplar_school) ).to be_within(0.01).of(11.26)
     end
   end
 
@@ -27,17 +27,17 @@ describe Baseload::BaseloadBenchmarkingService, type: :service do
     it 'calculates usage for a benchmark school' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
       usage = service.baseload_usage(compare: :benchmark_school)
-      expect(usage.kwh).to round_to_two_digits(164328.84)
-      expect(usage.£).to round_to_two_digits(24547.5)
-      expect(usage.co2).to round_to_two_digits(31107.96)
+      expect(usage.kwh).to be_within(0.01).of(164328.84)
+      expect(usage.£).to be_within(0.01).of(19232.10)
+      expect(usage.co2).to be_within(0.01).of(27455.47)
     end
 
     it 'calculates usage for an exemplar school' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
       usage = service.baseload_usage(compare: :exemplar_school)
-      expect(usage.kwh).to round_to_two_digits(98597.3)
-      expect(usage.£).to round_to_two_digits(14728.5)
-      expect(usage.co2).to round_to_two_digits(18664.78)
+      expect(usage.kwh).to be_within(0.01).of(98597.3)
+      expect(usage.£).to be_within(0.01).of(11539.26)
+      expect(usage.co2).to be_within(0.01).of(16473.28)
     end
   end
 
@@ -45,17 +45,17 @@ describe Baseload::BaseloadBenchmarkingService, type: :service do
     it 'calculates savings vs benchmark school' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
       usage = service.estimated_savings(versus: :benchmark_school)
-      expect(usage.kwh).to round_to_two_digits(48672.96)
-      expect(usage.£).to round_to_two_digits(7270.79)
-      expect(usage.co2).to round_to_two_digits(9213.94)
+      expect(usage.kwh).to be_within(0.01).of(48672.96)
+      expect(usage.£).to be_within(0.01).of(5696.40)
+      expect(usage.co2).to be_within(0.01).of(8132.10)
     end
 
     it 'calculates savings vs exemplar school' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
       usage = service.estimated_savings(versus: :exemplar_school)
-      expect(usage.kwh).to round_to_two_digits(114404.5)
-      expect(usage.£).to round_to_two_digits(17089.79)
-      expect(usage.co2).to round_to_two_digits(21657.13)
+      expect(usage.kwh).to be_within(0.01).of(114404.5)
+      expect(usage.£).to be_within(0.01).of(13389.24)
+      expect(usage.co2).to be_within(0.01).of(19114.29)
     end
   end
 

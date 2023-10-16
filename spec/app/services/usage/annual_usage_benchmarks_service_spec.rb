@@ -35,30 +35,30 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
     context 'for electricity' do
       it 'calculates the expected values for a benchmark school' do
         annual_usage = service.annual_usage(compare: :benchmark_school)
-        expect(annual_usage.kwh).to round_to_two_digits(312325.0)
-        expect(annual_usage.£).to round_to_two_digits(47484.71)
-        expect(annual_usage.co2).to round_to_two_digits(59124.1)
+        expect(annual_usage.kwh).to be_within(0.01).of(312325.0)
+        expect(annual_usage.£).to be_within(0.01).of(46848.75)
+        expect(annual_usage.co2).to be_within(0.01).of(52182.13)
       end
       it 'calculates the expected values for an exemplar school' do
         annual_usage = service.annual_usage(compare: :exemplar_school)
-        expect(annual_usage.kwh).to round_to_two_digits(218627.5)
-        expect(annual_usage.£).to round_to_two_digits(33239.3)
-        expect(annual_usage.co2).to round_to_two_digits(41386.87)
+        expect(annual_usage.kwh).to be_within(0.01).of(218627.5)
+        expect(annual_usage.£).to be_within(0.01).of(32794.12)
+        expect(annual_usage.co2).to be_within(0.01).of(36527.49)
       end
     end
     context 'for gas' do
       let(:fuel_type)        { :gas }
       it 'calculates the expected values for a benchmark school' do
         annual_usage = service.annual_usage(compare: :benchmark_school)
-        expect(annual_usage.kwh).to round_to_two_digits(542203.44)
-        expect(annual_usage.£).to round_to_two_digits(16266.10)
-        expect(annual_usage.co2).to round_to_two_digits(113862.72)
+        expect(annual_usage.kwh).to be_within(0.01).of(541711.87)
+        expect(annual_usage.£).to be_within(0.01).of(16251.35)
+        expect(annual_usage.co2).to be_within(0.01).of(113759.49)
       end
       it 'calculates the expected values for an exemplar school' do
         annual_usage = service.annual_usage(compare: :exemplar_school)
-        expect(annual_usage.kwh).to round_to_two_digits(502913.33)
-        expect(annual_usage.£).to round_to_two_digits(15087.40)
-        expect(annual_usage.co2).to round_to_two_digits(105611.8)
+        expect(annual_usage.kwh).to be_within(0.01).of(502457.39)
+        expect(annual_usage.£).to be_within(0.01).of(15073.72)
+        expect(annual_usage.co2).to be_within(0.01).of(105516.05)
       end
     end
   end
@@ -67,34 +67,34 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
     context 'for electricity' do
       it 'calculates the expected values for a benchmark school' do
         savings = service.estimated_savings(versus: :benchmark_school)
-        expect(savings.kwh).to round_to_two_digits(137223.0)
-        expect(savings.£).to round_to_two_digits(20862.87)
-        expect(savings.co2).to round_to_two_digits(25976.74)
-        expect(savings.percent).to round_to_two_digits(0.44)
+        expect(savings.kwh).to be_within(0.01).of(137223.0)
+        expect(savings.£).to be_within(0.01).of(20583.45)
+        expect(savings.co2).to be_within(0.01).of(22926.72)
+        expect(savings.percent).to be_within(0.01).of(0.44)
       end
       it 'calculates the expected values for an exemplar school' do
         savings = service.estimated_savings(versus: :exemplar_school)
-        expect(savings.kwh).to round_to_two_digits(230920.5)
-        expect(savings.£).to round_to_two_digits(35108.28)
-        expect(savings.co2).to round_to_two_digits(43713.97)
-        expect(savings.percent).to round_to_two_digits(1.06)
+        expect(savings.kwh).to be_within(0.01).of(230920.5)
+        expect(savings.£).to be_within(0.01).of(34638.07)
+        expect(savings.co2).to be_within(0.01).of(38581.36)
+        expect(savings.percent).to be_within(0.01).of(1.06)
       end
     end
     context 'for gas' do
       let(:fuel_type)        { :gas }
       it 'calculates the expected values for a benchmark school' do
         savings = service.estimated_savings(versus: :benchmark_school)
-        expect(savings.kwh).to round_to_two_digits(90129.45)
-        expect(savings.£).to round_to_two_digits(2703.88)
-        expect(savings.co2).to round_to_two_digits(18927.18)
-        expect(savings.percent).to round_to_two_digits(0.17)
+        expect(savings.kwh).to be_within(0.01).of(90621.01)
+        expect(savings.£).to be_within(0.01).of(2718.63)
+        expect(savings.co2).to be_within(0.01).of(19030.41)
+        expect(savings.percent).to be_within(0.01).of(0.16)
       end
       it 'calculates the expected values for an exemplar school' do
         savings = service.estimated_savings(versus: :exemplar_school)
-        expect(savings.kwh).to round_to_two_digits(129419.56)
-        expect(savings.£).to round_to_two_digits(3882.59)
-        expect(savings.co2).to round_to_two_digits(27178.11)
-        expect(savings.percent).to round_to_two_digits(0.26)
+        expect(savings.kwh).to be_within(0.01).of(129875.49)
+        expect(savings.£).to be_within(0.01).of(3896.26)
+        expect(savings.co2).to be_within(0.01).of(27273.85)
+        expect(savings.percent).to be_within(0.01).of(0.25)
       end
     end
   end
