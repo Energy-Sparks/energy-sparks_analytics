@@ -391,7 +391,7 @@ class GenericAccountingTariff
   end
 
   def tier_description(tier_name, low_threshold, high_threshold, rate_config)
-    time_range = format_time_range(rate_config)
+    time_range = GenericAccountingTariff.format_time_range(rate_config)
     threshold_range = threshhold_range_description(tier_name, low_threshold, high_threshold)
     trtr = "#{time_range}: #{threshold_range}"
     append_weekday_weekend(trtr)
