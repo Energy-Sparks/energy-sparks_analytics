@@ -40,7 +40,7 @@ describe GenericAccountingTariff do
       }
       let(:tariff_attribute) { create_accounting_tariff_generic(type: :differential, rates: rates) }
       it 'raises exception' do
-        expect{ accounting_tariff }.to raise_error(AccountingTariff::OverlappingTimeRanges)
+        expect{ accounting_tariff }.to raise_error(GenericAccountingTariff::OverlappingTimeRanges)
       end
     end
 
@@ -58,7 +58,7 @@ describe GenericAccountingTariff do
 
       let(:tariff_attribute) { create_accounting_tariff_generic(type: :differential, rates: rates) }
       it 'raises exception' do
-        expect{ accounting_tariff }.to raise_error(AccountingTariff::IncompleteTimeRanges)
+        expect{ accounting_tariff }.to raise_error(GenericAccountingTariff::IncompleteTimeRanges)
       end
     end
 
@@ -81,7 +81,7 @@ describe GenericAccountingTariff do
       }
       let(:tariff_attribute) { create_accounting_tariff_generic(type: :differential, rates: rates) }
       it 'raises exception' do
-        expect{ accounting_tariff }.to raise_error(AccountingTariff::TimeRangesNotOn30MinuteBoundary)
+        expect{ accounting_tariff }.to raise_error(GenericAccountingTariff::TimeRangesNotOn30MinuteBoundary)
       end
     end
   end
@@ -89,15 +89,16 @@ describe GenericAccountingTariff do
   context '.differential?' do
     context 'with flat rate' do
       it 'identifies the type of tariff' do
-        expect(accounting_tariff.differential?(nil)).to be false
-        expect(accounting_tariff.flat_tariff?(nil)).to be true
+        expect(accounting_tariff.differential?).to be false
+        expect(accounting_tariff.flat_tariff?).to be true
       end
     end
     context 'with differential ' do
-      let(:tariff_attribute) { create_accounting_tariff_generic(rates: create_differential_rate) }
+      let(:tariff_type)       { :differential }
+      let(:rates)             { create_differential_rate }
       it 'identifies the type of tariff' do
-        expect(accounting_tariff.differential?(nil)).to be true
-        expect(accounting_tariff.flat_tariff?(nil)).to be false
+        expect(accounting_tariff.differential?).to be true
+        expect(accounting_tariff.flat_tariff?).to be false
       end
     end
   end
@@ -244,6 +245,7 @@ describe GenericAccountingTariff do
         let(:tariff_attribute) { create_accounting_tariff_generic(start_date: start_date, end_date: end_date, type: tariff_type, rates: rates, vat: vat) }
 
         it 'calculates vat' do
+          #ap accounting_cost.all_costs_x48
           expect(accounting_cost.all_costs_x48[:"vat@10%"]).to eq Array.new(48, 0.01 * 0.15 * 0.10)
         end
 

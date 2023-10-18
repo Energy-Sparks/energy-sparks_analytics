@@ -18,33 +18,6 @@ module EnergySparksAnalyticsDataHelpers
     rates
   end
 
-  #Creates hash structure used to describe the rates in an older style differential tariff
-  #As used by AccountingTariff
-  def create_old_differential_rate(day_rate: 0.30, night_rate: 0.15, standing_charge: nil, other_charges: {})
-    rates = {
-      nighttime_rate: {
-        from: TimeOfDay.new(7,0),
-        to: TimeOfDay.new(24,0),
-        per: :kwh,
-        rate: night_rate
-      },
-      daytime_rate: {
-        from: TimeOfDay.new(0,0),
-        to: TimeOfDay.new(6,30),
-        per: :kwh,
-        rate: day_rate
-      }
-    }
-    if standing_charge
-      rates[:standing_charge] = {
-        per: :day,
-        rate: standing_charge
-      }
-    end
-    rates.merge!(other_charges)
-    rates
-  end
-
   #Creates hash structure used to describe the rates in the current style of differential tariff
   #As used by GenericAccountingTariff
   def create_differential_rate(day_rate: 0.30, night_rate: 0.15, standing_charge: nil, other_charges: {})

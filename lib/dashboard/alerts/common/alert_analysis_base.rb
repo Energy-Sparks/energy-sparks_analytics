@@ -546,7 +546,6 @@ class AlertAnalysisBase < ContentBase
       AlertThermostaticControl                                    => 'httc',
       AlertWeekendGasConsumptionShortTerm                         => 'gswe',
       AlertMeterASCLimit                                          => 'masc',
-      AlertDifferentialTariffOpportunity                          => 'dtaf',
       AlertSchoolWeekComparisonElectricity                        => 'eswc',
       AlertPreviousHolidayComparisonElectricity                   => 'ephc',
       AlertPreviousYearHolidayComparisonElectricity               => 'epyc',

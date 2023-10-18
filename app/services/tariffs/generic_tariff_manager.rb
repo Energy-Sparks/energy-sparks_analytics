@@ -81,7 +81,7 @@ class GenericTariffManager
     #tariff unchanged in period
     return nil if prev_tariff == found_tariff
     #tariff changed, so return start unless its the minimum date
-    prev_tariff.start_date == MeterTariff::MIN_DEFAULT_START_DATE ? nil : prev_tariff.start_date
+    prev_tariff.start_date == GenericAccountingTariff::MIN_DEFAULT_START_DATE ? nil : prev_tariff.start_date
   end
 
   # Find all the dates when the tariff changes within the period
@@ -90,7 +90,7 @@ class GenericTariffManager
   # Costs::EconomicTariffsChangeCaveatsService
   def tariff_change_dates_in_period(start_date  = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
     list_of_tariffs = find_tariffs_between_dates(start_date, end_date)
-    list_of_tariffs = list_of_tariffs.reject {|t| t.end_date == MeterTariff::MAX_DEFAULT_END_DATE }
+    list_of_tariffs = list_of_tariffs.reject {|t| t.end_date == GenericAccountingTariff::MAX_DEFAULT_END_DATE }
     list_of_tariffs.map{ |t| t.end_date + 1 }
   end
 
@@ -143,7 +143,7 @@ class GenericTariffManager
   #find most recently created tariff, force nil timestamps to sort last
   def most_recent(found_tariffs)
     found_tariffs.max_by do |t|
-      t.tariff[:created_at].nil? ? MeterTariff::MIN_DEFAULT_START_DATE : t.tariff[:created_at]
+      t.tariff[:created_at].nil? ? GenericAccountingTariff::MIN_DEFAULT_START_DATE : t.tariff[:created_at]
     end
   end
 
@@ -249,6 +249,6 @@ class GenericTariffManager
   #Determine whether there's a differential tariff for a specific date
   def differential_tariff_on_date?(date)
     tariff = find_tariff_for_date(date)
-    !tariff.nil? && tariff.differential?(date)
+    !tariff.nil? && tariff.differential?
   end
 end
