@@ -163,6 +163,10 @@ class MeterCollection
     @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
   end
 
+  def earliest_meter_date
+    all_meters.map{|meter| meter.amr_data.start_date }.min
+  end
+
   def first_combined_meter_date
     all_aggregate_meters.map{ |meter| meter.amr_data.start_date }.max
   end
@@ -502,7 +506,7 @@ class MeterCollection
   #Clip the schedule data to the earliest date that we need for charting or
   #subsequent analysis.
   private def clean_up_schedule_data!
-    earliest_date = first_combined_meter_date
+    earliest_date = earliest_meter_date
     return if earliest_date.nil?
 
     grid_carbon_intensity.set_start_date(earliest_date)

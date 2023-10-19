@@ -160,12 +160,14 @@ class HalfHourlyData < Hash
   end
 
   def set_start_date(date)
+    return if date < @min_date
     logger.info "setting start date to #{date} truncating prior data"
     @min_date = date
     self.delete_if{ |d, _value| d < date }
   end
 
   def set_end_date(date)
+    return if date > @max_date
     logger.info "setting end date to #{date} truncating post data"
     @max_date = date
     self.delete_if{ |d, _value| d > date }
@@ -205,7 +207,7 @@ class HalfHourlyData < Hash
   private
 
   def reset_min_max_date
-    # This method needs to remain private as it should only ever be called by 
+    # This method needs to remain private as it should only ever be called by
     # the `remove_dates!` method
     @min_date,@max_date = keys.minmax
   end
