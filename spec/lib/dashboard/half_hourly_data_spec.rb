@@ -10,4 +10,5 @@ describe HalfHourlyData do
      expect(data.inspect).to include("days: 0")
     end
   end
+
 end
