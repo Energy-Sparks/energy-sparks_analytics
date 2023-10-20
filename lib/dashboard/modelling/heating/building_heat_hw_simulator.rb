@@ -52,7 +52,11 @@ class BuildingHeatHWSimulator
   def occupied_by_time?(date, day_index)
     @occupied_time_cache ||= {} # this 2 level caching doesn't improve performance much
     @occupied_time_cache[date] ||= {}
-    @occupied_time_cache[date][day_index] ||= occupied?(date) && school.is_school_usually_open?(date, time_of_day(day_index))
+    @occupied_time_cache[date][day_index] ||= occupied?(date) && is_school_usually_open?(school, time_of_day(day_index))
+  end
+
+  def is_school_usually_open?(school, time_of_day)
+    time_of_day >= school.open_time && time_of_day < school.close_time
   end
 
   def weekend?(date)
