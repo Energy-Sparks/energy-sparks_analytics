@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Baseload
   # mix of electricity baseload analysis
   class BaseloadCalculator
@@ -15,7 +17,8 @@ module Baseload
     end
 
     def average_baseload_kw(date1, date2)
-      amr_data.average_baseload_kw_date_range(date1, date2, sheffield_solar_pv: @meter.sheffield_simulated_solar_pv_panels?)
+      amr_data.average_baseload_kw_date_range(date1, date2,
+                                              sheffield_solar_pv: @meter.sheffield_simulated_solar_pv_panels?)
     end
 
     def average_baseload_last_week_kw(date)
@@ -50,13 +53,14 @@ module Baseload
     def blended_baseload_tariff_rate_£_per_kwh(datatype, asof_date = amr_data.end_date)
       annual_average_baseload_kwh = annual_average_baseload_kwh(asof_date)
       return 0.0 if annual_average_baseload_kwh.zero?
+
       scaled_annual_baseload_cost_£ = scaled_annual_baseload_cost_£(datatype, asof_date)
       scaled_annual_baseload_cost_£ / annual_average_baseload_kwh
     end
 
     def one_years_data?(asof_date = amr_data.end_date)
       start_date = @meter.amr_data.start_date
-      return (asof_date - 364) >= start_date
+      (asof_date - 364) >= start_date
     end
 
     def scaled_annual_dates(asof_date)
@@ -67,8 +71,8 @@ module Baseload
       [start_date, end_date, scale_to_year.to_f]
     end
 
-    #We use 6 rather than 7 days ago because of potential issue with schools
-    #with large intraweek variation in consumption.
+    # We use 6 rather than 7 days ago because of potential issue with schools
+    # with large intraweek variation in consumption.
     def one_week_ago(date)
       date - 6
     end
@@ -82,7 +86,6 @@ module Baseload
     def one_years_baseload_co2_kg(asof_date = amr_data.end_date)
       HOURS_IN_YEAR * baseload_co2_carbon_intensity_co2_k2_per_kwh(asof_date)
     end
-
 
     def baseload_economic_cost_date_range_£(d1, d2, datatype)
       (d1..d2).map do |date|
@@ -110,8 +113,10 @@ module Baseload
 
     def percent_seasonal_variation(asof_date = amr_data.end_date)
       return nil unless one_years_data?
+
       kw_in_summer = summer_kw(asof_date)
       return 0.0 if kw_in_summer.zero? # Otherwise the division (by zero) below will return Infinity
+
       (winter_kw(asof_date) - kw_in_summer) / kw_in_summer
     end
 
@@ -123,15 +128,14 @@ module Baseload
 
       (start_date..amr_data.end_date).each do |date|
         next if daytype(date) == :holiday
+
         weekday_kws[date.wday] ||= []
         weekday_kws[date.wday].push(amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?))
       end
 
-      average_day_kw = weekday_kws.transform_values do |kws|
+      weekday_kws.transform_values do |kws|
         kws.sum / kws.length
       end
-
-      average_day_kw
     end
 
     def costs_of_baseload_above_minimum_kwh(asof_date = amr_data.end_date, minimum)
