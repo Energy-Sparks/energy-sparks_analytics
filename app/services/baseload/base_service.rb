@@ -15,7 +15,7 @@ module Baseload
     end
 
     def baseload_analysis
-      @baseload_analysis ||= ElectricityBaseloadAnalysis.new(@meter)
+      @baseload_analysis ||= BaseloadCalculator.new(@meter)
     end
 
     def validate_meter_collection(meter_collection)

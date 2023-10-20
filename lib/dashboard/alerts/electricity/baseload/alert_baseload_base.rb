@@ -1,3 +1,5 @@
+require_relative '../../../../../app/services/baseload/baseload_calculator.rb'
+
 class AlertBaseloadBase < AlertElectricityOnlyBase
   attr_reader :blended_baseload_rate_£_per_kwh, :blended_baseload_rate_£current_per_kwh, :has_changed_during_period_text
   attr_reader :annual_baseload_percent
@@ -77,10 +79,6 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
 
   private
 
-  def baseload_calculator(meter = aggregate_meter)
-    @baseload_calculator ||= ElectricityBaseloadAnalysis.new(meter)
-  end
-
   def average_baseload(date1, date2)
     baseload_analysis.average_baseload_kw(date1, date2)
   end
@@ -107,7 +105,7 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
   end
 
   def baseload_analysis
-    @baseload_analysis ||= ElectricityBaseloadAnalysis.new(@meter)
+    @baseload_analysis ||= Baseload::BaseloadCalculator.new(@meter)
   end
 
   def valid_calculation(alert, asof_date)

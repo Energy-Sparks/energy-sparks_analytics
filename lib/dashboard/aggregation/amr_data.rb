@@ -476,7 +476,7 @@ class AMRData < HalfHourlyData
     overnight_baseload_kwh_date_range(date1, date2) / (date2 - date1 + 1)
   end
 
-  def overnight_baseload_kwh_date_range(date1, date2)
+  private def overnight_baseload_kwh_date_range(date1, date2)
     total = 0.0
     (date1..date2).each do |date|
       raise EnergySparksNotEnoughDataException.new("Missing electric data for #{date}") if !self.key?(date)
@@ -485,7 +485,7 @@ class AMRData < HalfHourlyData
     total
   end
 
-  def baseload_kw_between_half_hour_indices(date, hhi1, hhi2, data_type = :kwh)
+  private def baseload_kw_between_half_hour_indices(date, hhi1, hhi2, data_type = :kwh)
     total_kwh = 0.0
     count = 0
     if hhi2 > hhi1 # same day
@@ -520,10 +520,6 @@ class AMRData < HalfHourlyData
     lowest_sorted_kwh = sorted_kwh[0..7]
     average_kwh = lowest_sorted_kwh.inject { |sum, el| sum + el }.to_f / lowest_sorted_kwh.size
     average_kwh * 2.0 # convert to kW
-  end
-
-  def statistical_baseloads_in_date_range(start_date, end_date)
-    (start_date..end_date).to_a.map { |d| statistical_baseload_kw(d) }
   end
 
   def statistical_peak_kw(date)

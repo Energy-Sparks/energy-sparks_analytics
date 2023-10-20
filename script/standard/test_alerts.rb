@@ -9,14 +9,14 @@ require_rel '../../test_support'
 
 asof_date = Date.new(2023, 7, 19)
 # schools = ['t*']
-schools = ['s*']
+schools = ['acme*']
 
 overrides = {
   schools:  schools,
   cache_school: false,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
   alerts:   { alerts: [
-    AlertSeasonalHeatingSchoolDays
+    AlertElectricityBaseloadVersusBenchmark
 #    AlertThermostaticControl
 #    AlertEnergyAnnualVersusBenchmark,
 #    AlertSchoolWeekComparisonGas,
