@@ -41,7 +41,7 @@ class MeterCollection
     @pseudo_meter_attributes = pseudo_meter_attributes
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
-    process_school_times(school.school_times, school.community_use_times)
+    @open_close_times = OpenCloseTimes.convert_frontend_times(@school.school_times, @school.community_use_times, @holidays)
   end
 
   def name
@@ -79,20 +79,6 @@ class MeterCollection
 
   def delete_pseudo_meter_attribute(pseudo_meter_key, attribute_key)
     @pseudo_meter_attributes[pseudo_meter_key]&.delete(attribute_key)
-  end
-
-  def matches_identifier?(identifier, identifier_type)
-    case identifier_type
-    when :name
-      identifier == name
-    when :urn
-      identifier == urn
-    when :postcode
-      identifier == postcode
-    else
-      raise EnergySparksUnexpectedStateException.new("Unexpected nil school identifier_type") if identifier_type.nil?
-      raise EnergySparksUnexpectedStateException.new("Unknown or implement school identifier lookup #{identifier_type}")
-    end
   end
 
   def target_school?
@@ -236,12 +222,17 @@ class MeterCollection
     meter_list
   end
 
-  # alternative approach to finding real meters, avoids synthetic_mpan_mprn?
+  #TODO remove reference in front-end
+  def real_meters2
+    real_meters
+  end
+
+  # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
+  #
+  # This version of the code avoids checking synthetic_mpan_mprn?
   # which can pickup real meters coming in from 3rd party systems like
   # Orsis where the MPAN is made up; used to test whether this approach works
-  #  too big a change to replace real_meters function
-  # TODO (PH, 4May2021) - replace if working, fully tested - see costs_advice.rb: check_real_meters
-  def real_meters2
+  def real_meters
     meter_list = [
       @heat_meters,
       @electricity_meters,
@@ -251,11 +242,6 @@ class MeterCollection
     meters = meter_list.map{ |m| m.sub_meters.fetch(:mains_consume, m) }
 
     meters.uniq{ |meter| meter.mpxn }
-  end
-
-  # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
-  def real_meters
-    all_meters.select { |meter| !meter.synthetic_mpan_mprn? }.uniq{ |m| m.mpxn}
   end
 
   def underlying_meters(fuel_type)
@@ -295,10 +281,6 @@ class MeterCollection
 
   def all_electricity_meters
     all_meters.select { |meter| meter.electricity_meter? }
-  end
-
-  def all_real_meters
-    [all_heat_meters, all_electricity_meters].flatten
   end
 
   def gas_only?
@@ -407,15 +389,7 @@ class MeterCollection
   end
 
   def open_close_times
-    @open_close_times ||= OpenCloseTimes.new(pseudo_meter_attributes(:school_level_data), holidays)
-  end
-
-  def process_school_times(school_day_times, community_times)
-    if school_day_times.nil? # TODO(PH, 17Feb2022) remove once new school timing code has migrated to production, backwards compatibility with old YAML files
-      @open_close_times = OpenCloseTimes.default_school_open_close_times(holidays)
-    else
-      @open_close_times = OpenCloseTimes.convert_frontend_times(school_day_times, community_times, holidays)
-    end
+    @open_close_times
   end
 
   def target_school(type = :day)
@@ -442,12 +416,6 @@ class MeterCollection
 
   def meter_attribute_types
     @pseudo_meter_attributes.keys
-  end
-
-  # This is overridden in the energysparks code at the moment, to use the actual open/close times
-  # It replaces school_day_in_hours(time_of_day)
-  def is_school_usually_open?(_date, time_of_day)
-    time_of_day >= @cached_open_time && time_of_day < @cached_close_time
   end
 
   # Notify meter collection that aggregation process is over.
