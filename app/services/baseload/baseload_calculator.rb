@@ -8,8 +8,8 @@ module Baseload
       @meter = meter
     end
 
-    def baseload_kwh_date_range(d1, d2)
-      amr_data.baseload_kwh_date_range(d1, d2, @meter.sheffield_simulated_solar_pv_panels?)
+    def baseload_kwh_date_range(date1, date2)
+      amr_data.baseload_kwh_date_range(date1, date2, @meter.sheffield_simulated_solar_pv_panels?)
     end
 
     def baseload_kw(date)
@@ -87,8 +87,8 @@ module Baseload
       HOURS_IN_YEAR * baseload_co2_carbon_intensity_co2_k2_per_kwh(asof_date)
     end
 
-    def baseload_economic_cost_date_range_£(d1, d2, datatype)
-      (d1..d2).map do |date|
+    def baseload_economic_cost_date_range_£(date1, date2, datatype)
+      (date1..date2).map do |date|
         baseload_economic_cost_£(date, datatype)
       end.sum
     end
@@ -123,22 +123,14 @@ module Baseload
     def average_intraweek_schoolday_kw(asof_date = amr_data.end_date)
       return nil unless one_years_data?
 
-      weekday_kws = {}
-      start_date = [asof_date - 364, amr_data.start_date].max
+      weekday_baseloads = weekday_baseloads_kw(asof_date)
 
-      (start_date..amr_data.end_date).each do |date|
-        next if daytype(date) == :holiday
-
-        weekday_kws[date.wday] ||= []
-        weekday_kws[date.wday].push(amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?))
-      end
-
-      weekday_kws.transform_values do |kws|
+      weekday_baseloads.transform_values do |kws|
         kws.sum / kws.length
       end
     end
 
-    def costs_of_baseload_above_minimum_kwh(asof_date = amr_data.end_date, minimum)
+    def costs_of_baseload_above_minimum_kwh(asof_date, minimum)
       baseloads_kw = years_baseloads(asof_date)
       excess_of_minimum_kws = baseloads_kw.map { |kw| [kw - minimum, 0.0].max }
       excess_of_minimum_kws.sum * 24.0 # convert to kWh
@@ -147,8 +139,7 @@ module Baseload
     private
 
     def years_baseloads(asof_date)
-      start_date = [asof_date - 364, amr_data.start_date].max
-      statistical_baseloads_in_date_range(start_date, amr_data.end_date)
+      statistical_baseloads_in_date_range(up_to_a_year_ago(asof_date), amr_data.end_date)
     end
 
     def statistical_baseloads_in_date_range(start_date, end_date)
@@ -159,13 +150,13 @@ module Baseload
       dates.map { |d| amr_data.baseload_kw(d, @meter.sheffield_simulated_solar_pv_panels?) }
     end
 
-    def average_top_n(baseload_kws, n)
-      kws = baseload_kws.sort.last(n)
+    def average_top_n(baseload_kws, num)
+      kws = baseload_kws.sort.last(num)
       kws.sum / kws.length
     end
 
-    def average_bottom_n(baseload_kws, n)
-      kws = baseload_kws.sort.first(n)
+    def average_bottom_n(baseload_kws, num)
+      kws = baseload_kws.sort.first(num)
       kws.sum / kws.length
     end
 
@@ -179,11 +170,25 @@ module Baseload
 
     def sample_days_in_months(asof_date, months_list, type = :schoolday)
       sample_dates = []
-      start_date = [asof_date - 364, amr_data.start_date].max
-      (start_date..amr_data.end_date).each do |date|
+      (up_to_a_year_ago(asof_date)..amr_data.end_date).each do |date|
         sample_dates.push(date) if months_list.include?(date.month) && daytype(date) == type
       end
       sample_dates
+    end
+
+    def weekday_baseloads_kw(asof_date)
+      weekday_baseloads = {}
+      (up_to_a_year_ago(asof_date)..amr_data.end_date).each do |date|
+        next if daytype(date) == :holiday
+
+        weekday_baseloads[date.wday] ||= []
+        weekday_baseloads[date.wday].push(amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?))
+      end
+      weekday_baseloads
+    end
+
+    def up_to_a_year_ago(asof_date)
+      [asof_date - 364, amr_data.start_date].max
     end
 
     def daytype(date)
