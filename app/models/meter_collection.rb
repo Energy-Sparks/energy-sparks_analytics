@@ -510,11 +510,12 @@ class MeterCollection
     return if earliest_date.nil?
 
     grid_carbon_intensity.set_start_date(earliest_date)
+
+    #we need a bit more temperature and solar data for calculating targets and annual estimates,
+    #so adjust date by one year for solar and
+    earliest_date = earliest_date - (365 + TargetMeterTemperatureCompensatedDailyDayTypeBase::TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
     solar_pv.set_start_date(earliest_date)
     solar_irradiation.set_start_date(earliest_date)
-
-    #we need a bit more temperature data for targets, so adjust date by one year
-    earliest_date = earliest_date - (365 + TargetMeterTemperatureCompensatedDailyDayTypeBase::TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
     temperatures.set_start_date(earliest_date)
   end
 end
