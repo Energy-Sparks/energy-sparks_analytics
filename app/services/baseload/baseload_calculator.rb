@@ -8,10 +8,12 @@ module Baseload
       @meter = meter
     end
 
+    #Not used, but could replace amr method?
     def baseload_kwh_date_range(date1, date2)
       amr_data.baseload_kwh_date_range(date1, date2, @meter.sheffield_simulated_solar_pv_panels?)
     end
 
+    #Not used? but could replace amr method?
     def baseload_kw(date)
       amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?)
     end
@@ -93,16 +95,6 @@ module Baseload
       end.sum
     end
 
-    def baseload_economic_cost_£(date, datatype)
-      baseload_economic_cost_x48(date, datatype).sum
-    end
-
-    def baseload_economic_cost_x48(date, datatype)
-      blended_rate_£_per_kwh_x48 = amr_data.blended_rate_£_per_kwh_x48(date, datatype)
-      baseload_kwh_x48 = AMRData.single_value_kwh_x48(baseload_kw(date) / 2.0)
-      AMRData.fast_multiply_x48_x_x48(baseload_kwh_x48, blended_rate_£_per_kwh_x48)
-    end
-
     def winter_kw(asof_date = amr_data.end_date)
       average_top_n(baseload_kws_for_dates(winter_school_day_sample_dates(asof_date)), 15)
     end
@@ -137,6 +129,16 @@ module Baseload
     end
 
     private
+
+    def baseload_economic_cost_£(date, datatype)
+      baseload_economic_cost_x48(date, datatype).sum
+    end
+
+    def baseload_economic_cost_x48(date, datatype)
+      blended_rate_£_per_kwh_x48 = amr_data.blended_rate_£_per_kwh_x48(date, datatype)
+      baseload_kwh_x48 = AMRData.single_value_kwh_x48(baseload_kw(date) / 2.0)
+      AMRData.fast_multiply_x48_x_x48(baseload_kwh_x48, blended_rate_£_per_kwh_x48)
+    end
 
     def years_baseloads(asof_date)
       statistical_baseloads_in_date_range(up_to_a_year_ago(asof_date), amr_data.end_date)
