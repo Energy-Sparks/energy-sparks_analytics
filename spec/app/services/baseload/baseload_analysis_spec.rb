@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe Baseload::BaseloadCalculator do
+describe Baseload::BaseloadAnalysis do
 
   let(:day_count)       { 365 }
   let(:amr_data)        { build(:amr_data, :with_days, day_count: day_count) }
   let(:meter)           { build(:meter, amr_data: amr_data) }
-  subject(:calculator)  { Baseload::BaseloadCalculator.new(meter) }
+  subject(:calculator)  { Baseload::BaseloadAnalysis.new(meter) }
 
   context '#one_years_data?' do
     it 'returns true with a years worth of data' do

@@ -47,7 +47,7 @@ module Baseload
     end
 
     def average_baseload_kw_for(year)
-      BaseloadCalculator.new(aggregate_meter).average_annual_baseload_kw(asof_date_for(year))
+      BaseloadAnalysis.new(aggregate_meter).average_annual_baseload_kw(asof_date_for(year))
     rescue StandardError
       nil
     end

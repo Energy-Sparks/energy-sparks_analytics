@@ -1,4 +1,4 @@
-require_relative '../../../../../app/services/baseload/baseload_calculator.rb'
+require_relative '../../../../../app/services/baseload/baseload_analysis.rb'
 
 class AlertBaseloadBase < AlertElectricityOnlyBase
   attr_reader :blended_baseload_rate_£_per_kwh, :blended_baseload_rate_£current_per_kwh, :has_changed_during_period_text
@@ -105,7 +105,7 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
   end
 
   def baseload_analysis
-    @baseload_analysis ||= Baseload::BaseloadCalculator.new(@meter)
+    @baseload_analysis ||= Baseload::BaseloadAnalysis.new(@meter)
   end
 
   def valid_calculation(alert, asof_date)

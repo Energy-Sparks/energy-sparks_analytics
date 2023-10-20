@@ -1,5 +1,8 @@
 require_relative '../utilities/half_hourly_data'
 require_relative '../utilities/half_hourly_loader'
+require_relative '../../../app/services/baseload/baseload_calculator.rb'
+require_relative '../../../app/services/baseload/statistical_baseload_calculator.rb'
+require_relative '../../../app/services/baseload/overnight_baseload_calculator.rb'
 
 class AMRData < HalfHourlyData
   attr_reader :economic_tariff, :current_economic_tariff, :accounting_tariff, :carbon_emissions
@@ -454,72 +457,49 @@ class AMRData < HalfHourlyData
     total_kwh
   end
 
+  #Returns a baseload calculator. Parameter controls whether a statistical or
+  #overnight calculator is created. Pass true for schools with sheffield solar pv
+  #
+  # sheffield solar PV data artificially creates PV data which
+  # is not always 100% consistent with real PV data e.g. if orientation is different
+  # so the calculated statistics baseload can pick up morning and evening baseloads
+  # lower than reality, resulting in volatile and less accurate baseload
+  # test is on aggregate.
+  #
+  # So for these schools we use a different method
+  def baseload_calculator(overnight)
+    @calculators ||= {}
+    @calculators[overnight] ||= Baseload::BaseloadCalculator.calculator_for(self, overnight)
+  end
+
   def baseload_kw(date, sheffield_solar_pv = false, data_type = :kwh)
-    # sheffield solar PV data artificially creates PV data which
-    # is not always 100% consistent with real PV data e.g. if orientation is different
-    # so the calculated statistics baseload can pick up morning and evening baseloads
-    # lower than reality, resulting in volatile and less accurate baseload
-    # test is on aggregate
-    sheffield_solar_pv ? overnight_baseload_kw(date, data_type) : statistical_baseload_kw(date, data_type)
+    #use appropriate calculator
+    baseload_calculator(sheffield_solar_pv).baseload_kw(date, data_type)
   end
 
   def overnight_baseload_kw(date, data_type = :kwh)
-    raise EnergySparksNotEnoughDataException.new("Missing electric data (2) for #{date}") if date_missing?(date)
-    # The values 41 and 47 represent the electricity consumed between 20:30 and midnight.
-    # (i.e. 48 half hour values in a day so 41 * 0.5 = 20.5 => 20:30 in the evening to 47 * 0.5 => 23.5 => 23:30)
-    # This time of day for schools with solar PV panels synthesized by Sheffield PV data should provide a reasonable estimate of baseload.
-    # Sampling in the early morning instead is problematic as other consumers startup (e.g. boiler pumps, often from around 01:00).
-    baseload_kw_between_half_hour_indices(date, 41, 47, data_type)
+    #use calculator thats looks at overnight period
+    baseload_calculator(true).baseload_kw(date, data_type)
   end
 
   def average_overnight_baseload_kw_date_range(date1 = start_date, date2 = end_date)
-    overnight_baseload_kwh_date_range(date1, date2) / (date2 - date1 + 1)
+    #use calculator thats looks at overnight period
+    baseload_calculator(true).average_overnight_baseload_kw_date_range(date1, date2)
   end
 
-  private def overnight_baseload_kwh_date_range(date1, date2)
-    total = 0.0
-    (date1..date2).each do |date|
-      raise EnergySparksNotEnoughDataException.new("Missing electric data for #{date}") if !self.key?(date)
-      total += overnight_baseload_kw(date)
-    end
-    total
-  end
-
-  private def baseload_kw_between_half_hour_indices(date, hhi1, hhi2, data_type = :kwh)
-    total_kwh = 0.0
-    count = 0
-    if hhi2 > hhi1 # same day
-      (hhi1..hhi2).each do |halfhour_index|
-        total_kwh += kwh(date, halfhour_index, data_type)
-        count += 1
-      end
-    else
-      (hhi1..48).each do |halfhour_index| # before midnight
-        total_kwh += kwh(date, halfhour_index, data_type)
-        count += 1
-      end
-      (0..hhi2).each do |halfhour_index| # after midnight
-        total_kwh += kwh(date, halfhour_index, data_type)
-        count += 1
-      end
-    end
-    total_kwh * 2.0 / count
-  end
-
-  # alternative heuristic for baseload calculation (for storage heaters)
-  # find the average of the bottom 8 samples (4 hours) in a day
   def statistical_baseload_kw(date, data_type = :kwh)
-    @statistical_baseload_kw ||= {}
-    @statistical_baseload_kw[data_type] ||= {}
-    @statistical_baseload_kw[data_type][date] ||= calculate_statistical_baseload(date, data_type)
+    #use statistical calculator
+    baseload_calculator(false).baseload_kw(date, data_type)
   end
 
-  private def calculate_statistical_baseload(date, data_type)
-    days_data = days_kwh_x48(date, data_type) # 48 x 1/2 hour kWh
-    sorted_kwh = days_data.clone.sort
-    lowest_sorted_kwh = sorted_kwh[0..7]
-    average_kwh = lowest_sorted_kwh.inject { |sum, el| sum + el }.to_f / lowest_sorted_kwh.size
-    average_kwh * 2.0 # convert to kW
+  def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
+    #use appropriate calculator
+    baseload_calculator(sheffield_solar_pv).average_baseload_kw_date_range(date1, date2)
+  end
+
+  def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)
+    #use appropriate calculator
+    baseload_calculator(sheffield_solar_pv).baseload_kwh_date_range(date1, date2, sheffield_solar_pv)
   end
 
   def statistical_peak_kw(date)
@@ -564,35 +544,10 @@ class AMRData < HalfHourlyData
     [end_date - 365, start_date].max
   end
 
-  def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
-    date_divisor = (date2 - date1 + 1)
-    return 0.0 if date_divisor.zero?
-    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / date_divisor / 24.0
-  end
-
-  def baseload_£_economic_cost_date_range_deprecated(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
-    total_£ = 0.0
-
-    (date1..date2).each do |date|
-      bl_kw = baseload_kw(date, sheffield_solar_pv)
-      total_£ += @economic_tariff.calculate_baseload_cost(date, bl_kw)
-    end
-
-    total_£
-  end
-
   def economic_cost_for_x48_kwhs(date, kwh_x48)
     rate_£_per_kwh_x48 = blended_rate_£_per_kwh_x48(date)
     res = AMRData.fast_multiply_x48_x_x48(kwh_x48, rate_£_per_kwh_x48)
     res.sum
-  end
-
-  def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)
-    total_kwh = 0.0
-    (date1..date2).each do |date|
-      total_kwh += baseload_kw(date, sheffield_solar_pv)
-    end
-    total_kwh * 24.0
   end
 
   def self.create_empty_dataset(type, start_date, end_date, reading_type = 'ORIG')
