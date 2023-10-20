@@ -99,7 +99,7 @@ class RunAdultDashboard < RunCharts
     end
   end
 
-  private def adult_report_groups(@school)
+  private def adult_report_groups
     report_groups = []
     report_groups.push(:benchmark)                    if @school.electricity? && !@school.solar_pv_panels?
     report_groups.push(:benchmark_kwh_electric_only)  if @school.electricity? && @school.solar_pv_panels?
@@ -115,7 +115,7 @@ class RunAdultDashboard < RunCharts
   end
 
   private def page_list
-    adult_report_groups(@school).map do |report_group|
+    adult_report_groups.map do |report_group|
       DashboardConfiguration::ADULT_DASHBOARD_GROUPS[report_group]
     end.flatten
   end
