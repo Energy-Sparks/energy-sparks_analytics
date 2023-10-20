@@ -1,24 +1,13 @@
-# Was a building!
-
-# building: potentially a misnomer, holds data associated with a group
-#           of buildings, which could be a whole school or the area
-#           covered by a single meter
-#           primarily a placeholder for data associated with a school
-#           or group of buildings, potentially different to the parent
-#           school, so for example a different holiday and open/close time
-#           schedule if a meter covers a community sports centre which is
-#           used out of core school hours
-#           - also holds modelling data
+# Meaning of this class has evolved over time, from a building, to data
+# associated with a group of buildings (e.g. whole school or area of single meter)
+#
+# But now it largely holds the consumption, schedule data and analysis associated
+# with a specific school.
 class MeterCollection
   include Logging
 
   attr_reader :heat_meters, :electricity_meters, :storage_heater_meters
-
-  # From school/building
-  attr_reader :floor_area, :number_of_pupils, :calculated_floor_area_pupil_numbers
-
-  # Currently, but not always
-  attr_reader :school, :name, :address, :postcode, :country, :funding_status, :urn, :area_name, :model_cache, :default_energy_purchaser
+  attr_reader :school, :model_cache
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
@@ -29,46 +18,59 @@ class MeterCollection
                 :solar_pv,
                 :grid_carbon_intensity
 
-  # Centrica
+  # For community use calculations
   attr_accessor :aggregated_electricity_meter_without_community_usage
   attr_accessor :aggregated_heat_meters_without_community_usage
   attr_accessor :storage_heater_meter_without_community_usage
   attr_accessor :community_disaggregator
 
   def initialize(school, holidays:, temperatures:, solar_irradiation: nil, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
-    @name = school.name
-    @address = school.address
-    @postcode = school.postcode
-    @country = school.country
-    @funding_status = school.funding_status
-    @floor_area = school.floor_area
-    @number_of_pupils = school.number_of_pupils
+    @school = school
     @holidays = holidays
     @temperatures = temperatures
     @solar_pv = solar_pv
     @solar_irradiation = solar_irradiation.nil? ? SolarIrradianceFromPV.new('solar irradiance from pv', solar_pv_data: solar_pv) : solar_irradiation
-
     @grid_carbon_intensity = grid_carbon_intensity
-
-    unless school.location.nil?
-      @latitude  = school.location[0].to_f
-      @longitude = school.location[1].to_f
-    end
 
     @heat_meters = []
     @electricity_meters = []
     @storage_heater_meters = []
-    @school = school
-    @urn = school.urn
     @meter_identifier_lookup = {} # [mpan or mprn] => meter
-    @area_name = school.area_name
-    @default_energy_purchaser = @area_name # use the area name for the moment
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
     @pseudo_meter_attributes = pseudo_meter_attributes
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
     process_school_times(school.school_times, school.community_use_times)
+  end
+
+  def name
+    @school.name
+  end
+
+  def postcode
+    @school.postcode
+  end
+
+  def country
+    @school.country
+  end
+
+  def funding_status
+    @school.funding_status
+  end
+
+  def urn
+    @school.urn
+  end
+
+  def area_name
+    @school.area_name
+  end
+
+  def default_energy_purchaser
+    # use the area name for the moment
+    @school.area_name
   end
 
   def merge_additional_pseudo_meter_attributes(pseudo_meter_attributes)
@@ -160,7 +162,7 @@ class MeterCollection
   end
 
   def calculate_floor_area_number_of_pupils
-    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
+    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@school.floor_area, @school.number_of_pupils, pseudo_meter_attributes(:school_level_data))
   end
 
   def earliest_meter_date
@@ -176,7 +178,7 @@ class MeterCollection
   end
 
   def inspect
-    "Meter Collection (name: '#{@name}', object_id: #{"0x00%x" % (object_id << 1)})"
+    "Meter Collection (name: '#{@school.name}', object_id: #{"0x00%x" % (object_id << 1)})"
   end
 
   def to_s
@@ -208,15 +210,11 @@ class MeterCollection
   end
 
   def latitude
-    @latitude ||= latitude_longitude[:latitude]
+    @school.latitude
   end
 
   def longitude
-    @longitude ||= latitude_longitude[:longitude]
-  end
-
-  private def latitude_longitude
-    @latitude_longitude ||= LatitudeLongitude.schools_latitude_longitude(self)
+    @school.longitude
   end
 
   private def search_meter_list_for_identifier(meter_list, identifier)
@@ -392,27 +390,15 @@ class MeterCollection
   end
 
   def energysparks_start_date
-    activation_date.nil? ? creation_date : activation_date
+    @school.activation_date || @school.creation_date
   end
 
   def activation_date
-    return nil if @school.nil?
-    return nil if @school.activation_date.nil?
-    # the time is passed in as an active_support Time and not a ruby Time
-    # from the front end, so can't be used directly, the utc field needs to be accessed
-    # instead
-    t = @school.activation_date.respond_to?(:utc) ? @school.activation_date.utc : @school.activation_date
-    Date.new(t.year, t.month, t.day)
+    @school.activation_date
   end
 
   def creation_date
-    return nil if @school.nil?
-    return nil if @school.created_at.nil?
-    # the time is passed in as an active_support Time and not a ruby Time
-    # from the front end, so can't be used directly, the utc field needs to be accessed
-    # instead
-    t = @school.created_at.respond_to?(:utc) ? @school.created_at.utc : @school.created_at
-    Date.new(t.year, t.month, t.day)
+    @school.creation_date
   end
 
   def add_heat_meter(meter)
