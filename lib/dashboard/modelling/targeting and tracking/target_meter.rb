@@ -111,6 +111,9 @@ class TargetMeter < Dashboard::Meter
     @feedback
   end
 
+  #TODO: we only appear to ever use :day?
+  #Calculation type is provided as a parameter to meter_collection.target_school
+  #Defaults to :day but can be configured via charts. But charts only use :day
   def self.calculation_factory(type, meter_to_clone)
     case type
     when :month
