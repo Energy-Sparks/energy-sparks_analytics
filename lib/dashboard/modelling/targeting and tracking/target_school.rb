@@ -22,27 +22,26 @@ class TargetSchool < MeterCollection
   attr_reader :unscaled_target_meters, :synthetic_target_meters
 
   # TODO(PH, 26Oct2021) - inherit from SyntheticSchool, replace super() call
-  def initialize(school, calculation_type)
-    super(school.school,
-          holidays:                 school.holidays,
-          temperatures:             school.temperatures,
-          solar_irradiation:        school.solar_irradiation,
-          solar_pv:                 school.solar_pv,
-          grid_carbon_intensity:    school.grid_carbon_intensity,
-          pseudo_meter_attributes:  school.pseudo_meter_attributes_private)
+  def initialize(meter_collection, calculation_type)
+    super(meter_collection.school,
+          holidays:                 meter_collection.holidays,
+          temperatures:             meter_collection.temperatures,
+          solar_irradiation:        meter_collection.solar_irradiation,
+          solar_pv:                 meter_collection.solar_pv,
+          grid_carbon_intensity:    meter_collection.grid_carbon_intensity,
+          pseudo_meter_attributes:  meter_collection.pseudo_meter_attributes_private)
 
-    @original_school = school
+    @original_school = meter_collection
     @unscaled_target_meters = {}
     @synthetic_target_meters = {}
     @meter_nil_reason = {}
     @aggregated_meters_by_fuel_type = {}
     @calculation_type = calculation_type
+    @debug = false
+  end
 
-    @debug = true
-
-    # calculate_target_meters(@original_school, calculation_type)
-
-    @name += ': target'
+  def name
+    "#{super} : target"
   end
 
   def target_school?
@@ -71,19 +70,6 @@ class TargetSchool < MeterCollection
     return nil if @meter_nil_reason.key?(fuel)
 
     @aggregated_meters_by_fuel_type[fuel] ||= calculate_target_meter(fuel)
-  end
-
-  def calculate_target_meters_deprecated(original_school, calculation_type = @calculation_type)
-    debug "Calculating all target meters for #{original_school.name}".ljust(140, '=')
-
-    bm = Benchmark.realtime {
-      %i[electricity gas storage_heater].each do |fuel_type|
-        original_meter = original_school.aggregate_meter(fuel_type)
-        calculate_target_meter(original_meter, fuel_type, calculation_type)
-      end
-    }
-
-    debug "Completed calculation of all target meters for #{original_school.name} in #{bm.round(3)} seconds".ljust(140, '=')
   end
 
   def calculate_target_meter(fuel_type, calculation_type = @calculation_type)
@@ -134,10 +120,6 @@ class TargetSchool < MeterCollection
     nil
   end
 
-  def set_target_deprecated(meter, calculation_type)
-    target_set?(meter) ? calculate_target_meter(meter, calculation_type) : nil
-  end
-
   def calculate_target_meter_data(meter, calculation_type)
     meter = TargetMeter.calculation_factory(calculation_type, meter)
     @unscaled_target_meters[meter.fuel_type] = meter.non_scaled_target_meter
@@ -154,4 +136,3 @@ class TargetSchool < MeterCollection
     puts var if @debug && !Object.const_defined?('Rails')
   end
 end
-
