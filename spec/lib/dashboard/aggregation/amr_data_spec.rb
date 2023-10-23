@@ -8,5 +8,4 @@ describe AMRData do
     it 'caches the created calculators'
   end
 
-
 end

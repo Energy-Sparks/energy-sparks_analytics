@@ -483,7 +483,7 @@ class AMRData < HalfHourlyData
   end
 
   def average_overnight_baseload_kw_date_range(date1 = start_date, date2 = end_date)
-    #use calculator thats looks at overnight period
+    #use calculator thats specifically looks at overnight period
     baseload_calculator(true).average_overnight_baseload_kw_date_range(date1, date2)
   end
 
