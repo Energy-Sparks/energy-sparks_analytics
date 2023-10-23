@@ -24,7 +24,7 @@ describe Baseload::BaseloadCalculator, type: :service do
   end
 
   context '.calculator_for' do
-    let(:amr_data)        { meter_collection.electricity_meters.first.amr_data }
+    let(:amr_data)            { meter_collection.electricity_meters.first.amr_data }
     subject(:calculator)      { Baseload::BaseloadCalculator.calculator_for(amr_data, sheffield_solar_pv)}
 
     context 'with sheffield solar' do

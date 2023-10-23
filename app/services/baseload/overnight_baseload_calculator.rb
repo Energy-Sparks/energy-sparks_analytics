@@ -28,29 +28,19 @@ module Baseload
 
     def overnight_baseload_kw(date, data_type = :kwh)
       raise EnergySparksNotEnoughDataException, "Missing electric data for #{date}" if @amr_data.date_missing?(date)
-      baseload_kw_between_half_hour_indices(date, 41, 47, data_type)
+
+      range = (41..47)
+      total_kwh = total_kwh_within_hh_range(date, range, data_type)
+      # convert to kW and produce average
+      total_kwh * 2.0 / range.size
     end
 
-    def baseload_kw_between_half_hour_indices(date, hhi1, hhi2, data_type = :kwh)
+    def total_kwh_within_hh_range(date, range, data_type = :kwh)
       total_kwh = 0.0
-      count = 0
-      if hhi2 > hhi1 # same day
-        (hhi1..hhi2).each do |halfhour_index|
-          total_kwh += @amr_data.kwh(date, halfhour_index, data_type)
-          count += 1
-        end
-      else
-        (hhi1..48).each do |halfhour_index| # before midnight
-          total_kwh += @amr_data.kwh(date, halfhour_index, data_type)
-          count += 1
-        end
-        (0..hhi2).each do |halfhour_index| # after midnight
-          total_kwh += @amr_data.kwh(date, halfhour_index, data_type)
-          count += 1
-        end
+      range.each do |halfhour_index|
+        total_kwh += @amr_data.kwh(date, halfhour_index, data_type)
       end
-      #convert to kW and produce average
-      total_kwh * 2.0 / count
+      total_kwh
     end
 
     def overnight_baseload_kw_date_range(date1, date2)
@@ -60,6 +50,5 @@ module Baseload
       end
       total
     end
-
   end
 end

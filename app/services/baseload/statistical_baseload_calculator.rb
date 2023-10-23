@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Baseload
-
   # Default heuristics for calculating daily baseload
   #
   # Finds the average of the 8 half-hourly periods (4 hours) with

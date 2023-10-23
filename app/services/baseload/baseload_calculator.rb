@@ -11,7 +11,7 @@ module Baseload
     # the Sheffield data resulting underestimated early morning usage
     #
     def self.for_meter(dashboard_meter)
-      #return calculator cached by the amr data
+      # return calculator cached by the amr data
       dashboard_meter.amr_data.baseload_calculator(dashboard_meter.sheffield_simulated_solar_pv_panels?)
     end
 
@@ -20,7 +20,7 @@ module Baseload
     # method as there are issues with the Sheffield data resulting underestimated
     # early morning usage
     def self.calculator_for(amr_data, sheffield_solar_pv)
-      #create a new calculator
+      # create a new calculator
       sheffield_solar_pv ? OvernightBaseloadCalculator.new(amr_data) : StatisticalBaseloadCalculator.new(amr_data)
     end
 
@@ -29,7 +29,7 @@ module Baseload
       date_divisor = (date2 - date1 + 1)
       return 0.0 if date_divisor.zero?
 
-      #take average then convert from kWh to kW
+      # take average then convert from kWh to kW
       baseload_kwh_date_range(date1, date2) / date_divisor / 24.0
     end
 
@@ -39,7 +39,7 @@ module Baseload
       (date1..date2).each do |date|
         total_kw += baseload_kw(date)
       end
-      total_kw * 24.0 #convert from kw to kwh
+      total_kw * 24.0 # convert from kw to kwh
     end
 
     private
