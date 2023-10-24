@@ -5,7 +5,7 @@ require 'spec_helper'
 describe FormatEnergyUnit do
   let!(:value) { 113.66216439927433 }
 
-  context 'ks2 formatting' do
+  context 'with ks2 formatting' do
     [
       { units: :£_0dp, expected: '&pound;114', medium: :html, type: String },
       { units: :£_0dp, expected: '£114',       medium: :text, type: String },
@@ -20,7 +20,7 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'benchmark formatting' do
+  context 'with benchmark formatting' do
     [
       { units: :£_0dp, expected: '&pound;114', medium: :html, type: String },
       { units: :£_0dp, expected: '£114',       medium: :text, type: String },
@@ -35,7 +35,7 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'energy expert formatting' do
+  context 'with energy expert formatting' do
     [
       { units: :£_0dp, expected: '&pound;114', medium: :html, type: String },
       { units: :£_0dp, expected: '£114',       medium: :text, type: String },
@@ -50,7 +50,7 @@ describe FormatEnergyUnit do
     end
   end
 
-  context "'to pence' formatting" do
+  context "with 'to pence' formatting" do
     [
       { units: :£_0dp, expected: '&pound;114', medium: :html, type: String },
       { units: :£_0dp, expected: '£114',       medium: :text, type: String },
@@ -65,34 +65,34 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'percentage formatting' do
-    context ':percent' do
+  context 'when percentage formatting' do
+    context 'with :percent' do
       it 'formats correctly' do
         expect(FormatUnit.format(:percent, 0.37019427511151964)).to eq('37%')
       end
     end
 
-    context ':percent_0dp' do
+    context 'with :percent_0dp' do
       it 'formats correctly' do
         expect(FormatUnit.format(:percent_0dp, 0.37019427511151964)).to eq('37%')
       end
     end
 
-    context ':relative_percent' do
+    context 'with :relative_percent' do
       it 'formats correctly' do
         expect(FormatUnit.format(:relative_percent, -0.1188911792177762)).to eq('-12%')
         expect(FormatUnit.format(:relative_percent, 0.1188911792177762)).to eq('+12%')
       end
     end
 
-    context ':relative_percent_0dp' do
+    context 'with :relative_percent_0dp' do
       it 'formats correctly' do
         expect(FormatUnit.format(:relative_percent_0dp, -0.1188911792177762)).to eq('-12%')
         expect(FormatUnit.format(:relative_percent_0dp, 0.1188911792177762)).to eq('+12%')
       end
     end
 
-    context ':comparison_percent' do
+    context 'with :comparison_percent' do
       it 'formats correctly' do
         expect(FormatUnit.format(:comparison_percent, 0.1)).to eq('+10%')
         expect(FormatUnit.format(:comparison_percent, -0.5)).to eq('-50%')
@@ -100,8 +100,8 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'date and time formatting' do
-    context ':date' do
+  context 'when date and time formatting' do
+    context 'with :date' do
       it 'formats Dates' do
         date = Date.new(2000, 1, 1)
         expect(FormatUnit.format(:date, date, :text)).to eq 'Saturday  1 Jan 2000'
@@ -112,7 +112,7 @@ describe FormatEnergyUnit do
       end
     end
 
-    context ':datetime' do
+    context 'with :datetime' do
       it 'formats Date as a date time' do
         date = Date.new(2000, 1, 1)
         expect(FormatUnit.format(:datetime, date, :text)).to eq 'Saturday  1 Jan 2000 00:00'
@@ -125,7 +125,7 @@ describe FormatEnergyUnit do
       end
     end
 
-    context ':date_mmm_yyyy' do
+    context 'with :date_mmm_yyyy' do
       it 'formats Dates' do
         date = Date.new(2000, 1, 1)
         expect(FormatUnit.format(:date_mmm_yyyy, date, :text)).to eq 'Jan 2000'
@@ -136,7 +136,7 @@ describe FormatEnergyUnit do
       end
     end
 
-    context ':days' do
+    context 'with :days' do
       it 'formats correctly' do
         expect(FormatUnit.format(:days, 1)).to eq '1 day'
         expect(FormatUnit.format(:days, 7)).to eq '7 days'
@@ -145,7 +145,7 @@ describe FormatEnergyUnit do
       end
     end
 
-    context ':years' do
+    context 'with :years' do
       it 'formats correctly' do
         expect(FormatUnit.format(:years, 2)).to eq '2 years 0 months'
         expect(FormatUnit.format(:years, 2.5)).to eq '2 years 6 months'
@@ -159,7 +159,7 @@ describe FormatEnergyUnit do
       end
     end
 
-    context ':years_range' do
+    context 'with :years_range' do
       it 'formats correctly' do
         expect(FormatUnit.format(:years_range, 1..1)).to eq '12 months'
         expect(FormatUnit.format(:years_range, 1..3)).to eq '12 months to 3 years 0 months'
@@ -167,7 +167,7 @@ describe FormatEnergyUnit do
       end
     end
 
-    context ':timeofday' do
+    context 'with :timeofday' do
       it 'formats correctly' do
         expect(FormatUnit.format(:timeofday, '01:00')).to eq '01:00'
       end
@@ -201,43 +201,43 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'money' do
-    context 'pence' do
+  context 'when money' do
+    context 'with pence' do
       it 'formats correctly' do
         expect(FormatUnit.format(:£, 0.5)).to eq '50p'
         expect(FormatUnit.format(:£, 0.5, :html)).to eq '50p'
       end
     end
 
-    context ':£' do
+    context 'with :£' do
       it 'formats correctly' do
         expect(FormatUnit.format(:£, 10)).to eq '£10'
         expect(FormatUnit.format(:£, 10, :html)).to eq '&pound;10'
       end
     end
 
-    context ':£_0dp' do
+    context 'with :£_0dp' do
       it 'formats correctly' do
         expect(FormatUnit.format(:£_0dp, 10)).to eq '£10'
         expect(FormatUnit.format(:£_0dp, 10, :html)).to eq '&pound;10'
       end
     end
 
-    context ':£_per_kva' do
+    context 'with :£_per_kva' do
       it 'formats correctly' do
         expect(FormatUnit.format(:£_per_kva, 10)).to eq '£10/kVA'
         expect(FormatUnit.format(:£_per_kva, 10, :html)).to eq '&pound;10/kVA'
       end
     end
 
-    context ':£_per_kwh' do
+    context 'with :£_per_kwh' do
       it 'formats correctly' do
         expect(FormatUnit.format(:£_per_kwh, 10)).to eq '£10/kWh'
         expect(FormatUnit.format(:£_per_kwh, 10, :html)).to eq '&pound;10/kWh'
       end
     end
 
-    context ':£_range' do
+    context 'with :£_range' do
       it 'formats correctly' do
         expect(FormatUnit.format(:£_range, 730.0..740.0)).to eq '£730'
         expect(FormatUnit.format(:£_range, 730.0..2190.0)).to eq '£730 to £2,200'
@@ -247,7 +247,7 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'validating units' do
+  context 'when validating units' do
     it 'identifies known units' do
       expect(FormatUnit.known_unit?(:£)).to be true
       expect(FormatUnit.known_unit?(:kwh_per_day)).to be true
@@ -272,32 +272,32 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'temperature' do
+  context 'with temperature' do
     it 'formats correctly' do
       expect(FormatUnit.format(:temperature, 10)).to eq('10C')
       expect(FormatUnit.format(:temperature, 10.51)).to eq('10.5C')
     end
   end
 
-  context 'r2' do
+  context 'with r2' do
     it 'formats correctly' do
       expect(FormatUnit.format(:r2, 2)).to eq('2.00')
     end
   end
 
-  context 'school names' do
+  context 'with school names' do
     it 'formats correctly' do
       expect(FormatUnit.format(:school_name, 'Junior School')).to eq('Junior School')
     end
   end
 
-  context 'nil values' do
+  context 'with nil values' do
     it 'formats correctly' do
       expect(FormatUnit.format(:date, nil)).to eq('')
     end
   end
 
-  context 'floats' do
+  context 'with floats' do
     it 'formats correctly' do
       expect(FormatUnit.format(Float, 0.01)).to eq('0.01')
     end
@@ -309,7 +309,7 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'default formatting of other units' do
+  context 'when doing default formatting of other units' do
     it 'formats correctly' do
       expect(FormatUnit.format(:accounting_cost, 2)).to eq('£2')
       expect(FormatUnit.format(:bev_car, 2)).to eq('2 km')

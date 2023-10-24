@@ -18,7 +18,7 @@ describe TargetDates do
   end
 
   describe '#default_target_start_date' do
-    context 'there is no data' do
+    context 'when there is no data' do
       let(:this_month) { Date.new(Date.today.year, Date.today.month, 1) }
 
       it 'defaults to this month' do
@@ -26,7 +26,7 @@ describe TargetDates do
       end
     end
 
-    context 'there is recent data' do
+    context 'when there is recent data' do
       # 2 years
       let(:amr_start_date)    { Date.today.prev_year.prev_year }
       # arbitrary day in this month, avoid Date.today - 1.
@@ -38,7 +38,7 @@ describe TargetDates do
       end
     end
 
-    context 'the data is lagging' do
+    context 'when the data is lagging' do
       # 2 years
       let(:amr_start_date)    { Date.today.prev_year.prev_year }
       # last month
@@ -52,13 +52,13 @@ describe TargetDates do
   end
 
   describe '#one_year_of_meter_readings_available_prior_to_1st_date?' do
-    context 'no target set' do
+    context 'when no target set' do
       before do
         allow(aggregate_meter).to receive(:target_set?).and_return(false)
         allow_any_instance_of(TargetAttributes).to receive(:target_set?).and_return(false)
       end
 
-      context 'and there is recent data' do
+      context 'with recent data' do
         # 2 years
         let(:amr_start_date)    { Date.today.prev_year.prev_year }
         # less than a month ago
@@ -69,7 +69,7 @@ describe TargetDates do
         end
       end
 
-      context 'and data is lagging' do
+      context 'with lagging data' do
         # 2 years
         let(:amr_start_date)    { Date.today.prev_year.prev_year }
         # more than 30 days ago
@@ -80,7 +80,7 @@ describe TargetDates do
         end
       end
 
-      context 'there is less than a year of data' do
+      context 'when there is less than a year of data' do
         # 90 days
         let(:amr_start_date)    { Date.today - 90 }
         let(:amr_end_date)      { Date.today }
