@@ -60,23 +60,10 @@ RSpec/AnyInstance:
 RSpec/BeforeAfterAll:
   Enabled: false
 
-# Offense count: 122
-# Configuration parameters: Prefixes, AllowedPatterns.
-# Prefixes: when, with, without
-#RSpec/ContextWording:
-#  Enabled: false
-
 # Offense count: 210
 # Configuration parameters: CountAsOne.
 RSpec/ExampleLength:
   Max: 89
-
-# Offense count: 1
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: always_allow, single_line_only, disallow
-RSpec/ExampleWithoutDescription:
-  Exclude:
-    - 'spec/lib/dashboard/benchmarking/benchmark_change_adhoc_comparison_spec.rb'
 
 # Offense count: 29
 RSpec/ExpectInHook:

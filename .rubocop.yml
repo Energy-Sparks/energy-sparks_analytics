@@ -4,7 +4,7 @@ AllCops:
   NewCops: disable
   SuggestExtensions: false
   Include:
-#    - 'app/classes/**/*.rb'
+    - 'app/classes/**/*.rb'
 #    - 'app/models/**/*.rb'
 #    - 'app/services/**/*.rb'
     - 'spec/**/*.rb'
@@ -21,6 +21,12 @@ require:
   - rubocop-performance
   - rubocop-rspec
 
+Naming/MethodParameterName:
+  AllowedNames: ['kw', '£', 'co2']
+Naming/VariableName:
+  AllowedPatterns: ['_£','£']
+Naming/MethodName:
+  AllowedPatterns: ['_£', 'co2', '£']
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:

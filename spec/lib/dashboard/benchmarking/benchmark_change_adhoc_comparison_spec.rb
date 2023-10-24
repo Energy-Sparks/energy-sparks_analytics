@@ -125,7 +125,7 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
       expect(content.size).to be > 0
     end
 
-    it '' do
+    it 'creates expected content array' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
       rows = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :rows) }
       expect(rows).to eq(
