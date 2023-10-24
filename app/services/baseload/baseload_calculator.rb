@@ -21,7 +21,15 @@ module Baseload
     # early morning usage
     def self.calculator_for(amr_data, sheffield_solar_pv)
       # create a new calculator
-      sheffield_solar_pv ? self.overnight_calculator(amr_data) : StatisticalBaseloadCalculator.new(amr_data)
+      sheffield_solar_pv ? BaseloadCalculator.overnight_calculator(amr_data) : StatisticalBaseloadCalculator.new(amr_data)
+    end
+
+    def self.overnight_calculator(amr_data)
+      if ENV['FEATURE_FLAG_MIDNIGHT_BASELOAD'] == 'true'
+        Baseload::AroundMidnightBaseloadCalculator.new(amr_data)
+      else
+        Baseload::OvernightBaseloadCalculator.new(amr_data)
+      end
     end
 
     # Calculates the average baseload in kw between 2 dates
@@ -47,14 +55,5 @@ module Baseload
     def up_to_1_year_ago
       [@amr_data.end_date - 365, @amr_data.start_date].max
     end
-
-    def self.overnight_calculator(amr_data)
-      if ENV['FEATURE_FLAG_MIDNIGHT_BASELOAD'] == 'true'
-        Baseload::AroundMidnightBaseloadCalculator.new(amr_data)
-      else
-        Baseload::OvernightBaseloadCalculator.new(amr_data)
-      end
-    end
-
   end
 end
