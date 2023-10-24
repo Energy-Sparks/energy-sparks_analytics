@@ -5,7 +5,7 @@ module Baseload
     include AnalysableMixin
 
     def initialize(meter_collection)
-      super
+      super()
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
     end

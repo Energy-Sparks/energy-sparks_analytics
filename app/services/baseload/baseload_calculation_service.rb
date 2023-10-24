@@ -25,7 +25,7 @@ module Baseload
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
     def initialize(analytics_meter, asof_date = Date.today)
-      super
+      super()
       validate_meter(analytics_meter)
       @meter = analytics_meter
       @asof_date = asof_date

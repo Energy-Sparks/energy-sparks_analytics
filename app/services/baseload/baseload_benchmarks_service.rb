@@ -15,7 +15,7 @@ module Baseload
     #
     # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have electricity meters
     def initialize(meter_collection, asof_date = Date.today)
-      super
+      super()
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
       # baseload analysis always uses the aggregated meter
