@@ -6,14 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 2
-# Configuration parameters: AllowedMethods.
-# AllowedMethods: enums
-Lint/ConstantDefinitionInBlock:
-  Exclude:
-#    - 'spec/app/services/aggregation_service_spec.rb'
-#    - 'spec/meter_attributes_spec.rb'
-
 # Offense count: 1
 # Configuration parameters: AllowedParentClasses.
 Lint/MissingSuper:
@@ -35,22 +27,15 @@ Metrics/ModuleLength:
 Metrics/ParameterLists:
   Max: 12
 
-# Offense count: 46
 # Configuration parameters: EnforcedStyle, CheckMethodNames, CheckSymbols, AllowedIdentifiers, AllowedPatterns.
 # SupportedStyles: snake_case, normalcase, non_integer
 # AllowedIdentifiers: capture3, iso8601, rfc1123_date, rfc822, rfc2822, rfc3339, x86_64
 Naming/VariableNumber:
   Exclude:
     - 'spec/app/models/tariffs/generic_accounting_tariff_spec.rb'
-    - 'spec/app/services/baseload/baseload_meter_breakdown_service_spec.rb'
-    - 'spec/app/services/tariffs/generic_tariff_manager_spec.rb'
-    - 'spec/app/services/usage/holiday_usage_calculation_service_spec.rb'
-    - 'spec/lib/dashboard/aggregation/accounting_costs_spec.rb'
-    - 'spec/lib/dashboard/aggregation/economic_costs_spec.rb'
     - 'spec/lib/dashboard/aggregation/one_days_cost_data_spec.rb'
     - 'spec/lib/dashboard/benchmarking/benchmark_change_adhoc_comparison_spec.rb'
     - 'spec/lib/dashboard/charting_and_reports/charts/chart_timescale_descriptions_spec.rb'
-    - 'spec/lib/dashboard/data_sources/n3rgy/n3rgy_data_deduplicator_spec.rb'
     - 'spec/lib/dashboard/utilities/adjective_spec.rb'
     - 'spec/meter_attributes_spec.rb'
 

@@ -3,11 +3,11 @@
 require 'spec_helper'
 
 describe MeterReadingsFeeds::N3rgyDataDeduplicator do
-  let(:date_1) { Date.parse('2012-02-01') }
-  let(:date_2) { date_1 + 1 }
-  let(:date_3) { date_1 + 2 }
-  let(:date_4) { date_1 + 3 }
-  let(:date_5) { date_1 + 4 }
+  let(:date1) { Date.parse('2012-02-01') }
+  let(:date2) { date1 + 1 }
+  let(:date3) { date1 + 2 }
+  let(:date4) { date1 + 3 }
+  let(:date5) { date1 + 4 }
 
   describe 'when deduplicating prices' do
     let(:usual_price)    { 0.15992 }
@@ -15,20 +15,20 @@ describe MeterReadingsFeeds::N3rgyDataDeduplicator do
 
     let(:prices) do
       {
-        date_1 => usual_prices,
-        date_2 => usual_prices,
-        date_3 => other_prices,
-        date_4 => usual_prices,
-        date_5 => usual_prices
+        date1 => usual_prices,
+        date2 => usual_prices,
+        date3 => other_prices,
+        date4 => usual_prices,
+        date5 => usual_prices
       }
     end
 
     let(:expected_deduped) do
       {
-        date_1 => usual_prices,
-        date_3 => other_prices,
-        date_4 => usual_prices,
-        date_5 => usual_prices
+        date1 => usual_prices,
+        date3 => other_prices,
+        date4 => usual_prices,
+        date5 => usual_prices
       }
     end
 
@@ -74,19 +74,19 @@ describe MeterReadingsFeeds::N3rgyDataDeduplicator do
 
       let(:standing_charges) do
         [
-          [date_1, usual_standing_charge],
-          [date_2, usual_standing_charge],
-          [date_3, other_standing_charge],
-          [date_4, usual_standing_charge],
-          [date_5, usual_standing_charge]
+          [date1, usual_standing_charge],
+          [date2, usual_standing_charge],
+          [date3, other_standing_charge],
+          [date4, usual_standing_charge],
+          [date5, usual_standing_charge]
         ]
       end
 
       let(:expected_deduped) do
         [
-          [date_1, usual_standing_charge],
-          [date_3, other_standing_charge],
-          [date_4, usual_standing_charge]
+          [date1, usual_standing_charge],
+          [date3, other_standing_charge],
+          [date4, usual_standing_charge]
         ]
       end
 

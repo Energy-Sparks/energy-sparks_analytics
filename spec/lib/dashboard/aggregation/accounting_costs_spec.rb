@@ -17,7 +17,7 @@ describe AccountingCosts do
   let(:kwh_data_x48) { Array.new(48, 0.01) }
 
   let(:combined_meter) { build(:meter) }
-  let(:meter_1) do
+  let(:meter1) do
     build(:meter,
           type: :electricity,
           meter_attributes: meter_attributes,
@@ -25,7 +25,7 @@ describe AccountingCosts do
                                                  kwh_data_x48: kwh_data_x48))
   end
 
-  let(:meter_2) do
+  let(:meter2) do
     build(:meter,
           type: :electricity,
           meter_attributes: meter_attributes,
@@ -33,7 +33,7 @@ describe AccountingCosts do
                                                  kwh_data_x48: kwh_data_x48))
   end
 
-  let(:list_of_meters)      { [meter_1, meter_2] }
+  let(:list_of_meters)      { [meter1, meter2] }
 
   let(:combined_start_date) { start_date }
   let(:combined_end_date)   { end_date }
@@ -78,7 +78,7 @@ describe AccountingCosts do
 
     context 'with missing tariffs' do
       before do
-        allow(meter_1.amr_data).to receive(:date_exists_by_type?).and_return(false)
+        allow(meter1.amr_data).to receive(:date_exists_by_type?).and_return(false)
       end
 
       it 'has expected type' do

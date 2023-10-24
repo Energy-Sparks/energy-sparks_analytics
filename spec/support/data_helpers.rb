@@ -8,7 +8,7 @@ module EnergySparksAnalyticsDataHelpers
   def load_unvalidated_meter_collection(dir: 'test_output/MeterCollections', school: 'acme-academy',
                                         validate_and_aggregate: true)
     file_name = "#{dir}/unvalidated-data-#{school}.yaml"
-    data = load_meter_collection(dir: dir, file_name: file_name)
+    data = load_meter_collection(file_name: file_name)
     meter_collection = create_meter_collection(data)
     validate_and_aggregate(meter_collection) if validate_and_aggregate
     meter_collection

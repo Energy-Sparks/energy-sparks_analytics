@@ -17,7 +17,7 @@ describe EconomicCosts do
   let(:kwh_data_x48) { Array.new(48, 0.01) }
 
   let(:combined_meter) { build(:meter) }
-  let(:meter_1) do
+  let(:meter1) do
     build(:meter,
           type: :electricity,
           meter_attributes: meter_attributes,
@@ -25,7 +25,7 @@ describe EconomicCosts do
                                                  kwh_data_x48: kwh_data_x48))
   end
 
-  let(:meter_2) do
+  let(:meter2) do
     build(:meter,
           type: :electricity,
           meter_attributes: meter_attributes,
@@ -33,7 +33,7 @@ describe EconomicCosts do
                                                  kwh_data_x48: kwh_data_x48))
   end
 
-  let(:list_of_meters)      { [meter_1, meter_2] }
+  let(:list_of_meters)      { [meter1, meter2] }
 
   let(:combined_start_date) { start_date }
   let(:combined_end_date)   { end_date }

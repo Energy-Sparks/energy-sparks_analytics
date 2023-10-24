@@ -129,17 +129,17 @@ describe Usage::HolidayUsageCalculationService, type: :service do
 
     describe '#holidays_usage_comparison' do
       let(:academic_year) { nil }
-      let(:school_period_1) do
+      let(:school_period1) do
         Holiday.new(:xmas, 'Xmas 2021/2022', Date.new(2021, 12, 18), Date.new(2022, 0o1, 3), academic_year)
       end
-      let(:school_period_2) do
+      let(:school_period2) do
         Holiday.new(:autumn_half_term, 'Autum half term', Date.new(2021, 10, 23), Date.new(2021, 10, 31), academic_year)
       end
-      let(:comparison) { service.holidays_usage_comparison(school_periods: [school_period_1, school_period_2]) }
+      let(:comparison) { service.holidays_usage_comparison(school_periods: [school_period1, school_period2]) }
 
       it 'calculates all comparisons' do
-        expect(comparison[school_period_1]).not_to be_nil
-        expect(comparison[school_period_2]).not_to be_nil
+        expect(comparison[school_period1]).not_to be_nil
+        expect(comparison[school_period2]).not_to be_nil
       end
     end
 

@@ -250,15 +250,15 @@ describe GenericTariffManager, type: :service do
     let(:t1_start_date)  { Date.new(2022, 1, 1) }
     let(:t1_end_date)    { Date.new(2022, 12, 31) }
 
-    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+    let(:tariff1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
 
     let(:t2_start_date)  { Date.new(2023, 1, 1) }
     let(:t2_end_date)    { Date.new(2023, 12, 31) }
 
-    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+    let(:tariff2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
 
     let(:meter_attributes) do
-      { accounting_tariff_generic: [tariff_1, tariff_2] }
+      { accounting_tariff_generic: [tariff1, tariff2] }
     end
 
     let(:search_start_date)     { Date.new(2023, 4, 1)  }
@@ -353,15 +353,15 @@ describe GenericTariffManager, type: :service do
     let(:t1_start_date)  { Date.new(2022, 1, 1) }
     let(:t1_end_date)    { Date.new(2022, 12, 31) }
 
-    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+    let(:tariff1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
 
     let(:t2_start_date)  { Date.new(2023, 1, 1) }
     let(:t2_end_date)    { Date.new(2023, 12, 31) }
 
-    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+    let(:tariff2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
 
     let(:meter_attributes) do
-      { accounting_tariff_generic: [tariff_1, tariff_2] }
+      { accounting_tariff_generic: [tariff1, tariff2] }
     end
 
     let(:search_start_date)     { Date.new(2023, 4, 1)  }
@@ -468,15 +468,15 @@ describe GenericTariffManager, type: :service do
     let(:t1_start_date)  { Date.new(2022, 1, 1) }
     let(:t1_end_date)    { Date.new(2022, 12, 31) }
 
-    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+    let(:tariff1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
 
     let(:t2_start_date)  { Date.new(2023, 1, 1) }
     let(:t2_end_date)    { Date.new(2023, 12, 31) }
 
-    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+    let(:tariff2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
 
     let(:meter_attributes) do
-      { accounting_tariff_generic: [tariff_1, tariff_2] }
+      { accounting_tariff_generic: [tariff1, tariff2] }
     end
 
     let(:search_start_date)     { Date.new(2023, 4, 1)  }
@@ -504,15 +504,15 @@ describe GenericTariffManager, type: :service do
     let(:t1_start_date)  { Date.new(2022, 1, 1) }
     let(:t1_end_date)    { Date.new(2022, 12, 31) }
 
-    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+    let(:tariff1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
 
     let(:t2_start_date)  { Date.new(2023, 1, 1) }
     let(:t2_end_date)    { Date.new(2023, 12, 31) }
 
-    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+    let(:tariff2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
 
     let(:meter_attributes) do
-      { accounting_tariff_generic: [tariff_1, tariff_2] }
+      { accounting_tariff_generic: [tariff1, tariff2] }
     end
 
     let(:first_period)    { Date.new(2023, 2, 1)..Date.new(2023, 3, 1) }
@@ -538,15 +538,15 @@ describe GenericTariffManager, type: :service do
     let(:t1_start_date)  { Date.new(2022, 1, 1) }
     let(:t1_end_date)    { Date.new(2022, 12, 31) }
 
-    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+    let(:tariff1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
 
     let(:t2_start_date)  { Date.new(2023, 1, 1) }
     let(:t2_end_date)    { Date.new(2023, 12, 31) }
 
-    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+    let(:tariff2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
 
     let(:meter_attributes) do
-      { accounting_tariff_generic: [tariff_1, tariff_2] }
+      { accounting_tariff_generic: [tariff1, tariff2] }
     end
 
     let(:search_start_date)     { Date.new(2023, 4, 1)  }
@@ -580,15 +580,15 @@ describe GenericTariffManager, type: :service do
     let(:t1_start_date)  { Date.new(2022, 1, 1) }
     let(:t1_end_date)    { Date.new(2022, 12, 31) }
 
-    let(:tariff_1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
+    let(:tariff1) { create_accounting_tariff_generic(start_date: t1_start_date, end_date: t1_end_date) }
 
     let(:t2_start_date)  { Date.new(2023, 1, 1) }
     let(:t2_end_date)    { Date.new(2023, 12, 31) }
 
-    let(:tariff_2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
+    let(:tariff2) { create_accounting_tariff_generic(start_date: t2_start_date, end_date: t2_end_date) }
 
     let(:meter_attributes) do
-      { accounting_tariff_generic: [tariff_1, tariff_2] }
+      { accounting_tariff_generic: [tariff1, tariff2] }
     end
 
     let(:first_period)    { Date.new(2023, 2, 1)..Date.new(2023, 3, 1) }
