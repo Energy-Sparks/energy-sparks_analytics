@@ -11,8 +11,8 @@
 # AllowedMethods: enums
 Lint/ConstantDefinitionInBlock:
   Exclude:
-    - 'spec/app/services/aggregation_service_spec.rb'
-    - 'spec/meter_attributes_spec.rb'
+#    - 'spec/app/services/aggregation_service_spec.rb'
+#    - 'spec/meter_attributes_spec.rb'
 
 # Offense count: 1
 # Configuration parameters: AllowedParentClasses.

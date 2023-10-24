@@ -2,18 +2,18 @@
 
 require 'spec_helper'
 
-describe AggregateDataService do
+# https://github.com/rollbar/rollbar-gem/blob/63c68eed6a8066cdd8e09ab5429728d187482b12/lib/rollbar/plugins/error_context.rb
+class FakeRollbarError < StandardError
+  attr_accessor :rollbar_context
+end
+
+describe AggregateDataService, type: :service do
   describe '#validate_meter_data' do
     context 'when validation fails' do
       let(:school)                  { build(:school) }
       let(:meter_collection)        { build(:meter_collection) }
       let(:service)                 { described_class.new(meter_collection) }
       let(:meter)                   { build(:meter) }
-
-      # https://github.com/rollbar/rollbar-gem/blob/63c68eed6a8066cdd8e09ab5429728d187482b12/lib/rollbar/plugins/error_context.rb
-      class FakeRollbarError < StandardError
-        attr_accessor :rollbar_context
-      end
 
       # it "should validate empty readings" do
       #   meter_collection.add_heat_meter(meter)

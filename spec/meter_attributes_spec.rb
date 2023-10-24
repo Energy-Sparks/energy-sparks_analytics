@@ -366,22 +366,6 @@ describe MeterAttributes do
     end
   end
 
-  class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
-    id                  :solar_pv_mpan_meter_mapping
-    aggregate_over      :solar_pv_mpan_meter_mapping
-    name                'Solar PV MPAN Meter mapping'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date: MeterAttributeTypes::Date.define(required: true),
-        end_date: MeterAttributeTypes::Date.define,
-        export_mpan: MeterAttributeTypes::String.define,
-        production_mpan: MeterAttributeTypes::String.define,
-        self_consume_mpan: MeterAttributeTypes::String.define
-      }
-    )
-  end
-
   describe MeterAttributes::LowCarbonHub do
     it 'accepts a string or symbol and keys it using the class defined key' do
       attribute = described_class.parse('2345')
