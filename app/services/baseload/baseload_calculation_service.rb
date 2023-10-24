@@ -25,6 +25,7 @@ module Baseload
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
     def initialize(analytics_meter, asof_date = Date.today)
+      super
       validate_meter(analytics_meter)
       @meter = analytics_meter
       @asof_date = asof_date
@@ -38,7 +39,7 @@ module Baseload
       enough_data? ? nil : range_checker.date_when_enough_data_available(DEFAULT_DAYS_OF_DATA_REQUIRED)
     end
 
-    # 
+    #
     # co2_per_kwh = Costs::BlendedRateCalculator.new(@meter.meter_collection.aggregated_electricity_meters).blended_co2_per_kwh
     def saving_through_1_kw_reduction_in_baseload
       CombinedUsageMetric.new(

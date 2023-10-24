@@ -65,14 +65,13 @@ module Baseload
     end
 
     def validate_meter_collection(meter_collection)
-      if meter_collection.electricity_meters.nil?
-        raise EnergySparksUnexpectedStateException, 'School does not have electricity meters'
-      end
+      return unless meter_collection.electricity_meters.nil?
+
+      raise EnergySparksUnexpectedStateException, 'School does not have electricity meters'
     end
 
     def range_checker
       @range_checker ||= Util::MeterDateRangeChecker.new(@meter_collection.aggregated_electricity_meters)
     end
-
   end
 end

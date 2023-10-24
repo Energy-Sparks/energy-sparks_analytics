@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
+
 module Baseload
   # mix of electricity baseload analysis
   class BaseloadAnalysis
@@ -203,3 +205,4 @@ module Baseload
     end
   end
 end
+# rubocop:enable Metrics/ClassLength
