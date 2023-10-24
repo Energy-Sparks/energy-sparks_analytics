@@ -53,7 +53,7 @@ describe Series::AccountingCost do
       allow(meter_collection).to receive(:meter?).and_return(meter)
     end
 
-    context 'if there is a mains consumption sub meter' do
+    context 'with a mains consumption sub meter' do
       # hash that returns true for each key, to fake there being a submeter
       let(:sub_meters) { [[:mains_consume, true]].to_h }
 
@@ -62,7 +62,7 @@ describe Series::AccountingCost do
       end
     end
 
-    context 'if there is no mains consumption sub meter' do
+    context 'with no mains consumption sub meter' do
       it 'returns the requested meter' do
         expect(accounting_cost_series.meter).to eq meter
       end

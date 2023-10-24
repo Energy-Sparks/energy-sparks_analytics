@@ -119,7 +119,7 @@ describe SolarPVPanels, type: :service do
   end
 
   # Cross check values against spreadsheet with revised logic.
-  context 'analysis-cross-check' do
+  context 'with analysis-cross-check' do
     let(:solar_pv_installation_date)  { Date.new(2022, 6, 8) }
     let(:kwp)                         { 24.0 }
 

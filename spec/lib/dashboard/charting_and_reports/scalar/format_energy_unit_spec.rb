@@ -153,7 +153,7 @@ describe FormatEnergyUnit do
       end
     end
 
-    context ':years_decimal' do
+    context 'with :years_decimal' do
       it 'formats correctly' do
         expect(FormatUnit.format(:years_decimal, 2)).to eq '2 years'
       end

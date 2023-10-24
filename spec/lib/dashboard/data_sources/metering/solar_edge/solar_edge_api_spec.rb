@@ -17,7 +17,7 @@ describe SolarEdgeAPI do
   end
 
   # minimal test of HTTP response handling behaviour
-  context 'site_details' do
+  describe '#site_details' do
     let(:expected_url) { "#{SolarEdgeAPI::BASE_URL}/sites/list" }
     let(:expected_params) { { api_key: api_key } }
 

@@ -45,7 +45,7 @@ describe ChartManagerTimescaleManipulation do
     end
   end
 
-  context 'ChartManagerTimescaleManipulationMove' do
+  context 'with ChartManagerTimescaleManipulationMove' do
     let(:manipulator) { ChartManagerTimescaleManipulationMove.new(operation_type, chart_config, meter_collection) }
 
     describe '#adjust_timescale' do

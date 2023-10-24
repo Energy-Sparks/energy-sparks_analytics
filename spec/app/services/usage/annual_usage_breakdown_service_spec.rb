@@ -46,7 +46,7 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
     end
     let(:day_type_breakdown) { usage_breakdown_benchmark_service.usage_breakdown }
 
-    context 'for electricity' do
+    context 'with electricity' do
       let(:fuel_type) { :electricity }
 
       it 'returns the holiday usage analysis' do
@@ -109,7 +109,7 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
       end
     end
 
-    context 'for storage heater' do
+    context 'with storage heater' do
       let(:fuel_type) { :storage_heater }
       let(:meter_collection) { @beta_academy }
 

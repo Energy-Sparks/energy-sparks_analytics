@@ -32,7 +32,7 @@ describe GenericTariffManager, type: :service do
   let(:service) { described_class.new(meter) }
 
   describe '#initialize' do
-    context 'smart meter tariffs' do
+    context 'with smart meter tariffs' do
       # amr data will be 1st - 31st Jan
       let(:amr_end_date)       { Date.new(2023, 1, 31) }
 
@@ -172,7 +172,7 @@ describe GenericTariffManager, type: :service do
         expect(found_tariff.tariff).to eq newer
       end
 
-      context 'and one has a missing timestamp' do
+      context 'when one has a missing timestamp' do
         let(:older) { create_accounting_tariff_generic(created_at: nil, tariff_holder: :school) }
 
         it 'returns the most recently created' do
@@ -266,13 +266,13 @@ describe GenericTariffManager, type: :service do
 
     let(:change_date) { service.last_tariff_change_date(search_start_date, search_end_date) }
 
-    context 'searching within range of latest tariff' do
+    context 'when searching within range of latest tariff' do
       it 'there was no change' do
         expect(change_date).to eq nil
       end
     end
 
-    context 'searching beyond range of latest tariff' do
+    context 'when searching beyond range of latest tariff' do
       let(:search_start_date)     { Date.new(2024, 1, 1) }
       let(:search_end_date)       { Date.new(2024, 12, 31) }
 
@@ -281,7 +281,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching with range overlapping latest tariff' do
+    context 'when searching with range overlapping latest tariff' do
       let(:search_start_date)     { Date.new(2023, 10, 1) }
       let(:search_end_date)       { Date.new(2024, 1, 31) }
 
@@ -290,7 +290,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching with range overlapping change of tariffs' do
+    context 'when searching with range overlapping change of tariffs' do
       let(:search_start_date)     { Date.new(2022, 10, 1) }
       let(:search_end_date)       { Date.new(2023, 1, 31) }
 
@@ -299,7 +299,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching within range of previous tariff' do
+    context 'when searching within range of previous tariff' do
       let(:search_start_date)     { Date.new(2022, 4, 1)  }
       let(:search_end_date)       { Date.new(2022, 4, 30) }
 
@@ -308,7 +308,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching outside range of first tariff' do
+    context 'when searching outside range of first tariff' do
       let(:search_start_date)     { Date.new(2021, 1, 1) }
       let(:search_end_date)       { Date.new(2021, 1, 31) }
 
@@ -317,7 +317,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'across both tariffs' do
+    context 'when looking across both tariffs' do
       let(:search_start_date)     { Date.new(2021, 1, 1) }
       let(:search_end_date)       { Date.new(2024, 1, 1) }
 
@@ -326,7 +326,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'within open ended tariff' do
+    context 'with in open ended tariff' do
       let(:t1_start_date)         { nil }
       let(:t2_end_date)           { nil }
       let(:search_start_date)     { Date.new(2021, 1, 1) }
@@ -337,7 +337,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching before MIN_DEFAULT_START_DATE' do
+    context 'when searching before MIN_DEFAULT_START_DATE' do
       let(:t1_start_date)         { nil }
       let(:t2_end_date)           { nil }
       let(:search_start_date)     { Date.new(1999, 1, 1) }
@@ -369,13 +369,13 @@ describe GenericTariffManager, type: :service do
 
     let(:change_dates) { service.tariff_change_dates_in_period(search_start_date, search_end_date) }
 
-    context 'searching within range of latest tariff' do
+    context 'when searching within range of latest tariff' do
       it 'there was no change' do
         expect(change_dates).to eq []
       end
     end
 
-    context 'searching beyond range of latest tariff' do
+    context 'when searching beyond range of latest tariff' do
       let(:search_start_date)     { Date.new(2024, 1, 1) }
       let(:search_end_date)       { Date.new(2024, 12, 31) }
 
@@ -384,7 +384,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching with range overlapping latest tariff' do
+    context 'when searching with range overlapping latest tariff' do
       let(:search_start_date)     { Date.new(2023, 10, 1) }
       let(:search_end_date)       { Date.new(2024, 1, 31) }
 
@@ -393,7 +393,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching with range overlapping a change of tariffs' do
+    context 'when searching with range overlapping a change of tariffs' do
       let(:search_start_date)     { Date.new(2022, 12, 1) }
       let(:search_end_date)       { Date.new(2023, 1, 31) }
 
@@ -402,7 +402,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching within range of previous tariff' do
+    context 'when searching within range of previous tariff' do
       let(:search_start_date)     { Date.new(2022, 4, 1)  }
       let(:search_end_date)       { Date.new(2022, 4, 30) }
 
@@ -411,7 +411,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching outside range of first tariff' do
+    context 'when searching outside range of first tariff' do
       let(:search_start_date)     { Date.new(2021, 1, 1) }
       let(:search_end_date)       { Date.new(2021, 1, 31) }
 
@@ -420,7 +420,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'across both tariffs' do
+    context 'when searching across both tariffs' do
       let(:search_start_date)     { Date.new(2021, 1, 1) }
       let(:search_end_date)       { Date.new(2024, 1, 1) }
 
@@ -429,7 +429,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'within open ended tariff' do
+    context 'with in open ended tariff' do
       let(:t1_start_date)         { nil }
       let(:t2_end_date)           { nil }
       let(:search_start_date)     { Date.new(2021, 1, 1) }
@@ -452,7 +452,7 @@ describe GenericTariffManager, type: :service do
       end
     end
 
-    context 'searching before MIN_DEFAULT_START_DATE' do
+    context 'when searching before MIN_DEFAULT_START_DATE' do
       let(:t1_start_date)         { nil }
       let(:t2_end_date)           { nil }
       let(:search_start_date)     { Date.new(1999, 1, 1) }

@@ -68,7 +68,7 @@ describe AggregatorSingleSeries do
       allow(amr_data).to receive(:one_day_kwh).and_return(one_day_kwh_breakdown)
     end
 
-    context 'and timescale is up_to_one_year' do
+    context 'with timescale up_to_one_year' do
       let(:timescale) { :up_to_a_year }
       # Sunday to Saturday 15th January 2022
       let(:expected_x_axis_start_range) do
@@ -133,7 +133,7 @@ describe AggregatorSingleSeries do
         expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
       end
 
-      context 'moving back one year' do
+      context 'when moving back one year' do
         let(:timescale) { { up_to_a_year: -1 } }
 
         it 'populates the x axis' do
@@ -151,7 +151,7 @@ describe AggregatorSingleSeries do
       # this context just replicates the above few specs but substitutes different dates
       # taken from observing the current/expected behaviour on real charts
       # as a double check of the logic
-      context '-- additional date tests --' do
+      context 'with additional date tests --' do
         # all dates below taken from real example data
         let(:meter_start_date)         { Date.new(2020, 3, 1) }
         let(:meter_end_date)           { Date.new(2023, 3, 13) }
@@ -163,7 +163,7 @@ describe AggregatorSingleSeries do
           expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
         end
 
-        context 'moving back one year' do
+        context 'when moving back one year' do
           let(:timescale) { { up_to_a_year: -1 } }
 
           it 'populates the x axis' do
@@ -193,7 +193,7 @@ describe AggregatorSingleSeries do
       end
     end
 
-    context 'and timescale is year' do
+    context 'with timescale year' do
       let(:timescale) { :year }
       # with data ending on 2023-01-01, and with the graph NOT showing partial final weeks,
       # then the final range end on Saturday 31st December 2022
@@ -223,7 +223,7 @@ describe AggregatorSingleSeries do
         expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
       end
 
-      context 'moving back one year' do
+      context 'when moving back one year' do
         let(:timescale) { { year: -1 } }
 
         it 'populates the x axis' do
@@ -325,7 +325,7 @@ describe AggregatorSingleSeries do
       expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
     end
 
-    context 'moving back one year' do
+    context 'when moving back one year' do
       let(:timescale) { { up_to_a_year: -1 } }
 
       it 'populates the x axis' do

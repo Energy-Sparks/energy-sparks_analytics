@@ -64,7 +64,7 @@ describe Util::MeterDateRangeChecker, type: :service do
       expect(service.days_data_is_lagging).to eq 0
     end
 
-    context 'and data is lagging' do
+    context 'when data is lagging' do
       let(:end_date) { Date.today - 45 }
 
       it 'returns expected value' do
@@ -78,7 +78,7 @@ describe Util::MeterDateRangeChecker, type: :service do
       expect(service.recent_data?).to be true
     end
 
-    context 'and data is lagging' do
+    context 'when data is lagging' do
       let(:end_date) { Date.today - 45 }
 
       it 'returns false' do
@@ -92,7 +92,7 @@ describe Util::MeterDateRangeChecker, type: :service do
       expect(service.date_when_enough_data_available(365)).to be nil
     end
 
-    context 'and we have 200 days' do
+    context 'when we have 200 days' do
       let(:day_count) { 200 }
 
       it 'returns false' do

@@ -19,7 +19,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
       FormatEnergyUnit.format(unit, val, :html, true, true)
     end
 
-    context 'for electricity' do
+    context 'with electricity' do
       context 'with two years data' do
         it 'calculates the expected values' do
           usage_breakdown = service.calculate_breakdown
@@ -57,7 +57,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
       end
     end
 
-    context 'for gas' do
+    context 'with gas' do
       let(:fuel_type) { :gas }
 
       context 'with two years data' do

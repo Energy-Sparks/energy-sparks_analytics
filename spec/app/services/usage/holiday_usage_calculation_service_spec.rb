@@ -21,7 +21,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
       let(:school_period) { Holiday.new(holiday_type, name, start_date, end_date, academic_year) }
       let(:usage) { service.holiday_usage(school_period: school_period) }
 
-      context 'for xmas 2021/2022' do
+      context 'with xmas 2021/2022' do
         let(:holiday_type)  { :xmas }
         let(:name)          { 'Xmas 2021/2022' }
         let(:start_date)    { Date.new(2021, 12, 18) }

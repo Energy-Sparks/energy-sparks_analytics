@@ -15,7 +15,7 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
   end
 
   describe '#enough_data?' do
-    context 'for electricity' do
+    context 'with electricity' do
       context 'with enough data' do
         it 'returns true' do
           expect(service.enough_data?).to be true
@@ -23,10 +23,10 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
       end
     end
 
-    context 'for gas' do
+    context 'with gas' do
       let(:fuel_type) { :gas }
 
-      context 'with enough data' do
+      context 'when there is enough data' do
         it 'returns true' do
           expect(service.enough_data?).to be true
         end
@@ -35,7 +35,7 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
   end
 
   describe '#annual_usage' do
-    context 'for electricity' do
+    context 'with electricity' do
       it 'calculates the expected values for a benchmark school' do
         annual_usage = service.annual_usage(compare: :benchmark_school)
         expect(annual_usage.kwh).to be_within(0.01).of(312_325.0)
@@ -51,7 +51,7 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
       end
     end
 
-    context 'for gas' do
+    context 'with gas' do
       let(:fuel_type) { :gas }
 
       it 'calculates the expected values for a benchmark school' do
@@ -71,7 +71,7 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
   end
 
   describe '#estimate_savings' do
-    context 'for electricity' do
+    context 'with electricity' do
       it 'calculates the expected values for a benchmark school' do
         savings = service.estimated_savings(versus: :benchmark_school)
         expect(savings.kwh).to be_within(0.01).of(137_223.0)
@@ -89,7 +89,7 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
       end
     end
 
-    context 'for gas' do
+    context 'with gas' do
       let(:fuel_type) { :gas }
 
       it 'calculates the expected values for a benchmark school' do

@@ -226,7 +226,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
     end
   end
 
-  context 'fetch' do
+  describe '#fetch' do
     let(:response) do
       {
         'entries' => %w[gas electricity],
@@ -245,7 +245,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
     end
   end
 
-  context 'find' do
+  describe '#find' do
     let(:response) do
       {
         "mpxn": '123456789100',
@@ -271,7 +271,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
     end
   end
 
-  context 'find' do
+  describe '#find' do
     let(:response) do
       {
         "mpxn": '123456789100',
@@ -297,7 +297,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
     end
   end
 
-  context 'list' do
+  describe '#list' do
     let(:response) do
       { 'startAt' => 0, 'maxResults' => 100, 'total' => 3, 'entries' => %w[1234567891000 1234567891002 1234567891008],
         'resource' => '/', 'responseTimestamp' => '2021-03-29T15:48:37.637Z' }
