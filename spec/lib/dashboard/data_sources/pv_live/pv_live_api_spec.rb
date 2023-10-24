@@ -14,7 +14,7 @@ describe DataSources::PVLiveAPI do
     expect(Faraday).to receive(:get).with(expected_url, expected_params, {}).and_return(response)
   end
 
-  context 'gsp_list' do
+  describe '#gsp_list' do
     let(:expected_url) { "#{DataSources::PVLiveAPI::BASE_URL}/gsp_list" }
     let(:expected_params) { {} }
 
@@ -75,7 +75,7 @@ describe DataSources::PVLiveAPI do
     end
   end
 
-  context 'gsp' do
+  describe '#gsp' do
     let(:expected_url) { "#{DataSources::PVLiveAPI::BASE_URL}/gsp/0" }
     let(:expected_params) { { data_format: 'json', extra_fields: 'installedcapacity_mwp' } }
     let(:body) do
