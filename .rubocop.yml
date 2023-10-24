@@ -1,20 +1,29 @@
+inherit_from: .rubocop_todo.yml
+
 AllCops:
-  NewCops: enable
+  NewCops: disable
+  SuggestExtensions: false
+  Include:
+#    - 'app/classes/**/*.rb'
+#    - 'app/models/**/*.rb'
+#    - 'app/services/**/*.rb'
+    - 'spec/**/*.rb'
   Exclude:
-    - 'app/models/**/*'
+#    - 'app/models/**/*'
     - 'config/**/*'
     - 'InputData/**/*'
     - 'script/**/*'
     - 'lib/**/*'
     - 'log/**/*'
-    - 'rakelib/**/*'
     - 'test_output/**/*'
     - 'test_support/**/*'
-    - 'spec/app/models/**/*'
-    - 'spec/lib/**/*'
+require:
+  - rubocop-performance
+  - rubocop-rspec
+
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:
   Enabled: false
 Style/Documentation:
-  Enabled: false  
+  Enabled: false
