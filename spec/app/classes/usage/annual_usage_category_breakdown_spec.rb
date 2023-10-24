@@ -14,7 +14,7 @@ describe Usage::AnnualUsageCategoryBreakdown, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context 'total' do
+  context '#total' do
     it 'returns a combined usage metric for total annual kwh and co2' do
       model = service.total
       expect(model.kwh).to be_within(0.01).of(408_845.4)

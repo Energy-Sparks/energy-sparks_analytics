@@ -10,7 +10,7 @@ describe Baseload::BaseloadCalculator, type: :service do
 
     let(:meter) { meter_collection.electricity_meters.first }
 
-    context 'and school has sheffield solar' do
+    context 'when school has sheffield solar' do
       before do
         allow(meter).to receive(:sheffield_simulated_solar_pv_panels?).and_return(true)
       end
@@ -28,7 +28,7 @@ describe Baseload::BaseloadCalculator, type: :service do
       end
     end
 
-    context 'and school does not have sheffield solar' do
+    context 'when school does not have sheffield solar' do
       it 'returns calculator' do
         expect(calculator).to be_a(Baseload::StatisticalBaseloadCalculator)
       end

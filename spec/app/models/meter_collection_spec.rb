@@ -40,7 +40,7 @@ describe MeterCollection do
         expect(meter_collection.grid_carbon_intensity.key?(earliest_meter_date - 1)).to eq false
       end
 
-      context 'for the temperature data' do
+      context 'when there is temperature data' do
         let(:start_date) { Date.today - 3 }
         let(:end_date)   { Date.today }
 

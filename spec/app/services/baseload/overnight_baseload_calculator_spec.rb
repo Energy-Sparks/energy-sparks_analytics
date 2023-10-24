@@ -29,7 +29,7 @@ describe Baseload::OvernightBaseloadCalculator, type: :service do
       end
     end
 
-    context 'for a day not in the data' do
+    context 'when the day is not in the data' do
       let(:day)  { Date.new(2023, 4, 1) }
 
       it 'raises an exception' do
@@ -45,7 +45,7 @@ describe Baseload::OvernightBaseloadCalculator, type: :service do
       expect(average_baseload_kw).to be_within(0.0000001).of(0.2)
     end
 
-    context 'for a period not covered by the data' do
+    context 'when the period is not covered by the data' do
       let(:average_baseload_kw) { calculator.average_baseload_kw_date_range(start_date, Date.new(2023, 4, 1)) }
 
       it 'raises an exception' do

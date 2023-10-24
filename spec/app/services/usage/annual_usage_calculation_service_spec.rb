@@ -14,7 +14,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
   end
 
   describe '#enough_data?' do
-    context 'for electricity' do
+    context 'with electricity' do
       context 'with enough data' do
         it 'returns true' do
           expect(service.enough_data?).to be true
@@ -22,7 +22,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
       end
     end
 
-    context 'for gas' do
+    context 'with gas' do
       let(:meter)          { @acme_academy.aggregated_heat_meters }
 
       context 'with enough data' do
@@ -34,7 +34,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
   end
 
   describe '#annual_usage' do
-    context 'for electricity' do
+    context 'with electricity' do
       it 'calculates the expected values for this year' do
         annual_usage = service.annual_usage
         expect(annual_usage.kwh).to be_within(0.01).of(449_547.99)
@@ -50,7 +50,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
       end
     end
 
-    context 'for gas' do
+    context 'with gas' do
       let(:meter) { @acme_academy.aggregated_heat_meters }
 
       it 'calculates the expected values for this year' do
@@ -70,7 +70,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
   end
 
   describe '#annual_usage_change_since_last_year' do
-    context 'for electricity' do
+    context 'with electricity' do
       it 'calculates the expected values' do
         usage_change = service.annual_usage_change_since_last_year
         # values checked against electricity long term trend alert
@@ -80,7 +80,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
         expect(usage_change.percent).to be_within(0.01).of(0.11)
       end
 
-      context 'and there isnt enough data' do
+      context 'when there isnt enough data' do
         let(:asof_date) { Date.new(2021, 1, 1) }
 
         it 'returns nil' do
@@ -89,7 +89,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
       end
     end
 
-    context 'for gas' do
+    context 'with gas' do
       let(:meter) { @acme_academy.aggregated_heat_meters }
 
       it 'calculates the expected values' do
@@ -101,7 +101,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
         expect(usage_change.percent).to be_within(0.01).of(-0.02)
       end
 
-      context 'and there isnt enough data' do
+      context 'when there isnt enough data' do
         let(:asof_date) { Date.new(2019, 1, 1) }
 
         it 'returns nil' do

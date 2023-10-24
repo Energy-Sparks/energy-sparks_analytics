@@ -20,7 +20,7 @@ describe Baseload::AroundMidnightBaseloadCalculator, type: :service do
       expect(baseload_kw).to be_within(0.0000001).of(0.2)
     end
 
-    context 'with varied consumption over the day' do
+    context 'when there is varied consumption over the day' do
       # first 2 and last 2 hours are 0.1, rest are random
       let(:kwh_data_x48) { Array.new(4, 0.1) + Array.new(40, rand(1.1..3.0)) + Array.new(4, 0.1) }
 

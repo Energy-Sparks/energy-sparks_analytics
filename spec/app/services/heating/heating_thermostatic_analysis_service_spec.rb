@@ -22,7 +22,7 @@ describe Heating::HeatingThermostaticAnalysisService do
   describe '#create_model' do
     let(:model) { service.create_model }
 
-    context 'for gas' do
+    context 'with gas' do
       let(:service) { described_class.new(meter_collection: @acme_academy, fuel_type: :gas) }
 
       it 'creates a model for results of a heating thermostatic analysis for gas' do
@@ -38,7 +38,7 @@ describe Heating::HeatingThermostaticAnalysisService do
       end
     end
 
-    context 'for storage heaters' do
+    context 'with storage heaters' do
       let(:service) { described_class.new(meter_collection: @beta_academy, fuel_type: :storage_heater) }
 
       it 'creates a model for results of a heating thermostatic analysis' do

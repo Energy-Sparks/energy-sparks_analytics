@@ -41,7 +41,7 @@ describe Baseload::StatisticalBaseloadCalculator, type: :service do
       end
     end
 
-    context 'for a day not in the data' do
+    context 'when the day is not in the data' do
       let(:day)  { Date.new(2023, 4, 1) }
 
       it 'raises an exception' do

@@ -14,7 +14,7 @@ describe Costs::TariffInformationService, type: :service do
   let(:analysis_start_date) { [analysis_end_date - 365 - 364, meter.amr_data.start_date].max }
   let(:service) { described_class.new(meter, analysis_start_date, analysis_end_date) }
 
-  context 'checking tariff coverage' do
+  context 'when checking tariff coverage' do
     it 'has expected coverage' do
       expect(service.incomplete_coverage?).to be false
       expect(service.percentage_with_real_tariffs).to eq 0.0

@@ -272,7 +272,7 @@ describe GenericAccountingTariff do
           expect(accounting_cost.all_costs_x48[:"vat@10%"]).to eq Array.new(48, 0.01 * 0.15 * 0.10)
         end
 
-        context 'and a standing charge' do
+        context 'with a standing charge' do
           let(:rates) { create_flat_rate(rate: 0.15, standing_charge: 1.0) }
 
           it 'calculates vat' do

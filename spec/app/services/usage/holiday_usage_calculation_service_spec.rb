@@ -35,7 +35,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
       end
 
-      context 'for xmas 2020/2021' do
+      context 'with xmas 2020/2021' do
         let(:holiday_type)  { :xmas }
         let(:name)          { 'Xmas 2020/2021' }
         let(:start_date)    { Date.new(2020, 12, 19) }
@@ -49,7 +49,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
       end
 
-      context 'for autumn half term 2021' do
+      context 'with autumn half term 2021' do
         let(:holiday_type)  { :autumn_half_term }
         let(:name)          { 'Autumn half term' }
         let(:start_date)    { Date.new(2021, 10, 23) }
@@ -62,7 +62,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
       end
 
-      context 'for period outside meter range' do
+      context 'when the period is outside meter range' do
         let(:holiday_type)  { :xmas }
         let(:name)          { 'Christmas 2023' }
         let(:start_date)    { Date.new(2023, 12, 20) }
@@ -73,7 +73,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
       end
 
-      context 'in the middle of a holiday' do
+      context 'when period is in the middle of a holiday' do
         let(:holiday_type)  { :xmas }
         let(:name)          { 'Xmas 2021/2022' }
         let(:start_date)    { Date.new(2021, 12, 18) }
@@ -93,7 +93,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
       let(:school_period) { Holiday.new(holiday_type, name, start_date, end_date, academic_year) }
       let(:comparison) { service.holiday_usage_comparison(school_period: school_period) }
 
-      context 'for xmas 2021/2022' do
+      context 'with xmas 2021/2022' do
         let(:holiday_type)  { :xmas }
         let(:name)          { 'Xmas' }
         let(:start_date)    { Date.new(2021, 12, 18) }
@@ -114,7 +114,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
       end
 
-      context 'for period outside meter range' do
+      context 'when the period is outside the meter range' do
         let(:holiday_type)  { :easter }
         let(:name)          { 'Easter 2019' }
         let(:start_date)    { Date.new(2019, 4, 13) }
@@ -144,7 +144,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
     end
 
     describe '#school_holiday_calendar_comparison' do
-      context 'for Easter 2022' do
+      context 'with Easter 2022' do
         let(:asof_date) { Date.new(2022, 4, 1) }
         let(:holiday_comparison) { service.school_holiday_calendar_comparison }
 
@@ -166,7 +166,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
       end
 
-      context 'for Summer 2022' do
+      context 'with Summer 2022' do
         # last meter date
         let(:asof_date)        { Date.new(2022, 7, 13) }
         let(:service)          { described_class.new(meter, meter_collection.holidays, asof_date) }

@@ -63,8 +63,8 @@ RSpec/BeforeAfterAll:
 # Offense count: 122
 # Configuration parameters: Prefixes, AllowedPatterns.
 # Prefixes: when, with, without
-RSpec/ContextWording:
-  Enabled: false
+#RSpec/ContextWording:
+#  Enabled: false
 
 # Offense count: 210
 # Configuration parameters: CountAsOne.

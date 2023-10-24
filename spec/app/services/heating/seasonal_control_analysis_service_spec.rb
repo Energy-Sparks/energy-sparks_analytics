@@ -38,7 +38,7 @@ describe Heating::SeasonalControlAnalysisService do
   describe '#seasonal_analysis' do
     let(:seasonal_analysis) { service.seasonal_analysis }
 
-    context 'for gas' do
+    context 'with gas' do
       it 'produces expected seasonal control analysis' do
         expect(seasonal_analysis.estimated_savings.kwh).to be_within(0.01).of(15_340.36)
         expect(seasonal_analysis.estimated_savings.£).to be_within(0.01).of(460.21)
@@ -53,7 +53,7 @@ describe Heating::SeasonalControlAnalysisService do
       end
     end
 
-    context 'for storage heater' do
+    context 'with storage heater' do
       let(:service) do
         described_class.new(meter_collection: @beta_academy, fuel_type: :storage_heater)
       end
