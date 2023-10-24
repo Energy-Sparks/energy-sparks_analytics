@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'benchmark/memory'
 
 # Service responsible for carrying out the data "validation" and "aggregation" processes
@@ -70,19 +71,19 @@ class AggregateDataService
   def aggregate_heat_and_electricity_meters
     log 'Aggregate Meters'
     bm = Benchmark.realtime do
-      #aggregate heat meters
+      # aggregate heat meters
       aggregate_heat_meters
 
-      #pre-process, aggregate and post-process electricity meters
+      # pre-process, aggregate and post-process electricity meters
       process_electricity_meters
 
-      #process the community use opening times, configuring
-      #results for each aggregate meter
+      # process the community use opening times, configuring
+      # results for each aggregate meter
       process_community_usage_open_close_times
 
-      #notify meter collection that aggregation is complete
-      #carries out clean-up and sets flags on amr data to indicate aggregation process
-      #has been completed and caching can be enabled
+      # notify meter collection that aggregation is complete
+      # carries out clean-up and sets flags on amr data to indicate aggregation process
+      # has been completed and caching can be enabled
       @meter_collection.notify_aggregation_complete!
     end
     calc_text = "Calculated meter aggregation for |#{format('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds"
@@ -95,8 +96,8 @@ class AggregateDataService
   private
 
   def process_electricity_meters
-    #Preprocessing step that creates new meters and reorganises existing
-    #collection
+    # Preprocessing step that creates new meters and reorganises existing
+    # collection
     process_solar_meters
 
     aggregate_electricity_meters
@@ -106,32 +107,32 @@ class AggregateDataService
     combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
   end
 
-  #If a school has solar panels, then run the solar aggregation process which
-  #results in creation of additional solar meters.
+  # If a school has solar panels, then run the solar aggregation process which
+  # results in creation of additional solar meters.
   #
-  #The list of meters returned by that process overrides the original list of
-  #electricity meters in the collection.
+  # The list of meters returned by that process overrides the original list of
+  # electricity meters in the collection.
   #
-  #TODO: within the service any newly created main_plus_self_consume meter will
-  #already have had its costs/co2 information configured. So this may get
-  #repeated or overridden in `aggregate_electricity_meters` step that follows.
+  # TODO: within the service any newly created main_plus_self_consume meter will
+  # already have had its costs/co2 information configured. So this may get
+  # repeated or overridden in `aggregate_electricity_meters` step that follows.
   def process_solar_meters
-    if @meter_collection.solar_pv_panels?
-      aggregate_solar = AggregateDataServiceSolar.new(@meter_collection)
-      processed_meters = aggregate_solar.process_solar_pv_electricity_meters
-      # assign references to arrays, as can't be asigned within AggregateDataServiceSolar
-      @meter_collection.update_electricity_meters(processed_meters)
-      @electricity_meters = processed_meters
-    end
+    return unless @meter_collection.solar_pv_panels?
+
+    aggregate_solar = AggregateDataServiceSolar.new(@meter_collection)
+    processed_meters = aggregate_solar.process_solar_pv_electricity_meters
+    # assign references to arrays, as can't be asigned within AggregateDataServiceSolar
+    @meter_collection.update_electricity_meters(processed_meters)
+    @electricity_meters = processed_meters
   end
 
-  #If a school has storage heaters, then run the storage heater disaggregation
-  #process which creates new storage heaters
+  # If a school has storage heaters, then run the storage heater disaggregation
+  # process which creates new storage heaters
   def process_storage_heaters
-    if @meter_collection.storage_heaters?
-      adssh = AggregateDataServiceStorageHeaters.new(@meter_collection)
-      adssh.disaggregate
-    end
+    return unless @meter_collection.storage_heaters?
+
+    adssh = AggregateDataServiceStorageHeaters.new(@meter_collection)
+    adssh.disaggregate
   end
 
   def process_community_usage_open_close_times
@@ -150,10 +151,9 @@ class AggregateDataService
     @meter_collection.solar_pv_panels? && @meter_collection.electricity_meters.length > 1
   end
 
-
-  #Run the validation process on a list of meters.
+  # Run the validation process on a list of meters.
   #
-  #If any meter fails validation then an exception will be raised
+  # If any meter fails validation then an exception will be raised
   #
   # @param Array list_of_meters an array of +Dashboard::Meter+
   def validate_meter_list(list_of_meters)
@@ -176,10 +176,10 @@ class AggregateDataService
     aggregate_sub_meters_by_type(aggregate_meter, @meter_collection.electricity_meters)
   end
 
-  #Creates a new aggregate meter that combines together all of the mains consumption (and other subtypes)
-  #sub meters associated with the list of meters.
+  # Creates a new aggregate meter that combines together all of the mains consumption (and other subtypes)
+  # sub meters associated with the list of meters.
   #
-  #This is only called for schools that have multiple solar meters.
+  # This is only called for schools that have multiple solar meters.
   def aggregate_sub_meters_by_type(combined_meter, meters)
     log "Aggregating sub meters for combined meter #{combined_meter} and main electricity meters #{meters.map(&:to_s).join(' ')}"
     sub_meter_types = meters.map { |m| m.sub_meters.keys }.flatten.compact.uniq
@@ -200,9 +200,7 @@ class AggregateDataService
       combined_sub_meter.id   = sub_meters[0].id
       combined_sub_meter.name = sub_meters[0].name
       combined_meter.sub_meters[sub_meter_type] = combined_sub_meter
-      if sub_meter_type == :mains_consume
-        combined_sub_meter.name = SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
-      end
+      combined_sub_meter.name = SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME if sub_meter_type == :mains_consume
     end
     log "Completed sub meter aggregation for: #{combined_meter}"
     combined_meter.sub_meters.each { |t, m| log "   #{t}: #{m}" }
@@ -224,10 +222,10 @@ class AggregateDataService
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
   end
 
-  #Creates a name, id, total floor area and total number of pupils based on
-  #metadata associated with a list of meters
+  # Creates a name, id, total floor area and total number of pupils based on
+  # metadata associated with a list of meters
   #
-  #Names and ids are just concentated, floor area and pupil counts are totalled.
+  # Names and ids are just concentated, floor area and pupil counts are totalled.
   #
   # @param Array list_of_meters list of meters to process
   def combine_meter_meta_data(list_of_meters)
@@ -254,7 +252,6 @@ class AggregateDataService
     [name, id, floor_area, pupils]
   end
 
-  # rubocop:disable Layout/LineLength
   #
   # Carry out the aggregation process for a list of meters, of a given type
   #
@@ -294,20 +291,18 @@ class AggregateDataService
 
     log_meter_dates(list_of_meters)
 
-    #Combine the AMR data for the meters to create a new +AmrData+ object
-    #Will apply rules that define how the time series are combined
+    # Combine the AMR data for the meters to create a new +AmrData+ object
+    # Will apply rules that define how the time series are combined
     combined_amr_data = aggregate_amr_data(list_of_meters, fuel_type)
 
     has_sheffield_solar_pv = list_of_meters.any?(&:sheffield_simulated_solar_pv_panels?)
 
-    #Concatenate meter names ids and sum floor area and number of pupils
-    combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
+    # Concatenate meter names ids and sum floor area and number of pupils
+    combined_name, _, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
-    #As there is no existing aggregate meter, create a new one
+    # As there is no existing aggregate meter, create a new one
     if combined_meter.nil?
-      unless @meter_collection.urn.nil?
-        mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, fuel_type)
-      end
+      mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, fuel_type) unless @meter_collection.urn.nil?
 
       combined_meter = Dashboard::AggregateMeter.new(
         meter_collection: @meter_collection,
@@ -326,19 +321,15 @@ class AggregateDataService
       combined_meter.add_aggregate_partial_meter_coverage_component(list_of_meters.map(&:partial_meter_coverage))
     else
       log "Combined meter #{combined_meter.mpan_mprn} already created"
-      if combined_meter.floor_area.nil? || combined_meter.floor_area.zero?
-        combined_meter.floor_area = combined_floor_area
-      end
-      if combined_meter.number_of_pupils.nil? || combined_meter.number_of_pupils.zero?
-        combined_meter.number_of_pupils = combined_pupils
-      end
+      combined_meter.floor_area = combined_floor_area if combined_meter.floor_area.nil? || combined_meter.floor_area.zero?
+      combined_meter.number_of_pupils = combined_pupils if combined_meter.number_of_pupils.nil? || combined_meter.number_of_pupils.zero?
       combined_meter.amr_data = combined_amr_data
     end
 
     calculate_carbon_emissions_for_meter(combined_meter, fuel_type)
 
-    has_differential_meter = any_component_meter_differential?(list_of_meters, fuel_type, combined_meter.amr_data.start_date, combined_meter.amr_data.end_date) #true if any differential accounting, mostly false atm
-    economic_tariffs_differ = !all_economic_tariffs_identical?(list_of_meters) #always false
+    has_differential_meter = any_component_meter_differential?(list_of_meters, fuel_type, combined_meter.amr_data.start_date, combined_meter.amr_data.end_date) # true if any differential accounting, mostly false atm
+    economic_tariffs_differ = !all_economic_tariffs_identical?(list_of_meters) # always false
     has_time_variant_economic_tariffs = any_time_variant_economic_tariffs?(list_of_meters)
 
     log "Aggregation service time variant #{has_time_variant_economic_tariffs}"
@@ -352,8 +343,8 @@ class AggregateDataService
     combined_meter
   end
 
-  #Returns true if there are any differential accounting tariffs for any meters in the provided list, within
-  #the specified date range.
+  # Returns true if there are any differential accounting tariffs for any meters in the provided list, within
+  # the specified date range.
   def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
     return false if fuel_type == :gas
 
@@ -363,20 +354,21 @@ class AggregateDataService
     false
   end
 
-  #Returns true if all economic tariffs for the list of meters are identical.
+  # Returns true if all economic tariffs for the list of meters are identical.
   #
-  #Currently, economic tariffs and time varying tariffs are not set "below" School.
-  #So all meters in a school will inherit the same tariffs, so this will always
-  #be returning true currently.
+  # Currently, economic tariffs and time varying tariffs are not set "below" School.
+  # So all meters in a school will inherit the same tariffs, so this will always
+  # be returning true currently.
   def all_economic_tariffs_identical?(list_of_meters)
     return true if list_of_meters.length == 1
-    #Check whether any of the meters have their own tariffs, rather than
-    #just sharing the same school/group/system tariffs.
-    return !list_of_meters.any? {|meter| meter.meter_tariffs.meter_tariffs.any? }
+
+    # Check whether any of the meters have their own tariffs, rather than
+    # just sharing the same school/group/system tariffs.
+    list_of_meters.none? { |meter| meter.meter_tariffs.meter_tariffs.any? }
   end
 
-  #Returns true if there are any "time varying" economic tariffs. i.e. economic
-  #tariffs with different start/end dates.
+  # Returns true if there are any "time varying" economic tariffs. i.e. economic
+  # tariffs with different start/end dates.
   def any_time_variant_economic_tariffs?(list_of_meters)
     list_of_meters.each do |meter|
       return true if meter.meter_tariffs.economic_tariffs_change_over_time?
@@ -408,7 +400,7 @@ class AggregateDataService
   end
 
   def set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differing_tariffs)
-    mpan_mprn = combined_meter.mpan_mprn
+    combined_meter.mpan_mprn
     if has_differing_tariffs # so need pre aggregated economic costs as kwh to £ no longer additive
       log 'Combining multiple economic costs for a differential tariff meter'
       economic_costs = EconomicCosts.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
@@ -421,7 +413,7 @@ class AggregateDataService
 
   def set_current_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differing_tariffs, has_time_variant_economic_tariffs)
     if has_time_variant_economic_tariffs
-      mpan_mprn = combined_meter.mpan_mprn
+      combined_meter.mpan_mprn
       if has_differing_tariffs # so need pre aggregated economic costs as kwh to £ no longer additive
         log "Combining multiple current economic costs for meter #{combined_meter.fuel_type}"
         economic_costs = EconomicCosts.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)

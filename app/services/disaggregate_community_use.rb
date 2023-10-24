@@ -85,7 +85,7 @@ class DisaggregateCommunityUsage
   def disaggregate_whole_meters(fuel_type)
     meters = @school.underlying_meters(fuel_type)
 
-    community_use_meters     = meters.select(&:has_exclusive_community_use?)
+    meters.select(&:has_exclusive_community_use?)
     non_community_use_meters = meters.reject(&:has_exclusive_community_use?)
 
     aggregate_meter_to_copy = @school.aggregate_meter(fuel_type)
@@ -121,7 +121,7 @@ class DisaggregateCommunityUsage
       weights[date] = oc.open_close_weights_x48(date)
     end
 
-    puts self.class.test_dates.map { |d| d.strftime('%a %d %b %Y') }
+    puts(self.class.test_dates.map { |d| d.strftime('%a %d %b %Y') })
 
     @community_weights = oc.merge_down_community_weights(weights)
 

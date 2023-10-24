@@ -5,10 +5,8 @@ AllCops:
   SuggestExtensions: false
   Include:
     - 'app/classes/**/*.rb'
-    - 'app/services/baseload/*.rb'
-
+    - 'app/services/**/*.rb'
 #    - 'app/models/**/*.rb'
-#    - 'app/services/**/*.rb'
     - 'spec/**/*.rb'
   Exclude:
 #    - 'app/models/**/*'

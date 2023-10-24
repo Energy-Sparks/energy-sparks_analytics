@@ -61,13 +61,12 @@ class AggregateDataServiceStorageHeaters
       if electricity_meter.storage_heater?
         map = disaggregate_storage_heat_meter(electricity_meter)
         @electricity_meters[i] = reassign_meters(map)
-        map
       else
         map = SHMap.new
         map[:original]          = electricity_meter
         map[:ex_storage_heater] = electricity_meter
-        map
       end
+      map
     end
   end
 

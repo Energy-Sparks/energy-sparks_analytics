@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Usage
   class AnnualUsageMeterBreakdownService
     include AnalysableMixin
@@ -14,7 +16,7 @@ module Usage
     # @param [Date] asof_date the date to use as the basis for calculations
     #
     # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have meters of the specified type
-    def initialize(meter_collection, fuel_type, asof_date=Date.today)
+    def initialize(meter_collection, fuel_type, asof_date = Date.today)
       @meter_collection = meter_collection
       @fuel_type = fuel_type
       @asof_date = asof_date
@@ -44,11 +46,11 @@ module Usage
     private
 
     def total_kwh(meter_breakdown)
-      meter_breakdown.map { |meter, usage| usage[:usage].kwh || 0.0 }.sum
+      meter_breakdown.map { |_meter, usage| usage[:usage].kwh || 0.0 }.sum
     end
 
     def add_percentages(meter_breakdown, total_kwh)
-      meter_breakdown.each do |meter, usage|
+      meter_breakdown.each do |_meter, usage|
         usage[:usage].percent = usage[:usage].kwh / total_kwh
       end
     end
@@ -56,7 +58,7 @@ module Usage
     def calculate
       underlying_meters.each_with_object({}) do |meter, breakdown|
         meter_start_date = [start_date, meter.amr_data.start_date].max
-        meter_end_date   = [end_date,   meter.amr_data.end_date  ].min
+        meter_end_date   = [end_date,   meter.amr_data.end_date].min
         if meter_end_date < meter_start_date
           nil # 'retired' meter before aggregate start date
         else
@@ -88,12 +90,10 @@ module Usage
       whole_meter_this_year     = whole_meter_in_range(meter, this_year_start_date, end_date)
       whole_meter_previous_year = whole_meter_in_range(meter, previous_year_start_date, previous_year_end_date)
 
-      if whole_meter_this_year && whole_meter_previous_year
-        previous_year_kwh = meter.amr_data.kwh_date_range(previous_year_start_date, previous_year_end_date, :kwh)
-        percent_change(this_year_kwh, previous_year_kwh)
-      else
-        nil
-      end
+      return unless whole_meter_this_year && whole_meter_previous_year
+
+      previous_year_kwh = meter.amr_data.kwh_date_range(previous_year_start_date, previous_year_end_date, :kwh)
+      percent_change(this_year_kwh, previous_year_kwh)
     end
 
     def whole_meter_in_range(meter, start_date, end_date)
@@ -102,6 +102,7 @@ module Usage
 
     def percent_change(this_year_kwh, previous_year_kwh)
       return nil if previous_year_kwh.zero?
+
       (this_year_kwh - previous_year_kwh) / previous_year_kwh
     end
 
@@ -113,41 +114,41 @@ module Usage
       @end_date ||= chart_date_ranges[:end_date]
     end
 
-    #The original advice page produced a usage breakdown table that was shown next
-    #to a chart. So the date ranges used to calculate the usage breakdown were aligned
-    #to those in the chart.
+    # The original advice page produced a usage breakdown table that was shown next
+    # to a chart. So the date ranges used to calculate the usage breakdown were aligned
+    # to those in the chart.
     #
-    #Due to how that chart is generated (a weekly breakdown, with ranges aligned to Sunday-Saturday),
-    #the start and end dates aren't just the latest meter data minus 12 months
+    # Due to how that chart is generated (a weekly breakdown, with ranges aligned to Sunday-Saturday),
+    # the start and end dates aren't just the latest meter data minus 12 months
     #
-    #Rather than run the chart to just pull out the date ranges, this method calls the
-    #charting code responsible for building the series ranges. It supplies the same
-    #chart config, for consistency.
+    # Rather than run the chart to just pull out the date ranges, this method calls the
+    # charting code responsible for building the series ranges. It supplies the same
+    # chart config, for consistency.
     #
-    #This means the code is consistent with the chart, but if we want a service that just
-    #generates a usage breakdown based on the last 12 months, then we'll need to tweak the
-    #code and use aggregate_meter.amr_date.end_date instead
+    # This means the code is consistent with the chart, but if we want a service that just
+    # generates a usage breakdown based on the last 12 months, then we'll need to tweak the
+    # code and use aggregate_meter.amr_date.end_date instead
     def chart_date_ranges
-      #create a period calculator, to calculate date ranges
+      # create a period calculator, to calculate date ranges
       period_calculator = PeriodsBase.period_factory(chart_config,
-        @meter_collection, aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date)
-      #calculate the ranges
+                                                     @meter_collection, aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date)
+      # calculate the ranges
       periods = period_calculator.periods
-      #construct a bucketor that can create the x-axis from those ranges
-      #will be a XBucketWeek based on current chart config
+      # construct a bucketor that can create the x-axis from those ranges
+      # will be a XBucketWeek based on current chart config
       bucketor = XBucketBase.create_bucketor(chart_config[:x_axis], periods)
-      #populate the axis and then read off the start and end of the ranges
+      # populate the axis and then read off the start and end of the ranges
       bucketor.create_x_axis
-      {start_date: bucketor.x_axis_bucket_date_ranges.first.first, end_date: bucketor.x_axis_bucket_date_ranges.last.last}
+      { start_date: bucketor.x_axis_bucket_date_ranges.first.first, end_date: bucketor.x_axis_bucket_date_ranges.last.last }
     end
 
-    #Load the chart config required to calculate the start/end dates for the
-    #analysis
+    # Load the chart config required to calculate the start/end dates for the
+    # analysis
     def chart_config
       @chart_config ||= ChartManager.new(@meter_collection).get_chart_config(chart_for_fuel_type)
     end
 
-    #Chart that was originally displayed next to this breakdown
+    # Chart that was originally displayed next to this breakdown
     def chart_for_fuel_type
       if @fuel_type == :electricity
         :group_by_week_electricity_meter_breakdown_one_year
@@ -166,8 +167,6 @@ module Usage
         @meter_collection.electricity_meters
       when :gas
         @meter_collection.heat_meters
-      else
-        nil
       end
     end
 
@@ -178,7 +177,7 @@ module Usage
     def validate_meter_collection
       meters = underlying_meters
       raise EnergySparksUnexpectedStateException, 'Unexpected fuel type' if meters.nil?
-      raise EnergySparksUnexpectedStateException, 'School does not have #{fuel_type} meters' if meters.empty?
+      raise EnergySparksUnexpectedStateException, "School does not have #{fuel_type} meters" if meters.empty?
     end
   end
 end

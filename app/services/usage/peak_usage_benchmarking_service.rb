@@ -23,9 +23,9 @@ module Usage
     def estimated_savings(versus: :exemplar_school)
       case versus
       when :benchmark_school
-        consumption_above_peak( benchmark_kwh )
+        consumption_above_peak(benchmark_kwh)
       when :exemplar_school
-        consumption_above_peak( exemplar_kwh )
+        consumption_above_peak(exemplar_kwh)
       else
         raise 'Invalid comparison'
       end
@@ -45,7 +45,6 @@ module Usage
       @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
     end
 
-
     def consumption_above_peak(peak_kwh)
       totals = consumption_above_peak_totals(peak_kwh)
 
@@ -56,12 +55,11 @@ module Usage
       )
     end
 
-    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
     def consumption_above_peak_totals(peak_kwh)
       totals = { kwh: 0.0, £: 0.0, co2: 0.0 }
 
       full_date_range.each do |date|
-        (0..47).each do |hhi|
+        48.times do |hhi|
           kwh = aggregate_meter.amr_data.kwh(date, hhi, :kwh)
           percent_above_exemplar = capped_percent(kwh, peak_kwh)
 
@@ -75,7 +73,6 @@ module Usage
 
       totals.transform_values { |value| scale_to_year(value) }
     end
-    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
     def capped_percent(kwh, peak_kwh)
       return nil if kwh <= peak_kwh

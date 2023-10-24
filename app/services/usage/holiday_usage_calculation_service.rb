@@ -1,22 +1,24 @@
+# frozen_string_literal: true
+
 module Usage
   class HolidayUsageCalculationService
-
-    def initialize(analytics_meter, holidays, asof_date=Date.today)
+    def initialize(analytics_meter, holidays, asof_date = Date.today)
       @meter = analytics_meter
       @holidays = holidays
       @asof_date = asof_date
     end
 
-    #Returns the usage for a specific holiday, expressed as a
-    #Holiday or School Period.
+    # Returns the usage for a specific holiday, expressed as a
+    # Holiday or School Period.
     #
-    #Will return +nil+ if the meter doesn't have data for the
-    #entire period
+    # Will return +nil+ if the meter doesn't have data for the
+    # entire period
     #
-    #@param [Holiday] school period, the period to be analysed
-    #@return [CombinedUsageMetric] the calculated usage
+    # @param [Holiday] school period, the period to be analysed
+    # @return [CombinedUsageMetric] the calculated usage
     def holiday_usage(school_period:)
       return nil unless has_data_for_period?(school_period)
+
       CombinedUsageMetric.new(
         kwh: usage_for_period(school_period, :kwh),
         £: usage_for_period(school_period, :£),
@@ -33,8 +35,8 @@ module Usage
     # the alerts. So should only be used for reporting the "metered"
     # usage for the periods.
     #
-    #@param [Holiday] school period, the period to be analysed
-    #@return [OpenStruct]
+    # @param [Holiday] school period, the period to be analysed
+    # @return [OpenStruct]
     def holiday_usage_comparison(school_period:)
       usage_for_period = holiday_usage(school_period: school_period)
       previous_period = holiday_period_for_previous_year(school_period)
@@ -52,8 +54,8 @@ module Usage
     # Equivalent to calling +holiday_usage_comparison+ for each item in the
     # Array. Useful when tabulating usage across a range of periods
     #
-    #@param [Array] school_periods, an array of periods
-    #@return [Hash] of school_period => OpenStruct
+    # @param [Array] school_periods, an array of periods
+    # @return [Hash] of school_period => OpenStruct
     def holidays_usage_comparison(school_periods: [])
       school_periods.map do |school_period|
         [school_period, holiday_usage_comparison(school_period: school_period)]
@@ -81,12 +83,12 @@ module Usage
     # This is to allow us to provide a "rolling" calendar of holiday usage
     # calculations
     #
-    #@return [Hash] of school_period => OpenStruct
+    # @return [Hash] of school_period => OpenStruct
     def school_holiday_calendar_comparison
       academic_year = academic_year_for_comparison
-      holidays_for_academic_year = @holidays.holidays.select{ |h| h.academic_year == academic_year }
+      holidays_for_academic_year = @holidays.holidays.select { |h| h.academic_year == academic_year }
       comparison_periods = holidays_for_academic_year.map do |holiday|
-        #use last year holiday if the holiday hasn't started yet
+        # use last year holiday if the holiday hasn't started yet
         if holiday.start_date > @asof_date
           holiday_period_for_previous_year(holiday)
         else
@@ -125,6 +127,5 @@ module Usage
     def usage_for_period(school_period, data_type = :kwh)
       @meter.amr_data.kwh_date_range(school_period.start_date, end_date(school_period), data_type)
     end
-
   end
 end

@@ -41,7 +41,7 @@ class PVMap < RestrictedKeyHash
   end
 
   def self.mpan_maps(mpan_map)
-    mpan_map.select { |k, _v| MPAN_KEY_MAPPINGS.keys.include?(k)}
+    mpan_map.select { |k, _v| MPAN_KEY_MAPPINGS.key?(k) }
   end
 
   def self.attribute_map_meter_type(mpan_meter_type)

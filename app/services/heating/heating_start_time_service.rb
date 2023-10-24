@@ -12,7 +12,7 @@ module Heating
     #
     # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have gas meters
     # @raise [EnergySparksUnexpectedStateException] if the school does not use gas for heating
-    def initialize(meter_collection, asof_date=Date.today)
+    def initialize(meter_collection, asof_date = Date.today)
       validate_meter_collection(meter_collection)
       super(meter_collection, asof_date)
     end
@@ -35,7 +35,7 @@ module Heating
 
       days = days.map do |day|
         # unpack the array
-        date, heating_start_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2 = day
+        date, heating_start_time, recommended_time, temperature, _, kwh_saving, saving_£, saving_co2 = day
         OpenStruct.new(
           date: date,
           heating_start_time: heating_start_time,
@@ -56,7 +56,7 @@ module Heating
     end
 
     def heating_start_time_calculator
-      @heating_time_calculator ||= HeatingStartTimeCalculator.new(heating_model: heating_model)
+      @heating_start_time_calculator ||= HeatingStartTimeCalculator.new(heating_model: heating_model)
     end
   end
 end

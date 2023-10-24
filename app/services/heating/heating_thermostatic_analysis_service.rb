@@ -9,6 +9,7 @@ module Heating
       fuel_type: :gas
     )
       raise 'Invalid fuel type' unless %i[gas storage_heater].include? fuel_type
+
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
       @average_outside_temperature_high_centigrade = average_outside_temperature_high_centigrade
@@ -19,7 +20,6 @@ module Heating
     # def data_available_from
     # end
 
-    # rubocop:disable Metrics/MethodLength
     def create_model
       OpenStruct.new(
         r2: r2,
@@ -33,7 +33,6 @@ module Heating
         predicted_kwh_for_low_average_outside_temperature: predicted_kwh(@average_outside_temperature_low_centigrade)
       )
     end
-    # rubocop:enable Metrics/MethodLength
 
     private
 
@@ -49,17 +48,13 @@ module Heating
       a + b * temperature
     end
 
-    # rubocop:disable Naming/MethodName
     def latest_blended_tariff_£_per_kwh
       aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
     end
-    # rubocop:enable Naming/MethodName
 
-    # rubocop:disable Naming/MethodName
     def insulation_hotwater_heat_loss_estimate_£
       insulation_hotwater_heat_loss_estimate_kwh * latest_blended_tariff_£_per_kwh
     end
-    # rubocop:enable Naming/MethodName
 
     def insulation_hotwater_heat_loss_estimate_kwh
       loss_kwh, _percent_loss = heating_model.hot_water_poor_insulation_cost_kwh(
