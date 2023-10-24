@@ -4,7 +4,7 @@ module Baseload
   # Alternative approach for calculating daily baseload
   #
   # Assumes that the school is using minimal power for other purposes during the
-  # late evrning, between 8.30pm and midnight. The correspond to half-hourly periods
+  # late evening, between 8.30pm and midnight. The correspond to half-hourly periods
   # 41 through to 47.
   #
   # This approach is used where we are using modelled solar data from Sheffield, as there

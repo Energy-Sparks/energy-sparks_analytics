@@ -14,6 +14,14 @@ describe Baseload::BaseloadCalculator, type: :service do
       it 'returns calculator' do
         expect(calculator).to be_a(Baseload::OvernightBaseloadCalculator)
       end
+
+      context 'with FEATURE_FLAG_MIDNIGHT_BASELOAD enabled' do
+        it 'returns the new implementation' do
+          ClimateControl.modify FEATURE_FLAG_MIDNIGHT_BASELOAD: 'true' do
+            expect(calculator).to be_a Baseload::AroundMidnightBaseloadCalculator
+          end
+        end
+      end
     end
 
     context 'and school does not have sheffield solar' do
@@ -31,6 +39,13 @@ describe Baseload::BaseloadCalculator, type: :service do
       let(:sheffield_solar_pv)  { true }
       it 'returns calculator' do
         expect(calculator).to be_a(Baseload::OvernightBaseloadCalculator)
+      end
+      context 'with FEATURE_FLAG_MIDNIGHT_BASELOAD enabled' do
+        it 'returns the new implementation' do
+          ClimateControl.modify FEATURE_FLAG_MIDNIGHT_BASELOAD: 'true' do
+            expect(calculator).to be_a Baseload::AroundMidnightBaseloadCalculator
+          end
+        end
       end
     end
     context 'without sheffield solar' do
