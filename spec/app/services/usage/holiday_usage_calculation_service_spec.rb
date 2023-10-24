@@ -1,34 +1,35 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Usage::HolidayUsageCalculationService, type: :service do
-
   let(:fuel_type)        { :electricity }
   let(:meter_collection) { @acme_academy }
   let(:meter)            { meter_collection.aggregated_electricity_meters }
   let(:asof_date)        { Date.today }
-  let(:service)          { Usage::HolidayUsageCalculationService.new(meter, meter_collection.holidays, asof_date)}
+  let(:service)          { described_class.new(meter, meter_collection.holidays, asof_date) }
 
-  #using before(:all) here to avoid slow loading of YAML and then
-  #running the aggregation code for each test.
+  # using before(:all) here to avoid slow loading of YAML and then
+  # running the aggregation code for each test.
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
   context 'with electricity meters' do
-    context '#holiday_usage' do
+    describe '#holiday_usage' do
       let(:academic_year) { nil }
       let(:school_period) { Holiday.new(holiday_type, name, start_date, end_date, academic_year) }
       let(:usage) { service.holiday_usage(school_period: school_period) }
 
       context 'for xmas 2021/2022' do
         let(:holiday_type)  { :xmas }
-        let(:name)          { "Xmas 2021/2022" }
-        let(:start_date)    { Date.new(2021,12,18)}
-        #last day of xmas holiday
-        let(:end_date)      { Date.new(2022,01,3) }
+        let(:name)          { 'Xmas 2021/2022' }
+        let(:start_date)    { Date.new(2021, 12, 18) }
+        # last day of xmas holiday
+        let(:end_date)      { Date.new(2022, 0o1, 3) }
 
         it 'calculates the expected usage' do
-          expect(usage.kwh).to be_within(0.1).of(10425.6)
+          expect(usage.kwh).to be_within(0.1).of(10_425.6)
           expect(usage.co2).to be_within(0.1).of(1794.7996)
           expect(usage.£).to be_within(0.1).of(1262.19)
         end
@@ -36,13 +37,13 @@ describe Usage::HolidayUsageCalculationService, type: :service do
 
       context 'for xmas 2020/2021' do
         let(:holiday_type)  { :xmas }
-        let(:name)          { "Xmas 2020/2021" }
-        let(:start_date)    { Date.new(2020,12,19)}
-        #last day of xmas holiday
-        let(:end_date)      { Date.new(2021,1,3) }
+        let(:name)          { 'Xmas 2020/2021' }
+        let(:start_date)    { Date.new(2020, 12, 19) }
+        # last day of xmas holiday
+        let(:end_date)      { Date.new(2021, 1, 3) }
 
         it 'calculates the expected usage' do
-          expect(usage.kwh).to be_within(0.1).of(11728.89)
+          expect(usage.kwh).to be_within(0.1).of(11_728.89)
           expect(usage.co2).to be_within(0.1).of(2068.9643)
           expect(usage.£).to be_within(0.1).of(1437.97)
         end
@@ -50,9 +51,9 @@ describe Usage::HolidayUsageCalculationService, type: :service do
 
       context 'for autumn half term 2021' do
         let(:holiday_type)  { :autumn_half_term }
-        let(:name)          { "Autumn half term" }
-        let(:start_date)    { Date.new(2021,10,23) }
-        let(:end_date)      { Date.new(2021,10,31) }
+        let(:name)          { 'Autumn half term' }
+        let(:start_date)    { Date.new(2021, 10, 23) }
+        let(:end_date)      { Date.new(2021, 10, 31) }
 
         it 'calculates the expected usage' do
           expect(usage.kwh).to be_within(0.1).of(7801.6)
@@ -63,9 +64,10 @@ describe Usage::HolidayUsageCalculationService, type: :service do
 
       context 'for period outside meter range' do
         let(:holiday_type)  { :xmas }
-        let(:name)          { "Christmas 2023" }
-        let(:start_date)    { Date.new(2023,12,20) }
-        let(:end_date)      { Date.new(2024,1,02) }
+        let(:name)          { 'Christmas 2023' }
+        let(:start_date)    { Date.new(2023, 12, 20) }
+        let(:end_date)      { Date.new(2024, 1, 0o2) }
+
         it 'returns nil' do
           expect(usage).to eq nil
         end
@@ -73,41 +75,40 @@ describe Usage::HolidayUsageCalculationService, type: :service do
 
       context 'in the middle of a holiday' do
         let(:holiday_type)  { :xmas }
-        let(:name)          { "Xmas 2021/2022" }
-        let(:start_date)    { Date.new(2021,12,18)}
-        #last day of xmas holiday
-        let(:end_date)      { Date.new(2022,01,3) }
-        let(:asof_date)     { Date.new(2021,12,25) }
+        let(:name)          { 'Xmas 2021/2022' }
+        let(:start_date)    { Date.new(2021, 12, 18) }
+        # last day of xmas holiday
+        let(:end_date)      { Date.new(2022, 0o1, 3) }
+        let(:asof_date)     { Date.new(2021, 12, 25) }
 
         it 'returns partial usage' do
-          #less than usage for full holiday
-          expect(usage.kwh).to be <= 10425.6
+          # less than usage for full holiday
+          expect(usage.kwh).to be <= 10_425.6
         end
-
       end
     end
 
-    context '#holiday_usage_comparison' do
+    describe '#holiday_usage_comparison' do
       let(:academic_year) { nil }
       let(:school_period) { Holiday.new(holiday_type, name, start_date, end_date, academic_year) }
       let(:comparison) { service.holiday_usage_comparison(school_period: school_period) }
 
       context 'for xmas 2021/2022' do
         let(:holiday_type)  { :xmas }
-        let(:name)          { "Xmas" }
-        let(:start_date)    { Date.new(2021,12,18)}
-        let(:end_date)      { Date.new(2022,01,3) }
+        let(:name)          { 'Xmas' }
+        let(:start_date)    { Date.new(2021, 12, 18) }
+        let(:end_date)      { Date.new(2022, 0o1, 3) }
 
         it 'produces the right comparison' do
           xmas_2021_usage = comparison.usage
-          expect(xmas_2021_usage.kwh).to be_within(0.1).of(10425.6)
+          expect(xmas_2021_usage.kwh).to be_within(0.1).of(10_425.6)
           expect(xmas_2021_usage.co2).to be_within(0.1).of(1794.7996)
           expect(xmas_2021_usage.£).to be_within(0.1).of(1262.19)
 
-          expect(comparison.previous_holiday).to_not be_nil
+          expect(comparison.previous_holiday).not_to be_nil
 
           xmas_2020_usage = comparison.previous_holiday_usage
-          expect(xmas_2020_usage.kwh).to be_within(0.1).of(11728.89)
+          expect(xmas_2020_usage.kwh).to be_within(0.1).of(11_728.89)
           expect(xmas_2020_usage.co2).to be_within(0.1).of(2068.9643)
           expect(xmas_2020_usage.£).to be_within(0.1).of(1437.97)
         end
@@ -115,76 +116,79 @@ describe Usage::HolidayUsageCalculationService, type: :service do
 
       context 'for period outside meter range' do
         let(:holiday_type)  { :easter }
-        let(:name)          { "Easter 2019" }
-        let(:start_date)    { Date.new(2019,4,13)}
-        let(:end_date)      { Date.new(2019,4,28) }
+        let(:name)          { 'Easter 2019' }
+        let(:start_date)    { Date.new(2019, 4, 13) }
+        let(:end_date)      { Date.new(2019, 4, 28) }
 
         it 'returns nil for previous year' do
-          expect(comparison.usage).to_not be_nil
+          expect(comparison.usage).not_to be_nil
           expect(comparison.previous_holiday_usage).to be_nil
         end
       end
     end
 
-    context '#holidays_usage_comparison' do
+    describe '#holidays_usage_comparison' do
       let(:academic_year) { nil }
-      let(:school_period_1) { Holiday.new(:xmas, "Xmas 2021/2022", Date.new(2021,12,18), Date.new(2022,01,3), academic_year) }
-      let(:school_period_2) { Holiday.new(:autumn_half_term, "Autum half term", Date.new(2021,10,23), Date.new(2021,10,31), academic_year) }
+      let(:school_period_1) do
+        Holiday.new(:xmas, 'Xmas 2021/2022', Date.new(2021, 12, 18), Date.new(2022, 0o1, 3), academic_year)
+      end
+      let(:school_period_2) do
+        Holiday.new(:autumn_half_term, 'Autum half term', Date.new(2021, 10, 23), Date.new(2021, 10, 31), academic_year)
+      end
       let(:comparison) { service.holidays_usage_comparison(school_periods: [school_period_1, school_period_2]) }
 
       it 'calculates all comparisons' do
-        expect(comparison[school_period_1]).to_not be_nil
-        expect(comparison[school_period_2]).to_not be_nil
+        expect(comparison[school_period_1]).not_to be_nil
+        expect(comparison[school_period_2]).not_to be_nil
       end
     end
 
-    context '#school_holiday_calendar_comparison' do
-
+    describe '#school_holiday_calendar_comparison' do
       context 'for Easter 2022' do
-        let(:asof_date)        { Date.new(2022, 4, 1) }
+        let(:asof_date) { Date.new(2022, 4, 1) }
         let(:holiday_comparison) { service.school_holiday_calendar_comparison }
 
         it 'finds all the holidays' do
-          holiday_types = holiday_comparison.keys.map {|h| h.type }
-          expect(holiday_types).to match_array([:autumn_half_term, :xmas, :spring_half_term, :easter, :summer_half_term, :summer])
+          holiday_types = holiday_comparison.keys.map(&:type)
+          expect(holiday_types).to match_array(%i[autumn_half_term xmas spring_half_term easter
+                                                  summer_half_term summer])
         end
 
         it 'calculates usage for all holidays' do
-          holiday_comparison.each do |holiday, usage|
-            expect(usage.usage).to_not be_nil
+          holiday_comparison.each do |_holiday, usage|
+            expect(usage.usage).not_to be_nil
           end
         end
 
         it 'has Easter as latest' do
-          latest_holiday = holiday_comparison.keys.sort{|a,b| b.start_date <=> a.start_date }.last
+          latest_holiday = holiday_comparison.keys.max { |a, b| b.start_date <=> a.start_date }
           expect(latest_holiday.type).to eq :easter
         end
       end
 
       context 'for Summer 2022' do
-        #last meter date
-        let(:asof_date)        { Date.new(2022,7,13) }
-        let(:service)          { Usage::HolidayUsageCalculationService.new(meter, meter_collection.holidays, asof_date)}
+        # last meter date
+        let(:asof_date)        { Date.new(2022, 7, 13) }
+        let(:service)          { described_class.new(meter, meter_collection.holidays, asof_date) }
         let(:holiday_comparison) { service.school_holiday_calendar_comparison }
 
         it 'finds all the holidays' do
-          holiday_types = holiday_comparison.keys.map {|h| h.type }
-          expect(holiday_types).to match_array([:autumn_half_term, :xmas, :spring_half_term, :easter, :summer_half_term, :summer])
+          holiday_types = holiday_comparison.keys.map(&:type)
+          expect(holiday_types).to match_array(%i[autumn_half_term xmas spring_half_term easter
+                                                  summer_half_term summer])
         end
 
         it 'calculates usage for all holidays' do
-          holiday_comparison.each do |holiday, usage|
-            expect(usage.usage).to_not be_nil
+          holiday_comparison.each do |_holiday, usage|
+            expect(usage.usage).not_to be_nil
           end
         end
 
         it 'has Summer as latest' do
-          latest_holiday = holiday_comparison.keys.sort{|a,b| b.start_date <=> a.start_date }.last
+          latest_holiday = holiday_comparison.keys.max { |a, b| b.start_date <=> a.start_date }
           expect(latest_holiday.type).to eq :summer
         end
-
       end
     end
-
   end
 end

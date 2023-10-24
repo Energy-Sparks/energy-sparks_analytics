@@ -8,9 +8,9 @@ describe Costs::EconomicTariffsChangeCaveatsService do
     @beta_academy = load_unvalidated_meter_collection(school: 'beta-academy')
   end
 
-  context '#calculate_economic_tariff_changed' do
+  describe '#calculate_economic_tariff_changed' do
     it 'calulates economic tariff changed data' do
-      service = Costs::EconomicTariffsChangeCaveatsService.new(meter_collection: @beta_academy, fuel_type: :electricity)
+      service = described_class.new(meter_collection: @beta_academy, fuel_type: :electricity)
       model = service.calculate_economic_tariff_changed
 
       expect(model.last_change_date).to eq(Date.new(2023, 4, 1))

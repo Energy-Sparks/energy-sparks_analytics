@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_energy_use_since_joined_energy_sparks,
@@ -129,20 +129,24 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) } #.flatten.map { |c| c[:name] }
+      column_groups = # .flatten.map { |c| c[:name] }
+        content.select do |c|
+          c[:type] == :table_composite
+        end.map { |c| c.dig(:content, :column_groups) }
       expect(column_groups).to eq(
         [
           [
-            { name: "", span: 2},
-            { name: I18n.t("analytics.benchmarking.configuration.column_groups.change_since_joined_energy_sparks"), span: 5}
+            { name: '', span: 2 },
+            { name: I18n.t('analytics.benchmarking.configuration.column_groups.change_since_joined_energy_sparks'),
+              span: 5 }
           ],
           [
-            { name: "", span: 2},
-            { name: I18n.t("analytics.benchmarking.configuration.column_groups.electricity_consumption"), span: 3},
-            { name: I18n.t("analytics.benchmarking.configuration.column_groups.gas_consumption"), span: 3},
-            { name: I18n.t("analytics.benchmarking.configuration.column_groups.storage_heater_consumption"), span: 3},
-            { name: I18n.t("analytics.benchmarking.configuration.column_groups.solar_pv_production"), span: 3},
-            { name: I18n.t("analytics.benchmarking.configuration.column_groups.total_energy_consumption"), span: 1}
+            { name: '', span: 2 },
+            { name: I18n.t('analytics.benchmarking.configuration.column_groups.electricity_consumption'), span: 3 },
+            { name: I18n.t('analytics.benchmarking.configuration.column_groups.gas_consumption'), span: 3 },
+            { name: I18n.t('analytics.benchmarking.configuration.column_groups.storage_heater_consumption'), span: 3 },
+            { name: I18n.t('analytics.benchmarking.configuration.column_groups.solar_pv_production'), span: 3 },
+            { name: I18n.t('analytics.benchmarking.configuration.column_groups.total_energy_consumption'), span: 1 }
           ]
         ]
       )

@@ -1,36 +1,40 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe ChartYAxisManipulation do
-
   let(:chart_name)            { :gas_longterm_trend }
   let(:existing_chart_config) { ChartManager::STANDARD_CHART_CONFIGURATION[chart_name] }
   let(:full_y1_choices)       { %i[kwh £ co2] }
   let(:full_y2_choices)       { %i[temperature degreedays irradiance gridcarbon gascarbon] }
 
-  let(:manipulator)           { ChartYAxisManipulation.new }
+  let(:manipulator)           { described_class.new }
+
   describe '#y1_axis_choices' do
     it 'returns valid choices' do
-      expect( manipulator.y1_axis_choices(existing_chart_config) ).to match_array(full_y1_choices)
+      expect(manipulator.y1_axis_choices(existing_chart_config)).to match_array(full_y1_choices)
     end
 
     context 'with solar charts' do
       let(:chart_name) { :solar_pv_group_by_week }
+
       it 'removes all choices' do
-        expect( manipulator.y1_axis_choices(existing_chart_config) ).to be_nil
+        expect(manipulator.y1_axis_choices(existing_chart_config)).to be_nil
       end
     end
 
     context 'with benchmarks' do
       let(:chart_name) { :benchmark }
+
       it 'restricts to £ and c02' do
-        expect( manipulator.y1_axis_choices(existing_chart_config) ).to match_array([:£, :co2])
+        expect(manipulator.y1_axis_choices(existing_chart_config)).to match_array(%i[£ co2])
       end
     end
   end
 
   describe '#y2_axis_choices' do
     it 'returns valid choices' do
-      expect( manipulator.y2_axis_choices(existing_chart_config) ).to match_array(full_y2_choices)
+      expect(manipulator.y2_axis_choices(existing_chart_config)).to match_array(full_y2_choices)
     end
   end
 
@@ -42,7 +46,10 @@ describe ChartYAxisManipulation do
     end
 
     it 'raises exception for invalid choice' do
-      expect { manipulator.change_y1_axis_config(existing_chart_config, :rubbish) }.to raise_error ChartYAxisManipulation::CantChangeY1AxisException
+      expect do
+        manipulator.change_y1_axis_config(existing_chart_config,
+                                          :rubbish)
+      end.to raise_error ChartYAxisManipulation::CantChangeY1AxisException
     end
   end
 
@@ -54,8 +61,10 @@ describe ChartYAxisManipulation do
     end
 
     it 'raises exception for invalid choice' do
-      expect { manipulator.change_y2_axis_config(existing_chart_config, :rubbish) }.to raise_error ChartYAxisManipulation::CantChangeY2AxisException
+      expect do
+        manipulator.change_y2_axis_config(existing_chart_config,
+                                          :rubbish)
+      end.to raise_error ChartYAxisManipulation::CantChangeY2AxisException
     end
   end
-
 end

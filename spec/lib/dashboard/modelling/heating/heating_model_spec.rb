@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe AnalyseHeatingAndHotWater::HeatingModel do
-
-  context '#school_heating_day_adjective' do
+  describe '#school_heating_day_adjective' do
     it 'finds the right adjective' do
       expect(described_class.school_heating_day_adjective(50)).to eq 'perfect'
       expect(described_class.school_heating_day_adjective(95)).to eq 'excellent'
@@ -15,7 +16,7 @@ describe AnalyseHeatingAndHotWater::HeatingModel do
     end
   end
 
-  context '#school_day_heating_rating_out_of_10' do
+  describe '#school_day_heating_rating_out_of_10' do
     it 'finds the right rating' do
       expect(described_class.school_day_heating_rating_out_of_10(50)).to eq 10
       expect(described_class.school_day_heating_rating_out_of_10(95)).to eq 10
@@ -28,7 +29,7 @@ describe AnalyseHeatingAndHotWater::HeatingModel do
     end
   end
 
-  context '#non_school_heating_day_adjective' do
+  describe '#non_school_heating_day_adjective' do
     it 'finds the right adjective' do
       expect(described_class.non_school_heating_day_adjective(1)).to eq 'perfect'
       expect(described_class.non_school_heating_day_adjective(6)).to eq 'excellent'
@@ -44,7 +45,7 @@ describe AnalyseHeatingAndHotWater::HeatingModel do
     end
   end
 
-  context '#non_school_day_heating_rating_out_of_10' do
+  describe '#non_school_day_heating_rating_out_of_10' do
     it 'finds the right rating' do
       expect(described_class.non_school_day_heating_rating_out_of_10(1)).to eq 10
       expect(described_class.non_school_day_heating_rating_out_of_10(6)).to eq 9
@@ -60,7 +61,7 @@ describe AnalyseHeatingAndHotWater::HeatingModel do
     end
   end
 
-  context '#r2_rating_adjective' do
+  describe '#r2_rating_adjective' do
     it 'finds the right adjective' do
       expect(described_class.r2_rating_adjective(0.05)).to eq 'very poor'
       expect(described_class.r2_rating_adjective(0.15)).to eq 'very poor'
@@ -75,7 +76,7 @@ describe AnalyseHeatingAndHotWater::HeatingModel do
     end
   end
 
-  context '#r2_rating_out_of_10' do
+  describe '#r2_rating_out_of_10' do
     it 'finds the right rating' do
       expect(described_class.r2_rating_out_of_10(0.05)).to eq 0
       expect(described_class.r2_rating_out_of_10(0.15)).to eq 1
@@ -89,5 +90,4 @@ describe AnalyseHeatingAndHotWater::HeatingModel do
       expect(described_class.r2_rating_out_of_10(0.95)).to eq 10
     end
   end
-
 end

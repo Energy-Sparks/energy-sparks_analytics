@@ -1,6 +1,7 @@
-FactoryBot.define do
-  factory :holiday, class: Holiday do
+# frozen_string_literal: true
 
+FactoryBot.define do
+  factory :holiday, class: 'Holiday' do
     transient do
       type             { :school_holiday }
       sequence(:name)  { |n| "Term #{n}" }

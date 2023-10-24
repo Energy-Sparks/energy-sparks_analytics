@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentPeakElectricityPerFloorArea, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentPeakElectricityPerFloorArea.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :electricity_peak_kw_per_pupil,
@@ -37,7 +37,7 @@ describe Benchmarking::BenchmarkContentPeakElectricityPerFloorArea, type: :servi
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
         <p>
-          This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day. 
+          This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day.#{' '}
         </p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.electricity_peak_kw_per_pupil.introduction_text_html')
@@ -103,8 +103,10 @@ describe Benchmarking::BenchmarkContentPeakElectricityPerFloorArea, type: :servi
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
-    end    
+    end
   end
 end

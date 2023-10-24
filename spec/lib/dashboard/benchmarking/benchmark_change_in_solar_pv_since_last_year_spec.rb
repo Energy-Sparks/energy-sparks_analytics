@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkChangeInSolarPVSinceLastYear, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkChangeInSolarPVSinceLastYear.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_solar_pv_since_last_year,
@@ -150,6 +150,6 @@ describe Benchmarking::BenchmarkChangeInSolarPVSinceLastYear, type: :service do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
       column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }
       expect(column_groups).to eq([])
-    end    
+    end
   end
 end
