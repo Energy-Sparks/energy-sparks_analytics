@@ -1,11 +1,14 @@
 require_relative './synthetic_school.rb'
 
 class BenchmarkSchool < SyntheticSchool
-  def initialize(school, benchmark_type: :benchmark)
+  def initialize(meter_collection, benchmark_type: :benchmark)
     puts "Creating school"
-    super(school)
+    super(meter_collection)
     @benchmark_type = benchmark_type
-    @name = benchmark_type.to_s
+  end
+
+  def name
+    @benchmark_type.to_s
   end
 
   def aggregated_electricity_meters

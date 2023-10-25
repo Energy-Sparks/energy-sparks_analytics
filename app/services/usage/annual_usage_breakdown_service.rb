@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength, Metrics/AbcSize
 module Usage
   class AnnualUsageBreakdownService
     include AnalysableMixin
@@ -181,4 +180,3 @@ module Usage
     end
   end
 end
-# rubocop:enable Metrics/ClassLength, Metrics/AbcSize

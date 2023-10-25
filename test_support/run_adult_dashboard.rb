@@ -99,8 +99,23 @@ class RunAdultDashboard < RunCharts
     end
   end
 
+  private def adult_report_groups
+    report_groups = []
+    report_groups.push(:benchmark)                    if @school.electricity? && !@school.solar_pv_panels?
+    report_groups.push(:benchmark_kwh_electric_only)  if @school.electricity? && @school.solar_pv_panels?
+    report_groups.push(:electric_group)               if @school.electricity?
+    report_groups.push(:gas_group)                    if @school.gas?
+    report_groups.push(:hotwater_group)               unless @school.heating_only?
+    report_groups.push(:boiler_control_group)         unless @school.non_heating_only?
+    report_groups.push(:storage_heater_group)         if @school.storage_heaters?
+    # now part of electricity report_groups.push(:solar_pv_group)               if solar_pv_panels?
+    report_groups.push(:carbon_group)                 # if electricity? && gas?
+    report_groups.push(:energy_tariffs_group)         if false
+    report_groups
+  end
+
   private def page_list
-    @school.adult_report_groups.map do |report_group|
+    adult_report_groups.map do |report_group|
       DashboardConfiguration::ADULT_DASHBOARD_GROUPS[report_group]
     end.flatten
   end
@@ -242,7 +257,7 @@ class RunAdultDashboard < RunCharts
                       }
 
                       label {
-                          display: block;    
+                          display: block;
                           padding: 8px 22px;
                           margin: 0 0 1px 0;
                           cursor: pointer;
@@ -279,11 +294,11 @@ class RunAdultDashboard < RunCharts
                       .split-para span {
                         display:block;float:right;width:15%;margin-left:10px;
                       }
-                      
+
                       * {
                         transition: all .2s ease;
                       }
-                      
+
                       .extra-info {
                         display: none;
                         line-height: 30px;
@@ -292,18 +307,18 @@ class RunAdultDashboard < RunCharts
                         top: 0;
                         left: 50px;
                       }
-                      
+
                       .info:hover .extra-info {
                         display: block;
                       }
-                      
+
                       .info {
                         font-size: 20px;
                         padding-left: 5px;
                         width: 20px;
                         border-radius: 15px;
                       }
-                      
+
                       .info:hover {
                         background-color: white;
                         padding: 0 0 0 5px;
@@ -318,12 +333,12 @@ class RunAdultDashboard < RunCharts
 
   def valid?(advice, page)
     unless advice.valid_alert?
-      puts "                Page failed, as advice not valid #{page}" 
+      puts "                Page failed, as advice not valid #{page}"
       return false
     end
 
     unless advice.relevance == :relevant
-      puts "                Page failed, as advice not relevant #{page}" 
+      puts "                Page failed, as advice not relevant #{page}"
       return false
     end
 

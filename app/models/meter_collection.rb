@@ -1,24 +1,13 @@
-# Was a building!
-
-# building: potentially a misnomer, holds data associated with a group
-#           of buildings, which could be a whole school or the area
-#           covered by a single meter
-#           primarily a placeholder for data associated with a school
-#           or group of buildings, potentially different to the parent
-#           school, so for example a different holiday and open/close time
-#           schedule if a meter covers a community sports centre which is
-#           used out of core school hours
-#           - also holds modelling data
+# Meaning of this class has evolved over time, from a building, to data
+# associated with a group of buildings (e.g. whole school or area of single meter)
+#
+# But now it largely holds the consumption, schedule data and analysis associated
+# with a specific school.
 class MeterCollection
   include Logging
 
   attr_reader :heat_meters, :electricity_meters, :storage_heater_meters
-
-  # From school/building
-  attr_reader :floor_area, :number_of_pupils, :calculated_floor_area_pupil_numbers
-
-  # Currently, but not always
-  attr_reader :school, :name, :address, :postcode, :country, :funding_status, :urn, :area_name, :model_cache, :default_energy_purchaser
+  attr_reader :school, :model_cache
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
@@ -29,46 +18,59 @@ class MeterCollection
                 :solar_pv,
                 :grid_carbon_intensity
 
-  # Centrica
+  # For community use calculations
   attr_accessor :aggregated_electricity_meter_without_community_usage
   attr_accessor :aggregated_heat_meters_without_community_usage
   attr_accessor :storage_heater_meter_without_community_usage
   attr_accessor :community_disaggregator
 
   def initialize(school, holidays:, temperatures:, solar_irradiation: nil, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
-    @name = school.name
-    @address = school.address
-    @postcode = school.postcode
-    @country = school.country
-    @funding_status = school.funding_status
-    @floor_area = school.floor_area
-    @number_of_pupils = school.number_of_pupils
+    @school = school
     @holidays = holidays
     @temperatures = temperatures
     @solar_pv = solar_pv
     @solar_irradiation = solar_irradiation.nil? ? SolarIrradianceFromPV.new('solar irradiance from pv', solar_pv_data: solar_pv) : solar_irradiation
-
     @grid_carbon_intensity = grid_carbon_intensity
-
-    unless school.location.nil?
-      @latitude  = school.location[0].to_f
-      @longitude = school.location[1].to_f
-    end
 
     @heat_meters = []
     @electricity_meters = []
     @storage_heater_meters = []
-    @school = school
-    @urn = school.urn
     @meter_identifier_lookup = {} # [mpan or mprn] => meter
-    @area_name = school.area_name
-    @default_energy_purchaser = @area_name # use the area name for the moment
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
     @pseudo_meter_attributes = pseudo_meter_attributes
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
-    process_school_times(school.school_times, school.community_use_times)
+    @open_close_times = OpenCloseTimes.convert_frontend_times(@school.school_times, @school.community_use_times, @holidays)
+  end
+
+  def name
+    @school.name
+  end
+
+  def postcode
+    @school.postcode
+  end
+
+  def country
+    @school.country
+  end
+
+  def funding_status
+    @school.funding_status
+  end
+
+  def urn
+    @school.urn
+  end
+
+  def area_name
+    @school.area_name
+  end
+
+  def default_energy_purchaser
+    # use the area name for the moment
+    @school.area_name
   end
 
   def merge_additional_pseudo_meter_attributes(pseudo_meter_attributes)
@@ -77,20 +79,6 @@ class MeterCollection
 
   def delete_pseudo_meter_attribute(pseudo_meter_key, attribute_key)
     @pseudo_meter_attributes[pseudo_meter_key]&.delete(attribute_key)
-  end
-
-  def matches_identifier?(identifier, identifier_type)
-    case identifier_type
-    when :name
-      identifier == name
-    when :urn
-      identifier == urn
-    when :postcode
-      identifier == postcode
-    else
-      raise EnergySparksUnexpectedStateException.new("Unexpected nil school identifier_type") if identifier_type.nil?
-      raise EnergySparksUnexpectedStateException.new("Unknown or implement school identifier lookup #{identifier_type}")
-    end
   end
 
   def target_school?
@@ -108,10 +96,6 @@ class MeterCollection
     when :solar_pv
       aggregated_electricity_meters.sub_meters[:generation]
     end
-  end
-
-  def sheffield_solar_pv_data
-    solar_pv
   end
 
   def set_aggregate_meter(fuel_type, meter)
@@ -160,15 +144,11 @@ class MeterCollection
   end
 
   def calculate_floor_area_number_of_pupils
-    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
+    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@school.floor_area, @school.number_of_pupils, pseudo_meter_attributes(:school_level_data))
   end
 
   def earliest_meter_date
     all_meters.map{|meter| meter.amr_data.start_date }.min
-  end
-
-  def first_combined_meter_date
-    all_aggregate_meters.map{ |meter| meter.amr_data.start_date }.max
   end
 
   def last_combined_meter_date
@@ -176,7 +156,7 @@ class MeterCollection
   end
 
   def inspect
-    "Meter Collection (name: '#{@name}', object_id: #{"0x00%x" % (object_id << 1)})"
+    "Meter Collection (name: '#{@school.name}', object_id: #{"0x00%x" % (object_id << 1)})"
   end
 
   def to_s
@@ -208,15 +188,11 @@ class MeterCollection
   end
 
   def latitude
-    @latitude ||= latitude_longitude[:latitude]
+    @school.latitude
   end
 
   def longitude
-    @longitude ||= latitude_longitude[:longitude]
-  end
-
-  private def latitude_longitude
-    @latitude_longitude ||= LatitudeLongitude.schools_latitude_longitude(self)
+    @school.longitude
   end
 
   private def search_meter_list_for_identifier(meter_list, identifier)
@@ -246,12 +222,17 @@ class MeterCollection
     meter_list
   end
 
-  # alternative approach to finding real meters, avoids synthetic_mpan_mprn?
+  #TODO remove reference in front-end
+  def real_meters2
+    real_meters
+  end
+
+  # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
+  #
+  # This version of the code avoids checking synthetic_mpan_mprn?
   # which can pickup real meters coming in from 3rd party systems like
   # Orsis where the MPAN is made up; used to test whether this approach works
-  #  too big a change to replace real_meters function
-  # TODO (PH, 4May2021) - replace if working, fully tested - see costs_advice.rb: check_real_meters
-  def real_meters2
+  def real_meters
     meter_list = [
       @heat_meters,
       @electricity_meters,
@@ -261,11 +242,6 @@ class MeterCollection
     meters = meter_list.map{ |m| m.sub_meters.fetch(:mains_consume, m) }
 
     meters.uniq{ |meter| meter.mpxn }
-  end
-
-  # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
-  def real_meters
-    all_meters.select { |meter| !meter.synthetic_mpan_mprn? }.uniq{ |m| m.mpxn}
   end
 
   def underlying_meters(fuel_type)
@@ -279,21 +255,6 @@ class MeterCollection
     else
       []
     end
-  end
-
-  def adult_report_groups
-    report_groups = []
-    report_groups.push(:benchmark)                    if electricity? && !solar_pv_panels?
-    report_groups.push(:benchmark_kwh_electric_only)  if electricity? && solar_pv_panels?
-    report_groups.push(:electric_group)               if electricity?
-    report_groups.push(:gas_group)                    if gas?
-    report_groups.push(:hotwater_group)               unless heating_only?
-    report_groups.push(:boiler_control_group)         unless non_heating_only?
-    report_groups.push(:storage_heater_group)         if storage_heaters?
-    # now part of electricity report_groups.push(:solar_pv_group)               if solar_pv_panels?
-    report_groups.push(:carbon_group)                 # if electricity? && gas?
-    report_groups.push(:energy_tariffs_group)         if false
-    report_groups
   end
 
   def report_group
@@ -320,10 +281,6 @@ class MeterCollection
 
   def all_electricity_meters
     all_meters.select { |meter| meter.electricity_meter? }
-  end
-
-  def all_real_meters
-    [all_heat_meters, all_electricity_meters].flatten
   end
 
   def gas_only?
@@ -388,31 +345,19 @@ class MeterCollection
   end
 
   def school_type
-    @school.nil? ? nil : @school.school_type.to_sym
+    @school.school_type.to_sym
   end
 
   def energysparks_start_date
-    activation_date.nil? ? creation_date : activation_date
+    @school.activation_date || @school.creation_date
   end
 
   def activation_date
-    return nil if @school.nil?
-    return nil if @school.activation_date.nil?
-    # the time is passed in as an active_support Time and not a ruby Time
-    # from the front end, so can't be used directly, the utc field needs to be accessed
-    # instead
-    t = @school.activation_date.respond_to?(:utc) ? @school.activation_date.utc : @school.activation_date
-    Date.new(t.year, t.month, t.day)
+    @school.activation_date
   end
 
   def creation_date
-    return nil if @school.nil?
-    return nil if @school.created_at.nil?
-    # the time is passed in as an active_support Time and not a ruby Time
-    # from the front end, so can't be used directly, the utc field needs to be accessed
-    # instead
-    t = @school.created_at.respond_to?(:utc) ? @school.created_at.utc : @school.created_at
-    Date.new(t.year, t.month, t.day)
+    @school.creation_date
   end
 
   def add_heat_meter(meter)
@@ -444,15 +389,7 @@ class MeterCollection
   end
 
   def open_close_times
-    @open_close_times ||= OpenCloseTimes.new(pseudo_meter_attributes(:school_level_data), holidays)
-  end
-
-  def process_school_times(school_day_times, community_times)
-    if school_day_times.nil? # TODO(PH, 17Feb2022) remove once new school timing code has migrated to production, backwards compatibility with old YAML files
-      @open_close_times = OpenCloseTimes.default_school_open_close_times(holidays)
-    else
-      @open_close_times = OpenCloseTimes.convert_frontend_times(school_day_times, community_times, holidays)
-    end
+    @open_close_times
   end
 
   def target_school(type = :day)
@@ -481,12 +418,6 @@ class MeterCollection
     @pseudo_meter_attributes.keys
   end
 
-  # This is overridden in the energysparks code at the moment, to use the actual open/close times
-  # It replaces school_day_in_hours(time_of_day)
-  def is_school_usually_open?(_date, time_of_day)
-    time_of_day >= @cached_open_time && time_of_day < @cached_close_time
-  end
-
   # Notify meter collection that aggregation process is over.
   # Allows for any post aggregation clean-up to be carried out.
   def notify_aggregation_complete!
@@ -510,11 +441,12 @@ class MeterCollection
     return if earliest_date.nil?
 
     grid_carbon_intensity.set_start_date(earliest_date)
+
+    #we need a bit more temperature and solar data for calculating targets and annual estimates,
+    #so adjust date by one year for solar and
+    earliest_date = earliest_date - (365 + TargetMeterTemperatureCompensatedDailyDayTypeBase::TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
     solar_pv.set_start_date(earliest_date)
     solar_irradiation.set_start_date(earliest_date)
-
-    #we need a bit more temperature data for targets, so adjust date by one year
-    earliest_date = earliest_date - (365 + TargetMeterTemperatureCompensatedDailyDayTypeBase::TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
     temperatures.set_start_date(earliest_date)
   end
 end

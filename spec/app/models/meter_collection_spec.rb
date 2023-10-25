@@ -31,19 +31,17 @@ describe MeterCollection do
       end
 
       it 'cleans up the data as expected' do
-        expect(meter_collection.solar_irradiation.start_date).to eq earliest_meter_date
-        expect(meter_collection.solar_pv.start_date).to eq earliest_meter_date
-
         # for some reason this class overrides start/end date to throw an exception
         # so check for changes another way...
         expect(meter_collection.grid_carbon_intensity.key?(earliest_meter_date)).to eq true
         expect(meter_collection.grid_carbon_intensity.key?(earliest_meter_date - 1)).to eq false
       end
 
-      context 'when there is temperature data' do
+      context 'when there is temperature and solar irradiation data' do
         let(:start_date) { Date.today - 3 }
         let(:end_date)   { Date.today }
 
+        let(:solar_pv)            { build(:solar_pv, :with_days, start_date: start_date, end_date: end_date) }
         let(:temperatures)        { build(:temperatures, :with_days, start_date: start_date, end_date: end_date) }
         let(:meter_collection)    do
           build(:meter_collection, :with_electricity_and_gas_meters, temperatures: temperatures)
@@ -51,6 +49,8 @@ describe MeterCollection do
 
         it 'sets to earliest date' do
           expect(meter_collection.temperatures.start_date).to eq earliest_meter_date
+          expect(meter_collection.solar_irradiation.start_date).to eq earliest_meter_date
+          expect(meter_collection.solar_pv.start_date).to eq earliest_meter_date
         end
 
         context 'when there is earlier data' do
@@ -58,6 +58,8 @@ describe MeterCollection do
 
           it 'sets to about a year earlier' do
             expect(meter_collection.temperatures.start_date).to eq(earliest_meter_date - 369)
+            expect(meter_collection.solar_irradiation.start_date).to eq(earliest_meter_date - 369)
+            expect(meter_collection.solar_pv.start_date).to eq(earliest_meter_date - 369)
           end
         end
       end
