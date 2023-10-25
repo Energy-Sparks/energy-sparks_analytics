@@ -44,7 +44,7 @@ describe MeterCollection do
         let(:solar_pv)            { build(:solar_pv, :with_days, start_date: start_date, end_date: end_date) }
         let(:temperatures)        { build(:temperatures, :with_days, start_date: start_date, end_date: end_date) }
         let(:meter_collection)    do
-          build(:meter_collection, :with_electricity_and_gas_meters, temperatures: temperatures)
+          build(:meter_collection, :with_electricity_and_gas_meters, temperatures: temperatures, solar_pv: solar_pv)
         end
 
         it 'sets to earliest date' do
