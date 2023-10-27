@@ -20,7 +20,7 @@ module MeterAttributeTypes
   ].freeze
 
   class AttributeBase
-    class_attribute :attribute_key, :attribute_aggregation, :attribute_name, :attribute_structure, :attribute_id, :attribute_description, :attribute_meter_types, :attribute_pseudo_meter_types
+    class_attribute :attribute_key, :attribute_aggregation, :attribute_name, :attribute_structure, :attribute_id, :attribute_description, :attribute_meter_types, :attribute_pseudo_meter_types, :internal
 
     def self.id(value)
       self.attribute_id = value
@@ -60,6 +60,14 @@ module MeterAttributeTypes
 
     def self.applicable_attribute_pseudo_meter_types
       attribute_pseudo_meter_types || PSEUDO_METER_TYPES
+    end
+
+    def self.internal?
+      self.internal || false
+    end
+
+    def self.analytics_internal(internal = true)
+      self.internal = internal
     end
 
     def initialize(value)
@@ -112,18 +120,6 @@ module MeterAttributeTypes
     self.type = :string
     def _parse(value)
       value.to_s
-    end
-  end
-
-  # deprecated 18Dec2020 because of issues with its interaction with the front end editor
-  class MPANStringDeprecated < AttributeType
-    self.type = :string
-    def _parse(value)
-      if value.count('0-9') != value.length
-        # temporary validation, may need to be relaxed to include alphas in future
-        raise InvalidAttributeValue, 'Invalid MPAN: must be numeric'
-      end
-      value
     end
   end
 
