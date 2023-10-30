@@ -8,11 +8,20 @@ describe MeterAttributes do
     it 'builds a list of attributes' do
       expect(MeterAttributes.all).not_to be_empty
     end
-    it 'filters analytics internal attributes that shouldnt be set by admins' do
-      expect(all_attributes.key?(:accounting_tariff_generic)).to be false
-      expect(all_attributes.key?(:open_close_times)).to be false
-      expect(all_attributes.key?(:targeting_and_tracking)).to be false
-      expect(all_attributes.key?(:estimated_period_consumption)).to be false
+    it 'returns all items by default' do
+      expect(all_attributes.key?(:accounting_tariff_generic)).to be true
+      expect(all_attributes.key?(:open_close_times)).to be true
+      expect(all_attributes.key?(:targeting_and_tracking)).to be true
+      expect(all_attributes.key?(:estimated_period_consumption)).to be true
+    end
+    context 'when filtering' do
+      let(:all_attributes) { MeterAttributes.all(filter: true) }
+      it 'filters analytics internal attributes that shouldnt be set by admins' do
+        expect(all_attributes.key?(:accounting_tariff_generic)).to be false
+        expect(all_attributes.key?(:open_close_times)).to be false
+        expect(all_attributes.key?(:targeting_and_tracking)).to be false
+        expect(all_attributes.key?(:estimated_period_consumption)).to be false
+      end
     end
   end
 

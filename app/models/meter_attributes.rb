@@ -641,10 +641,10 @@ class MeterAttributes
     structure MeterAttributes.generic_accounting_tariff
   end
 
-  def self.all
+  def self.all(filter: false)
     constants.inject({}) do |collection, constant_name|
       constant = const_get(constant_name)
-      collection[constant.attribute_id] = constant unless constant.internal?
+      collection[constant.attribute_id] = constant unless (filter && constant.internal?)
       collection
     end
   end
