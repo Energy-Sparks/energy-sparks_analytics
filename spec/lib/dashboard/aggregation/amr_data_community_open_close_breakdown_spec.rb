@@ -132,6 +132,26 @@ describe AMRDataCommunityOpenCloseBreakdown do
         end
       end
     end
+
+    context 'with multiple community use times' do
+
+      let(:community_use_times)          do
+        [
+          {day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(6,00), closing_time: TimeOfDay.new(7,30), calendar_period: :term_times},
+          {day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19,00), closing_time: TimeOfDay.new(21,30), calendar_period: :term_times}
+        ]
+      end
+
+      context 'with default filter' do
+        it 'returns a breakdown of all periods' do
+          expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
+        end
+
+        it 'returns same total as the amr_data class' do
+          expect(days_kwh_x48.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
+        end
+      end
+    end
   end
 
   describe '#one_day_kwh' do
