@@ -156,20 +156,7 @@ class AMRDataCommunityOpenCloseBreakdown
       end
     end
 
-    check_totals(kwh_breakdown, date, data_type)
-
     kwh_breakdown
-  end
-
-  def check_totals(kwh_breakdown, date, data_type)
-    # TODO(PH, 18Jan2022) remove if never thrown as has computation impact
-    breakdown_total = kwh_breakdown.values.flatten.sum
-    original_total  = @meter.amr_data.one_day_kwh(date, data_type)
-    raise InternalSelfTestAggregationError, "breakdown = #{breakdown_total} #{data_type} original = #{original_total} for #{date}" unless similar?(breakdown_total, original_total)
-  end
-
-  def similar?(a, b)
-    (a - b).magnitude < 0.0001
   end
 
   def community_type_weights(weights)
