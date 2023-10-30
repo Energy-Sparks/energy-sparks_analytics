@@ -73,7 +73,6 @@ class AMRDataCommunityOpenCloseBreakdown
     dkx = days_kwh_x48(date, data_type, community_use: community_use_copy)
     use_to_hh_kwh_co2_£ = dkx.transform_values { |data_x48| data_x48[halfhour_index] }
     community_breakdown(use_to_hh_kwh_co2_£, community_use)
-    # community_use[:aggregate] == :all_to_single_value ? dkx.values : dkx
   end
 
   #only called from test_community_use
@@ -101,6 +100,8 @@ class AMRDataCommunityOpenCloseBreakdown
     @open_close_weights_x48[date] ||= calculate_open_close_weights_x48(date)
   end
 
+  #Produces a hash of period => array of weighted values
+  #Will combine multiple ranges of same type into a single weighting
   def calculate_open_close_weights_x48(date)
     usages = @open_close_times.usage(date)
 
@@ -123,14 +124,17 @@ class AMRDataCommunityOpenCloseBreakdown
     baseload_kw  = calc_baseload_kw(date, data_type)
     baseload_kwh = baseload_kw / 2.0
 
+    #how will any unallocated usage be typed?
     type_of_remainder = @open_close_times.remainder_type(date)
 
+    #Hash of periods => weighted vector
     weights = open_close_weights_x48(date)
 
     kwh_breakdown = {}
 
     (0..47).each do |hhi|
       kwh = data_x48[hhi]
+      #new hash with single weighting for each type
       hhi_weights = weights.transform_values { |data_x48| data_x48[hhi] }
 
       if hhi_weights.empty? || hhi_weights.values.all?(&:zero?) # whole half hour nothing open
