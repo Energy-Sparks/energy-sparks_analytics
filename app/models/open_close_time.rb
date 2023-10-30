@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OpenCloseTime
   SCHOOL_OPEN                 = :school_day_open
   SCHOOL_CLOSED               = :school_day_closed
@@ -60,28 +62,32 @@ class OpenCloseTime
   end
 
   def self.user_configurable_community_use_types
-    @@user_configurable_community_use_types ||= community_use_types.select { |_type, config| config[:user_configurable] != false }
+    @@user_configurable_community_use_types ||= community_use_types.reject do |_type, config|
+      config[:user_configurable] == false
+    end
   end
 
   def self.non_user_configurable_community_use_types
-    @@non_user_configurable_community_use_types ||= community_use_types.select { |_type, config| config[:user_configurable] == false }
+    @@non_user_configurable_community_use_types ||= community_use_types.select do |_type, config|
+      config[:user_configurable] == false
+    end
   end
 
   def self.community_use_types
     @@community_use_types ||= {
-      SCHOOL_CLOSED       =>    { user_configurable: false, sort_order: 1 },
-      SCHOOL_OPEN         =>    {                           sort_order: 2},
-      WEEKEND             =>    { user_configurable: false, sort_order: 3 },
-      HOLIDAY             =>    { user_configurable: false, sort_order: 4 },
-      COMMUNITY_BASELOAD  =>    { community_use: true, sort_order:  5, benchmark_code: 'b' },
-      COMMUNITY           =>    { community_use: true, sort_order:  6, benchmark_code: 'c' },
-      dormitory:          { community_use: true, sort_order:  7, benchmark_code: 'd' },
-      sports_centre:      { community_use: true, sort_order:  8, benchmark_code: 's' },
-      swimming_pool:      { community_use: true, sort_order:  9, benchmark_code: 's' },
-      kitchen:            { community_use: true, sort_order: 10, benchmark_code: 'k' },
-      library:            { community_use: true, sort_order: 11, benchmark_code: 'l' },
-      flood_lighting:     { community_use: true, sort_order: 12, benchmark_code: 'f', fuel_type: :electricity },
-      other:              { community_use: true, sort_order: 13, benchmark_code: 'o' }
+      SCHOOL_CLOSED => { user_configurable: false, sort_order: 1 },
+      SCHOOL_OPEN => { sort_order: 2 },
+      WEEKEND => { user_configurable: false, sort_order: 3 },
+      HOLIDAY => { user_configurable: false, sort_order: 4 },
+      COMMUNITY_BASELOAD => { community_use: true, sort_order: 5, benchmark_code: 'b' },
+      COMMUNITY => { community_use: true, sort_order: 6, benchmark_code: 'c' },
+      dormitory: { community_use: true, sort_order: 7, benchmark_code: 'd' },
+      sports_centre: { community_use: true, sort_order:  8, benchmark_code: 's' },
+      swimming_pool: { community_use: true, sort_order:  9, benchmark_code: 's' },
+      kitchen: { community_use: true, sort_order: 10, benchmark_code: 'k' },
+      library: { community_use: true, sort_order: 11, benchmark_code: 'l' },
+      flood_lighting: { community_use: true, sort_order: 12, benchmark_code: 'f', fuel_type: :electricity },
+      other: { community_use: true, sort_order: 13, benchmark_code: 'o' }
     }
   end
 
@@ -99,8 +105,8 @@ class OpenCloseTime
 
   def matched_usage?(date)
     matches_start_end_date?(date) &&
-    match_holiday?(date) &&
-    match_weekday?(date)
+      match_holiday?(date) &&
+      match_weekday?(date)
   end
 
   # aka extract_times_for_week_day
@@ -132,7 +138,7 @@ class OpenCloseTime
   end
 
   def match_weekday?(date)
-    open_close_times.any?{ |open_close_time| matches_weekday?(date, open_close_time) }
+    open_close_times.any? { |open_close_time| matches_weekday?(date, open_close_time) }
   end
 
   def matches_weekday?(date, open_close_time)
@@ -140,7 +146,7 @@ class OpenCloseTime
     when :weekdays
       date.wday.between?(1, 5)
     when :weekends
-      date.wday == 0 || date.wday == 6
+      date.wday.zero? || date.wday == 6
     when :everyday
       true
     when :monday
@@ -156,16 +162,16 @@ class OpenCloseTime
     when :saturday
       date.wday == 6
     when :sunday
-      date.wday == 0
+      date.wday.zero?
     end
   end
 
   def matches_start_end_date?(date)
-    (@open_close_time[:start_date] == nil || date >= @open_close_time[:start_date]) &&
-    (@open_close_time[:end_date]   == nil || date <= @open_close_time[:end_date])
+    (@open_close_time[:start_date].nil? || date >= @open_close_time[:start_date]) &&
+      (@open_close_time[:end_date].nil? || date <= @open_close_time[:end_date])
   end
 
   def open_close_times
-    @open_close_time.select { |time_n, config| self.class.open_time_keys.include?(time_n) }.values
+    @open_close_time.select { |time_n, _config| self.class.open_time_keys.include?(time_n) }.values
   end
 end

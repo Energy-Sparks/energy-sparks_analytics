@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # manages school open and close times
 class OpenCloseTimes
   class UnknownFrontEndType < StandardError; end
@@ -10,12 +12,10 @@ class OpenCloseTimes
   end
 
   def usage(date)
-    usages = Hash.new{|h, k| h[k] = []}
+    usages = Hash.new { |h, k| h[k] = [] }
 
     @open_times.each do |usage_time|
-      if usage_time.matched_usage?(date)
-        usages[usage_time.type] += usage_time.time_ranges_for_week_day(date)
-      end
+      usages[usage_time.type] += usage_time.time_ranges_for_week_day(date) if usage_time.matched_usage?(date)
     end
 
     usages
@@ -29,7 +29,7 @@ class OpenCloseTimes
   def self.convert_frontend_times(school_times, community_times, holidays)
     st = convert_frontend_time(school_times)
     ct = convert_frontend_time(community_times)
-    OpenCloseTimes.new({ open_close_times: st + ct}, holidays)
+    OpenCloseTimes.new({ open_close_times: st + ct }, holidays)
   end
 
   def self.convert_frontend_time(times)
@@ -40,15 +40,15 @@ class OpenCloseTimes
 
   def self.convert_front_end_time_period(time_period)
     {
-      type:             convert_front_end_usage_type(time_period[:usage_type]),
+      type: convert_front_end_usage_type(time_period[:usage_type]),
       holiday_calendar: convert_front_end_calendar_type(time_period[:calendar_period]),
-      time0:            {
+      time0: {
         day_of_week: convert_front_end_day(time_period[:day]),
         from: time_period[:opening_time],
-        to:   time_period[:closing_time]
+        to: time_period[:closing_time]
       }
     }
-  rescue => e
+  rescue StandardError => e
     puts e.message
     raise
   end
@@ -79,15 +79,16 @@ class OpenCloseTimes
 
   def self.convert_front_end_day(type)
     raise UnknownFrontEndType, "Day type #{type}" unless OpenCloseTime.day_of_week_types.include?(type)
+
     type
   end
 
   def self.default_school_open_close_times_config
     [
       {
-        type:             :school_day_open,
+        type: :school_day_open,
         holiday_calendar: :follows_school_calendar,
-        time0:            { day_of_week: :weekdays, from: TimeOfDay.new(7, 0), to: TimeOfDay.new(16, 30) }
+        time0: { day_of_week: :weekdays, from: TimeOfDay.new(7, 0), to: TimeOfDay.new(16, 30) }
       }
     ]
   end
@@ -100,12 +101,12 @@ class OpenCloseTimes
     [
       :school_day_open,
       OpenCloseTime.non_user_configurable_community_use_types.keys,
-      @open_times.map { |config| config.type }
+      @open_times.map(&:type)
     ].flatten.uniq
   end
 
   def community_usage?
-    @community_usage ||= !time_types.select { |tt| OpenCloseTime.community_usage_types.include?(tt) }.empty?
+    @community_usage ||= time_types.any? { |tt| OpenCloseTime.community_usage_types.include?(tt) }
   end
 
   def series_names
