@@ -114,6 +114,9 @@ class AMRDataCommunityOpenCloseBreakdown
     @converted_times_x48[opening_times] ||= DateTimeHelper.weighted_x48_vector_multiple_ranges(opening_times)
   end
 
+  # This is the basic method which does the breakdowns, called from +#days_kwh_x48+ and the
+  # other public interface methods that calculate breakdowns delegate to that method.
+  #
   # NB references to variables names kwh in this function could be to kwh, CO2 or £
   def calculate_days_kwh_x48(date, data_type)
     data_x48 = @meter.amr_data.days_kwh_x48(date, data_type)
@@ -232,6 +235,7 @@ class AMRDataCommunityOpenCloseBreakdown
     end
   end
 
+  #This is called before the other methods return, to create the breakdown
   def community_breakdown(data, community_use)
     community_use ||= { aggregate: :none, filter: :all}
 
