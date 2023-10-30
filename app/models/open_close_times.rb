@@ -5,10 +5,9 @@ class OpenCloseTimes
   class UnknownFrontEndType < StandardError; end
   attr_reader :open_times
 
-  def initialize(attributes, holidays)
+  def initialize(open_times, holidays)
     @holidays = holidays
-    oct = attributes[:open_close_times] || self.class.default_school_open_close_times_config
-    @open_times = oct.map { |t| OpenCloseTime.new(t, holidays) }
+    @open_times = open_times
   end
 
   def usage(date)
@@ -21,15 +20,26 @@ class OpenCloseTimes
     usages
   end
 
+  #Only used in test script
   def print_usages(date)
     puts date.strftime('%a %d %b %Y')
     ap usage(date)
   end
 
+  #Create the OpenCloseTime instances from the internal hash structure and
+  #return a new OpenCloseTimes object
+  def self.create_open_close_times(open_close_time_attributes, holidays)
+    open_close_time_config = open_close_time_attributes[:open_close_times] || self.class.default_school_open_close_times_config
+    opening_times = open_close_time_config.map { |t| OpenCloseTime.new(t, holidays) }
+    OpenCloseTimes.new(opening_times, holidays)
+  end
+
+  #Convert hash structure passed by application to a different hash structure
+  #used internally
   def self.convert_frontend_times(school_times, community_times, holidays)
     st = convert_frontend_time(school_times)
     ct = convert_frontend_time(community_times)
-    OpenCloseTimes.new({ open_close_times: st + ct }, holidays)
+    OpenCloseTimes.create_open_close_times({ open_close_times: st + ct }, holidays)
   end
 
   def self.convert_frontend_time(times)
@@ -94,7 +104,7 @@ class OpenCloseTimes
   end
 
   def self.default_school_open_close_times(holidays)
-    OpenCloseTimes.new({}, holidays)
+    OpenCloseTimes.create_open_close_times.new({}, holidays)
   end
 
   def time_types
