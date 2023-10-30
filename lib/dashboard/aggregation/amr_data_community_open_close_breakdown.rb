@@ -4,7 +4,7 @@ class AMRDataCommunityOpenCloseBreakdown
   class UnknownCommunityUseParameter < StandardError; end
 
   def initialize(meter, open_close_times)
-    @meter = meter # needs to be tied to meter so caching of results works
+    @meter = meter
     @open_close_times = open_close_times
   end
 
@@ -120,7 +120,7 @@ class AMRDataCommunityOpenCloseBreakdown
   # NB references to variables names kwh in this function could be to kwh, CO2 or £
   def calculate_days_kwh_x48(date, data_type)
     data_x48 = @meter.amr_data.days_kwh_x48(date, data_type)
-    baseload_kw  = calc_baseload_kw(@meter, date, data_type)
+    baseload_kw  = calc_baseload_kw(date, data_type)
     baseload_kwh = baseload_kw / 2.0
 
     type_of_remainder = @open_close_times.remainder_type(date)
@@ -227,9 +227,9 @@ class AMRDataCommunityOpenCloseBreakdown
     [open_kwh, community_kwh, community_baseload_kwh, closed_kwh]
   end
 
-  def calc_baseload_kw(meter, date, data_type)
-    if meter.fuel_type == :electricity
-      meter.amr_data.baseload_kw(date, meter.sheffield_simulated_solar_pv_panels?, data_type)
+  def calc_baseload_kw(date, data_type)
+    if @meter.fuel_type == :electricity
+      @meter.amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?, data_type)
     else # gas and perhaps for storage heaters
       0.0
     end
@@ -270,7 +270,7 @@ class AMRDataCommunityOpenCloseBreakdown
     when :community_use
       use           = filter_community_use(data, :school_only)
       community_use = filter_community_use(data, :community_only, split_electricity_baseload)
-      if @meter.meter_collection.community_usage?
+      if @open_close_times.community_usage?
         if split_electricity_baseload
           use[OpenCloseTime::COMMUNITY]          = aggregate_values(community_use.values)
           use[OpenCloseTime::COMMUNITY_BASELOAD] = data[OpenCloseTime::COMMUNITY_BASELOAD] || 0.0
