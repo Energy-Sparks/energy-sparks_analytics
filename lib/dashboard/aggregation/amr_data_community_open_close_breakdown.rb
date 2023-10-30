@@ -8,6 +8,7 @@ class AMRDataCommunityOpenCloseBreakdown
     @open_close_times = open_close_times
   end
 
+  #unused, just documentation
   private_class_method def self.community_use_breakdown_example
     # example of community_use: parameter - see below
     # filter:    is a filter, just return community_only use, of school use only or both
@@ -18,6 +19,10 @@ class AMRDataCommunityOpenCloseBreakdown
     # the returned values could be a single kwh/co2/£ value,
     # or a hash keyed by :school_day_open, closed etc. to kwh/co2/£ values
     # community_use: nil won't get this far as no breakdown and so handled within class AMRdata
+    #
+    # Aggregating community use into a single total:
+    #
+    # { filter: :community_only, aggregate: :all_to_single_value }
     {
       community_use: {
         filter:    :community_only || :school_only || :all,
@@ -27,10 +32,7 @@ class AMRDataCommunityOpenCloseBreakdown
     }
   end
 
-  def self.aggregate_community_use_total
-    { filter: :community_only, aggregate: :all_to_single_value }
-  end
-
+  #Called from AMRData#days_kwh_x48
   def days_kwh_x48(date, data_type, community_use:)
     @days_kwh_x48 ||= {}
     @days_kwh_x48[date] ||= {}
@@ -38,6 +40,7 @@ class AMRDataCommunityOpenCloseBreakdown
     community_breakdown(@days_kwh_x48[date][data_type], community_use)
   end
 
+  #Called from AMRData#one_day_kwh
   def one_day_kwh(date, data_type, community_use:)
     @one_day_kwh ||= {}
     @one_day_kwh[date] ||= {}
@@ -45,6 +48,7 @@ class AMRDataCommunityOpenCloseBreakdown
     community_breakdown(@one_day_kwh[date][data_type], community_use)
   end
 
+  #Called from AMRData#kwh_date_range
   def kwh_date_range(start_date, end_date, data_type = :kwh, community_use:)
     sd = [@meter.amr_data.start_date, start_date].max
     ed = [@meter.amr_data.end_date, end_date].min
@@ -62,6 +66,7 @@ class AMRDataCommunityOpenCloseBreakdown
     community_breakdown(aggregate, community_use)
   end
 
+  #Called from AMRData#kwh
   def kwh(date, halfhour_index, data_type, community_use:)
     community_use_copy = community_use.dup
     community_use_copy[:aggregate] = :none
@@ -71,17 +76,14 @@ class AMRDataCommunityOpenCloseBreakdown
     # community_use[:aggregate] == :all_to_single_value ? dkx.values : dkx
   end
 
-  def open_close_weights_x48(date)
-    @open_close_weights_x48 ||= {}
-    @open_close_weights_x48[date] ||= calculate_open_close_weights_x48(date)
-  end
-
+  #only called from test_community_use
   def compact_print_weights(date)
     open_close_weights_x48(date).each do |type, weight_x48|
       puts "#{sprintf('%-15.15s',type.to_s)} #{weight_x48.map(&:to_i).join('')}"
     end
   end
 
+  #Called from DayType#calculate_day_type_names in series_data_manager
   def series_names(community_use)
     usage_types = @open_close_times.time_types.map { |t| [t, 0.0] }.to_h
 
@@ -93,6 +95,11 @@ class AMRDataCommunityOpenCloseBreakdown
   end
 
   private
+
+  def open_close_weights_x48(date)
+    @open_close_weights_x48 ||= {}
+    @open_close_weights_x48[date] ||= calculate_open_close_weights_x48(date)
+  end
 
   def calculate_open_close_weights_x48(date)
     usages = @open_close_times.usage(date)
