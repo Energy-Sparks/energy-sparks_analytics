@@ -1,5 +1,5 @@
 require_relative './meter_attribute_types'
-require_relative './open_close_times.rb'
+require_relative './open_close_time.rb'
 class MeterAttributes
 
   class AutoInsertMissingReadings < MeterAttributeTypes::AttributeBase
