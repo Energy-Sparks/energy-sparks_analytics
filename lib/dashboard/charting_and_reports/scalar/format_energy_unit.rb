@@ -115,12 +115,12 @@ class FormatEnergyUnit
 
     pct_str = if !percent.infinite?.nil?
                 plus_minus_infinity_value(percent)
-              elsif percent.magnitude < 10.0
+              elsif percent.magnitude < 10.0 #true for negative, up to value 0.1
                 sprintf('%+.1f', percent)
-              elsif percent.magnitude < 150.0
+              elsif percent.magnitude < 150.0 #true for up to value 1.5
                 sprintf('%+.0f', percent)
               else
-                scale_num(percent)
+                "+#{scale_num(percent)}"
               end
 
     I18n.t(key_for_unit(:percent, medium), value: pct_str)
