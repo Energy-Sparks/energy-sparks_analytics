@@ -89,8 +89,11 @@ describe FormatEnergyUnit do
     end
     context ':comparison_percent' do
       it 'formats correctly' do
+        expect(FormatUnit.format(:comparison_percent, 0.005)).to eq("+0.5%")
         expect(FormatUnit.format(:comparison_percent, 0.1)).to eq("+10%")
         expect(FormatUnit.format(:comparison_percent, -0.5)).to eq("-50%")
+        expect(FormatUnit.format(:comparison_percent, 10)).to eq("+1,000%")
+        expect(FormatUnit.format(:comparison_percent, 4.125)).to eq("+410%")
       end
     end
   end
