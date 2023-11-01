@@ -286,7 +286,7 @@ class MeterAttributes
 
     id :aggregation_switch
     aggregate_over :aggregation
-    name 'Aggregation > Switch'
+    name 'Meter > Data presentation'
 
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:ignore_start_date, :deprecated_include_but_ignore_start_date, :deprecated_include_but_ignore_end_date])
   end
@@ -295,7 +295,7 @@ class MeterAttributes
 
     id :function_switch
     aggregate_over :function
-    name 'Function > Switch'
+    name 'Meter > Energy Use'
 
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:heating_only, :kitchen_only, :hotwater_only])
   end
