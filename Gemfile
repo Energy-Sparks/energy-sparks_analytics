@@ -2,51 +2,34 @@
 
 source 'https://rubygems.org'
 
-ruby '~> 2.7.6'
+gemspec
 
-gem 'activesupport', '~> 6.1.7'
-gem 'chroma'
-gem 'faraday'
-gem 'faraday-retry'
-gem 'html-table'
-gem 'interpolate'
-gem 'require_all'
 gem 'roo', git: 'https://github.com/Energy-Sparks/roo.git', branch: 'bug-fix-branch'
-gem 'roo-xls'
-gem 'ruby-sun-times'
-gem 'soda-ruby', require: 'soda'
-# Forked statsample to do proper relases and to remove dependency on
-# awesome_print which is no longer supported. Last official release of
-# statsample also had a problem where it overrode the definition of Array#sum
-# with dodgy results. This is fixed in master, which is what this release is
-# based upon.
+# Forked statsample to do proper relases and to remove dependency on awesome_print which is no longer supported
+# Last official release of statsample also had a problem where it overrode the definition of Array#sum with dodgy
+# results
+# This is fixed in master, which is what this release is based upon.
 gem 'statsample', git: 'https://github.com/Energy-Sparks/statsample', branch: 'update-gems-and-awesome-print'
-gem 'structured_warnings'
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw]
-gem 'write_xlsx'
-
-# limit rate that we call api methods
-gem 'ruby-limiter', '~> 1.1.0'
 
 # Useful for debugging
-gem 'hashdiff', '~> 1.0.0'
 gem 'pry-byebug'
 
 gem 'dotenv'
 
 gem 'rollbar'
 
-group :development, :test do
-  gem 'rubocop'
-  gem 'rubocop-performance'
-  gem 'rubocop-rspec'
-end
+gem 'rexml'
 
 group :development do
   gem 'aws-sdk-s3'
-  gem 'i18n-tasks', '~> 1.0.10'
+  gem 'i18n-tasks'
+  # For profiling code
   gem 'benchmark-memory'
   gem 'climate_control'
+  gem 'rubocop'
+  gem 'rubocop-rspec'
+  gem 'rubocop-performance'
   gem 'ruby-prof'
 end
 

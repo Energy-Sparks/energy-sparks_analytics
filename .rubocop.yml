@@ -33,6 +33,7 @@ AllCops:
 require:
   - rubocop-performance
   - rubocop-rspec
+  - rubocop-factory_bot
 
 Naming/MethodParameterName:
   AllowedNames: ['kw', '£', 'co2']
