@@ -19,7 +19,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
   describe '#days_kwh_x48' do
     let(:community_use_times)   { [] }
     let(:community_use)         { nil }
-    let(:day)                   { Date.today }
+    let(:day)                   { Date.new(2023,10,30) }
 
     let(:days_kwh_x48)          { open_close_breakdown.days_kwh_x48(day, :kwh, community_use: community_use) }
 
@@ -100,7 +100,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
         context 'with :community_use' do
           let(:aggregate) { :community_use }
           context 'when splitting out baseload' do
-            xit 'does not apply a sum?' do
+            it 'does not apply a sum, as its unnecessary' do
               not_aggregated = open_close_breakdown.days_kwh_x48(day, :kwh, community_use: nil)
               expect(days_kwh_x48[:community].sum).to be_within(0.0001).of( not_aggregated[:community].sum )
             end
@@ -157,7 +157,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
   describe '#one_day_kwh' do
     let(:community_use_times)   { [] }
     let(:community_use)         { nil }
-    let(:day)                   { Date.today }
+    let(:day)                   { Date.new(2023,10,30) }
 
     let(:one_day_kwh)          { open_close_breakdown.one_day_kwh(day, :kwh, community_use: community_use) }
 
@@ -233,7 +233,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
         context 'with :community_use' do
           let(:aggregate) { :community_use }
           context 'when splitting out baseload' do
-            xit 'does not apply a sum?' do
+            it 'does not apply a sum, as its unnecessary' do
               not_aggregated = open_close_breakdown.one_day_kwh(day, :kwh, community_use: nil)
               expect(one_day_kwh[:community]).to be_within(0.0001).of( not_aggregated[:community] )
             end
@@ -272,8 +272,8 @@ describe AMRDataCommunityOpenCloseBreakdown do
     let(:community_use_times)   { [] }
     let(:community_use)         { nil }
     #Should cover a weekend
-    let(:start_date)            { Date.today - 7 }
-    let(:end_date)              { Date.today }
+    let(:start_date)            { Date.new(2023,10,30) - 7 }
+    let(:end_date)              { Date.new(2023,10,30) }
 
     let(:kwh_date_range)        { open_close_breakdown.kwh_date_range(start_date, end_date, :kwh, community_use: community_use) }
 
@@ -305,7 +305,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
   describe '#kwh' do
     let(:community_use_times)   { [] }
     let(:community_use)         { { filter: :all, aggregate: :none } }
-    let(:day)                   { Date.today }
+    let(:day)                   { Date.new(2023,10,30) }
     let(:hh_index)              { 12 }
 
     let(:kwh)          { open_close_breakdown.kwh(day, hh_index, :kwh, community_use: community_use) }

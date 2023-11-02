@@ -127,6 +127,7 @@ class AMRDataCommunityOpenCloseBreakdown
     #how will any unallocated usage be typed?
     type_of_remainder = @open_close_times.remainder_type(date)
 
+
     #Hash of periods => weighted vector
     weights = open_close_weights_x48(date)
 
