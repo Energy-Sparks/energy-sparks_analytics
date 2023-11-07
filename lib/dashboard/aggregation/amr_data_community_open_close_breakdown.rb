@@ -125,6 +125,7 @@ class AMRDataCommunityOpenCloseBreakdown
     baseload_kwh = baseload_kw / 2.0
 
     #how will any unallocated usage be typed?
+    #will be school_day_closed, holiday, weekend
     type_of_remainder = @open_close_times.remainder_type(date)
 
 
@@ -138,11 +139,13 @@ class AMRDataCommunityOpenCloseBreakdown
       #new hash with single weighting for each type
       hhi_weights = weights.transform_values { |data_x48| data_x48[hhi] }
 
+      #TODO: if we add a check for community use == 1.0, then we could reduce need to do extra calculations?
+      #E.g. if 1.0 then assign to either community baseload (if < baseload) or split across if > baseload
       if hhi_weights.empty? || hhi_weights.values.all?(&:zero?) # whole half hour nothing open
         set_hhi_value(kwh_breakdown, type_of_remainder, hhi, kwh)
       elsif hhi_weights[OpenCloseTime::SCHOOL_OPEN] == 1.0 # whole half hour school open
         set_hhi_value(kwh_breakdown, OpenCloseTime::SCHOOL_OPEN, hhi, kwh)
-      else # slower more complex split half hour periods
+      else # slower more complex split half hour periods, TODO also currently covers period when ALL community use
         open_kwh, community_kwh, community_baseload_kwh, closed_kwh = split_half_hour_kwhs(hhi_weights, baseload_kwh, kwh)
 
         set_hhi_value(kwh_breakdown, OpenCloseTime::SCHOOL_OPEN,        hhi, open_kwh              ) unless open_kwh.zero?
@@ -204,11 +207,20 @@ class AMRDataCommunityOpenCloseBreakdown
     open_t, community_t, _closed_t = bucket_time_weights(weights)
 
     open_kwh                = kwh * open_t
+    #this means that for periods when the kwh use in the hh period is less than the baseload
+    #then we never allocate any community use
     community_kwh           = [(kwh - baseload_kwh) * community_t, 0.0].max
+    #allocate same fraction of baseload to community use
+    #but will be set to kwh if usage in period is below the baseload for the day
     community_baseload_kwh  = [baseload_kwh * community_t, kwh].min
     #LD 2023-3-21 dont allocate community baseload if community use has been clipped to zero
+    #See: https://github.com/Energy-Sparks/energy-sparks_analytics/pull/490
+    #This means periods of low usage have no community use OR community baseload
+    #Hence we get gaps in the HH periods
+    #TODO: we might want to revisit this fix and ensure we dont get negatives, but still allocate some baseload?
     community_baseload_kwh  = 0.0 if community_kwh == 0.0
 
+    #allocate remainder as "closed")
     closed_kwh              = kwh - open_kwh - community_kwh - community_baseload_kwh
     closed_kwh              = 0.0 if closed_kwh.magnitude < 0.00000001 # remove floating point noise
 

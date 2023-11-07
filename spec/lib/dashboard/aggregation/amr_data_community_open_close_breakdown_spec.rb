@@ -2,7 +2,12 @@ require 'spec_helper'
 
 describe AMRDataCommunityOpenCloseBreakdown do
 
-  let(:meter)        { build(:meter, type: :electricity)}
+  let(:kwh_data_x48)    { Array.new(48) { rand(0.0..1.0).round(2) } }
+  let(:amr_start_date)  { Date.new(2023,10,1)}
+  let(:amr_end_date)    { Date.new(2023,10,31)}
+
+  let(:amr_data)     { build(:amr_data, :with_date_range, start_date: amr_start_date, end_date: amr_end_date, kwh_data_x48: kwh_data_x48) }
+  let(:meter)        { build(:meter, type: :electricity, amr_data: amr_data)}
   let(:holidays)     { build(:holidays, :with_academic_year) }
 
   let(:school_times) do
@@ -37,6 +42,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
     end
 
     context 'with single community use time period' do
+      #Times correspond to HH index: 38-43
       let(:community_use_times)          do
         [{day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19,00), closing_time: TimeOfDay.new(21,30), calendar_period: :term_times}]
       end
@@ -48,6 +54,24 @@ describe AMRDataCommunityOpenCloseBreakdown do
 
         it 'returns same total as the amr_data class' do
           expect(days_kwh_x48.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
+        end
+
+        context 'when the community use period has usage below baseload' do
+          #a 48 low hh readings where the usage in the community use period will be lower than the baseload for rest of the day
+          #community use is 6 HH periods, statistical baseload will use 8 HH periods, so the calculated baseload is guaranteed to be higher
+          #
+          let(:low_usage)               { Array.new(37) { rand(0.5..1.0).round(2) } + Array.new(6) { 0.1 } + Array.new(5) { rand(0.5..1.0).round(2) } }
+          let(:low_usage_reading)       { build(:one_day_amr_reading, date: day, kwh_data_x48: low_usage)}
+          before do
+            amr_data.add(day, low_usage_reading)
+          end
+          it 'should still allocate all the usage to community use during the configured periods' do
+            puts low_usage[38..43].inspect
+            puts days_kwh_x48.inspect
+            puts days_kwh_x48[:school_day_closed][38..43].inspect
+            puts days_kwh_x48[:community_baseload][38..43].inspect
+            puts days_kwh_x48[:community][38..43].inspect
+          end
         end
       end
 
