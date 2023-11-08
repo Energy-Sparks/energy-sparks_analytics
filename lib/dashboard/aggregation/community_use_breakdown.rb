@@ -1,13 +1,14 @@
-class AMRDataCommunityOpenCloseBreakdown
+class CommunityUseBreakdown
   class NegativeClosedkWhCalculation < StandardError; end
   class InternalSelfTestAggregationError < StandardError; end
   class UnknownCommunityUseParameter < StandardError; end
 
   def initialize(meter, open_close_times)
-    @meter = meter # needs to be tied to meter so caching of results works
+    @meter = meter
     @open_close_times = open_close_times
   end
 
+  #unused, just documentation
   private_class_method def self.community_use_breakdown_example
     # example of community_use: parameter - see below
     # filter:    is a filter, just return community_only use, of school use only or both
@@ -18,6 +19,10 @@ class AMRDataCommunityOpenCloseBreakdown
     # the returned values could be a single kwh/co2/£ value,
     # or a hash keyed by :school_day_open, closed etc. to kwh/co2/£ values
     # community_use: nil won't get this far as no breakdown and so handled within class AMRdata
+    #
+    # Aggregating community use into a single total:
+    #
+    # { filter: :community_only, aggregate: :all_to_single_value }
     {
       community_use: {
         filter:    :community_only || :school_only || :all,
@@ -27,10 +32,7 @@ class AMRDataCommunityOpenCloseBreakdown
     }
   end
 
-  def self.aggregate_community_use_total
-    { filter: :community_only, aggregate: :all_to_single_value }
-  end
-
+  #Called from AMRData#days_kwh_x48
   def days_kwh_x48(date, data_type, community_use:)
     @days_kwh_x48 ||= {}
     @days_kwh_x48[date] ||= {}
@@ -38,6 +40,7 @@ class AMRDataCommunityOpenCloseBreakdown
     community_breakdown(@days_kwh_x48[date][data_type], community_use)
   end
 
+  #Called from AMRData#one_day_kwh
   def one_day_kwh(date, data_type, community_use:)
     @one_day_kwh ||= {}
     @one_day_kwh[date] ||= {}
@@ -45,6 +48,7 @@ class AMRDataCommunityOpenCloseBreakdown
     community_breakdown(@one_day_kwh[date][data_type], community_use)
   end
 
+  #Called from AMRData#kwh_date_range
   def kwh_date_range(start_date, end_date, data_type = :kwh, community_use:)
     sd = [@meter.amr_data.start_date, start_date].max
     ed = [@meter.amr_data.end_date, end_date].min
@@ -62,26 +66,16 @@ class AMRDataCommunityOpenCloseBreakdown
     community_breakdown(aggregate, community_use)
   end
 
+  #Called from AMRData#kwh
   def kwh(date, halfhour_index, data_type, community_use:)
     community_use_copy = community_use.dup
     community_use_copy[:aggregate] = :none
     dkx = days_kwh_x48(date, data_type, community_use: community_use_copy)
     use_to_hh_kwh_co2_£ = dkx.transform_values { |data_x48| data_x48[halfhour_index] }
     community_breakdown(use_to_hh_kwh_co2_£, community_use)
-    # community_use[:aggregate] == :all_to_single_value ? dkx.values : dkx
   end
 
-  def open_close_weights_x48(date)
-    @open_close_weights_x48 ||= {}
-    @open_close_weights_x48[date] ||= calculate_open_close_weights_x48(date)
-  end
-
-  def compact_print_weights(date)
-    open_close_weights_x48(date).each do |type, weight_x48|
-      puts "#{sprintf('%-15.15s',type.to_s)} #{weight_x48.map(&:to_i).join('')}"
-    end
-  end
-
+  #Called from DayType#calculate_day_type_names in series_data_manager
   def series_names(community_use)
     usage_types = @open_close_times.time_types.map { |t| [t, 0.0] }.to_h
 
@@ -94,6 +88,13 @@ class AMRDataCommunityOpenCloseBreakdown
 
   private
 
+  def open_close_weights_x48(date)
+    @open_close_weights_x48 ||= {}
+    @open_close_weights_x48[date] ||= calculate_open_close_weights_x48(date)
+  end
+
+  #Produces a hash of period => array of weighted values
+  #Will combine multiple ranges of same type into a single weighting
   def calculate_open_close_weights_x48(date)
     usages = @open_close_times.usage(date)
 
@@ -107,26 +108,42 @@ class AMRDataCommunityOpenCloseBreakdown
     @converted_times_x48[opening_times] ||= DateTimeHelper.weighted_x48_vector_multiple_ranges(opening_times)
   end
 
+  # This is the basic method which does the breakdowns, called from +#days_kwh_x48+ and the
+  # other public interface methods that calculate breakdowns delegate to that method.
+  #
   # NB references to variables names kwh in this function could be to kwh, CO2 or £
   def calculate_days_kwh_x48(date, data_type)
     data_x48 = @meter.amr_data.days_kwh_x48(date, data_type)
-    baseload_kw  = calc_baseload_kw(@meter, date, data_type)
+    baseload_kw  = calc_baseload_kw(date, data_type)
     baseload_kwh = baseload_kw / 2.0
 
+    #how will any unallocated usage be typed?
+    #will be school_day_closed, holiday, weekend
     type_of_remainder = @open_close_times.remainder_type(date)
 
+    #Hash of periods => weighted vector
     weights = open_close_weights_x48(date)
 
     kwh_breakdown = {}
 
     (0..47).each do |hhi|
       kwh = data_x48[hhi]
+      #new hash with single weighting for each type
       hhi_weights = weights.transform_values { |data_x48| data_x48[hhi] }
 
       if hhi_weights.empty? || hhi_weights.values.all?(&:zero?) # whole half hour nothing open
         set_hhi_value(kwh_breakdown, type_of_remainder, hhi, kwh)
       elsif hhi_weights[OpenCloseTime::SCHOOL_OPEN] == 1.0 # whole half hour school open
         set_hhi_value(kwh_breakdown, OpenCloseTime::SCHOOL_OPEN, hhi, kwh)
+      elsif hhi_weights[OpenCloseTime::COMMUNITY] == 1.0 #whole half hour is community use
+        if baseload_kwh >= kwh
+          #assign all usage to community baseload if below the baseload
+          set_hhi_value(kwh_breakdown, OpenCloseTime::COMMUNITY_BASELOAD, hhi, kwh)
+        else
+          #otherwise allocate baseload to community baseload and everything above to community
+          set_hhi_value(kwh_breakdown, OpenCloseTime::COMMUNITY_BASELOAD, hhi, baseload_kwh)
+          set_hhi_value(kwh_breakdown, OpenCloseTime::COMMUNITY, hhi, (kwh - baseload_kwh))
+        end
       else # slower more complex split half hour periods
         open_kwh, community_kwh, community_baseload_kwh, closed_kwh = split_half_hour_kwhs(hhi_weights, baseload_kwh, kwh)
 
@@ -146,20 +163,7 @@ class AMRDataCommunityOpenCloseBreakdown
       end
     end
 
-    check_totals(kwh_breakdown, date, data_type)
-
     kwh_breakdown
-  end
-
-  def check_totals(kwh_breakdown, date, data_type)
-    # TODO(PH, 18Jan2022) remove if never thrown as has computation impact
-    breakdown_total = kwh_breakdown.values.flatten.sum
-    original_total  = @meter.amr_data.one_day_kwh(date, data_type)
-    raise InternalSelfTestAggregationError, "breakdown = #{breakdown_total} #{data_type} original = #{original_total} for #{date}" unless similar?(breakdown_total, original_total)
-  end
-
-  def similar?(a, b)
-    (a - b).magnitude < 0.0001
   end
 
   def community_type_weights(weights)
@@ -201,30 +205,46 @@ class AMRDataCommunityOpenCloseBreakdown
   def split_half_hour_kwhs(weights, baseload_kwh, kwh)
     open_t, community_t, _closed_t = bucket_time_weights(weights)
 
-    open_kwh                = kwh * open_t
-    community_kwh           = [(kwh - baseload_kwh) * community_t, 0.0].max
-    community_baseload_kwh  = [baseload_kwh * community_t, kwh].min
-    #LD 2023-3-21 dont allocate community baseload if community use has been clipped to zero
-    community_baseload_kwh  = 0.0 if community_kwh == 0.0
+    community_kwh = 0.0
+    community_baseload_kwh = 0.0
 
+    #if we have any community use time
+    if community_t > 0.0
+       if baseload_kwh >= kwh
+         #assign all usage to community baseload if below the baseload
+         community_baseload_kwh = kwh
+       else
+         #otherwise allocate a portion of the baseload to community use
+         community_baseload_kwh  = baseload_kwh * community_t
+         #allocate portion of usage above baseload to community use
+         community_kwh = (kwh - baseload_kwh) * community_t
+       end
+    end
+
+    #allocate portion of usage to opening times
+    open_kwh                = kwh * open_t
+
+    #allocate remainder as "closed"
     closed_kwh              = kwh - open_kwh - community_kwh - community_baseload_kwh
     closed_kwh              = 0.0 if closed_kwh.magnitude < 0.00000001 # remove floating point noise
 
     # TODO(PH, 4Apr2022) there seems to be a problem with some Orsis solar schools providing small -tbe mains consumption
     #                    hence kwh > 0.0 additjon below, needs further investigation of root cause
+    # LD, 2023 not sure this is happening, no signs of exception in the Rollbar reports
     raise NegativeClosedkWhCalculation, "Negative closed allocation #{closed_kwh} Before #{kwh} => Open #{open_kwh} + Closed #{closed_kwh} + Comms baseload #{community_baseload_kwh} + Comms #{community_kwh} (Comms time #{community_t})" if closed_kwh < 0.0 && kwh > 0.0
 
     [open_kwh, community_kwh, community_baseload_kwh, closed_kwh]
   end
 
-  def calc_baseload_kw(meter, date, data_type)
-    if meter.fuel_type == :electricity
-      meter.amr_data.baseload_kw(date, meter.sheffield_simulated_solar_pv_panels?, data_type)
+  def calc_baseload_kw(date, data_type)
+    if @meter.fuel_type == :electricity
+      @meter.amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?, data_type)
     else # gas and perhaps for storage heaters
       0.0
     end
   end
 
+  #This is called before the other methods return, to create the breakdown
   def community_breakdown(data, community_use)
     community_use ||= { aggregate: :none, filter: :all}
 
@@ -259,7 +279,7 @@ class AMRDataCommunityOpenCloseBreakdown
     when :community_use
       use           = filter_community_use(data, :school_only)
       community_use = filter_community_use(data, :community_only, split_electricity_baseload)
-      if @meter.meter_collection.community_usage?
+      if @open_close_times.community_usage?
         if split_electricity_baseload
           use[OpenCloseTime::COMMUNITY]          = aggregate_values(community_use.values)
           use[OpenCloseTime::COMMUNITY_BASELOAD] = data[OpenCloseTime::COMMUNITY_BASELOAD] || 0.0

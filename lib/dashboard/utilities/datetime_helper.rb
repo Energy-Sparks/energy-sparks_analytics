@@ -104,11 +104,8 @@ module DateTimeHelper
   #
   # To specify a full day, the end range must be 24:00.
   #
-  # FIXME:
   # Unlike weighted_x48_vector_fast_inclusive the method does not support overnight
-  # ranges, e.g. a range of 23:00-02.00, will just produce invalid output. This means
-  # AccountingTariff and EconomicTariff that specify these ranges will produce invalid
-  # results. They should use the other method.
+  # ranges, e.g. a range of 23:00-02.00, will just produce invalid output.
   #
   # return a vector for a single time range (as per weighted_x48_vector_multiple_ranges)
   # performance could be improved, currently takes 0.000007 seconds or 150,000 per second or 15ms for an average meter
