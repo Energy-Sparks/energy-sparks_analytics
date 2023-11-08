@@ -42,7 +42,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
     end
 
     context 'with single community use time period' do
-      #Times correspond to HH index: 38-43
+      #The times correspond to the HH index starting at 38 and ending at 42 (exclusive range), so 5 periods in total
       let(:community_use_times)          do
         [{day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19,00), closing_time: TimeOfDay.new(21,30), calendar_period: :term_times}]
       end
@@ -56,21 +56,29 @@ describe AMRDataCommunityOpenCloseBreakdown do
           expect(days_kwh_x48.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
         end
 
-        context 'when the community use period has usage below baseload' do
+        context 'when the usage in the community use period is below the baseload' do
           #a 48 low hh readings where the usage in the community use period will be lower than the baseload for rest of the day
-          #community use is 6 HH periods, statistical baseload will use 8 HH periods, so the calculated baseload is guaranteed to be higher
-          #
-          let(:low_usage)               { Array.new(37) { rand(0.5..1.0).round(2) } + Array.new(6) { 0.1 } + Array.new(5) { rand(0.5..1.0).round(2) } }
+          #community use is 5 HH periods, the statistical baseload calculator will use the lowest 8 HH periods,
+          #so the calculated baseload for this day is guaranteed to be higher than the community use consumption
+          let(:low_usage)               { Array.new(38) { 1.0 } + Array.new(5) { 0.1 } + Array.new(5) { 1.0 } }
           let(:low_usage_reading)       { build(:one_day_amr_reading, date: day, kwh_data_x48: low_usage)}
           before do
             amr_data.add(day, low_usage_reading)
           end
-          it 'should still allocate all the usage to community use during the configured periods' do
-            puts low_usage[38..43].inspect
-            puts days_kwh_x48.inspect
-            puts days_kwh_x48[:school_day_closed][38..43].inspect
-            puts days_kwh_x48[:community_baseload][38..43].inspect
-            puts days_kwh_x48[:community][38..43].inspect
+
+          it 'should return the expected breakdown for the day' do
+            expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload])
+          end
+
+          it 'should allocate all the usage to community baseload use during the community use period' do
+            #6.30pm (37) all usage is school day closed
+            expect(days_kwh_x48[:school_day_closed][37]).to eq(1.0)
+            #7.00pm (38) to period ending at 21:30 (42) is community use, so no school day closed usage
+            expect(days_kwh_x48[:school_day_closed][38..42]).to eq(Array.new(5, 0.0))
+            #all usage here is community use
+            expect(days_kwh_x48[:community_baseload][38..42]).to eq(Array.new(5, 0.1))
+            #21.30pm (43) all usage is school day closed again
+            expect(days_kwh_x48[:school_day_closed][43]).to eq(1.0)
           end
         end
       end
