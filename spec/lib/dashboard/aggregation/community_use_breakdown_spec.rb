@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe AMRDataCommunityOpenCloseBreakdown do
+describe CommunityUseBreakdown do
 
   let(:kwh_data_x48)    { Array.new(48) { rand(0.0..1.0).round(2) } }
   let(:amr_start_date)  { Date.new(2023,10,1)}
@@ -15,7 +15,7 @@ describe AMRDataCommunityOpenCloseBreakdown do
   end
 
   let(:open_close_times)      { OpenCloseTimes.convert_frontend_times(school_times, community_use_times, holidays)}
-  let(:open_close_breakdown)  { AMRDataCommunityOpenCloseBreakdown.new(meter, open_close_times) }
+  let(:open_close_breakdown)  { CommunityUseBreakdown.new(meter, open_close_times) }
 
   before do
     meter.amr_data.open_close_breakdown = open_close_breakdown

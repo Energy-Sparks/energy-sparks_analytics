@@ -1,4 +1,4 @@
-class AMRDataCommunityOpenCloseBreakdown
+class CommunityUseBreakdown
   class NegativeClosedkWhCalculation < StandardError; end
   class InternalSelfTestAggregationError < StandardError; end
   class UnknownCommunityUseParameter < StandardError; end
