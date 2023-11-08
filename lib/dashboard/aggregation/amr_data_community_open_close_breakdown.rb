@@ -75,13 +75,6 @@ class AMRDataCommunityOpenCloseBreakdown
     community_breakdown(use_to_hh_kwh_co2_£, community_use)
   end
 
-  #only called from test_community_use
-  def compact_print_weights(date)
-    open_close_weights_x48(date).each do |type, weight_x48|
-      puts "#{sprintf('%-15.15s',type.to_s)} #{weight_x48.map(&:to_i).join('')}"
-    end
-  end
-
   #Called from DayType#calculate_day_type_names in series_data_manager
   def series_names(community_use)
     usage_types = @open_close_times.time_types.map { |t| [t, 0.0] }.to_h
