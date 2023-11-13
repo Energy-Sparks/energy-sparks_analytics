@@ -83,7 +83,93 @@ describe CommunityUseBreakdown do
         end
       end
 
-      context 'with a filter' do
+      context 'when end of school day marks start of community use time' do
+        let(:kwh_data_x48)               { Array.new(48) { 1.0 } }
+
+        let(:school_times) do
+          [{day: :monday, usage_type: :school_day, opening_time: TimeOfDay.new(7,30), closing_time: TimeOfDay.new(16,15), calendar_period: :term_times}]
+        end
+
+        let(:community_use_times)          do
+          [{day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16,15), closing_time: TimeOfDay.new(21,00), calendar_period: :term_times}]
+        end
+
+        it 'should return the expected breakdown for the day' do
+          expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload])
+        end
+
+        it 'should split the usage at 16:00 between community baseload and school day' do
+          expect(days_kwh_x48[:school_day_open][32]).to eq 0.5
+          expect(days_kwh_x48[:community_baseload][32]).to eq 0.5
+        end
+
+        context 'with the usage in the community use period is below the daily baseload' do
+          # this has low usage for half hourly period indexes 31, 32 which is 16:00 and 16:30
+          # daily baseload will be higher than 0.1. Testing to ensure that the period with consumption
+          # at 0.1 is correct
+          let(:kwh_data_x48)               { Array.new(31) { 1.0 } + Array.new(2) { 0.1 } + Array.new(15) { 1.0 } }
+
+          it 'should return the expected breakdown across the day' do
+            expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload, :community])
+          end
+
+          it 'should split the usage at 16:00 between community baseload and school day' do
+            expect(days_kwh_x48[:school_day_open][32]).to eq 0.05
+            expect(days_kwh_x48[:community_baseload][32]).to eq 0.05
+          end
+        end
+      end
+
+      context 'when there is a gap between end of school day and community use time' do
+        let(:kwh_data_x48)               { Array.new(48) { 1.0 } }
+
+        let(:school_times) do
+          [{day: :monday, usage_type: :school_day, opening_time: TimeOfDay.new(7,30), closing_time: TimeOfDay.new(16,10), calendar_period: :term_times}]
+        end
+
+        let(:community_use_times)          do
+          [{day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16,15), closing_time: TimeOfDay.new(21,00), calendar_period: :term_times}]
+        end
+
+        it 'should return the expected breakdown across the day' do
+          expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload])
+        end
+
+        it 'should split the usage at 16:00 between community baseload, school day open and closed' do
+          #we are open for 10 minutes
+          expect(days_kwh_x48[:school_day_open][32].round(2)).to eq(0.33)
+          #closed for 5 minutes
+          expect(days_kwh_x48[:school_day_closed][32].round(2)).to eq(0.17)
+          #community use for 15 minutes
+          expect(days_kwh_x48[:community_baseload][32]).to eq 0.5
+        end
+
+        context 'with the usage in the community use period is below the daily baseload' do
+          # this has low usage for half hourly period indexes 31, 32 which is 16:00 and 16:30
+          # daily baseload will be higher than 0.1. Testing to ensure that the period with consumption
+          # at 0.1 is correct
+          let(:low_usage)               { Array.new(31) { 1.0 } + Array.new(2) { 0.1 } + Array.new(15) { 1.0 } }
+          let(:low_usage_reading)       { build(:one_day_amr_reading, date: day, kwh_data_x48: low_usage)}
+          before do
+            amr_data.add(day, low_usage_reading)
+          end
+
+          it 'should return the expected breakdown for the day' do
+            expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload, :community])
+          end
+
+          it 'should split the usage at 16:00 between community baseload and school day' do
+            #we are open for 10 minutes
+            expect(days_kwh_x48[:school_day_open][32].round(3)).to eq(0.033)
+            #closed for 5 minutes
+            expect(days_kwh_x48[:school_day_closed][32].round(3)).to eq(0.017)
+            #community use for 15 minutes
+            expect(days_kwh_x48[:community_baseload][32]).to eq 0.05
+          end
+        end
+      end
+
+      context 'when a filter is specified' do
         let(:community_use) do
           {
             filter:    filter,
