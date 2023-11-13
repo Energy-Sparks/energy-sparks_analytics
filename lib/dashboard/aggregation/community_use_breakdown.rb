@@ -211,8 +211,8 @@ class CommunityUseBreakdown
   #
   # - School is open for only part of the period, e.g. open until 16:15
   # - School is open for half of the period, and community use for rest
-  # - Within the period the school closes at 16:20, and community use starts at
-  #   16:45
+  # - Within the period the school closes at 16:15, and community use starts at
+  #   16:20
   #
   # refer to charts in \Energy Sparks\Energy Sparks Project Team Documents\Analytics\Community use etc\
   def split_half_hour_kwhs(date, hhi, weights, baseload_kwh, kwh)
