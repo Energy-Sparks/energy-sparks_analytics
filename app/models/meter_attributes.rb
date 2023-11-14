@@ -1,5 +1,5 @@
 require_relative './meter_attribute_types'
-require_relative './open_close_times.rb'
+require_relative './open_close_time.rb'
 class MeterAttributes
 
   class AutoInsertMissingReadings < MeterAttributeTypes::AttributeBase
@@ -142,7 +142,7 @@ class MeterAttributes
     id :partial_meter_coverage
     key :partial_meter_coverage
     aggregate_over :partial_meter_coverage
-    name 'Override percent of floor area or pupil numbers covered by meter'
+    name 'Schools > Override percent of floor area or pupil numbers covered by meter'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define,
@@ -166,6 +166,7 @@ class MeterAttributes
   end
 
   class OpenCloseTimesAttributes < MeterAttributeTypes::AttributeBase
+    analytics_internal true
     id :open_close_times
     aggregate_over :open_close_times
     name 'School and community function opening and closing times'
@@ -190,7 +191,7 @@ class MeterAttributes
     id :storage_heater_partial_meter_coverage
     key :storage_heater_partial_meter_coverage
     aggregate_over :storage_heater_partial_meter_coverage
-    name 'Override percent of floor area or pupil numbers covered by meter - storage heaters only'
+    name 'Storage Heaters > Override percent of floor area or pupil numbers covered by storage heaters'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define,
@@ -204,7 +205,7 @@ class MeterAttributes
   class FloorAreaPupilNumbersChangeOverTimeOverride < MeterAttributeTypes::AttributeBase
     id :floor_area_pupil_numbers
     aggregate_over :floor_area_pupil_numbers
-    name 'Changing floor area and pupil numbers over time'
+    name 'Schools > Changing floor area and pupil numbers over time'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date:       MeterAttributeTypes::Date.define,
@@ -215,23 +216,11 @@ class MeterAttributes
     )
   end
 
-  class SchoolFabricDescription < MeterAttributeTypes::AttributeBase
-    id :school_fabric
-    aggregate_over :school_fabric
-    name 'Genric school fabric information for audit purposes'
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        type:       MeterAttributeTypes::String.define(required: true),
-        description: MeterAttributeTypes::String.define(required: true)
-      }
-    )
-  end
-
   class PartialMeterFloorAreaPupilNumberDateRangeOverride < MeterAttributeTypes::AttributeBase
     id :partial_meter_coverage_date_range
     key :partial_meter_coverage_date_range
     aggregate_over :meter_corrections
-    name 'Override percent of floor area or pupil numbers covered by meter - with date ranges'
+    name 'Schools > Override percent of floor area or pupil numbers covered by meter - with date ranges'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define(required: true),
@@ -246,7 +235,7 @@ class MeterAttributes
 
     id :heating_model
     key :heating_model
-    name 'Heating model'
+    name 'Heating > Heating model'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -268,7 +257,7 @@ class MeterAttributes
     id :targeting_and_tracking_profiles_maximum_retries
     key :targeting_and_tracking_profiles_maximum_retries
 
-    name 'Targeting and tracking system profile substitution limit (temperature compensation)'
+    name 'Targets > Targets profile substitution limit (temperature compensation)'
     description 'Used to override targeting and tracking system maximum automatic nil profiles substituted in the event more are required - should only be added after review by an ebergy analyst'
 
     structure MeterAttributeTypes::Hash.define(
@@ -281,14 +270,14 @@ class MeterAttributes
   class HeatingNonHeatingDayFixedkWh < MeterAttributeTypes::AttributeBase
     id  :heating_non_heating_day_fixed_kwh_separation
     key :heating_non_heating_day_fixed_kwh_separation
-    name 'Heating/Non-Heating Separation Model Fixed Separation in kWh'
+    name 'Heating > Heating/Non-Heating Separation Model Fixed Separation in kWh'
     structure MeterAttributeTypes::Float.define(required: true, hint: 'kwh per day')
   end
 
   class HeatingNonHeatingDaySeparationModelOverride < MeterAttributeTypes::AttributeBase
     id  :heating_non_heating_day_separation_model_override
     key :heating_non_heating_day_separation_model_override
-    name 'Heating/Non-Heating Separation Model Override'
+    name 'Heating > Heating/Non-Heating Separation Model Override'
 
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:fixed_single_value_temperature_sensitive_regression_model, :temperature_sensitive_regression_model, :temperature_sensitive_regression_model_covid_tolerant, :no_idea, :either, :not_enough_data])
   end
@@ -297,7 +286,7 @@ class MeterAttributes
 
     id :aggregation_switch
     aggregate_over :aggregation
-    name 'Aggregation > Switch'
+    name 'Meter > Data presentation'
 
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:ignore_start_date, :deprecated_include_but_ignore_start_date, :deprecated_include_but_ignore_end_date])
   end
@@ -306,29 +295,16 @@ class MeterAttributes
 
     id :function_switch
     aggregate_over :function
-    name 'Function > Switch'
+    name 'Meter > Energy Use'
 
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:heating_only, :kitchen_only, :hotwater_only])
-  end
-
-  class Tariff < MeterAttributeTypes::AttributeBase
-
-    id :tariff
-    key :tariff
-    name 'Tariff'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        type: MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:economy_7])
-      }
-    )
   end
 
   class SolarPV < MeterAttributeTypes::AttributeBase
 
     id :solar_pv
     aggregate_over :solar_pv
-    name 'Solar PV'
+    name 'Solar > Solar PV'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -348,7 +324,7 @@ class MeterAttributes
 
     id :solar_pv_override
     aggregate_over :solar_pv_override
-    name 'Override bad metered solar pv data'
+    name 'Solar > Override bad metered solar pv data'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date:             MeterAttributeTypes::Date.define,
@@ -371,7 +347,7 @@ class MeterAttributes
 
     id                  :solar_pv_mpan_meter_mapping
     aggregate_over      :solar_pv_mpan_meter_mapping
-    name                'Solar PV MPAN Meter mapping'
+    name                'Solar > Solar PV MPAN Meter mapping'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -386,27 +362,11 @@ class MeterAttributes
     )
   end
 
-=begin
-# deprecated PH 13Apr2021
-  class SolarPVExternalMeterIdentifier < MeterAttributeTypes::AttributeBase
-    id    :solar_pv_external_identifier
-    key   :solar_pv_external_identifier
-    name  'Solar PV External Identifier (type e.g. low_carbon_hub, id e.g. 123456)'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        identifier_type:  MeterAttributeTypes::String.define(required: true),
-        identifier:       MeterAttributeTypes::String.define(required: true),
-      }
-    )
-  end
-=end
-
   class LowCarbonHub < MeterAttributeTypes::AttributeBase
 
     id :low_carbon_hub_meter_id
     key :low_carbon_hub_meter_id
-    name 'Low carbon hub meter ID'
+    name 'Solar > Low carbon hub meter ID'
 
     structure MeterAttributeTypes::Integer.define(required: true, min: 0)
 
@@ -415,7 +375,7 @@ class MeterAttributes
   class StorageHeaters < MeterAttributeTypes::AttributeBase
     id :storage_heaters
     aggregate_over :storage_heaters
-    name 'Storage heaters'
+    name 'Storage heaters > Storage heater configuration'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -429,10 +389,10 @@ class MeterAttributes
   end
 
   class TargetingAndTracking < MeterAttributeTypes::AttributeBase
-
+    analytics_internal true
     id :targeting_and_tracking
     aggregate_over :targeting_and_tracking
-    name 'Setting of Targets for Targeting and Tracking'
+    name 'Targets > Setting of Targets for Targeting and Tracking'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -443,10 +403,10 @@ class MeterAttributes
   end
 
   class EstimatedPeriodConsumption < MeterAttributeTypes::AttributeBase
-
+    analytics_internal true
     id :estimated_period_consumption
     aggregate_over :estimated_period_consumption
-    name 'Estimated consumption for period in absence of amr data (typically a year)'
+    name 'Targets > Estimated consumption for period'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -457,65 +417,15 @@ class MeterAttributes
     )
   end
 
-  def self.default_economic_rate
-    MeterAttributeTypes::Hash.define(
-      required: true,
-      structure: {
-        per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
-        rate: MeterAttributeTypes::Float.define(required: true)
-      }
-    )
-  end
+  class BackdateTariff < MeterAttributeTypes::AttributeBase
 
-  def self.default_economic_rate_by_time_of_day
-    MeterAttributeTypes::Hash.define(
-      required: false,
-      structure: {
-        per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
-        rate: MeterAttributeTypes::Float.define,
-        from: MeterAttributeTypes::TimeOfDay.define,
-        to:   MeterAttributeTypes::TimeOfDay.define
-      }
-    )
-  end
-
-  def self.default_economic_rates
-    MeterAttributeTypes::Hash.define(
-      required:       true,
-      structure: {
-        rate:           MeterAttributes.default_economic_rate,
-        daytime_rate:   MeterAttributes.default_economic_rate_by_time_of_day,
-        nighttime_rate: MeterAttributes.default_economic_rate_by_time_of_day
-      }
-    )
-  end
-
-  class EconomicTariff < MeterAttributeTypes::AttributeBase
-    id :economic_tariff
-    key :economic_tariff
-
-    name 'Economic tariff'
+    id :backdate_tariff
+    key :backdate_tariff
+    name 'Tariffs > Backdate DCC tariff'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        name:   MeterAttributeTypes::String.define,
-        rates:  MeterAttributes.default_economic_rates
-      }
-    )
-  end
-
-  class EconomicTariffChangeOverTime < MeterAttributeTypes::AttributeBase
-    id             :economic_tariff_change_over_time
-    aggregate_over :economic_tariff_change_over_time
-
-    name 'Economic tariff = changes over time'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        name:       MeterAttributeTypes::String.define,
-        start_date: MeterAttributeTypes::Date.define,
-        end_date:   MeterAttributeTypes::Date.define,
-        rates:      MeterAttributes.default_economic_rates
+        days: MeterAttributeTypes::Integer.define(required: true, hint: 'by default backdates up to 30 days, if you set to 0 then wont backdate')
       }
     )
   end
@@ -627,73 +537,6 @@ class MeterAttributes
     }
   end
 
-  class AccountingTariff < MeterAttributeTypes::AttributeBase
-    id :accounting_tariff
-    aggregate_over :accounting_tariffs
-    name 'Accounting tariff'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date:   MeterAttributeTypes::Date.define,
-        end_date:     MeterAttributeTypes::Date.define,
-        name:         MeterAttributeTypes::String.define,
-        default:      MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
-        system_wide:  MeterAttributeTypes::Boolean.define(hint: 'only set at system wide level'),
-        rates:        MeterAttributeTypes::Hash.define(
-          required: true,
-          structure: {
-            rate: MeterAttributeTypes::Hash.define(
-              required: true,
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define(required: true)
-              }
-            )
-          }.merge(MeterAttributes.default_tariff_rates)
-        ),
-      }
-    )
-  end
-
-  class AccountingTariffDifferential < MeterAttributeTypes::AttributeBase
-    id :accounting_tariff_differential
-    aggregate_over :accounting_tariffs
-    name 'Accounting tariff (differential)'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date: MeterAttributeTypes::Date.define,
-        end_date:   MeterAttributeTypes::Date.define,
-        name:       MeterAttributeTypes::String.define,
-        default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
-        rates:      MeterAttributeTypes::Hash.define(
-          required: true,
-          structure: {
-            daytime_rate: MeterAttributeTypes::Hash.define(
-              required: true,
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define(required: true),
-                from: MeterAttributeTypes::TimeOfDay.define(required: true),
-                to:   MeterAttributeTypes::TimeOfDay.define(required: true),
-              }
-            ),
-            nighttime_rate: MeterAttributeTypes::Hash.define(
-              required: true,
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define(required: true),
-                from: MeterAttributeTypes::TimeOfDay.define(required: true),
-                to:   MeterAttributeTypes::TimeOfDay.define(required: true),
-              }
-            )
-          }.merge(MeterAttributes.default_tariff_rates)
-        ),
-        asc_limit_kw: MeterAttributeTypes::Float.define
-      }
-    )
-  end
-
   def self.default_flat_rate
     MeterAttributeTypes::Hash.define(
       required: false,
@@ -738,19 +581,6 @@ class MeterAttributes
         tier1: default_tiered_rate_definition,
         tier2: default_tiered_rate_definition,
         tier3: default_tiered_rate_definition
-      }
-    )
-  end
-
-  class BackdateTariff < MeterAttributeTypes::AttributeBase
-
-    id :backdate_tariff
-    key :backdate_tariff
-    name 'Backdate tariff'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        days: MeterAttributeTypes::Integer.define(required: true, hint: 'by default backdates up to 30 days, if you set to 0 then wont backdate')
       }
     )
   end
@@ -803,17 +633,18 @@ class MeterAttributes
   end
 
   class AccountingGenericTariff < MeterAttributeTypes::AttributeBase
+    analytics_internal true
     id :accounting_tariff_generic
     aggregate_over :accounting_tariff_generic
-    name 'Accounting tariff (generic + DCC)'
+    name 'Tariffs > Generic Accounting tariff'
 
     structure MeterAttributes.generic_accounting_tariff
   end
 
-  def self.all
+  def self.all(filter: false)
     constants.inject({}) do |collection, constant_name|
       constant = const_get(constant_name)
-      collection[constant.attribute_id] = constant
+      collection[constant.attribute_id] = constant unless (filter && constant.internal?)
       collection
     end
   end

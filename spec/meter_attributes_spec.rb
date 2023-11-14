@@ -3,6 +3,32 @@
 require_relative '../app/models/meter_attributes'
 
 describe MeterAttributes do
+  describe '.all' do
+    let(:all_attributes) { described_class.all }
+
+    it 'builds a list of attributes' do
+      expect(described_class.all).not_to be_empty
+    end
+
+    it 'returns all items by default' do
+      expect(all_attributes.key?(:accounting_tariff_generic)).to be true
+      expect(all_attributes.key?(:open_close_times)).to be true
+      expect(all_attributes.key?(:targeting_and_tracking)).to be true
+      expect(all_attributes.key?(:estimated_period_consumption)).to be true
+    end
+
+    context 'when filtering' do
+      let(:all_attributes) { described_class.all(filter: true) }
+
+      it 'filters analytics internal attributes that shouldnt be set by admins' do
+        expect(all_attributes.key?(:accounting_tariff_generic)).to be false
+        expect(all_attributes.key?(:open_close_times)).to be false
+        expect(all_attributes.key?(:targeting_and_tracking)).to be false
+        expect(all_attributes.key?(:estimated_period_consumption)).to be false
+      end
+    end
+  end
+
   describe MeterAttributeTypes::Symbol do
     it 'converts strings to symbols' do
       expect(described_class.new(allowed_values: [:weekends]).parse('weekends')).to eq(:weekends)
@@ -276,15 +302,6 @@ describe MeterAttributes do
       attribute = described_class.parse('heating_only')
       expect(attribute.to_analytics).to eq(
         :heating_only
-      )
-    end
-  end
-
-  describe MeterAttributes::Tariff do
-    it 'accepts a string or symbol and keys it using the class defined key' do
-      attribute = described_class.parse({ type: 'economy_7' })
-      expect(attribute.to_analytics).to eq(
-        { tariff: { type: :economy_7 } }
       )
     end
   end

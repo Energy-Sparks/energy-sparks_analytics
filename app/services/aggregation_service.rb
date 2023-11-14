@@ -141,7 +141,7 @@ class AggregateDataService
       @meter_collection.aggregated_heat_meters,
       @meter_collection.storage_heater_meter
     ].compact.each do |meter|
-      oc_breakdown = AMRDataCommunityOpenCloseBreakdown.new(meter, @meter_collection.open_close_times)
+      oc_breakdown = CommunityUseBreakdown.new(meter, @meter_collection.open_close_times)
       meter.amr_data.open_close_breakdown = oc_breakdown
     end
   end
