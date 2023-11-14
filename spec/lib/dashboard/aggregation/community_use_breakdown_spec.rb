@@ -45,7 +45,7 @@ describe CommunityUseBreakdown do
     context 'with single community use time period' do
       # The times correspond to the HH index starting at 38 and ending at 42 (exclusive range), so 5 periods in total
       let(:community_use_times) do
-        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0o0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
+        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
       end
 
       context 'with default filter' do
@@ -93,7 +93,7 @@ describe CommunityUseBreakdown do
         end
 
         let(:community_use_times) do
-          [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16, 15), closing_time: TimeOfDay.new(21, 0o0), calendar_period: :term_times }]
+          [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16, 15), closing_time: TimeOfDay.new(21, 0), calendar_period: :term_times }]
         end
 
         it 'returns the expected breakdown for the day' do
@@ -130,7 +130,7 @@ describe CommunityUseBreakdown do
         end
 
         let(:community_use_times) do
-          [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16, 15), closing_time: TimeOfDay.new(21, 0o0), calendar_period: :term_times }]
+          [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16, 15), closing_time: TimeOfDay.new(21, 0), calendar_period: :term_times }]
         end
 
         it 'returns the expected breakdown across the day' do
@@ -263,8 +263,8 @@ describe CommunityUseBreakdown do
     context 'with multiple community use times' do
       let(:community_use_times)          do
         [
-          { day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(6, 0o0), closing_time: TimeOfDay.new(7, 30), calendar_period: :term_times },
-          { day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0o0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }
+          { day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(6, 0), closing_time: TimeOfDay.new(7, 30), calendar_period: :term_times },
+          { day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }
         ]
       end
 
@@ -297,7 +297,7 @@ describe CommunityUseBreakdown do
 
     context 'with single community use time period' do
       let(:community_use_times) do
-        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0o0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
+        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
       end
 
       context 'with default filter' do
@@ -418,7 +418,7 @@ describe CommunityUseBreakdown do
 
     context 'with single community use time period' do
       let(:community_use_times) do
-        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0o0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
+        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
       end
 
       context 'with default filter' do
@@ -451,7 +451,7 @@ describe CommunityUseBreakdown do
 
     context 'with single community use time period' do
       let(:community_use_times) do
-        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0o0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
+        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
       end
 
       context 'with default filter' do
@@ -515,7 +515,7 @@ describe CommunityUseBreakdown do
 
     context 'with a single community use time period' do
       let(:community_use_times) do
-        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0o0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
+        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
       end
 
       it 'includes the community use series' do

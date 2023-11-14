@@ -22,7 +22,7 @@ describe OpenCloseTimes do
 
     describe 'with both' do
       let(:community_use_times) do
-        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0o0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
+        [{ day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19, 0), closing_time: TimeOfDay.new(21, 30), calendar_period: :term_times }]
       end
 
       it 'creates both times' do
