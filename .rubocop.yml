@@ -33,5 +33,14 @@ Style/AsciiComments:
   Enabled: false
 Style/Documentation:
   Enabled: false
+
+RSpec/ChangeByZero:
+  Enabled: false
 RSpec/DescribedClass:
+  Enabled: false
+RSpec/LeadingSubject:
+  Enabled: false
+RSpec/ScatteredLet:
+  Enabled: false
+RSpec/NestedGroups:
   Enabled: false
