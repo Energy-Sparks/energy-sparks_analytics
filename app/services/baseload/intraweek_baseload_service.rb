@@ -30,9 +30,7 @@ module Baseload
     end
 
     def intraweek_variation
-      unless enough_data?
-        raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}"
-      end
+      raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}" unless enough_data?
 
       IntraweekVariation.new(
         days_kw: baseload_analysis.average_intraweek_schoolday_kw(@asof_date)
@@ -59,7 +57,6 @@ module Baseload
     def range_checker
       meter_date_range_checker(@meter, @asof_date)
     end
-
   end
 end
 # rubocop:enable Lint/MissingSuper

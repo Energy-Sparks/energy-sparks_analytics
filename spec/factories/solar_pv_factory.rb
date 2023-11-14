@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
-  factory :solar_pv, class: "SolarPV" do
+  factory :solar_pv, class: 'SolarPV' do
     transient do
-      type  { 'solar_pv'}
+      type { 'solar_pv' }
     end
 
-    initialize_with{ new(type) }
+    initialize_with { new(type) }
 
     trait :with_days do
       transient do
-        start_date { Date.yesterday - 7}
+        start_date { Date.yesterday - 7 }
         end_date { Date.yesterday }
         data_x48 { Array.new(48) { rand(0.0..1.0).round(2) } }
       end
@@ -19,6 +21,5 @@ FactoryBot.define do
         end
       end
     end
-
   end
 end

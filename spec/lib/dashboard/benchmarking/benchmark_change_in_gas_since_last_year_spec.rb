@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkChangeInGasSinceLastYear, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkChangeInGasSinceLastYear.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_gas_since_last_year,
@@ -144,15 +144,15 @@ describe Benchmarking::BenchmarkChangeInGasSinceLastYear, type: :service do
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
       column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }
-      
+
       expect(column_groups).to eq(
         [
           [
-            {:name=>"", :span=>1},
-            {:name=>"kWh", :span=>3},
-            {:name=>"CO2 (kg)", :span=>2},
-            {:name=>"£", :span=>2},
-            {:name=>"Percent changed", :span=>2}
+            { name: '', span: 1 },
+            { name: 'kWh', span: 3 },
+            { name: 'CO2 (kg)', span: 2 },
+            { name: '£', span: 2 },
+            { name: 'Percent changed', span: 2 }
           ]
         ]
       )

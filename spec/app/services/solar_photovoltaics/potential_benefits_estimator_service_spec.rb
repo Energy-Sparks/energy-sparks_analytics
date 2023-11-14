@@ -1,10 +1,11 @@
 # frozen_string_literal: true
-require 'pp'
 
 require 'spec_helper'
 
 describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service do
-  let(:service) { SolarPhotovoltaics::PotentialBenefitsEstimatorService.new(meter_collection: @acme_academy, asof_date: Date.parse('2020-12-31')) }
+  let(:service) do
+    described_class.new(meter_collection: @acme_academy, asof_date: Date.parse('2020-12-31'))
+  end
 
   # using before(:all) here to avoid slow loading of YAML and then
   # running the aggregation code for each test.
@@ -12,15 +13,16 @@ describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service d
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#enough_data?' do
+  describe '#enough_data?' do
     it 'returns true if one years worth of data is available' do
       expect(service.enough_data?).to eq(true)
     end
   end
 
-  context '#create_model' do
+  describe '#create_model' do
     let(:model)     { service.create_model }
     let(:scenarios) { model.scenarios }
+
     it 'calculates the potential benefits over a geometric sequence of capacity kWp' do
       expect(model.optimum_kwp).to be_within(0.01).of(75.5)
       expect(model.optimum_payback_years).to be_within(0.01).of(8.11)

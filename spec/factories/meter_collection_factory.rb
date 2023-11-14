@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
-  factory :meter_collection, class: MeterCollection do
+  factory :meter_collection, class: 'MeterCollection' do
     transient do
       start_date              { Date.yesterday - 7 }
       end_date                { Date.yesterday }
@@ -12,11 +14,13 @@ FactoryBot.define do
       solar_irradiation       { nil }
     end
 
-    initialize_with{ new(school,
-      holidays: holidays, temperatures: temperatures,
-      solar_irradiation: solar_irradiation, solar_pv: solar_pv,
-      grid_carbon_intensity: grid_carbon_intensity,
-      pseudo_meter_attributes: pseudo_meter_attributes) }
+    initialize_with do
+      new(school,
+          holidays: holidays, temperatures: temperatures,
+          solar_irradiation: solar_irradiation, solar_pv: solar_pv,
+          grid_carbon_intensity: grid_carbon_intensity,
+          pseudo_meter_attributes: pseudo_meter_attributes)
+    end
 
     trait :with_electricity_meter do
       after(:build) do |meter_collection, evaluator|

@@ -1,51 +1,57 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe AccountingCosts do
-
-  let(:start_date)  { Date.new(2023,1,1) }
-  let(:end_date)    { Date.new(2023,1,31) }
+  let(:start_date)  { Date.new(2023, 1, 1) }
+  let(:end_date)    { Date.new(2023, 1, 31) }
 
   let(:rates)       { create_flat_rate(rate: 0.15, standing_charge: 1.0) }
 
   let(:accounting_tariff) { create_accounting_tariff_generic(start_date: start_date, end_date: end_date, rates: rates) }
 
-  let(:meter_attributes) {
-    {:accounting_tariff_generic=> [accounting_tariff]}
-  }
+  let(:meter_attributes) do
+    { accounting_tariff_generic: [accounting_tariff] }
+  end
 
-  let(:kwh_data_x48)       { Array.new(48, 0.01) }
+  let(:kwh_data_x48) { Array.new(48, 0.01) }
 
-  let(:combined_meter)      { build(:meter) }
-  let(:meter_1) { build(:meter,
-      type: :electricity,
-      meter_attributes: meter_attributes,
-      amr_data: build(:amr_data, :with_days, day_count: 31, end_date: end_date, kwh_data_x48: kwh_data_x48)
-    )
-  }
+  let(:combined_meter) { build(:meter) }
+  let(:meter1) do
+    build(:meter,
+          type: :electricity,
+          meter_attributes: meter_attributes,
+          amr_data: build(:amr_data, :with_days, day_count: 31, end_date: end_date,
+                                                 kwh_data_x48: kwh_data_x48))
+  end
 
-  let(:meter_2) { build(:meter,
-      type: :electricity,
-      meter_attributes: meter_attributes,
-      amr_data: build(:amr_data, :with_days, day_count: 31, end_date: end_date, kwh_data_x48: kwh_data_x48)
-    )
-  }
+  let(:meter2) do
+    build(:meter,
+          type: :electricity,
+          meter_attributes: meter_attributes,
+          amr_data: build(:amr_data, :with_days, day_count: 31, end_date: end_date,
+                                                 kwh_data_x48: kwh_data_x48))
+  end
 
-  let(:list_of_meters)      { [meter_1, meter_2] }
+  let(:list_of_meters)      { [meter1, meter2] }
 
   let(:combined_start_date) { start_date }
   let(:combined_end_date)   { end_date }
 
-  #Simulate the meters having been through aggregation
-  before(:each) do
+  # Simulate the meters having been through aggregation
+  before do
     list_of_meters.each do |m|
       m.amr_data.set_tariffs(m)
     end
   end
 
-  context '#combine_accounting_costs_from_multiple_meters' do
-    let(:combined_costs)  { AccountingCosts.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date) }
+  describe '#combine_accounting_costs_from_multiple_meters' do
+    let(:combined_costs) do
+      described_class.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date,
+                                                                    combined_end_date)
+    end
 
-    #usage * rate * 48 hh periods * 2 meters + 2 * 1.0
+    # usage * rate * 48 hh periods * 2 meters + 2 * 1.0
     let(:expected_total_cost) { (0.01 * 0.15 * 48 * 2) + 2.0 }
 
     it 'has expected type' do
@@ -71,8 +77,8 @@ describe AccountingCosts do
     end
 
     context 'with missing tariffs' do
-      before(:each) do
-        allow(meter_1.amr_data).to receive(:date_exists_by_type?).and_return(false)
+      before do
+        allow(meter1.amr_data).to receive(:date_exists_by_type?).and_return(false)
       end
 
       it 'has expected type' do
@@ -83,8 +89,6 @@ describe AccountingCosts do
         expect(combined_costs.date_missing?(start_date)).to eq true
         expect(combined_costs.date_missing?(end_date)).to eq true
       end
-
     end
   end
-
 end

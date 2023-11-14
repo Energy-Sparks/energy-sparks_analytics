@@ -19,19 +19,19 @@ module Baseload
     end
 
     def validate_meter_collection(meter_collection)
-      if meter_collection.electricity_meters.empty?
-        raise EnergySparksUnexpectedStateException, 'School does not have electricity meters'
-      end
+      return unless meter_collection.electricity_meters.empty?
+
+      raise EnergySparksUnexpectedStateException, 'School does not have electricity meters'
     end
 
     def validate_meter(analytics_meter)
-      unless analytics_meter.fuel_type == :electricity
-        raise EnergySparksUnexpectedStateException, "Meter (mpan: #{analytics_meter.id}, fuel_type: #{analytics_meter.fuel_type}) is not an electricity meter"
-      end
+      return if analytics_meter.fuel_type == :electricity
+
+      raise EnergySparksUnexpectedStateException, "Meter (mpan: #{analytics_meter.id}, fuel_type: #{analytics_meter.fuel_type}) is not an electricity meter"
     end
 
-    def meter_date_range_checker(meter, asof_date=nil)
-      #align with ElectricityBaseloadAnalysis.one_years_data?
+    def meter_date_range_checker(meter, asof_date = nil)
+      # align with ElectricityBaseloadAnalysis.one_years_data?
       @meter_date_range_checker ||= Util::MeterDateRangeChecker.new(meter, asof_date, days_in_year: 364)
     end
   end

@@ -8,7 +8,6 @@ module SolarPhotovoltaics
       raise unless @meter_collection.solar_pv_panels?
     end
 
-    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Layout/LineLength
     def create_model
       OpenStruct.new(
         annual_saving_from_solar_pv_percent: solar_pv_profit_loss.annual_saving_from_solar_pv_percent,
@@ -23,7 +22,6 @@ module SolarPhotovoltaics
         annual_solar_pv_consumed_onsite_kwh: solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh
       )
     end
-    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Layout/LineLength
 
     def enough_data?
       meter_data_checker.one_years_data?
@@ -44,7 +42,6 @@ module SolarPhotovoltaics
       @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregated_electricity_meters, aggregated_electricity_meters.amr_data.end_date)
     end
 
-    # rubocop:disable Naming/MethodName
     def export_£
       solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics.pricing.solar_export_price
     end
@@ -56,7 +53,6 @@ module SolarPhotovoltaics
     def electricity_price_£current_per_kwh
       @meter_collection.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£current).round(5)
     end
-    # rubocop:enable Naming/MethodName
 
     def solar_pv_profit_loss
       @solar_pv_profit_loss = SolarPVProfitLoss.new(@meter_collection)

@@ -3,67 +3,6 @@
 # Collection of helper methods that are used across code that aggregates
 # and disaggregates meter data
 module AggregationMixin
-
-  # Factory method to create a new meter, copying values and data from an existing
-  # meter. By default it instantiates a new +Dashboard::Meter+ but other classes
-  # can be provided as a parameter.
-  #
-  # Note: relies on +meter_collection+ method being available
-  #
-  # @param Dashboard::Meter meter the meter to copy
-  # @param AmrData amr_data the amr data to populate the new meter
-  # @param Symbol type the type for the new meter
-  # @param String identifier the identifier for the new meter
-  # @param String name the name of the new meter
-  # @param Symbol pseudo_meter_name a symbol indicates the name of pseudo meter attributes to copy into the new meter
-  # @param Class meter_type the class to use to instantiate the new meter
-  #
-  # @return Dashboard::Meter the new meter
-  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name, meter_type = Dashboard::Meter)
-    meter_type.new(
-      meter_collection: meter_collection,
-      amr_data: amr_data,
-      type: type,
-      identifier: identifier,
-      name: name,
-      floor_area: meter.floor_area,
-      number_of_pupils: meter.number_of_pupils,
-      solar_pv_installation: meter.solar_pv_setup,
-      storage_heater_config: meter.storage_heater_setup,
-      meter_attributes: meter.meter_attributes.merge(meter_collection.pseudo_meter_attributes(pseudo_meter_name))
-    )
-  end
-
-  # Aggregate the data associated with a list of meters, optionally ignoring any aggregation rules
-  #
-  # @param Array meter an array of +Dashboard::Meter+
-  # @param Symbol type the fuel type
-  # @param boolean ignore_rules whether to ignore rules specifying how start/end dates of meters are handled
-  # @returns AmrData a new AmrData instance that holds the aggregate series of meter readings
-  private def aggregate_amr_data(meters, type, ignore_rules = false)
-    if meters.length == 1
-      logger.info 'Single meter, so aggregation is a reference to itself not an aggregate meter'
-      return meters.first.amr_data # optimisaton if only 1 meter, then its its own aggregate
-    end
-    min_date, max_date = combined_amr_data_date_range(meters, ignore_rules)
-
-    # This can happen if there are 2 meter, with non-overlapping date ranges
-    # Without a check, the renaming code is run but we end up with an aggregate meter that
-    # contains no readings and has default dates from HalfHourlyData.new. This can cause errors elsewhere as other
-    # code does not check for the dates or if there are no readings.
-    if min_date > max_date
-      raise EnergySparksUnexpectedStateException, "Invalid AMR date range. Minimum date (#{min_date}) after maximum date (#{max_date}) unable to aggregate data"
-    end
-
-    logger.info "Aggregating data between #{min_date} and #{max_date}"
-
-    unless meter_collection.urn.nil?
-      mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(meter_collection.urn, meters[0].fuel_type)
-    end
-
-    aggregate_amr_data_between_dates(meters, type, min_date, max_date, mpan_mprn)
-  end
-
   # Sums the half-hourly meter readings within a specified time period
   #
   # If a meter doesn't have a reading within the specified period, then it is ignored
@@ -119,7 +58,6 @@ module AggregationMixin
     ]
   end
 
-
   # Calculates a combined meter range, obeying a set of aggregation rules
   # configured as meter attributes
   #
@@ -151,13 +89,93 @@ module AggregationMixin
     [start_dates.max, end_dates.min]
   end
 
+  private
+
+  # Factory method to create a new meter, copying values and data from an existing
+  # meter. By default it instantiates a new +Dashboard::Meter+ but other classes
+  # can be provided as a parameter.
+  #
+  # Note: relies on +meter_collection+ method being available
+  #
+  # @param Dashboard::Meter meter the meter to copy
+  # @param AmrData amr_data the amr data to populate the new meter
+  # @param Symbol type the type for the new meter
+  # @param String identifier the identifier for the new meter
+  # @param String name the name of the new meter
+  # @param Symbol pseudo_meter_name a symbol indicates the name of pseudo meter attributes to copy into the new meter
+  # @param Class meter_type the class to use to instantiate the new meter
+  #
+  # @return Dashboard::Meter the new meter
+  def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name, meter_type = Dashboard::Meter)
+    meter_type.new(
+      meter_collection: meter_collection,
+      amr_data: amr_data,
+      type: type,
+      identifier: identifier,
+      name: name,
+      floor_area: meter.floor_area,
+      number_of_pupils: meter.number_of_pupils,
+      solar_pv_installation: meter.solar_pv_setup,
+      storage_heater_config: meter.storage_heater_setup,
+      meter_attributes: meter.meter_attributes.merge(meter_collection.pseudo_meter_attributes(pseudo_meter_name))
+    )
+  end
+
+  # Creates a new aggregate meter, by coping values from an existing meter
+  #
+  # Note: only used in +DisaggregateCommunityUsage+?
+  #
+  # @param Dashboard::Meter aggregate_meter the existing meter to copy from
+  # @param Array meters the list of meters to add to the new aggregate
+  # @param Symbol fuel_type the fuel type of the meter
+  # @param String identifier the identifier for the new meter
+  # @param String name the name of the new meter
+  # @param Symbol pseudo_meter_name a symbol indicates the name of pseudo meter attributes to copy into the new meter
+  def create_aggregate_meter(aggregate_meter, meters, fuel_type, identifier, name, pseudo_meter_name)
+    aggregate_amr_data = aggregate_amr_data_between_dates(meters, fuel_type, aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, aggregate_meter.mpxn)
+
+    new_aggregate_meter = create_modified_meter_copy(aggregate_meter, aggregate_amr_data, fuel_type, identifier, name, pseudo_meter_name, Dashboard::AggregateMeter)
+
+    new_aggregate_meter.set_constituent_meters(meters)
+
+    calculate_meter_carbon_emissions_and_costs(new_aggregate_meter, fuel_type)
+
+    new_aggregate_meter
+  end
+
+  # Aggregate the data associated with a list of meters, optionally ignoring any aggregation rules
+  #
+  # @param Array meter an array of +Dashboard::Meter+
+  # @param Symbol type the fuel type
+  # @param boolean ignore_rules whether to ignore rules specifying how start/end dates of meters are handled
+  # @returns AmrData a new AmrData instance that holds the aggregate series of meter readings
+  def aggregate_amr_data(meters, type, ignore_rules = false)
+    if meters.length == 1
+      logger.info 'Single meter, so aggregation is a reference to itself not an aggregate meter'
+      return meters.first.amr_data # optimisaton if only 1 meter, then its its own aggregate
+    end
+    min_date, max_date = combined_amr_data_date_range(meters, ignore_rules)
+
+    # This can happen if there are 2 meter, with non-overlapping date ranges
+    # Without a check, the renaming code is run but we end up with an aggregate meter that
+    # contains no readings and has default dates from HalfHourlyData.new. This can cause errors elsewhere as other
+    # code does not check for the dates or if there are no readings.
+    raise EnergySparksUnexpectedStateException, "Invalid AMR date range. Minimum date (#{min_date}) after maximum date (#{max_date}) unable to aggregate data" if min_date > max_date
+
+    logger.info "Aggregating data between #{min_date} and #{max_date}"
+
+    mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(meter_collection.urn, meters[0].fuel_type) unless meter_collection.urn.nil?
+
+    aggregate_amr_data_between_dates(meters, type, min_date, max_date, mpan_mprn)
+  end
+
   # Triggers the calculation and caching of co2 emissions for a meter
   # Results in the underlying +AmrData+ object holding a schedule of co2 emissions data
   #
   # If this is not called, then the +AmrData+ object will not be able to correctly return
   # co2 values for a given day or period
-  private def calculate_carbon_emissions_for_meter(meter, fuel_type)
-    if fuel_type == :electricity || fuel_type == :aggregated_electricity # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
+  def calculate_carbon_emissions_for_meter(meter, fuel_type)
+    if %i[electricity aggregated_electricity].include?(fuel_type) # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
       meter.amr_data.set_carbon_emissions(meter.id, nil, meter_collection.grid_carbon_intensity)
     else
       meter.amr_data.set_carbon_emissions(meter.id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)
@@ -169,17 +187,17 @@ module AggregationMixin
   #
   # If this is not called, then the +AmrData+ object will not be able to correctly return
   # cost values for a given day or period
-  private def calculate_costs_for_meter(meter)
+  def calculate_costs_for_meter(meter)
     logger.info "Creating economic & accounting costs for #{meter.mpan_mprn} fuel #{meter.fuel_type} from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}"
     meter.amr_data.set_tariffs(meter)
   end
 
-  private def calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
+  def calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
     calculate_carbon_emissions_for_meter(meter, fuel_type)
     calculate_costs_for_meter(meter)
   end
 
-  private def calculate_meters_carbon_emissions_and_costs(meters, fuel_type)
+  def calculate_meters_carbon_emissions_and_costs(meters, fuel_type)
     meters.each do |meter|
       calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
     end

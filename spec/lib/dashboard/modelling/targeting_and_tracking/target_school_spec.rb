@@ -1,13 +1,14 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe TargetSchool do
-
   let(:pseudo_meter_attributes) { {} }
 
   let(:meter_collection)    { build(:meter_collection, :with_electricity_meter, pseudo_meter_attributes: pseudo_meter_attributes) }
 
   let(:calculation_type)    { :day }
-  let(:target_school)       { TargetSchool.new(meter_collection, calculation_type) }
+  let(:target_school)       { described_class.new(meter_collection, calculation_type) }
 
   describe '#name' do
     it 'overrides name method' do
@@ -16,7 +17,7 @@ describe TargetSchool do
   end
 
   describe '#aggregated_electricity_meters' do
-    let(:meter_collection)    { build(:meter_collection, :with_electricity_meter, start_date: Date.today - 400, end_date: Date.yesterday, pseudo_meter_attributes: pseudo_meter_attributes)}
+    let(:meter_collection) { build(:meter_collection, :with_electricity_meter, start_date: Date.today - 400, end_date: Date.yesterday, pseudo_meter_attributes: pseudo_meter_attributes) }
 
     before do
       AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
@@ -32,10 +33,10 @@ describe TargetSchool do
     context 'with target set for electricity' do
       let(:pseudo_meter_attributes) do
         {
-          :aggregated_electricity => {
-            :targeting_and_tracking => [{
-              :start_date => Date.yesterday,
-              :target => 0.95
+          aggregated_electricity: {
+            targeting_and_tracking: [{
+              start_date: Date.yesterday,
+              target: 0.95
             }]
           }
         }

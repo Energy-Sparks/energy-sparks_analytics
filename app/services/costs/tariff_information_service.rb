@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Costs
   class TariffInformationService
     # Creates a service capable of providing information about the
@@ -17,28 +19,28 @@ module Costs
       @meter_end_date   = [@meter.amr_data.end_date,   analyis_end_date].min
     end
 
-    #Are we analysing less data than we have for the ideal range?
+    # Are we analysing less data than we have for the ideal range?
     def incomplete_coverage?
       @meter.amr_data.start_date > @analysis_start_date || @meter.amr_data.end_date != @analyis_end_date
     end
 
-    #For the analysed period, what % of that time do we have real tariffs?
+    # For the analysed period, what % of that time do we have real tariffs?
     #
-    #Will be 0.0 if periods_with_tariffs is an empty array
+    # Will be 0.0 if periods_with_tariffs is an empty array
     def percentage_with_real_tariffs
-      @percent_real ||= calculate_percent_real
+      @percentage_with_real_tariffs ||= calculate_percent_real
     end
 
     def periods_with_tariffs
-      #find missing billing period and extract earliest and latest dates
-      @tariff_periods ||= find_billing_periods(true).map do |period_block|
+      # find missing billing period and extract earliest and latest dates
+      @periods_with_tariffs ||= find_billing_periods(true).map do |period_block|
         [period_block.first[0], period_block.last[0]]
       end
     end
 
     def periods_with_missing_tariffs
-      #find missing billing period and extract earliest and latest dates
-      @missing_periods ||= find_billing_periods(false).map do |period_block|
+      # find missing billing period and extract earliest and latest dates
+      @periods_with_missing_tariffs ||= find_billing_periods(false).map do |period_block|
         [period_block.first[0], period_block.last[0]]
       end
     end
@@ -52,7 +54,7 @@ module Costs
           source: tariff.tariff[:source],
           start_date: tariff.tariff[:start_date],
           end_date: tariff.tariff[:end_date],
-          real: !(tariff.tariff[:default] || tariff.tariff[:system_wide]),
+          real: !(tariff.tariff[:default] || tariff.tariff[:system_wide])
         )
         [range, summary]
       end.to_h
@@ -65,8 +67,8 @@ module Costs
       count.to_f / (@meter_end_date - @meter_start_date + 1)
     end
 
-    #Find the ranges where we don't have fully real tariffs for a school
-    #@return an Enumerator which will yield one or more arrays, each of which contains run of dates
+    # Find the ranges where we don't have fully real tariffs for a school
+    # @return an Enumerator which will yield one or more arrays, each of which contains run of dates
     def find_billing_periods(real_tariffs = false)
       # split periods of real and non-real default system-wide tariffs
       grouped_periods = billing_periods.to_a.slice_when do |prev, curr|
@@ -74,17 +76,17 @@ module Costs
       end
       # select date ranges based on whether they contain real, or
       # non-real default system-wide tariffs
-      missing = grouped_periods.select { |period| period[0][1] == real_tariffs }
+      grouped_periods.select { |period| period[0][1] == real_tariffs }
     end
 
     def billing_periods
       @billing_periods ||= calculate_billing_periods
     end
 
-    #Returns an hash of day => boolean
-    #the boolean value indicates whether the tariff on that date is a
+    # Returns an hash of day => boolean
+    # the boolean value indicates whether the tariff on that date is a
     def calculate_billing_periods
-      count = (billing_calculation_start_date..@meter_end_date).to_a.map do |date|
+      (billing_calculation_start_date..@meter_end_date).to_a.map do |date|
         # these are tristate true, false and :mixed (combined meters)
         cost = accounting_tariff.one_days_cost_data(date)
         [
@@ -107,7 +109,7 @@ module Costs
       [@meter_end_date - twenty_five_months, @meter_start_date].max
     end
 
-    #Extracted from FormatMeterTariffs
+    # Extracted from FormatMeterTariffs
     def group_tariff_by_date_ranges
       @tariff_cache = {} # this slice_when is slow, cache lookup to double speed but still slow
 
@@ -126,6 +128,5 @@ module Costs
         ]
       end.to_h.reverse_each.to_h
     end
-
   end
 end

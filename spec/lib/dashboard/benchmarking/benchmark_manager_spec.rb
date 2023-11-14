@@ -6,7 +6,7 @@ require 'active_support/core_ext'
 describe Benchmarking::BenchmarkManager, type: :service do
   describe '#structured_pages' do
     it 'returns benchmarks by group for admin user types' do
-      expect(Benchmarking::BenchmarkManager.structured_pages({ user_role: :admin })).to eq(
+      expect(described_class.structured_pages({ user_role: :admin })).to eq(
         [
           {
             name: 'Total Energy Use Benchmarks',
@@ -76,7 +76,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
             name: 'Date limited comparisons',
             description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
-              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
+              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks'
             }
           }
         ]
@@ -84,7 +84,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
     end
 
     it 'returns benchmarks by group for analyst user types' do
-      expect(Benchmarking::BenchmarkManager.structured_pages({ user_role: :analyst })).to eq(
+      expect(described_class.structured_pages({ user_role: :analyst })).to eq(
         [
           {
             name: 'Total Energy Use Benchmarks',
@@ -154,7 +154,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
             name: 'Date limited comparisons',
             description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
-              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
+              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks'
             }
           }
         ]
@@ -162,7 +162,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
     end
 
     it 'returns benchmarks by group for guest user types' do
-      expect(Benchmarking::BenchmarkManager.structured_pages({ user_role: :guest })).to eq(
+      expect(described_class.structured_pages({ user_role: :guest })).to eq(
         [
           {
             name: 'Total Energy Use Benchmarks',

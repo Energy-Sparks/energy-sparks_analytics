@@ -34,9 +34,7 @@ module Baseload
     # @return [Baseload::SeasonalVariation] the calculated variation
     # @raise [EnergySparksNotEnoughDataException] if the meter doesnt have a years worth of data
     def seasonal_variation
-      unless enough_data?
-        raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}"
-      end
+      raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}" unless enough_data?
 
       SeasonalVariation.new(
         winter_kw: baseload_analysis.winter_kw(@asof_date),
@@ -47,9 +45,7 @@ module Baseload
 
     # Returns the costs over 1 year for the usage above the minimum baseload
     def estimated_costs
-      unless enough_data?
-        raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}"
-      end
+      raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}" unless enough_data?
 
       summer_kw = baseload_analysis.summer_kw(@asof_date)
       annual_cost_kwh = baseload_analysis.costs_of_baseload_above_minimum_kwh(@asof_date, summer_kw)
@@ -72,7 +68,6 @@ module Baseload
     def range_checker
       meter_date_range_checker(@meter, @asof_date)
     end
-
   end
 end
 # rubocop:enable Lint/MissingSuper

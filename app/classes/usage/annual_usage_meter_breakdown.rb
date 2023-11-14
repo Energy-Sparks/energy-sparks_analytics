@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Usage
   class AnnualUsageMeterBreakdown
     attr_reader :start_date, :end_date
@@ -36,12 +38,11 @@ module Usage
     private
 
     def total_kwh
-      @meter_breakdown.map { |meter, usage| usage[:usage].kwh || 0.0 }.sum
+      @meter_breakdown.map { |_meter, usage| usage[:usage].kwh || 0.0 }.sum
     end
 
     def total_£
-      @meter_breakdown.map { |meter, usage| usage[:usage].£ || 0.0 }.sum
+      @meter_breakdown.map { |_meter, usage| usage[:usage].£ || 0.0 }.sum
     end
-
   end
 end

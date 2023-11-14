@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentElectricityPerPupil, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentElectricityPerPupil.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :annual_electricity_costs_per_pupil,
@@ -41,8 +41,8 @@ describe Benchmarking::BenchmarkContentElectricityPerPupil, type: :service do
           This benchmark compares the electricity cost per pupil in the last year.
         </p>
         <p>
-          There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment, 
-          lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly 
+          There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment,#{' '}
+          lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly#{' '}
           increase demand. Special schools also have higher electricity costs per pupil due to lower pupil densities and specialist equipment.
         </p>
         <p>
@@ -139,8 +139,10 @@ describe Benchmarking::BenchmarkContentElectricityPerPupil, type: :service do
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
-    end    
+    end
   end
 end

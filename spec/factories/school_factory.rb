@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
-  factory :school, class: "Dashboard::School" do
+  factory :school, class: 'Dashboard::School' do
     transient do
       sequence(:id)   { |n| n }
       sequence(:name) { |n| "test #{n} school" }
       address         { '1 Station Road' }
-      floor_area      { BigDecimal("1234.567") }
+      floor_area      { BigDecimal('1234.567') }
       sequence(:number_of_pupils)
       school_type     { :primary }
       area_name       { 'Bath' }
@@ -19,11 +21,13 @@ FactoryBot.define do
       data_enabled    { true }
     end
 
-    initialize_with{ new(id: id, name: name, address: address, floor_area:
+    initialize_with do
+      new(id: id, name: name, address: address, floor_area:
       floor_area, number_of_pupils: number_of_pupils,
-      school_type: school_type, area_name: area_name,
-      urn: urn, postcode: postcode, country: country, funding_status: funding_status,
-      activation_date: activation_date, created_at: created_at, location: [latitude, longitude],
-      data_enabled: data_enabled) }
+          school_type: school_type, area_name: area_name,
+          urn: urn, postcode: postcode, country: country, funding_status: funding_status,
+          activation_date: activation_date, created_at: created_at, location: [latitude, longitude],
+          data_enabled: data_enabled)
+    end
   end
 end

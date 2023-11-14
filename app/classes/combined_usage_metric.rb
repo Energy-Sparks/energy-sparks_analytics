@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # In EnergySparks we frequently display usage, cost and carbon
 # emissions alongside each other. E.g. as adjacent columns in a table
 #
@@ -11,6 +13,7 @@
 # might not be a simple multiple of the kwh value.
 class CombinedUsageMetric
   attr_accessor :kwh, :£, :co2, :percent
+
   def initialize(kwh: nil, £: nil, co2: nil, percent: nil)
     @kwh = kwh
     @£ = £

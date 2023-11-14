@@ -4,13 +4,13 @@ require 'spec_helper'
 require 'active_support/core_ext'
 
 describe Baseload::BaseloadAnnualBreakdownService, type: :service do
-  let(:service) { Baseload::BaseloadAnnualBreakdownService.new(@acme_academy) }
+  let(:service) { described_class.new(@acme_academy) }
 
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#annual_baseload_breakdowns' do
+  describe '#annual_baseload_breakdowns' do
     it 'runs the calculation' do
       annual_baseload_breakdowns = service.annual_baseload_breakdowns
       expect(annual_baseload_breakdowns.size).to eq(5)
@@ -38,22 +38,25 @@ describe Baseload::BaseloadAnnualBreakdownService, type: :service do
     end
   end
 
-  context '#enough_data?' do
+  describe '#enough_data?' do
     context 'when theres is a years worth' do
       it 'returns true' do
-        expect( service.enough_data? ).to be true
-        expect( service.data_available_from).to be nil
+        expect(service.enough_data?).to be true
+        expect(service.data_available_from).to be nil
       end
     end
+
     context 'when theres is limited data' do
-      #acme academy has data starting in 2019-01-13
-      let(:asof_date)      { Date.new(2019, 1, 21) }
-      before(:each) do
+      # acme academy has data starting in 2019-01-13
+      let(:asof_date) { Date.new(2019, 1, 21) }
+
+      before do
         allow_any_instance_of(AMRData).to receive(:end_date).and_return(asof_date)
       end
+
       it 'returns false' do
-        expect( service.enough_data? ).to be false
-        expect( service.data_available_from).to_not be nil
+        expect(service.enough_data?).to be false
+        expect(service.data_available_from).not_to be nil
       end
     end
   end

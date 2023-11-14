@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkWeekdayBaseloadVariation, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkWeekdayBaseloadVariation.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :weekday_baseload_variation,
@@ -114,7 +114,9 @@ describe Benchmarking::BenchmarkWeekdayBaseloadVariation, type: :service do
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
     end
   end

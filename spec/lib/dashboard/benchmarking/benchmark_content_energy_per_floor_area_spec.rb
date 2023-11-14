@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentEnergyPerFloorArea.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :annual_energy_costs_per_floor_area,
@@ -43,7 +43,7 @@ describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
           <p>
             Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the appliances
             in use), but per floor area benchmarks are more appropriate for gas (the size of building which needs heating).
-            Overall, energy use comparison on a per pupil basis is probably more appropriate than on a per floor area basis, 
+            Overall, energy use comparison on a per pupil basis is probably more appropriate than on a per floor area basis,#{' '}
             but this analysis can be useful in some circumstances.
           </p>
         </p>
@@ -114,8 +114,10 @@ describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
-    end    
+    end
   end
 end

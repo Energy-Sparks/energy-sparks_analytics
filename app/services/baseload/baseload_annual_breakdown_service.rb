@@ -5,6 +5,7 @@ module Baseload
     include AnalysableMixin
 
     def initialize(meter_collection)
+      super()
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
     end
@@ -71,6 +72,5 @@ module Baseload
     def range_checker
       meter_date_range_checker(aggregate_meter)
     end
-
   end
 end

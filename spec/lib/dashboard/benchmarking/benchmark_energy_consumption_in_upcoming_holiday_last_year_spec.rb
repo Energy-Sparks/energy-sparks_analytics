@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkEnergyConsumptionInUpcomingHolidayLastYear, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkEnergyConsumptionInUpcomingHolidayLastYear.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :holiday_usage_last_year,
@@ -38,7 +38,7 @@ describe Benchmarking::BenchmarkEnergyConsumptionInUpcomingHolidayLastYear, type
       expect(html).to match_html(<<~HTML)
         <p>
           This benchmark shows the cost of electricity and gas used last year for the upcoming holidays.
-          For example, if the next holidays are the Summer holidays 2023, the data shown will be for Summer 
+          For example, if the next holidays are the Summer holidays 2023, the data shown will be for Summer#{' '}
           2022. This allows you to identify which schools in your group need to take the most action to cut holiday waste.
         </p>
       HTML
@@ -130,7 +130,9 @@ describe Benchmarking::BenchmarkEnergyConsumptionInUpcomingHolidayLastYear, type
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
     end
   end

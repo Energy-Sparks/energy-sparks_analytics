@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkBaseloadBase, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkBaseloadBase.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :baseload_per_pupil,
@@ -15,7 +15,7 @@ describe Benchmarking::BenchmarkBaseloadBase, type: :service do
 
   describe '#baseload_1_kw_change_range_£_html' do
     it 'returns html content based on an empty cost_of_1_kw_baseload_range_£_html' do
-      allow_any_instance_of(Benchmarking::BenchmarkBaseloadBase).to receive(:calculate_cost_of_1_kw_baseload_range_£) { [] }
+      allow_any_instance_of(described_class).to receive(:calculate_cost_of_1_kw_baseload_range_£).and_return([])
       html = benchmark.send(:baseload_1_kw_change_range_£_html, [795, 629, 634], nil, {})
       expect(html).to match_html(<<~HTML)
         <p>
@@ -24,18 +24,19 @@ describe Benchmarking::BenchmarkBaseloadBase, type: :service do
     end
 
     it 'returns html content based on a single value of cost_of_1_kw_baseload_range_£_html' do
-      allow_any_instance_of(Benchmarking::BenchmarkBaseloadBase).to receive(:calculate_cost_of_1_kw_baseload_range_£) { [1314] }
+      allow_any_instance_of(described_class).to receive(:calculate_cost_of_1_kw_baseload_range_£).and_return([1314])
       html = benchmark.send(:baseload_1_kw_change_range_£_html, [795, 629, 634], nil, {})
       expect(html).to match_html(<<~HTML)
         <p>
             A 1 kW increase in baseload is equivalent to an increase in
-            annual electricity costs of &pound;1,314.   
+            annual electricity costs of &pound;1,314.#{'   '}
         </p>
       HTML
     end
 
     it 'returns html content based on a value of cost_of_1_kw_baseload_range_£_html equal to 1' do
-      allow_any_instance_of(Benchmarking::BenchmarkBaseloadBase).to receive(:calculate_cost_of_1_kw_baseload_range_£) { [1314, 2000] }
+      allow_any_instance_of(described_class).to receive(:calculate_cost_of_1_kw_baseload_range_£).and_return([1314,
+                                                                                                              2000])
       html = benchmark.send(:baseload_1_kw_change_range_£_html, [795, 629, 634], nil, {})
       expect(html).to match_html(<<~HTML)
         <p>

@@ -25,12 +25,10 @@ module Heating
     end
 
     def validate_meter_collection(meter_collection)
-      if @fuel_type == :gas && meter_collection.aggregated_heat_meters.nil?
-        raise EnergySparksUnexpectedStateException, 'School does not have gas meters'
-      end
-      if @fuel_type == :gas && meter_collection.aggregated_heat_meters.non_heating_only?
-        raise EnergySparksUnexpectedStateException, 'School does not use gas for heating'
-      end
+      raise EnergySparksUnexpectedStateException, 'School does not have gas meters' if @fuel_type == :gas && meter_collection.aggregated_heat_meters.nil?
+      return unless @fuel_type == :gas && meter_collection.aggregated_heat_meters.non_heating_only?
+
+      raise EnergySparksUnexpectedStateException, 'School does not use gas for heating'
     end
 
     def aggregate_meter
@@ -41,7 +39,7 @@ module Heating
       heating_model.enough_samples_for_good_fit
     # FIXME: NoMethodError caught here as it was in original code,
     # but not sure why that's the case. Keeping for now
-    rescue EnergySparksNotEnoughDataException, NoMethodError => e
+    rescue EnergySparksNotEnoughDataException, NoMethodError
       false
     end
 
@@ -58,6 +56,5 @@ module Heating
     def meter_date_range_checker
       @meter_date_range_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
     end
-
   end
 end

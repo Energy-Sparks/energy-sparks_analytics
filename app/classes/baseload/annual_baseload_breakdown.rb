@@ -7,6 +7,7 @@ module Baseload
     attr_reader :year,
                 :average_annual_baseload_kw,
                 :meter_data_available_for_full_year
+
     def initialize(
       year:,
       average_annual_baseload_kw:,

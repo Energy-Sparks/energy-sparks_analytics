@@ -30,7 +30,7 @@ class MeterCollectionReconciler
   end
 
   def meters_with_percent_change_above(percent)
-    @meter_reading_comparisons.select { |_id, reconciler| reconciler.percent > percent}
+    @meter_reading_comparisons.select { |_id, reconciler| reconciler.percent > percent }
   end
 
   def print_comparison(verbosity = 0)
@@ -38,10 +38,10 @@ class MeterCollectionReconciler
       logger.info "Comparing meters for meter_collection #{@existing_meter_collection.name}"
       logger.info "  #{deleted_meters.length} deleted meters #{inserted_meters.length} new meters from #{matching_meters.length} matching"
     end
-    if verbosity >= 1
-      @meter_reading_comparisons.each do |_id, meter_readings_comparison|
-        meter_readings_comparison.print_comparison(verbosity)
-      end
+    return unless verbosity >= 1
+
+    @meter_reading_comparisons.each do |_id, meter_readings_comparison|
+      meter_readings_comparison.print_comparison(verbosity)
     end
   end
 
@@ -107,7 +107,7 @@ class MeterCollectionReconciler
         decimal_places = 3
         begin
           decimal_places = 1 + [Math.log10(day1.kwh_data_x48.max), Math.log10(day2.kwh_data_x48.max)].max
-        rescue StandardError => e
+        rescue StandardError
           puts "Failure to determine decimal places for #{id} #{day1.date}"
         end
         print_one_day_reading(day1, decimal_places)
