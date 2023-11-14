@@ -1,20 +1,46 @@
+inherit_from: .rubocop_todo.yml
+
 AllCops:
-  NewCops: enable
+  NewCops: disable
+  SuggestExtensions: false
+  Include:
+    - 'app/classes/**/*.rb'
+    - 'app/services/**/*.rb'
+#    - 'app/models/**/*.rb'
+    - 'spec/**/*.rb'
   Exclude:
-    - 'app/models/**/*'
+#    - 'app/models/**/*'
     - 'config/**/*'
     - 'InputData/**/*'
     - 'script/**/*'
     - 'lib/**/*'
     - 'log/**/*'
-    - 'rakelib/**/*'
     - 'test_output/**/*'
     - 'test_support/**/*'
-    - 'spec/app/models/**/*'
-    - 'spec/lib/**/*'
+require:
+  - rubocop-performance
+  - rubocop-rspec
+
+Naming/MethodParameterName:
+  AllowedNames: ['kw', '£', 'co2']
+Naming/VariableName:
+  AllowedPatterns: ['_£','£']
+Naming/MethodName:
+  AllowedPatterns: ['_£', 'co2', '£']
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:
   Enabled: false
 Style/Documentation:
-  Enabled: false  
+  Enabled: false
+
+RSpec/ChangeByZero:
+  Enabled: false
+RSpec/DescribedClass:
+  Enabled: false
+RSpec/LeadingSubject:
+  Enabled: false
+RSpec/ScatteredLet:
+  Enabled: false
+RSpec/NestedGroups:
+  Enabled: false

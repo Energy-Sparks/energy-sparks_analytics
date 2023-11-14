@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentChangeInElectricityBetween2HolidaysYearApart, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentChangeInElectricityBetween2HolidaysYearApart.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_electricity_holiday_consumption_previous_years_holiday,
@@ -13,12 +13,14 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetween2HolidaysYearAp
     )
   end
 
-  let(:rows) {
+  let(:rows) do
     [
-      ["Acme Academy 1", -0.4388582171232559, -188.42794266295016, -1256.1862844196673, "Xmas", "Autumn half term", false, 649, 649, false],
-      ["Acme Academy 2", -0.45664254667205617, -363.1775444789265, -2421.1836298595117, "Xmas", "Autumn half term", false, 438, 438, false]
+      ['Acme Academy 1', -0.4388582171232559, -188.42794266295016, -1256.1862844196673, 'Xmas', 'Autumn half term',
+       false, 649, 649, false],
+      ['Acme Academy 2', -0.45664254667205617, -363.1775444789265, -2421.1836298595117, 'Xmas', 'Autumn half term',
+       false, 438, 438, false]
     ]
-  } 
+  end
 
   describe '#page' do
     it 'returns a chart name if charts are present' do
@@ -128,16 +130,18 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetween2HolidaysYearAp
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
-    end    
+    end
   end
 
   describe 'footnote_text_for' do
     it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
-      html = benchmark.footnote_text_for(rows,rows,rows)
+      html = benchmark.footnote_text_for(rows, rows, rows)
       expect(html).to match_html(<<~HTML)
-        <p> 
+        <p>#{' '}
           Notes:
           <ul>
             <li>
@@ -148,7 +152,7 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetween2HolidaysYearAp
             </li>
             <li>
               (*3) schools where percentage change is -Infinity is caused by the electricity consumption in the current holiday being zero but in the previous holiday it was more than zero
-            </li>      
+            </li>#{'      '}
           </ul>
         </p>
       HTML

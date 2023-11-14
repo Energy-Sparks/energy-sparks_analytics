@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkGasTarget, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkGasTarget.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :gas_targets,
@@ -112,7 +112,9 @@ describe Benchmarking::BenchmarkGasTarget, type: :service do
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
     end
   end

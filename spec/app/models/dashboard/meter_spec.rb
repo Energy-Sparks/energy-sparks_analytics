@@ -1,13 +1,13 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Dashboard::Meter do
-
-  context '#create' do
-
+  describe '#create' do
     let(:type) { :electricity }
-    let(:identifier) { 1234567890 }
+    let(:identifier) { 1_234_567_890 }
 
-    let(:valid_params) {
+    let(:valid_params) do
       {
         meter_collection: [],
         amr_data: nil,
@@ -22,26 +22,26 @@ describe Dashboard::Meter do
         dcc_meter: true,
         meter_attributes: {}
       }
-    }
+    end
 
-    describe "#initialize" do
-      it "creates a meter" do
-        meter = Dashboard::Meter.new(valid_params)
+    describe '#initialize' do
+      it 'creates a meter' do
+        meter = described_class.new(valid_params)
         expect(meter.mpan_mprn).to eq(identifier)
         expect(meter.dcc_meter).to be true
       end
 
-      it "creates a heat meter" do
-        [:gas, :storage_heater, :aggregated_heat].each do |type|
-          meter = Dashboard::Meter.new(valid_params.merge({type: type}))
+      it 'creates a heat meter' do
+        %i[gas storage_heater aggregated_heat].each do |type|
+          meter = described_class.new(valid_params.merge({ type: type }))
           expect(meter.heat_meter?).to be true
           expect(meter.electricity_meter?).to be false
         end
       end
 
-      it "creates an electricity meter" do
-        [:electricity, :solar_pv, :aggregated_electricity].each do |type|
-          meter = Dashboard::Meter.new(valid_params.merge({type: type}))
+      it 'creates an electricity meter' do
+        %i[electricity solar_pv aggregated_electricity].each do |type|
+          meter = described_class.new(valid_params.merge({ type: type }))
           expect(meter.heat_meter?).to be false
           expect(meter.electricity_meter?).to be true
         end
@@ -49,7 +49,8 @@ describe Dashboard::Meter do
     end
 
     describe '#inspect' do
-      let(:meter) { Dashboard::Meter.new(valid_params.merge({type: type})) }
+      let(:meter) { described_class.new(valid_params.merge({ type: type })) }
+
       it 'works as expected' do
         expect(meter.inspect).to include(identifier.to_s)
         expect(meter.inspect).to include(type.to_s)
@@ -57,7 +58,7 @@ describe Dashboard::Meter do
     end
 
     describe '#analytics_name' do
-      let(:identifier)  { "1456789" }
+      let(:identifier)  { '1456789' }
       let(:name)        { nil }
 
       let(:meter) { build(:meter, identifier: identifier, name: name) }
@@ -67,15 +68,15 @@ describe Dashboard::Meter do
       end
 
       context 'with name' do
-        let(:name)  { "Kitchen" }
+        let(:name)  { 'Kitchen' }
 
         it 'returns bracketed text' do
-          expect(meter.analytics_name).to eq("Kitchen (1456789)")
+          expect(meter.analytics_name).to eq('Kitchen (1456789)')
         end
       end
     end
 
-    # TODO check on fuel type not currently applied
+    # TODO: check on fuel type not currently applied
     # it "raises error for unknown fuel type" do
     #   expect {
     #     Dashboard::Meter.new(valid_params.merge({type: :fruit}))

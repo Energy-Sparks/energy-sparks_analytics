@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentBase, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentBase.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :annual_energy_costs_per_pupil,

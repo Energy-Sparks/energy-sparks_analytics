@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Baseload
   class SeasonalVariation
     attr_reader :summer_kw, :winter_kw, :percentage

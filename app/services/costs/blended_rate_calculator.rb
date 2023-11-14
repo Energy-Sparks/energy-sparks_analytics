@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # There's other code in the amr_data class that
 # creates blended rates, perhaps that should be exposed here?
 module Costs
@@ -35,9 +36,7 @@ module Costs
     def blended_rate_date_range(start_date, end_date, datatype)
       kwh  = @aggregate_meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
       data = @aggregate_meter.amr_data.kwh_date_range(start_date, end_date, datatype)
-      if kwh == 0.0
-        raise EnergySparksNotEnoughDataException, "zero kWh consumption between #{start_date} and #{end_date}"
-      end
+      raise EnergySparksNotEnoughDataException, "zero kWh consumption between #{start_date} and #{end_date}" if kwh.zero?
 
       data / kwh
     end

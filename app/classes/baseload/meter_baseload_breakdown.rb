@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Baseload
   # Provides access to results of baseload calculations for
   # a range of meters and additional helper methods
@@ -12,7 +14,7 @@ module Baseload
     end
 
     def meters_by_baseload
-      sorted = @meter_breakdown.sort_by { |mpan, v| -v[:percent] }
+      sorted = @meter_breakdown.sort_by { |_mpan, v| -v[:percent] }
       sorted.map { |v| v[0] }
     end
 
@@ -29,7 +31,7 @@ module Baseload
     end
 
     def total_baseload_kw
-      @meter_breakdown.values.map{ |v| v[:kw] }.sum
+      @meter_breakdown.values.map { |v| v[:kw] }.sum
     end
   end
 end

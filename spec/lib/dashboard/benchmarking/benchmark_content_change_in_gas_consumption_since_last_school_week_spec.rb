@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_gas_consumption_recent_school_weeks,
@@ -13,12 +13,14 @@ describe Benchmarking::BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek
     )
   end
 
-  let(:rows) {
+  let(:rows) do
     [
-      ["Acme Primary School 2", -0.09877771200341656, -55.094143277636476, -1836.4714425878847, "Xmas 2022/2023", "Xmas 2021/2022", false, 3007.0, 3007.0, 3010],
-      ["Acme Primary School 1", -0.49206059850480305, -104.5201356349236, -3484.0045211641204, "Xmas 2022/2023", "Xmas 2021/2022", false, 1547.0, 1547.0, 0]
+      ['Acme Primary School 2', -0.09877771200341656, -55.094143277636476, -1836.4714425878847, 'Xmas 2022/2023',
+       'Xmas 2021/2022', false, 3007.0, 3007.0, 3010],
+      ['Acme Primary School 1', -0.49206059850480305, -104.5201356349236, -3484.0045211641204, 'Xmas 2022/2023',
+       'Xmas 2021/2022', false, 1547.0, 1547.0, 0]
     ]
-  }
+  end
 
   describe '#page' do
     it 'returns a chart name if charts are present' do
@@ -115,7 +117,7 @@ describe Benchmarking::BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek
 
   describe 'footnote_text_for' do
     it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
-      html = benchmark.footnote_text_for(rows,rows,rows)
+      html = benchmark.footnote_text_for(rows, rows, rows)
       expect(html).to match_html(<<~HTML)
         <p>
           Notes:
@@ -144,8 +146,10 @@ describe Benchmarking::BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
-    end    
+    end
   end
 end

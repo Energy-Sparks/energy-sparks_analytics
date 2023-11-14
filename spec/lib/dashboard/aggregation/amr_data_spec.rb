@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe AMRData do
-
-  context '#baseload_calculator' do
+  describe '#baseload_calculator' do
     let(:amr_data)            { build(:amr_data, :with_date_range) }
     let(:overnight)           { false }
 
@@ -13,7 +14,8 @@ describe AMRData do
     end
 
     context 'when overnight calculator requested' do
-      let(:overnight)           { true }
+      let(:overnight) { true }
+
       it 'returns the calculator' do
         expect(baseload_calculator).to be_a Baseload::OvernightBaseloadCalculator
       end
@@ -38,7 +40,5 @@ describe AMRData do
         expect(statistical_baseload_calculator).not_to be overnight_baseload_calculator
       end
     end
-
   end
-
 end

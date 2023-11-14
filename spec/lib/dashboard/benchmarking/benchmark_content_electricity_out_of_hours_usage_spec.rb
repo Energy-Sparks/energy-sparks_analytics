@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentElectricityOutOfHoursUsage, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentElectricityOutOfHoursUsage.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :annual_electricity_out_of_hours_use,
@@ -41,9 +41,9 @@ describe Benchmarking::BenchmarkContentElectricityOutOfHoursUsage, type: :servic
           to pupils and staff. School day closed is when the school is closed to pupils and staff overnight.
         </p>
         <p>
-          Most schools are unoccupied for about 85% of the year; between 5:00pm and 7:30am on school days, at weekends and during holidays. 
+          Most schools are unoccupied for about 85% of the year; between 5:00pm and 7:30am on school days, at weekends and during holidays.#{' '}
           A focus on reducing out of hours electricity usage; turning appliances off and installing efficient appliances often provides schools
-          with a cost-efficient way of reducing their overall consumption. Schools should aim to reduce their out of hours usage below 25% of annual consumption. 
+          with a cost-efficient way of reducing their overall consumption. Schools should aim to reduce their out of hours usage below 25% of annual consumption.#{' '}
         </p>
         <p>
           This breakdown excludes electricity consumed by storage heaters and
@@ -142,8 +142,10 @@ describe Benchmarking::BenchmarkContentElectricityOutOfHoursUsage, type: :servic
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
-    end    
+    end
   end
 end

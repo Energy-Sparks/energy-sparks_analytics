@@ -7,12 +7,12 @@ class PowerConsumptionService
   SECONDSINBUCKET = 30 * 60
 
   # Factory method to create light-weight service that wraps a simple interpolator
-  def self.create_service(aggregate_school, meter, day=Date.today)
+  def self.create_service(aggregate_school, meter, day = Date.today)
     dates = matching_dates(day, aggregate_school.holidays, meter.amr_data.start_date, meter.amr_data.end_date).sort
     weighted_dates = calculate_weighted_dates(dates)
     weighted_historic_kwh_x48 = calculate_weighted_kwh_x48(weighted_dates, meter.amr_data)
 
-    seconds_in_into_day_to_kwh = weighted_historic_kwh_x48.map.with_index { |kwh, hhi| [hhi * SECONDSINBUCKET + MIDDLEOFBUCKET15MINS, kwh]}.to_h
+    seconds_in_into_day_to_kwh = weighted_historic_kwh_x48.map.with_index { |kwh, hhi| [hhi * SECONDSINBUCKET + MIDDLEOFBUCKET15MINS, kwh] }.to_h
     PowerConsumptionService.new(Interpolate::Points.new(seconds_in_into_day_to_kwh))
   end
 
@@ -20,7 +20,7 @@ class PowerConsumptionService
     @interpolator = interpolator
   end
 
-  def perform(time=Time.now)
+  def perform(time = Time.now)
     seconds_since_midnight = (time.to_i - midnight(time).to_i).to_f
     2.0 * @interpolator.at(seconds_since_midnight)
   end

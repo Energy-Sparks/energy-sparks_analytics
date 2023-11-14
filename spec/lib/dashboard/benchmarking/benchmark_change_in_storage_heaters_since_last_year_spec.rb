@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkChangeInStorageHeatersSinceLastYear, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkChangeInStorageHeatersSinceLastYear.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_storage_heaters_since_last_year,

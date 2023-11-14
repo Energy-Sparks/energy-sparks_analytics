@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_electricity_consumption_recent_school_weeks,
@@ -13,12 +13,12 @@ describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSc
     )
   end
 
-  let(:rows) {
+  let(:rows) do
     [
-      ["Acme Primary School 1", 0.02384759261493898, 47.429999999999836, 316.1999999999989, false, 650, 640, false],
-      ["Acme Primary School 2", 0.02384759261493898, 47.429999999999836, 316.1999999999989, false, 650, 640, false]
+      ['Acme Primary School 1', 0.02384759261493898, 47.429999999999836, 316.1999999999989, false, 650, 640, false],
+      ['Acme Primary School 2', 0.02384759261493898, 47.429999999999836, 316.1999999999989, false, 650, 640, false]
     ]
-  }
+  end
 
   describe '#page' do
     it 'returns a chart name if charts are present' do
@@ -101,7 +101,7 @@ describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSc
 
   describe 'footnote_text_for' do
     it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
-      html = benchmark.footnote_text_for(rows,rows,rows)
+      html = benchmark.footnote_text_for(rows, rows, rows)
       expect(html).to match_html(<<~HTML)
         <p>
           Notes:
@@ -130,8 +130,10 @@ describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSc
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
-    end    
+    end
   end
 end

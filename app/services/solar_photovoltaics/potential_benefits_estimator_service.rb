@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Naming/VariableName, Metrics/ClassLength
 module SolarPhotovoltaics
   class PotentialBenefitsEstimatorService
     include AnalysableMixin
@@ -15,12 +14,12 @@ module SolarPhotovoltaics
     end
 
     def create_model
-      #find the optimum payback period
+      # find the optimum payback period
       optimum_kwp = calculate_optimum_kwp(@asof_date)
-      #calculate costs/benefits for range of scenarios, including the optimum
-      #sets @scenarios
+      # calculate costs/benefits for range of scenarios, including the optimum
+      # sets @scenarios
       calculate_scenarios(@asof_date, optimum_kwp)
-      #sets @optimum_kwp, @optimum_payback_years, @optimum_mains_reduction_percent
+      # sets @optimum_kwp, @optimum_payback_years, @optimum_mains_reduction_percent
       set_optimum_values(optimum_kwp)
 
       OpenStruct.new(
@@ -86,7 +85,7 @@ module SolarPhotovoltaics
     end
 
     def find_optimum_kwp(rows, optimum_kwp)
-      rows.select { |row| row[:kwp] == optimum_kwp }[0]
+      rows.find { |row| row[:kwp] == optimum_kwp }
     end
 
     def calculate_optimum_kwp(date)
@@ -99,9 +98,8 @@ module SolarPhotovoltaics
       calculate_economic_benefit(kwh_data)[:payback_years]
     end
 
-    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Layout/LineLength, Naming/VariableNumber
     def calculate_solar_pv_benefit(date, kwp)
-      # Note: this code is copied from existing code in AlertSolarPVBenefitEstimator and needs refactoring (see rubocop comment)
+      # NOTE: this code is copied from existing code in AlertSolarPVBenefitEstimator and needs refactoring (see rubocop comment)
       start_date = date - 365
       kwh_totals = estimate_consumption(start_date, date, kwp)
 
@@ -123,7 +121,6 @@ module SolarPhotovoltaics
         solar_pv_output_co2: kwh_totals[:solar_pv_output] * blended_co2_per_kwh
       }
     end
-    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Layout/LineLength, Naming/VariableNumber
 
     def existing_annual_kwh(start_date, end_date)
       aggregated_electricity_meters.amr_data.kwh_date_range(start_date, end_date)
@@ -145,7 +142,6 @@ module SolarPhotovoltaics
       @blended_co2_per_kwh ||= ::Costs::BlendedRateCalculator.new(aggregated_electricity_meters).blended_co2_per_kwh
     end
 
-    # rubocop:disable Metrics/MethodLength
     def calculate_economic_benefit(kwh_data)
       new_mains_cost = kwh_data[:new_mains_consumption_£]
       old_mains_cost = kwh_data[:existing_annual_£]
@@ -168,7 +164,6 @@ module SolarPhotovoltaics
         payback_years: payback
       }
     end
-    # rubocop:enable Metrics/MethodLength
 
     # rubocop:disable Lint/FloatComparison
     def capital_costs(kwp)
@@ -193,4 +188,3 @@ module SolarPhotovoltaics
     end
   end
 end
-# rubocop:enable Naming/VariableName, Metrics/ClassLength

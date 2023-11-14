@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkContentTotalAnnualEnergy.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :annual_energy_costs,
@@ -40,8 +40,8 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           This benchmark shows how much each school spent on energy last year.
         </p>
         <p>
-          Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with 
-          biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison 
+          Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with#{' '}
+          biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison#{' '}
           excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.
         </p>
       HTML
@@ -145,7 +145,9 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
 
     it 'translates column_groups' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
-      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      column_groups = content.select do |c|
+                        c[:type] == :table_composite
+                      end.map { |c| c.dig(:content, :column_groups) }.compact
       expect(column_groups).to eq([])
     end
   end

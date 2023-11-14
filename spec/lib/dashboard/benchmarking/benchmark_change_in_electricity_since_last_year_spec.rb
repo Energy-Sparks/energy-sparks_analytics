@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 
 describe Benchmarking::BenchmarkChangeInElectricitySinceLastYear, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkChangeInElectricitySinceLastYear.new(
+    described_class.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
       :change_in_electricity_since_last_year,
@@ -171,11 +171,11 @@ describe Benchmarking::BenchmarkChangeInElectricitySinceLastYear, type: :service
       expect(column_groups).to eq(
         [
           [
-            {:name=>"", :span=>1},
-            {:name=>"kWh", :span=>3},
-            {:name=>"CO2 (kg)", :span=>3},
-            {:name=>"£", :span=>3},
-            {:name=>"Solar self consumption", :span=>1}
+            { name: '', span: 1 },
+            { name: 'kWh', span: 3 },
+            { name: 'CO2 (kg)', span: 3 },
+            { name: '£', span: 3 },
+            { name: 'Solar self consumption', span: 1 }
           ]
         ]
       )

@@ -6,7 +6,7 @@ describe AlertSolarPVBenefitEstimator do
   Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
 
   let(:school) { @acme_academy }
-  let(:alert) { AlertSolarPVBenefitEstimator.new(school) }
+  let(:alert) { described_class.new(school) }
   let(:default_pricing_template_variables) do
     {
       optimum_kwp: '100 kWp',
