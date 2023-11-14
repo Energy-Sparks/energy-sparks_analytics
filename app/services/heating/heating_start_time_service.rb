@@ -35,7 +35,7 @@ module Heating
 
       days = days.map do |day|
         # unpack the array
-        date, heating_start_time, recommended_time, temperature, _, kwh_saving, saving_£, saving_co2 = day
+        date, heating_start_time, recommended_time, temperature, _timing, kwh_saving, saving_£, saving_co2 = day
         OpenStruct.new(
           date: date,
           heating_start_time: heating_start_time,
