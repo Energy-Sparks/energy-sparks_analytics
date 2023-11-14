@@ -23,12 +23,11 @@ describe Baseload::StatisticalBaseloadCalculator, type: :service do
     context 'with varied consumption' do
       # 8 periods of 0.1, rest are random
       let(:kwh_data_x48) do
-        Array.new(10,
-                  rand(1.1..3.0)) + Array.new(4,
-                                              0.1) + Array.new(26,
-                                                               rand(1.1..3.0)) + Array.new(4,
-                                                                                           0.1) + Array.new(4,
-                                                                                                            rand(1.1..3.0))
+        Array.new(10, rand(1.1..3.0)) +
+          Array.new(4, 0.1) +
+          Array.new(26, rand(1.1..3.0)) +
+          Array.new(4, 0.1) +
+          Array.new(4, rand(1.1..3.0))
       end
 
       it 'calculates the baseload using lowest periods' do
