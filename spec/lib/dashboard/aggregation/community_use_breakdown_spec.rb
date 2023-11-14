@@ -35,7 +35,7 @@ describe CommunityUseBreakdown do
           expect(days_kwh_x48.values.all?{ |v| v.size == 48 })
         end
 
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(days_kwh_x48.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
         end
       end
@@ -52,7 +52,7 @@ describe CommunityUseBreakdown do
           expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
         end
 
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(days_kwh_x48.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
         end
 
@@ -83,7 +83,93 @@ describe CommunityUseBreakdown do
         end
       end
 
-      context 'with a filter' do
+      context 'when end of school day marks start of community use time' do
+        let(:kwh_data_x48)               { Array.new(48) { 1.0 } }
+
+        let(:school_times) do
+          [{day: :monday, usage_type: :school_day, opening_time: TimeOfDay.new(7,30), closing_time: TimeOfDay.new(16,15), calendar_period: :term_times}]
+        end
+
+        let(:community_use_times)          do
+          [{day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16,15), closing_time: TimeOfDay.new(21,00), calendar_period: :term_times}]
+        end
+
+        it 'should return the expected breakdown for the day' do
+          expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload])
+        end
+
+        it 'should split the usage at 16:00 between community baseload and school day' do
+          expect(days_kwh_x48[:school_day_open][32]).to eq 0.5
+          expect(days_kwh_x48[:community_baseload][32]).to eq 0.5
+        end
+
+        context 'with the usage in the community use period is below the daily baseload' do
+          # this has low usage for half hourly period indexes 31, 32 which is 16:00 and 16:30
+          # daily baseload will be higher than 0.1. Testing to ensure that the period with consumption
+          # at 0.1 is correct
+          let(:kwh_data_x48)               { Array.new(31) { 1.0 } + Array.new(2) { 0.1 } + Array.new(15) { 1.0 } }
+
+          it 'should return the expected breakdown across the day' do
+            expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload, :community])
+          end
+
+          it 'should split the usage at 16:00 between community baseload and school day' do
+            expect(days_kwh_x48[:school_day_open][32]).to eq 0.05
+            expect(days_kwh_x48[:community_baseload][32]).to eq 0.05
+          end
+        end
+      end
+
+      context 'when there is a gap between end of school day and community use time' do
+        let(:kwh_data_x48)               { Array.new(48) { 1.0 } }
+
+        let(:school_times) do
+          [{day: :monday, usage_type: :school_day, opening_time: TimeOfDay.new(7,30), closing_time: TimeOfDay.new(16,10), calendar_period: :term_times}]
+        end
+
+        let(:community_use_times)          do
+          [{day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(16,15), closing_time: TimeOfDay.new(21,00), calendar_period: :term_times}]
+        end
+
+        it 'should return the expected breakdown across the day' do
+          expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload])
+        end
+
+        it 'should split the usage at 16:00 between community baseload, school day open and closed' do
+          #we are open for 10 minutes
+          expect(days_kwh_x48[:school_day_open][32].round(2)).to eq(0.33)
+          #closed for 5 minutes
+          expect(days_kwh_x48[:school_day_closed][32].round(2)).to eq(0.17)
+          #community use for 15 minutes
+          expect(days_kwh_x48[:community_baseload][32]).to eq 0.5
+        end
+
+        context 'with the usage in the community use period is below the daily baseload' do
+          # this has low usage for half hourly period indexes 31, 32 which is 16:00 and 16:30
+          # daily baseload will be higher than 0.1. Testing to ensure that the period with consumption
+          # at 0.1 is correct
+          let(:low_usage)               { Array.new(31) { 1.0 } + Array.new(2) { 0.1 } + Array.new(15) { 1.0 } }
+          let(:low_usage_reading)       { build(:one_day_amr_reading, date: day, kwh_data_x48: low_usage)}
+          before do
+            amr_data.add(day, low_usage_reading)
+          end
+
+          it 'should return the expected breakdown for the day' do
+            expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community_baseload, :community])
+          end
+
+          it 'should split the usage at 16:00 between community baseload and school day' do
+            #we are open for 10 minutes
+            expect(days_kwh_x48[:school_day_open][32].round(3)).to eq(0.033)
+            #closed for 5 minutes
+            expect(days_kwh_x48[:school_day_closed][32].round(3)).to eq(0.017)
+            #community use for 15 minutes
+            expect(days_kwh_x48[:community_baseload][32]).to eq 0.05
+          end
+        end
+      end
+
+      context 'when a filter is specified' do
         let(:community_use) do
           {
             filter:    filter,
@@ -94,25 +180,25 @@ describe CommunityUseBreakdown do
 
         context 'with :community_only filter' do
           let(:filter)    { :community_only }
-          it 'returns a breakdown of just the community use' do
+          it 'should return a breakdown of just the community use' do
             expect(days_kwh_x48.keys).to match_array([:community, :community_baseload])
           end
         end
 
         context 'with :school_only filter' do
           let(:filter)    { :school_only }
-          it 'returns a breakdown of just the school day' do
+          it 'should return a breakdown of just the school day' do
             expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open])
           end
         end
 
         context 'with :all filter' do
           let(:filter)    { :all }
-          it 'returns a breakdown of all periods' do
+          it 'should return a breakdown of all periods' do
             expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
           end
 
-          it 'returns same total as the amr_data class' do
+          it 'should return the same total as the amr_data class' do
             expect(days_kwh_x48.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
           end
         end
@@ -132,7 +218,7 @@ describe CommunityUseBreakdown do
         context 'with :community_use' do
           let(:aggregate) { :community_use }
           context 'when splitting out baseload' do
-            it 'does not apply a sum, as its unnecessary' do
+            it 'should not apply a sum, as its unnecessary' do
               not_aggregated = open_close_breakdown.days_kwh_x48(day, :kwh, community_use: nil)
               expect(days_kwh_x48[:community].sum).to be_within(0.0001).of( not_aggregated[:community].sum )
             end
@@ -143,13 +229,13 @@ describe CommunityUseBreakdown do
           context 'when not splitting out baseload' do
             let(:split_electricity_baseload)  { false }
 
-            it 'sums the community use as :community' do
+            it 'should sums the community use into :community' do
               not_aggregated = open_close_breakdown.days_kwh_x48(day, :kwh, community_use: nil)
               expected_sum = not_aggregated[:community].sum + not_aggregated[:community_baseload].sum
               expect(days_kwh_x48[:community].sum).to be_within(0.0001).of( expected_sum )
             end
 
-            it 'does not include the baseload' do
+            it 'should not include the baseload' do
               expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community])
             end
           end
@@ -158,7 +244,7 @@ describe CommunityUseBreakdown do
 
         context 'with :all_to_single_value' do
           let(:aggregate) { :all_to_single_value }
-          it 'returns an array with same total as the amr_data class' do
+          it 'should return an array with same total as the amr_data class' do
             expect(days_kwh_x48.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
           end
         end
@@ -175,11 +261,11 @@ describe CommunityUseBreakdown do
       end
 
       context 'with default filter' do
-        it 'returns a breakdown of all periods' do
+        it 'should return a breakdown of all periods' do
           expect(days_kwh_x48.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
         end
 
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(days_kwh_x48.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.days_kwh_x48(day).sum )
         end
       end
@@ -195,7 +281,7 @@ describe CommunityUseBreakdown do
 
     context 'with no community use time period' do
       context 'with default filter' do
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(one_day_kwh.values.sum).to be_within(0.0001).of( meter.amr_data.one_day_kwh(day) )
         end
       end
@@ -207,11 +293,11 @@ describe CommunityUseBreakdown do
       end
 
       context 'with default filter' do
-        it 'returns a breakdown of all periods' do
+        it 'should return a breakdown of all periods' do
           expect(one_day_kwh.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
         end
 
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(one_day_kwh.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.one_day_kwh(day) )
         end
       end
@@ -227,25 +313,25 @@ describe CommunityUseBreakdown do
 
         context 'with :community_only filter' do
           let(:filter)    { :community_only }
-          it 'returns a breakdown of just the community use' do
+          it 'should return a breakdown of just the community use' do
             expect(one_day_kwh.keys).to match_array([:community, :community_baseload])
           end
         end
 
         context 'with :school_only filter' do
           let(:filter)    { :school_only }
-          it 'returns a breakdown of just the school day' do
+          it 'should return a breakdown of just the school day' do
             expect(one_day_kwh.keys).to match_array([:school_day_closed, :school_day_open])
           end
         end
 
         context 'with :all filter' do
           let(:filter)    { :all }
-          it 'returns a breakdown of all periods' do
+          it 'should return a breakdown of all periods' do
             expect(one_day_kwh.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
           end
 
-          it 'returns same total as the amr_data class' do
+          it 'should return the same total as the amr_data class' do
             expect(one_day_kwh.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.one_day_kwh(day) )
           end
         end
@@ -265,24 +351,24 @@ describe CommunityUseBreakdown do
         context 'with :community_use' do
           let(:aggregate) { :community_use }
           context 'when splitting out baseload' do
-            it 'does not apply a sum, as its unnecessary' do
+            it 'should not apply a sum, as its unnecessary' do
               not_aggregated = open_close_breakdown.one_day_kwh(day, :kwh, community_use: nil)
               expect(one_day_kwh[:community]).to be_within(0.0001).of( not_aggregated[:community] )
             end
-            it 'includes the baseload' do
+            it 'should include the baseload' do
               expect(one_day_kwh.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
             end
           end
           context 'when not splitting out baseload' do
             let(:split_electricity_baseload)  { false }
 
-            it 'sums the community use as :community' do
+            it 'should sum the community use into :community' do
               not_aggregated = open_close_breakdown.one_day_kwh(day, :kwh, community_use: nil)
               expected_sum = not_aggregated[:community] + not_aggregated[:community_baseload]
               expect(one_day_kwh[:community]).to be_within(0.0001).of( expected_sum )
             end
 
-            it 'does not include the baseload' do
+            it 'should not include the baseload' do
               expect(one_day_kwh.keys).to match_array([:school_day_closed, :school_day_open, :community])
             end
           end
@@ -291,7 +377,7 @@ describe CommunityUseBreakdown do
 
         context 'with :all_to_single_value' do
           let(:aggregate) { :all_to_single_value }
-          it 'returns an array with same total as the amr_data class' do
+          it 'should return an array with same total as the amr_data class' do
             expect(one_day_kwh).to be_within(0.0001).of( meter.amr_data.one_day_kwh(day) )
           end
         end
@@ -311,7 +397,7 @@ describe CommunityUseBreakdown do
 
     context 'with no community use time period' do
       context 'with default filter' do
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(kwh_date_range.values.sum).to be_within(0.0001).of( meter.amr_data.kwh_date_range(start_date, end_date) )
         end
       end
@@ -323,11 +409,11 @@ describe CommunityUseBreakdown do
       end
 
       context 'with default filter' do
-        it 'returns a breakdown of all periods' do
+        it 'should return the breakdown of all periods' do
           expect(kwh_date_range.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload, :weekend])
         end
 
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(kwh_date_range.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.kwh_date_range(start_date, end_date) )
         end
       end
@@ -344,7 +430,7 @@ describe CommunityUseBreakdown do
 
     context 'with no community use time period' do
       context 'with default filter' do
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(kwh.values.sum).to be_within(0.0001).of( meter.amr_data.kwh(day, hh_index) )
         end
       end
@@ -356,11 +442,11 @@ describe CommunityUseBreakdown do
       end
 
       context 'with default filter' do
-        it 'returns a breakdown of all periods' do
+        it 'should return a breakdown of all periods' do
           expect(kwh.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
         end
 
-        it 'returns same total as the amr_data class' do
+        it 'should return the same total as the amr_data class' do
           expect(kwh.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.kwh(day,hh_index) )
         end
       end
@@ -376,25 +462,25 @@ describe CommunityUseBreakdown do
 
         context 'with :community_only filter' do
           let(:filter)    { :community_only }
-          it 'returns a breakdown of just the community use' do
+          it 'should return a breakdown of just the community use' do
             expect(kwh.keys).to match_array([:community, :community_baseload])
           end
         end
 
         context 'with :school_only filter' do
           let(:filter)    { :school_only }
-          it 'returns a breakdown of just the school day' do
+          it 'should return a breakdown of just the school day' do
             expect(kwh.keys).to match_array([:school_day_closed, :school_day_open])
           end
         end
 
         context 'with :all filter' do
           let(:filter)    { :all }
-          it 'returns a breakdown of all periods' do
+          it 'should return a breakdown of all periods' do
             expect(kwh.keys).to match_array([:school_day_closed, :school_day_open, :community, :community_baseload])
           end
 
-          it 'returns same total as the amr_data class' do
+          it 'should return the same total as the amr_data class' do
             expect(kwh.values.flatten.sum).to be_within(0.0001).of( meter.amr_data.kwh(day, hh_index) )
           end
         end
@@ -407,7 +493,7 @@ describe CommunityUseBreakdown do
     let(:community_use_times)   { [] }
 
     context 'with no community use time period' do
-      it 'returns the default series' do
+      it 'should return the default series' do
         expect(open_close_breakdown.series_names(nil)).to match_array([:school_day_closed, :school_day_open, :holiday, :weekend])
       end
     end
@@ -416,7 +502,7 @@ describe CommunityUseBreakdown do
       let(:community_use_times) do
         [{day: :monday, usage_type: :community_use, opening_time: TimeOfDay.new(19,00), closing_time: TimeOfDay.new(21,30), calendar_period: :term_times}]
       end
-      it 'includes the community use series' do
+      it 'should include the community use series' do
         expect(open_close_breakdown.series_names(nil)).to match_array([:school_day_closed, :school_day_open, :holiday, :weekend, :community])
       end
     end

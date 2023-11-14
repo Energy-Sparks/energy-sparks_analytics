@@ -145,7 +145,7 @@ class CommunityUseBreakdown
           set_hhi_value(kwh_breakdown, OpenCloseTime::COMMUNITY, hhi, (kwh - baseload_kwh))
         end
       else # slower more complex split half hour periods
-        open_kwh, community_kwh, community_baseload_kwh, closed_kwh = split_half_hour_kwhs(hhi_weights, baseload_kwh, kwh)
+        open_kwh, community_kwh, community_baseload_kwh, closed_kwh = split_half_hour_kwhs(date, hhi, hhi_weights, baseload_kwh, kwh)
 
         set_hhi_value(kwh_breakdown, OpenCloseTime::SCHOOL_OPEN,        hhi, open_kwh              ) unless open_kwh.zero?
         set_hhi_value(kwh_breakdown, OpenCloseTime::COMMUNITY_BASELOAD, hhi, community_baseload_kwh) unless community_baseload_kwh.zero?
@@ -201,37 +201,65 @@ class CommunityUseBreakdown
     end
   end
 
+  # This method is called for any half-hourly period which:
+  #
+  # - isn't a period when school is completely closed
+  # - isn't a period when school is open, with no other usage
+  # - isn't a period when school is open for community use, with no other usage
+  #
+  # So we're dealing some some mix of open/close/community use times, e.g.
+  #
+  # - School is open for only part of the period, e.g. open until 16:15
+  # - School is open for half of the period, and community use for rest
+  # - Within the period the school closes at 16:15, and community use starts at
+  #   16:20
+  #
   # refer to charts in \Energy Sparks\Energy Sparks Project Team Documents\Analytics\Community use etc\
-  def split_half_hour_kwhs(weights, baseload_kwh, kwh)
+  def split_half_hour_kwhs(date, hhi, weights, baseload_kwh, kwh)
     open_t, community_t, _closed_t = bucket_time_weights(weights)
 
     community_kwh = 0.0
     community_baseload_kwh = 0.0
 
-    #if we have any community use time
+    #do we have any community use time?
+    #otherwise its just an allocation of open/close times within half hour
     if community_t > 0.0
-       if baseload_kwh >= kwh
-         #assign all usage to community baseload if below the baseload
-         community_baseload_kwh = kwh
+       #this is a HH period where school is both open and has community use
+       if open_t > 0.0
+         if baseload_kwh > kwh
+           #allocate a portion of the usage to community baseload, not enough
+           #usage to allocate to :community
+           community_baseload_kwh  = kwh * community_t
+         else
+           #allocate a portion of the expected baseload to community baseload
+           community_baseload_kwh  = baseload_kwh * community_t
+         end
+        #this is a HH period where we have community use and rest of period is
+        #"closed"
        else
-         #otherwise allocate a portion of the baseload to community use
-         community_baseload_kwh  = baseload_kwh * community_t
-         #allocate portion of usage above baseload to community use
-         community_kwh = (kwh - baseload_kwh) * community_t
+         if baseload_kwh > kwh
+           #as school is not open in this period, assign all the usage to community
+           #baseload, as not enough usage for :community
+           community_baseload_kwh = kwh
+         else
+           #otherwise allocate a portion of the expected baseload to community use
+           community_baseload_kwh  = baseload_kwh * community_t
+           #also allocate a portion of usage above the baseload to community use
+           community_kwh = (kwh - baseload_kwh) * community_t
+         end
        end
     end
 
     #allocate portion of usage to opening times
     open_kwh                = kwh * open_t
 
-    #allocate remainder as "closed"
+    #allocate remainder as "closed", which might end up being mapped to
+    #school_day_closed or holiday in the calling method
     closed_kwh              = kwh - open_kwh - community_kwh - community_baseload_kwh
     closed_kwh              = 0.0 if closed_kwh.magnitude < 0.00000001 # remove floating point noise
 
-    # TODO(PH, 4Apr2022) there seems to be a problem with some Orsis solar schools providing small -tbe mains consumption
-    #                    hence kwh > 0.0 additjon below, needs further investigation of root cause
-    # LD, 2023 not sure this is happening, no signs of exception in the Rollbar reports
-    raise NegativeClosedkWhCalculation, "Negative closed allocation #{closed_kwh} Before #{kwh} => Open #{open_kwh} + Closed #{closed_kwh} + Comms baseload #{community_baseload_kwh} + Comms #{community_kwh} (Comms time #{community_t})" if closed_kwh < 0.0 && kwh > 0.0
+    # This is a sanity check to confirm that we dont end up over allocating usage across the periods
+    raise NegativeClosedkWhCalculation, "Negative closed allocation on #{date}[#{hhi}]. #{closed_kwh} Usage: #{kwh}. Open: #{open_kwh}, Closed: #{closed_kwh}, Community baseload #{community_baseload_kwh}, Commmunity use #{community_kwh} (Community time #{community_t})" if closed_kwh < 0.0 && kwh > 0.0
 
     [open_kwh, community_kwh, community_baseload_kwh, closed_kwh]
   end
