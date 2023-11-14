@@ -116,7 +116,7 @@ describe DateTimeHelper do
     end
 
     context 'with full day' do
-      let(:range) { TimeOfDay.new(0, 0)..TimeOfDay.new(24, 0o0) }
+      let(:range) { TimeOfDay.new(0, 0)..TimeOfDay.new(24, 0) }
 
       it 'returns expected weights' do
         expect(described_class.weighted_x48_vector_single_range(range)).to eq(Array.new(48, 1.0))

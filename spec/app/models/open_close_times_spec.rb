@@ -28,7 +28,7 @@ describe OpenCloseTimes do
       it 'creates both times' do
         expect(open_close_times.open_times.length).to eq 2
         expect(open_close_times.usage(day)[:school_day_open]).to eq([TimeOfDay.new(7, 30)..TimeOfDay.new(16, 20)])
-        expect(open_close_times.usage(day)[:community]).to eq([TimeOfDay.new(19, 0o0)..TimeOfDay.new(21, 30)])
+        expect(open_close_times.usage(day)[:community]).to eq([TimeOfDay.new(19, 0)..TimeOfDay.new(21, 30)])
       end
     end
   end
