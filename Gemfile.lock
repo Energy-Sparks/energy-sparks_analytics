@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/Energy-Sparks/roo.git
+  revision: 058a8e3d1c711c04c59a686805bbe1962d2b2ed1
+  branch: bug-fix-branch
+  specs:
+    roo (2.10.0)
+      nokogiri (~> 1)
+      rubyzip (>= 1.3.0, < 3.0.0)
+
+GIT
   remote: https://github.com/Energy-Sparks/statsample
   revision: e3de8a332546ca0506938f49f8a9f92762aee737
   branch: update-gems-and-awesome-print
@@ -148,13 +157,15 @@ GEM
       nokogiri (>= 1.5.9)
     memory_profiler (1.0.0)
     method_source (1.0.0)
-    mini_portile2 (2.8.2)
+    mini_portile2 (2.8.5)
     minimization (0.2.5)
       text-table (~> 1.2)
     minitest (5.15.0)
     multipart-post (2.0.0)
-    nokogiri (1.14.3)
-      mini_portile2 (~> 2.8.0)
+    nokogiri (1.15.4)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.15.4-x64-mingw32)
       racc (~> 1.4)
     nokogiri (1.14.3-x64-mingw32)
       racc (~> 1.4)
@@ -179,7 +190,7 @@ GEM
     pry-byebug (3.9.0)
       byebug (~> 11.0)
       pry (~> 0.13.0)
-    racc (1.6.2)
+    racc (1.7.3)
     rack (2.2.6.4)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
@@ -208,9 +219,6 @@ GEM
     require_all (3.0.0)
     rexml (3.2.6)
     rollbar (3.4.1)
-    roo (2.8.3)
-      nokogiri (~> 1)
-      rubyzip (>= 1.3.0, < 3.0.0)
     roo-xls (1.2.0)
       nokogiri
       roo (>= 2.0.0, < 3)
@@ -310,7 +318,7 @@ DEPENDENCIES
   pry-byebug
   require_all
   rollbar
-  roo
+  roo!
   roo-xls
   rspec (~> 3.12.0)
   rubocop
