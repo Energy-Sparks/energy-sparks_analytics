@@ -33,3 +33,5 @@ Style/AsciiComments:
   Enabled: false
 Style/Documentation:
   Enabled: false
+RSpec/DescribedClass:
+  Enabled: false
