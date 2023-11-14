@@ -90,7 +90,7 @@ module Usage
     end
 
     def has_full_previous_years_worth_of_data?
-      start_date, = dates_for_period(:last_year)
+      start_date, _end_date = dates_for_period(:last_year)
       @meter.amr_data.start_date <= start_date
     end
 
