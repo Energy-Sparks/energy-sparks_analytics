@@ -131,7 +131,10 @@ module Usage
     def chart_date_ranges
       # create a period calculator, to calculate date ranges
       period_calculator = PeriodsBase.period_factory(chart_config,
-                                                     @meter_collection, aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date)
+                                                     @meter_collection,
+                                                     aggregate_meter.amr_data.start_date,
+                                                     aggregate_meter.amr_data.end_date)
+
       # calculate the ranges
       periods = period_calculator.periods
       # construct a bucketor that can create the x-axis from those ranges

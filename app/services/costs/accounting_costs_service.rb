@@ -89,7 +89,7 @@ module Costs
     end
 
     def has_full_previous_years_worth_of_data?
-      previous_year_start_date, = dates_for_period(:last_year)
+      previous_year_start_date, _previous_year_end_date = dates_for_period(:last_year)
       @start_date <= previous_year_start_date
     end
 
