@@ -12,14 +12,10 @@ gem 'roo', git: 'https://github.com/Energy-Sparks/roo.git', branch: 'bug-fix-bra
 gem 'statsample', git: 'https://github.com/Energy-Sparks/statsample', branch: 'update-gems-and-awesome-print'
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw]
 
-# Useful for debugging
-gem 'pry-byebug'
-
-gem 'dotenv'
-
-gem 'rollbar'
-
-# gem 'rexml'
+group :development, :test do
+  # Useful for debugging
+  gem 'pry-byebug'
+end
 
 group :development do
   gem 'aws-sdk-s3'
@@ -28,8 +24,8 @@ group :development do
   gem 'benchmark-memory'
   gem 'climate_control'
   gem 'rubocop'
-  gem 'rubocop-rspec'
   gem 'rubocop-performance'
+  gem 'rubocop-rspec'
   gem 'ruby-prof'
 end
 
@@ -37,7 +33,8 @@ end
 group :test do
   gem 'bundler-audit', platforms: :ruby
   gem 'factory_bot'
-  gem 'rspec', '~> 3.12.0'
+  gem 'rollbar'
+  gem 'rspec'
   gem 'simplecov', require: false
 
   # Used by rspec html matcher
