@@ -19,7 +19,7 @@ gem 'dotenv'
 
 gem 'rollbar'
 
-gem 'rexml'
+# gem 'rexml'
 
 group :development do
   gem 'aws-sdk-s3'
