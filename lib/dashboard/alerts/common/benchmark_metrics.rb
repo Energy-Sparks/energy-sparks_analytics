@@ -9,13 +9,20 @@ module BenchmarkMetrics
   SOLAR_EXPORT_PRICE = 0.05
   GAS_PRICE = 0.03
 
-  BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL = 50_000.0 / 200.0
-  RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE = 1.3 # secondary electricity usage typically 1.3 times higher due extra hours and server ICT
+  # Annual alectricity Usage per pupil benchmark figures
+  # All updated November 2023
+  BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL = 220.0
+  BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL_SPECIAL_SCHOOL = 895.0
+  EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 190.0
+  EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL_SPECIAL_SCHOOL = 275.0
+  # Secondary electricity usage typically 1.3 times higher due extra hours and server ICT
+  # Updated November 2023
+  RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE = 1.74
+
   BENCHMARK_ELECTRICITY_USAGE_PER_M2 = 50_000.0 / 1_200.0
   BENCHMARK_GAS_USAGE_PER_PUPIL = 0.9 * 115_000.0 / 200.0 # 0.9 is artificial incentive for schools to do better
   BENCHMARK_GAS_USAGE_PER_M2 = 0.9 * 115_000.0 / 1_200.0 # 0.9 is artificial incentive for schools to do better
   EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
-  EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175.0
   LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH = 0.15
   ANNUAL_AVERAGE_DEGREE_DAYS = 2000.0
   AVERAGE_GAS_PROPORTION_OF_HEATING = 0.6
@@ -130,8 +137,10 @@ module BenchmarkMetrics
     check_school_type(school_type, 'benchmark electricity usage per pupil')
 
     case school_type
-    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
+    when :primary, :infant, :junior, :middle, :mixed_primary_and_secondary
       BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * pupils
+    when :special
+      BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL_SPECIAL_SCHOOL * pupils
     when :secondary
       RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * pupils
     end
@@ -147,8 +156,10 @@ module BenchmarkMetrics
     check_school_type(school_type, 'benchmark electricity usage per pupil')
 
     case school_type
-    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
+    when :primary, :infant, :junior, :middle, :mixed_primary_and_secondary
       EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
+    when :special
+      EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL_SPECIAL_SCHOOL * pupils
     when :secondary
       RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
     end
