@@ -30,7 +30,7 @@ require_relative '../utilities/half_hourly_loader'
 # and may override:
 # one_day_total_cost(date)
 class CostSchedule < HalfHourlyData
-  attr_reader :meter_tariffs, :fuel_type, :amr_data, :fuel_type
+  attr_reader :fuel_type, :amr_data
 
   #This class is initially false but will be set to true at the end
   #of the aggregation process. Indicating that any changes to meter data
