@@ -406,7 +406,7 @@ class AggregateDataService
       economic_costs = EconomicCosts.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
     else
       log 'Creating a caching economic cost schedule for meter'
-      economic_costs = CachingEconomicCosts.new(combined_meter)
+      economic_costs = CachingEconomicCosts.new(combined_meter.meter_tariffs, combined_meter.amr_data, combined_meter.fuel_type)
     end
     combined_meter.amr_data.set_economic_tariff_schedule(economic_costs)
   end
@@ -419,7 +419,7 @@ class AggregateDataService
         economic_costs = EconomicCosts.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
       else
         log 'Creating a caching current economic cost schedule for meter'
-        economic_costs = CachingCurrentEconomicCosts.new(combined_meter)
+        economic_costs = CachingCurrentEconomicCosts.new(combined_meter.meter_tariffs, combined_meter.amr_data, combined_meter.fuel_type)
       end
       combined_meter.amr_data.set_current_economic_tariff_schedule(economic_costs)
     else
