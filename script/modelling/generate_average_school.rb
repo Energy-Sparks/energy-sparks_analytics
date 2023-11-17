@@ -65,8 +65,6 @@ class CalculateAverageSchool
     end
   end
 
-
-
   def save_benchmark_type_config_to_csv(f, benchmark_type_config)
     f.puts '  def benchmark_calculation_config'
     f.puts '    {'
@@ -250,7 +248,7 @@ class CalculateAverageSchool
     # versus precalculated national average for each month
     # school.aggregated_heat_meters.heating_model.heating_on?(date)
 
-    
+
     # if a school is colder than average i.e. > school_degree_days reduce its consumption for average
     avg_degree_days / school_degree_days
   end
@@ -292,7 +290,7 @@ class CalculateAverageSchool
   end
 end
 
-def load_schools(pattern_match) 
+def load_schools(pattern_match)
   source_db = :unvalidated_meter_data
 
   results = {}
@@ -321,8 +319,6 @@ if false
 
   exit
 else
-  best_test = ['king-james*','all-saints-p*', 'fairview-school*'] # one of each type of school allows test and copying of .rb file
-
   school_name_pattern_match = ['*']
 
   benchmark_type_config = [[:average, 0.4..0.6], [:benchmark, 0.2..0.4], [:exemplar, 0.1..0.25]]
