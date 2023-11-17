@@ -63,11 +63,6 @@ module BenchmarkMetrics
     end
   end
 
-  # p = 110%, s = 60% => 106%
-  def self.scale_percent_towards_1(percent, scale)
-    ((percent - 1.0) * scale) + 1.0
-  end
-
   def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date, list_of_fuels)
 
     total = 0.0
@@ -112,6 +107,11 @@ module BenchmarkMetrics
     benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date) * gas_price_£_per_kwh(school)
   end
 
+  # Calculate the expected annual electricity use per pupil for a school
+  # returns either the value for a benchmark ("Well managed") or exemplar school
+  #
+  # @param Symbol benchmark_type Either :benchmark or :exemplar
+  # @param MeterCollection school
   def self.benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school)
     if benchmark_type == :benchmark
       benchmark_annual_electricity_usage_kwh(school.school_type)
@@ -120,6 +120,11 @@ module BenchmarkMetrics
     end
   end
 
+  # Calculate the expected annual electricity use per pupil for a benchmark
+  # ("Well managed") school of a specific type and size
+  #
+  # @param Symbol school_type The symbol representing the type of school
+  # @param Integer pupils The number of pupils
   def self.benchmark_annual_electricity_usage_kwh(school_type, pupils = 1)
     school_type = school_type.to_sym if school_type.instance_of? String
     check_school_type(school_type, 'benchmark electricity usage per pupil')
@@ -132,6 +137,24 @@ module BenchmarkMetrics
     end
   end
 
+  # Calculate the expected annual electricity use per pupil for an exemplar
+  # school of a specific type and size
+  #
+  # @param Symbol school_type The symbol representing the type of school
+  # @param Integer pupils The number of pupils
+  def self.exemplar_annual_electricity_usage_kwh(school_type, pupils = 1)
+    school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type, 'benchmark electricity usage per pupil')
+
+    case school_type
+    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
+      EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
+    when :secondary
+      RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
+    end
+  end
+
+  # used by ManagementSummaryTable
   def self.exemplar_£(school, fuel_type, start_date, end_date)
     case fuel_type
     when :electricity, :storage_heater, :storage_heaters
@@ -152,17 +175,6 @@ module BenchmarkMetrics
     end
   end
 
-  def self.exemplar_annual_electricity_usage_kwh(school_type, pupils = 1)
-    school_type = school_type.to_sym if school_type.instance_of? String
-    check_school_type(school_type, 'benchmark electricity usage per pupil')
-
-    case school_type
-    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
-      EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
-    when :secondary
-      RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
-    end
-  end
 
   def self.recommended_baseload_for_pupils(pupils, school_type)
     school_type = school_type.to_sym if school_type.instance_of? String
@@ -187,13 +199,6 @@ module BenchmarkMetrics
       else
         10 + 9.5 * (pupils - 500) / 500
       end
-    end
-  end
-
-  private_class_method def self.check_school_type(school_type, type = 'baseload benckmark')
-    raise EnergySparksUnexpectedStateException.new("Nil type of school in #{type} request") if school_type.nil?
-    if !%i[primary infant junior special middle secondary mixed_primary_and_secondary].include?(school_type)
-      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in #{type} request")
     end
   end
 
@@ -231,29 +236,6 @@ module BenchmarkMetrics
     [servers, power]
   end
 
-  def self.recommended_baseload_for_floor_area(floor_area, school_type)
-    school_type = school_type.to_sym if school_type.instance_of? String
-    case school_type
-    when :primary, :infant, :junior, :special
-      if floor_area < 1000
-        1.5
-      elsif floor_area < 1600
-        2.5
-      else
-        2.5 * (floor_area / 1600)
-      end
-    when :secondary, :middle, :mixed_primary_and_secondary
-      if floor_area < 1000
-        10
-      else
-        10 + 10 * (floor_area - 1000) / 1000
-      end
-    else
-      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request") if !school_type.nil?
-      raise EnergySparksUnexpectedStateException.new('Nil type of school in baseload floor area request') if school_type.nil?
-    end
-  end
-
   #Numbers based on analysis of school data, Feb 2023
   #https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
   def self.exemplar_peak_kw(pupils, school_type)
@@ -285,6 +267,18 @@ module BenchmarkMetrics
       0.314 * pupils
     else
       raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request")
+    end
+  end
+
+  # p = 110%, s = 60% => 106%
+  private_class_method def self.scale_percent_towards_1(percent, scale)
+    ((percent - 1.0) * scale) + 1.0
+  end
+
+  private_class_method def self.check_school_type(school_type, type = 'baseload benckmark')
+    raise EnergySparksUnexpectedStateException.new("Nil type of school in #{type} request") if school_type.nil?
+    if !%i[primary infant junior special middle secondary mixed_primary_and_secondary].include?(school_type)
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in #{type} request")
     end
   end
 
