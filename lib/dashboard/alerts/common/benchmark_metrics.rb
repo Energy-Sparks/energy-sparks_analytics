@@ -1,7 +1,10 @@
-# benchmark metrics
-#
+# frozen_string_literal: true
+
 module BenchmarkMetrics
+  # rubocop:disable Style/ClassVars
   @@current_prices = nil
+  # rubocop:enable Style/ClassVars
+
   ELECTRICITY_PRICE = 0.15
   SOLAR_EXPORT_PRICE = 0.05
   GAS_PRICE = 0.03
@@ -19,8 +22,8 @@ module BenchmarkMetrics
 
   AVERAGE_OUT_OF_HOURS_PERCENT = 0.5
 
-  #Out of hours metrics recalculated in Feb 2023, see trello
-  #https://trello.com/c/FdBEY5Qz/2903-revise-approach-for-calculating-out-of-hours-usage-benchmark
+  # Out of hours metrics recalculated in Feb 2023, see trello
+  # https://trello.com/c/FdBEY5Qz/2903-revise-approach-for-calculating-out-of-hours-usage-benchmark
   EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY = 0.5
   BENCHMARK_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY = 0.6
 
@@ -30,6 +33,7 @@ module BenchmarkMetrics
   EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.2
   BENCHMARK_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER = 0.5
 
+  # rubocop:disable Style/ClassVars
   def self.set_current_prices(prices:)
     @@current_prices = prices
   end
@@ -37,6 +41,7 @@ module BenchmarkMetrics
   def self.pricing
     @@current_prices || default_prices
   end
+  # rubocop:enable Style/ClassVars
 
   def self.default_prices
     OpenStruct.new(
@@ -55,8 +60,8 @@ module BenchmarkMetrics
   def self.normalise_degree_days(regional_temperatures, _holidays, fuel_type, asof_date)
     regional_degree_days = regional_temperatures.degree_days_this_year(asof_date)
     if fuel_type == :gas
-      scale_percent_towards_1(ANNUAL_AVERAGE_DEGREE_DAYS / regional_degree_days, AVERAGE_GAS_PROPORTION_OF_HEATING)
-    elsif fuel_type == :electricity || fuel_type == :storage_heaters
+      scale_percent_towards_one(ANNUAL_AVERAGE_DEGREE_DAYS / regional_degree_days, AVERAGE_GAS_PROPORTION_OF_HEATING)
+    elsif %i[electricity storage_heaters].include?(fuel_type)
       ANNUAL_AVERAGE_DEGREE_DAYS / regional_degree_days
     else
       raise EnergySparksUnexpectedStateException, "Not expecting fuel type #{fuel_type} for degree day adjustment"
@@ -64,16 +69,11 @@ module BenchmarkMetrics
   end
 
   def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date, list_of_fuels)
-
     total = 0.0
 
-    if list_of_fuels.include?(:electricity)
-      total += benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    end
+    total += benchmark_electricity_usage_£_per_pupil(benchmark_type, school) if list_of_fuels.include?(:electricity)
 
-    if !(list_of_fuels & %i[gas storage_heater storage_heaters]).empty?
-      total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date)
-    end
+    total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date) unless (list_of_fuels & %i[gas storage_heater storage_heaters]).empty?
 
     total
   end
@@ -115,7 +115,7 @@ module BenchmarkMetrics
   def self.benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school)
     if benchmark_type == :benchmark
       benchmark_annual_electricity_usage_kwh(school.school_type)
-    else  # :exemplar
+    else # :exemplar
       exemplar_annual_electricity_usage_kwh(school.school_type)
     end
   end
@@ -175,7 +175,6 @@ module BenchmarkMetrics
     end
   end
 
-
   def self.recommended_baseload_for_pupils(pupils, school_type)
     school_type = school_type.to_sym if school_type.instance_of? String
     check_school_type(school_type)
@@ -213,31 +212,31 @@ module BenchmarkMetrics
     power = 500.0
     case school_type
     when :primary, :infant, :junior, :special
-      if pupils < 100
-        servers = 2
-      elsif pupils < 300
-        servers = 3
-      else
-        servers = 3 + (pupils / 300).floor
-      end
+      servers = if pupils < 100
+                  2
+                elsif pupils < 300
+                  3
+                else
+                  3 + (pupils / 300).floor
+                end
     when :secondary, :middle, :mixed_primary_and_secondary
       power = 1000.0
-      if pupils < 400
-        servers = 4
-      elsif pupils < 1000
-        servers = 8
-      else
-        servers = 8 + ((pupils - 1000)/ 250).floor
-      end
+      servers = if pupils < 400
+                  4
+                elsif pupils < 1000
+                  8
+                else
+                  8 + ((pupils - 1000) / 250).floor
+                end
     else
-      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in typical servers request") if !school_type.nil?
-      raise EnergySparksUnexpectedStateException.new('Nil type of school in typical servers request') if school_type.nil?
+      raise EnergySparksUnexpectedStateException, "Unknown type of school #{school_type} in typical servers request" unless school_type.nil?
+      raise EnergySparksUnexpectedStateException, 'Nil type of school in typical servers request' if school_type.nil?
     end
     [servers, power]
   end
 
-  #Numbers based on analysis of school data, Feb 2023
-  #https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
+  # Numbers based on analysis of school data, Feb 2023
+  # https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
   def self.exemplar_peak_kw(pupils, school_type)
     school_type = school_type.to_sym if school_type.instance_of? String
     check_school_type(school_type)
@@ -249,12 +248,12 @@ module BenchmarkMetrics
     when :special
       0.251 * pupils
     else
-      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request")
+      raise EnergySparksUnexpectedStateException, "Unknown type of school #{school_type} in baseload floor area request"
     end
   end
 
-  #Numbers based on analysis of school data, Feb 2023
-  #https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
+  # Numbers based on analysis of school data, Feb 2023
+  # https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
   def self.benchmark_peak_kw(pupils, school_type)
     school_type = school_type.to_sym if school_type.instance_of? String
     check_school_type(school_type)
@@ -266,20 +265,19 @@ module BenchmarkMetrics
     when :special
       0.314 * pupils
     else
-      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request")
+      raise EnergySparksUnexpectedStateException, "Unknown type of school #{school_type} in baseload floor area request"
     end
   end
 
   # p = 110%, s = 60% => 106%
-  private_class_method def self.scale_percent_towards_1(percent, scale)
+  private_class_method def self.scale_percent_towards_one(percent, scale)
     ((percent - 1.0) * scale) + 1.0
   end
 
   private_class_method def self.check_school_type(school_type, type = 'baseload benckmark')
-    raise EnergySparksUnexpectedStateException.new("Nil type of school in #{type} request") if school_type.nil?
-    if !%i[primary infant junior special middle secondary mixed_primary_and_secondary].include?(school_type)
-      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in #{type} request")
-    end
-  end
+    raise EnergySparksUnexpectedStateException, "Nil type of school in #{type} request" if school_type.nil?
+    return if %i[primary infant junior special middle secondary mixed_primary_and_secondary].include?(school_type)
 
+    raise EnergySparksUnexpectedStateException, "Unknown type of school #{school_type} in #{type} request"
+  end
 end
