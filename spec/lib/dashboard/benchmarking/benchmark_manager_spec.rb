@@ -76,7 +76,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             name: 'Date limited comparisons',
             description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
-              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks'
+              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
+              jan_august_2022_2023_energy_comparison: 'Jan to August 2022 to 2023 energy use'
             }
           }
         ]
@@ -154,7 +155,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             name: 'Date limited comparisons',
             description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
-              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks'
+              change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
+              jan_august_2022_2023_energy_comparison: 'Jan to August 2022 to 2023 energy use'
             }
           }
         ]

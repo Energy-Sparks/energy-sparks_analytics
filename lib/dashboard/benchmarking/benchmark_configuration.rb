@@ -148,7 +148,8 @@ module Benchmarking
         :solar_generation_summary
       ],
       date_limited_comparisons: [
-        :change_in_energy_use_since_joined_energy_sparks
+        :change_in_energy_use_since_joined_energy_sparks,
+        :jan_august_2022_2023_energy_comparison
       ]
     }
 
@@ -1385,8 +1386,6 @@ module Benchmarking
         type: %i[table],
         admin_only: true
       },
-
-
       # second chart and table on page defined by change_in_energy_use_since_joined_energy_sparks above
       # not displayed on its own as a separate comparison
       change_in_energy_use_since_joined_energy_sparks_full_data: {
@@ -1804,7 +1803,216 @@ module Benchmarking
         sort_by:  [0],
         type: %i[table],
         admin_only: true
-      }
+      },
+      jan_august_2022_2023_energy_comparison: {
+        benchmark_class:  BenchmarkJanAugust20222023Comparison,
+        name:       'Jan-August 2022-2023 energy use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+
+          # kWh
+          {
+            data: ->{ sum_data([py23e_difk, py23g_difk, py23s_difk]) },
+            name: :change_kwh,  units: :kwh
+          },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([py23e_pppk, py23g_pppk, py23s_pppk], [py23e_cppk, py23g_cppk, py23s_cppk]),
+                                      sum_data([py23e_cppk, py23g_cppk,py23s_cppk]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp
+          },
+
+          # CO2
+          {
+            data: ->{ sum_data([py23e_difc, py23g_difc, py23s_difc]) },
+            name: :change_co2,  units: :co2
+          },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([py23e_pppc, py23g_pppc, py23s_pppc], [py23e_cppc, py23g_cppc, py23s_cppc]),
+                                      sum_data([py23e_cppc, py23g_cppc, py23s_cppc]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp
+          },
+
+          # £
+          {
+            data: ->{ sum_data([py23e_dif€, py23g_dif€, py23s_dif€]) },
+            name: :change_£current,  units: :£
+          },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([py23e_ppp€, py23g_ppp€, py23s_ppp€], [py23e_cpp€, py23g_cpp€, py23s_cpp€]),
+                                      sum_data([py23e_cpp€, py23g_cpp€, py23s_cpp€]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp, chart_data: true
+          },
+
+          # Metering
+
+          { data: ->{
+              [
+                py23e_ppp£.nil? ? nil : :electricity,
+                py23g_ppp£.nil? ? nil : :gas,
+                py23s_ppp£.nil? ? nil : :storage_heaters
+              ].compact.join(', ')
+            },
+            name: :metering,
+            units: String
+          },
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',         span: 2 },
+          { name: :kwh,      span: 2 },
+          { name: :co2_kg, span: 2 },
+          { name: :cost,     span: 2 },
+          { name: '',         span: 1 }
+        ],
+        where:   ->{ !sum_data([py23e_ppp£, py23g_ppp£], true).nil? },
+        sort_by:  [0],
+        type: %i[table],
+        admin_only: true
+      },
+      jan_august_2022_2023_electricity_table: {
+        benchmark_class:  BenchmarkJanAugust20222023ComparisonElectricityTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Jan-August 2022-2023 electricity use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+
+          #kwh
+          { data: ->{ py23e_pppk },  name: :previous_year, units: :kwh },
+          { data: ->{ py23e_cppk},   name: :last_year, units: :kwh},
+          { data: ->{ py23e_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ percent_change(py23e_pppk, py23e_cppk)}, name: :change_pct, units: :percent },
+
+          #co2
+          { data: ->{ py23e_pppc },  name: :previous_year, units: :co2 },
+          { data: ->{ py23e_cppc },  name: :last_year, units: :co2},
+          { data: ->{ py23e_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ percent_change(py23e_pppc, py23e_cppc)}, name: :change_pct, units: :percent },
+
+          #£current
+          { data: ->{ py23e_ppp€ },  name: :previous_year, units: :£current },
+          { data: ->{ py23e_cpp€ },  name: :last_year, units: :£current},
+          { data: ->{ py23e_dif€ },  name: :change_£, units: :£current },
+          { data: ->{ percent_change(py23e_ppp€, py23e_cpp€)}, name: :change_pct, units: :percent },
+
+          { data: ->{ enba_solr == 'synthetic' ? 'Y' : '' }, name: :estimated,  units: String },
+
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',         span: 2 },
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 4 },
+          { name: :cost,     span: 4 },
+          { name: :solar_self_consumption,   span: 1 }
+        ],
+        where:   ->{ !py23e_ppp£.nil? },
+        sort_by:  [0],
+        type: %i[table],
+        admin_only: true
+      },
+      jan_august_2022_2023_gas_table: {
+        benchmark_class:  BenchmarkJanAugust20222023ComparisonGasTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Jan-August 2022-2023 gas use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+
+          #kwh
+          { data: ->{ py23g_pppk },  name: :previous_year_temperature_adjusted, units: :kwh },
+          { data: ->{ py23g_cppk},   name: :last_year, units: :kwh},
+          { data: ->{ py23g_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ percent_change(py23g_pppk, py23g_cppk)}, name: :change_pct, units: :percent },
+
+          #co2
+          { data: ->{ py23g_pppc },  name: :previous_year, units: :co2 },
+          { data: ->{ py23g_cppc },  name: :last_year, units: :co2},
+          { data: ->{ py23g_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ percent_change(py23g_pppc, py23g_cppc)}, name: :change_pct, units: :percent },
+
+          #£current
+          { data: ->{ py23g_ppp€ },  name: :previous_year, units: :£current },
+          { data: ->{ py23g_cpp€ },  name: :last_year, units: :£current},
+          { data: ->{ py23g_dif€ },  name: :change_£, units: :£current },
+          { data: ->{ percent_change(py23g_ppp€, py23g_cpp€)}, name: :change_pct, units: :percent },
+
+          { data: ->{ py23g_pppu },  name: :previous_year_temperature_unadjusted, units: :kwh },
+          { data: ->{ py23g_cppk - py23g_pppu },  name: :unadjusted_kwh, units: :kwh },
+          { data: ->{ percent_change(py23g_pppu, py23g_cppk)}, name: :change_pct, units: :percent },
+
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',         span: 2 },
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 4 },
+          { name: :cost,     span: 4 },
+          { name: :kwh, span: 3}
+        ],
+        where:   ->{ !py23g_ppp£.nil? },
+        sort_by:  [0],
+        type: %i[table],
+        admin_only: true
+      },
+      jan_august_2022_2023_storage_heater_table: {
+        benchmark_class:  BenchmarkJanAugust20222023ComparisonStorageHeaterTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Jan-August 2022-2023 storage heater use comparison',
+        columns:  [
+          tariff_changed_school_name,
+
+          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+
+          #kwh
+          { data: ->{ py23s_pppk },  name: :previous_year_temperature_adjusted, units: :kwh },
+          { data: ->{ py23s_cppk},   name: :last_year, units: :kwh},
+          { data: ->{ py23s_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ percent_change(py23s_pppk, py23s_cppk)}, name: :change_pct, units: :percent },
+
+          #co2
+          { data: ->{ py23s_pppc },  name: :previous_year, units: :co2 },
+          { data: ->{ py23s_cppc },  name: :last_year, units: :co2},
+          { data: ->{ py23s_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ percent_change(py23s_pppc, py23s_cppc)}, name: :change_pct, units: :percent },
+
+          #£current
+          { data: ->{ py23s_ppp€ },  name: :previous_year, units: :£current },
+          { data: ->{ py23s_cpp€ },  name: :last_year, units: :£current},
+          { data: ->{ py23s_dif€ },  name: :change_£, units: :£current },
+          { data: ->{ percent_change(py23s_ppp€, py23s_cpp€)}, name: :change_pct, units: :percent },
+
+          { data: ->{ py23s_pppu },  name: :previous_year_temperature_unadjusted, units: :kwh },
+          { data: ->{ py23s_cppk - py23s_pppu },  name: :unadjusted_kwh, units: :kwh },
+          { data: ->{ percent_change(py23s_pppu, py23s_cppk)}, name: :change_pct, units: :percent },
+
+          TARIFF_CHANGED_COL
+        ],
+        column_groups: [
+          { name: '',         span: 2 },
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 4 },
+          { name: :cost,     span: 4 },
+          { name: :kwh, span: 3}
+        ],
+        where:   ->{ !py23s_ppp£.nil? },
+        sort_by:  [0],
+        type: %i[table],
+        admin_only: true
+      },
     }.freeze
   end
 end
