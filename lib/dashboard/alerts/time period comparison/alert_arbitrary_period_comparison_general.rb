@@ -167,3 +167,44 @@ class AlertEaster2023ShutdownStorageHeaterComparison < AlertArbitraryPeriodCompa
     basic_configuration
   end
 end
+
+#===================================================================================================
+# Jan-August 2022-2023 comparison
+module AlertJanAug20222023ComparisonMixIn
+  def basic_configuration
+    {
+      name:                   'Jan-August 2022 energy use comparison',
+      max_days_out_of_date:   365,
+      enough_days_data:       1,
+      current_period:         Date.new(2023, 1, 1)..Date.new(2023, 8, 31),
+      previous_period:        Date.new(2022, 1, 1)..Date.new(2022, 8, 31)
+    }
+  end
+end
+
+class AlertJanAug20222023ElectricityComparison < AlertArbitraryPeriodComparisonElectricityBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertJanAug20222023ComparisonMixIn
+
+  def comparison_configuration
+    basic_configuration
+  end
+end
+
+class AlertJanAug20222023GasComparison < AlertArbitraryPeriodComparisonGasBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertJanAug20222023ComparisonMixIn
+
+  def comparison_configuration
+    basic_configuration
+  end
+end
+
+class AlertJanAug20222023StorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertJanAug20222023ComparisonMixIn
+
+  def comparison_configuration
+    basic_configuration
+  end
+end

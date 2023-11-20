@@ -857,4 +857,41 @@ module Benchmarking
     include BenchmarkingNoTextMixin
   end
 
+  #=======================================================================================
+  class BenchmarkJanAugust20222023Comparison < BenchmarkChangeAdhocComparison
+
+    def electricity_content(school_ids:, filter:)
+      extra_content(:jan_august_2022_2023_electricity_table, filter: filter)
+    end
+
+    def gas_content(school_ids:, filter:)
+      extra_content(:jan_august_2022_2023_gas_table, filter: filter)
+    end
+
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:jan_august_2022_2023_storage_heater_table, filter: filter)
+    end
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.jan_august_2023_2023_energy_comparison.introduction_text_html')
+      ERB.new(text).result(binding)
+    end
+
+  end
+
+  class BenchmarkJanAugust20222023ComparisonElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+  end
+
+  class BenchmarkJanAugust20222023ComparisonGasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      I18n.t('analytics.benchmarking.content.benchmark_jan_august_2022_2023_gas_table.introduction_text')
+    end
+  end
+
+  class BenchmarkJanAugust20222023ComparisonStorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
+  end
 end
