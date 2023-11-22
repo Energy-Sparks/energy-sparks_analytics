@@ -75,56 +75,13 @@ module BenchmarkMetrics
     end
   end
 
+  # Only called from AlertEnergyAnnualVersusBenchmark
   def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date, list_of_fuels)
     total = 0.0
-
     total += benchmark_electricity_usage_£_per_pupil(benchmark_type, school) if list_of_fuels.include?(:electricity)
-
-    total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date) unless (list_of_fuels & %i[gas storage_heater storage_heaters]).empty?
-
+    total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date, :gas) if list_of_fuels.include?(:gas)
+    total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date, :storage_heaters) if list_of_fuels.include?(:storage_heater) || list_of_fuels.include?(:storage_heaters)
     total
-  end
-
-  def self.benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * electricity_price_£_per_kwh(school)
-  end
-
-  def self.electricity_price_£_per_kwh(school)
-    school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£)
-  end
-
-  def self.gas_price_£_per_kwh(school)
-    school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£)
-  end
-
-  # scale benchmark to schools's temperature zone; so result if higher for
-  # Scotland and lower for SW UK
-  # also scales years, so all years normalised to same temperature
-  def self.benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date = nil)
-    dd_adj = normalise_degree_days(school.temperatures, school.holidays, :gas, asof_date)
-    if benchmark_type == :benchmark
-      BENCHMARK_GAS_USAGE_PER_PUPIL / dd_adj
-    else # :exemplar
-      EXEMPLAR_GAS_USAGE_PER_M2 / dd_adj
-    end
-  end
-
-  # as above, larger number returned for Scotland, lower for SW
-  def self.benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date = nil)
-    benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date) * gas_price_£_per_kwh(school)
-  end
-
-  # Calculate the expected annual electricity use per pupil for a school
-  # returns either the value for a benchmark ("Well managed") or exemplar school
-  #
-  # @param Symbol benchmark_type Either :benchmark or :exemplar
-  # @param MeterCollection school
-  def self.benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school)
-    if benchmark_type == :benchmark
-      benchmark_annual_electricity_usage_kwh(school.school_type)
-    else # :exemplar
-      exemplar_annual_electricity_usage_kwh(school.school_type)
-    end
   end
 
   # Calculate the expected annual electricity use per pupil for a benchmark
@@ -290,5 +247,48 @@ module BenchmarkMetrics
     return if %i[primary infant junior special middle secondary mixed_primary_and_secondary].include?(school_type)
 
     raise EnergySparksUnexpectedStateException, "Unknown type of school #{school_type} in #{type} request"
+  end
+
+  private_class_method def self.benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
+    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * electricity_price_£_per_kwh(school)
+  end
+
+  # @param Symbol benchmark_type Either :benchmark or :exemplar
+  # @param MeterCollection school
+  private_class_method def self.benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school)
+    if benchmark_type == :benchmark
+      benchmark_annual_electricity_usage_kwh(school.school_type)
+    else # :exemplar
+      exemplar_annual_electricity_usage_kwh(school.school_type)
+    end
+  end
+
+  # as above, larger number returned for Scotland, lower for SW
+  private_class_method def self.benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date = nil, fuel_type = :gas)
+    if fuel_type == :gas
+      benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date, fuel_type) * gas_price_£_per_kwh(school)
+    else # storage_heaters
+      benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date, fuel_type) * electricity_price_£_per_kwh(school)
+    end
+  end
+
+  # scale benchmark to schools's temperature zone; so result if higher for
+  # Scotland and lower for SW UK
+  # also scales years, so all years normalised to same temperature
+  private_class_method def self.benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date = nil, fuel_type = :gas)
+    dd_adj = normalise_degree_days(school.temperatures, school.holidays, fuel_type, asof_date)
+    if benchmark_type == :benchmark
+      BENCHMARK_GAS_USAGE_PER_PUPIL / dd_adj
+    else # :exemplar
+      EXEMPLAR_GAS_USAGE_PER_M2 / dd_adj
+    end
+  end
+
+  private_class_method def self.electricity_price_£_per_kwh(school)
+    school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£)
+  end
+
+  private_class_method def self.gas_price_£_per_kwh(school)
+    school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£)
   end
 end
