@@ -37,9 +37,9 @@ require:
 Naming/MethodParameterName:
   AllowedNames: ['kw', '£', 'co2']
 Naming/VariableName:
-  AllowedPatterns: ['_£','£']
+  AllowedPatterns: ['_£', '£']
 Naming/MethodName:
-  AllowedPatterns: ['_£', 'co2', '£']
+  AllowedPatterns: ['_£','co2', '£']
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:
@@ -57,3 +57,5 @@ RSpec/ScatteredLet:
   Enabled: false
 RSpec/NestedGroups:
   Enabled: false
+RSpec/VariableName:
+  AllowedPatterns: ['_£']
