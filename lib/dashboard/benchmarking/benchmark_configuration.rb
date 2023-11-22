@@ -234,7 +234,7 @@ module Benchmarking
         name:     'Change in energy use since the school joined Energy Sparks',
         columns:  [
           { data: 'addp_name',      name: :name, units: :school_name, chart_data: true },
-          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+          { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
           { data: ->{ enba_kxap },  name: :energy_total,   units: :relative_percent_0dp, chart_data: true, content_class: 'AdviceBenchmark' },
           { data: ->{ enba_keap },  name: :electricity,      units: :relative_percent_0dp },
           { data: ->{ enba_kgap },  name: :gas,              units: :relative_percent_0dp },
@@ -1394,7 +1394,7 @@ module Benchmarking
         name:     'breakdown in the change in energy use since the school joined Energy Sparks',
         columns:  [
           { data: 'addp_name',      name: :name, units: :school_name, chart_data: true },
-          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+          { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           { data: ->{ enba_kea }, name: :year_before_joined,       units: :kwh },
           { data: ->{ enba_ke0 }, name: :last_year,                units: :kwh },
@@ -1810,7 +1810,7 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name,
 
-          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+          { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           # kWh
           {
@@ -1887,7 +1887,7 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name,
 
-          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+          { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           #kwh
           { data: ->{ py23e_pppk },  name: :previous_year, units: :kwh },
@@ -1930,7 +1930,7 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name,
 
-          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+          { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           #kwh
           { data: ->{ py23g_pppk },  name: :previous_year_temperature_adjusted, units: :kwh },
@@ -1975,7 +1975,7 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name,
 
-          { data: ->{ enba_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
+          { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           #kwh
           { data: ->{ py23s_pppk },  name: :previous_year_temperature_adjusted, units: :kwh },
