@@ -56,7 +56,6 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   attr_reader :change_in_gas_use_since_joined_percent, :change_in_storage_heater_use_since_joined_percent
   attr_reader :last_year_electricity_co2, :last_year_gas_co2
   attr_reader :last_year_storage_heater_co2, :last_year_solar_pv_co2
-  attr_reader :activation_date
   attr_reader :solar_type
   attr_reader :recent_fuel_types_for_debug
 
@@ -194,11 +193,6 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       description: 'Debugging information - list of up to date fuel types',
       units:  String
     },
-    activation_date: {
-      description: 'school activation date',
-      units:  Date,
-      benchmark_code: 'sact'
-    },
     solar_type: {
       description: 'Solar type - metered or synthetic',
       units:  String,
@@ -230,8 +224,6 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
 
     set_template_variables(res)
 
-    @activation_date = @school.energysparks_start_date
-
     @solar_type = calculate_solar_type
 
     assign_legacy_variables
@@ -241,6 +233,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     raise EnergySparksNotEnoughDataException, 'Zero up to date meter data (by fuel type)' if available_recent_fuel_types.empty?
     @recent_fuel_types_for_debug = available_recent_fuel_types.join(',')
 
+    #these all calculate a kwh per pupil or floor area figure
     @one_year_energy_per_pupil_kwh      = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :number_of_pupils)
     @one_year_energy_per_floor_area_kwh = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :floor_area)
 
@@ -250,6 +243,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     @one_year_energy_per_pupil_co2      = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :number_of_pupils)
     @one_year_energy_per_floor_area_co2 = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :floor_area)
 
+    #this is a £ per pupil across all fuel types
     per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school, asof_date, available_recent_fuel_types)
     per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school, asof_date, available_recent_fuel_types)
 
