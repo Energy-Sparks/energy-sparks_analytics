@@ -20,6 +20,7 @@ jobs:
   rspec_tests:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         ruby-version: ['2.7.8', '3.0.6']
     steps:
@@ -39,6 +40,7 @@ jobs:
   analytics_tests:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         ruby-version: ['2.7.8', '3.0.6']
     steps:

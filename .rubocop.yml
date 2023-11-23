@@ -30,6 +30,7 @@ AllCops:
     - 'log/**/*'
     - 'test_output/**/*'
     - 'test_support/**/*'
+    - 'vendor/**/*'
 require:
   - rubocop-performance
   - rubocop-rspec
