@@ -8,7 +8,7 @@ module Logging
   logger.level = :error
 end
 
-run_date = Date.new(2023,11,16)
+run_date = Date.new(2023,11,28)
 
 overrides = {
   schools: ['*'], # ['king-ja*', 'crook*', 'hunw*', 'combe*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],

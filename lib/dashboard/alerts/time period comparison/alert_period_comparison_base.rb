@@ -174,7 +174,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     current_period_data             = meter_values_period(current_period)
     previous_period_data            = normalised_period_data(current_period, previous_period)
-    previous_period_data_unadjusted = meter_values_period(current_period)
 
     @difference_kwh       = current_period_data[:kwh]       - previous_period_data[:kwh]
     @difference_£         = current_period_data[:£]         - previous_period_data[:£]
