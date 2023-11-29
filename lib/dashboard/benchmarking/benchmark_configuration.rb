@@ -1866,6 +1866,9 @@ module Benchmarking
             name: :metering,
             units: String
           },
+          { data: ->{ py23e_pnch ? 'Y' : 'N' }, name: :pupils, units: String },
+          { data: ->{ py23g_fach ? 'Y' : 'N' }, name: :floor_area, units: String },
+
           TARIFF_CHANGED_COL
         ],
         column_groups: [
@@ -1873,7 +1876,7 @@ module Benchmarking
           { name: :kwh,      span: 2 },
           { name: :co2_kg, span: 2 },
           { name: :cost,     span: 2 },
-          { name: '',         span: 1 }
+          { name: '',         span: 3 }
         ],
         where:   ->{ !sum_data([py23e_ppp£, py23g_ppp£], true).nil? },
         sort_by:  [0],
@@ -1907,6 +1910,7 @@ module Benchmarking
           { data: ->{ py23e_dif€ },  name: :change_£, units: :£current },
           { data: ->{ percent_change(py23e_ppp€, py23e_cpp€)}, name: :change_pct, units: :percent },
 
+          { data: ->{ py23e_pnch ? 'Y' : 'N' }, name: :pupils, units: String },
           { data: ->{ enba_solr == 'synthetic' ? 'Y' : '' }, name: :estimated,  units: String },
 
           TARIFF_CHANGED_COL
@@ -1916,7 +1920,8 @@ module Benchmarking
           { name: :kwh,      span: 4 },
           { name: :co2_kg, span: 4 },
           { name: :cost,     span: 4 },
-          { name: :solar_self_consumption,   span: 1 }
+          { name: '', span: 1 },
+          { name: :solar_self_consumption,   span: 1 },
         ],
         where:   ->{ !py23e_ppp£.nil? },
         sort_by:  [0],
@@ -1933,7 +1938,7 @@ module Benchmarking
           { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           #kwh
-          { data: ->{ py23g_pppk },  name: :previous_year_temperature_adjusted, units: :kwh },
+          { data: ->{ py23g_pppk },  name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ py23g_cppk},   name: :last_year, units: :kwh},
           { data: ->{ py23g_difk },  name: :change_kwh, units: :kwh },
           { data: ->{ percent_change(py23g_pppk, py23g_cppk)}, name: :change_pct, units: :percent },
@@ -1950,9 +1955,7 @@ module Benchmarking
           { data: ->{ py23g_dif€ },  name: :change_£, units: :£current },
           { data: ->{ percent_change(py23g_ppp€, py23g_cpp€)}, name: :change_pct, units: :percent },
 
-          { data: ->{ py23g_pppu },  name: :previous_year_temperature_unadjusted, units: :kwh },
-          { data: ->{ py23g_cppk - py23g_pppu },  name: :unadjusted_kwh, units: :kwh },
-          { data: ->{ percent_change(py23g_pppu, py23g_cppk)}, name: :change_pct, units: :percent },
+          { data: ->{ py23g_fach ? 'Y' : 'N' }, name: :floor_area, units: String },
 
           TARIFF_CHANGED_COL
         ],
@@ -1961,7 +1964,8 @@ module Benchmarking
           { name: :kwh,      span: 4 },
           { name: :co2_kg, span: 4 },
           { name: :cost,     span: 4 },
-          { name: :kwh, span: 3}
+          { name: :kwh, span: 3},
+          { name: '', span: 1}
         ],
         where:   ->{ !py23g_ppp£.nil? },
         sort_by:  [0],
@@ -1978,7 +1982,7 @@ module Benchmarking
           { data: ->{ addp_sact },  name: :energy_sparks_join_date, units: :date_mmm_yyyy },
 
           #kwh
-          { data: ->{ py23s_pppk },  name: :previous_year_temperature_adjusted, units: :kwh },
+          { data: ->{ py23s_pppk },  name: :previous_year_temperature_unadjusted, units: :kwh },
           { data: ->{ py23s_cppk},   name: :last_year, units: :kwh},
           { data: ->{ py23s_difk },  name: :change_kwh, units: :kwh },
           { data: ->{ percent_change(py23s_pppk, py23s_cppk)}, name: :change_pct, units: :percent },
@@ -1995,9 +1999,7 @@ module Benchmarking
           { data: ->{ py23s_dif€ },  name: :change_£, units: :£current },
           { data: ->{ percent_change(py23s_ppp€, py23s_cpp€)}, name: :change_pct, units: :percent },
 
-          { data: ->{ py23s_pppu },  name: :previous_year_temperature_unadjusted, units: :kwh },
-          { data: ->{ py23s_cppk - py23s_pppu },  name: :unadjusted_kwh, units: :kwh },
-          { data: ->{ percent_change(py23s_pppu, py23s_cppk)}, name: :change_pct, units: :percent },
+          { data: ->{ py23s_fach ? 'Y' : 'N' }, name: :floor_area, units: String },
 
           TARIFF_CHANGED_COL
         ],
@@ -2006,7 +2008,8 @@ module Benchmarking
           { name: :kwh,      span: 4 },
           { name: :co2_kg, span: 4 },
           { name: :cost,     span: 4 },
-          { name: :kwh, span: 3}
+          { name: :kwh, span: 3},
+          { name: '', span: 1}
         ],
         where:   ->{ !py23s_ppp£.nil? },
         sort_by:  [0],

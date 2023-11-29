@@ -180,6 +180,18 @@ module AlertJanAug20222023ComparisonMixIn
       previous_period:        Date.new(2022, 1, 1)..Date.new(2022, 8, 31)
     }
   end
+
+  #Override to disable the default period normalisation and temperature compensation
+  #applied to the previous period. Instead just return the consumption values
+  #for the period, unchanged
+  def normalised_period_data(_current_period, previous_period)
+    meter_values_period(previous_period)
+  end
+
+  #Disable pupil and floor area adjustments between periods
+  def pupil_floor_area_adjustment
+    1.0
+  end
 end
 
 class AlertJanAug20222023ElectricityComparison < AlertArbitraryPeriodComparisonElectricityBase
@@ -189,6 +201,7 @@ class AlertJanAug20222023ElectricityComparison < AlertArbitraryPeriodComparisonE
   def comparison_configuration
     basic_configuration
   end
+
 end
 
 class AlertJanAug20222023GasComparison < AlertArbitraryPeriodComparisonGasBase
