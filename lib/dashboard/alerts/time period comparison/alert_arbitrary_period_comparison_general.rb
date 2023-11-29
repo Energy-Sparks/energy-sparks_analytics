@@ -175,7 +175,7 @@ module AlertJanAug20222023ComparisonMixIn
     {
       name:                   'Jan-August 2022 energy use comparison',
       max_days_out_of_date:   365,
-      enough_days_data:       1,
+      enough_days_data:       242,
       current_period:         Date.new(2023, 1, 1)..Date.new(2023, 8, 31),
       previous_period:        Date.new(2022, 1, 1)..Date.new(2022, 8, 31)
     }
