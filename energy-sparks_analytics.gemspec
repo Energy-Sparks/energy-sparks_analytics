@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.7'
 
   s.add_dependency 'activesupport', '>= 6.0', '< 7.1'
+  s.add_dependency 'benchmark-memory', '~> 0'
   s.add_dependency 'chroma', '~> 0'
   s.add_dependency 'faraday', '~> 2'
   s.add_dependency 'faraday-retry', '~> 2'

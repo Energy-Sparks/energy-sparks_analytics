@@ -20,8 +20,6 @@ end
 group :development do
   gem 'aws-sdk-s3'
   gem 'i18n-tasks'
-  # For profiling code
-  gem 'benchmark-memory'
   gem 'climate_control'
   gem 'rubocop'
   gem 'rubocop-performance'
