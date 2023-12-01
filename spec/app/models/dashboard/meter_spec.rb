@@ -76,6 +76,20 @@ describe Dashboard::Meter do
       end
     end
 
+    describe '.aggregate_pseudo_meter_attribute_key' do
+      {
+        storage_heater: :storage_heater_aggregated,
+        solar_pv: :solar_pv_consumed_sub_meter,
+        exported_solar_pv: :solar_pv_exported_sub_meter,
+        electricity: :aggregated_electricity,
+        gas: :aggregated_gas
+      }.each do |fuel_type, key|
+        it "returns #{key} for #{fuel_type}" do
+          expect(described_class.aggregate_pseudo_meter_attribute_key(fuel_type)).to eq(key)
+        end
+      end
+    end
+
     # TODO: check on fuel type not currently applied
     # it "raises error for unknown fuel type" do
     #   expect {
