@@ -120,6 +120,10 @@ module Dashboard
       case fuel_type
       when :storage_heater
         :storage_heater_aggregated
+      when :solar_pv
+        :solar_pv_consumed_sub_meter
+      when :exported_solar_pv
+        :solar_pv_exported_sub_meter
       else
         :"aggregated_#{fuel_type}"
       end
