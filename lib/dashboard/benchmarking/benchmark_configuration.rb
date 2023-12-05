@@ -149,7 +149,8 @@ module Benchmarking
       ],
       date_limited_comparisons: [
         :change_in_energy_use_since_joined_energy_sparks,
-        :jan_august_2022_2023_energy_comparison
+        :jan_august_2022_2023_energy_comparison,
+        :layer_up_powerdown_day_november_2023
       ]
     }
 
@@ -2016,6 +2017,179 @@ module Benchmarking
         type: %i[table],
         admin_only: true
       },
+      layer_up_powerdown_day_november_2023: {
+        benchmark_class:  BenchmarkLayerUpPowerDownDay2023Comparison,
+        name:       'Change in energy for layer up power down day 24 November 2023 (compared with 17 November 2023)',
+        columns:  [
+          { data: 'addp_name', name: :name, units: :school_name, chart_data: true},
+
+          # kWh
+
+          { data: ->{ sum_if_complete([lu23e1_pppk, lu23g1_pppk, lu23s1_pppk], [lu23e1_cppk, lu23g1_cppk, lu23s1_cppk]) }, name: :previous_day, units: :kwh },
+          { data: ->{ sum_data([lu23e1_cppk, lu23g1_cppk, lu23s1_cppk]) },                                name: :layer_down_day,  units: :kwh },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([lu23e1_pppk, lu23g1_pppk, lu23s1_pppk], [lu23e1_cppk, lu23g1_cppk, lu23s1_cppk]),
+                                      sum_data([lu23e1_cppk, lu23g1_cppk, lu23s1_cppk]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp
+          },
+
+          # CO2
+          { data: ->{ sum_if_complete([lu23e1_pppc, lu23g1_pppc, lu23s1_pppc], [lu23e1_cppc, lu23g1_cppc, lu23s1_cppc]) }, name: :previous_day, units: :co2 },
+          { data: ->{ sum_data([lu23e1_cppc, lu23g1_cppc, lu23s1_cppc]) },                                name: :layer_down_day,  units: :co2 },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([lu23e1_pppc, lu23g1_pppc, lu23s1_pppc], [lu23e1_cppc, lu23g1_cppc, lu23s1_cppc]),
+                                      sum_data([lu23e1_cppc, lu23g1_cppc, lu23s1_cppc]),
+                                      true
+                                    ) },
+            name: :change_pct, units: :relative_percent_0dp
+          },
+
+          # £
+
+          { data: ->{ sum_if_complete([lu23e1_ppp£, lu23g1_ppp£, lu23s1_ppp£], [lu23e1_cpp£, lu23g1_cpp£, lu23s1_cpp£]) }, name: :previous_day, units: :£ },
+          { data: ->{ sum_data([lu23e1_cpp£, lu23g1_cpp£, lu23s1_cpp£]) },                                name: :layer_down_day,  units: :£ },
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([lu23e1_ppp£, lu23g1_ppp£, lu23s1_ppp£], [lu23e1_cpp£, lu23g1_cpp£, lu23s1_cpp£]),
+                                      sum_data([lu23e1_cpp£, lu23g1_cpp£, lu23s1_cpp£]),
+                                      true
+                                    ) },
+            name: :change_£, units: :relative_percent_0dp, chart_data: true
+          },
+
+          # Metering
+
+          { data: ->{
+              [
+                lu23e1_ppp£.nil? ? nil : :electricity,
+                lu23g1_ppp£.nil? ? nil : :gas,
+                lu23s1_ppp£.nil? ? nil : :storage_heaters
+              ].compact.join(', ')
+            },
+            name: :metering,
+            units: String
+          },
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: :kwh,       span: 3 },
+          { name: :co2_kg,    span: 3 },
+          { name: :cost,      span: 3 },
+          { name: '',         span: 1 }
+        ],
+        where:   ->{ !sum_data([lu23e1_ppp£, lu23g1_ppp£, lu23s1_ppp£], true).nil? },
+        sort_by:  [9],
+        type: %i[chart table],
+        admin_only: true
+      },
+      layer_up_powerdown_day_november_2023_electricity_table: {
+        benchmark_class:  BenchmarkLayerUpPowerDownDay2023ComparisonElectricityTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Change in electricity for layer up power down day November 2023',
+        columns:  [
+          { data: 'addp_name', name: :name, units: :school_name },
+
+          # kWh
+          { data: ->{ lu23e1_pppk }, name: :previous_day, units: :kwh },
+          { data: ->{ lu23e1_cppk }, name: :layer_down_day,  units: :kwh },
+          { data: ->{ percent_change(lu23e1_pppk, lu23e1_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ lu23e1_pppc }, name: :previous_day, units: :co2 },
+          { data: ->{ lu23e1_cppc }, name: :layer_down_day,  units: :co2 },
+          { data: ->{ percent_change(lu23e1_pppc, lu23e1_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ lu23e1_ppp£ }, name: :previous_day, units: :£ },
+          { data: ->{ lu23e1_cpp£ }, name: :layer_down_day,  units: :£ },
+          { data: ->{ percent_change(lu23e1_ppp£, lu23e1_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
+        ],
+        where:   ->{ !lu23e1_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+        admin_only: true
+      },
+      layer_up_powerdown_day_november_2023_gas_table: {
+        benchmark_class:  BenchmarkLayerUpPowerDownDay2023ComparisonGasTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Change in gas for layer up power down day November 2023',
+        columns:  [
+          { data: 'addp_name', name: :name, units: :school_name },
+
+          # kWh
+          { data: ->{ lu23g1_pppu }, name: :previous_day_temperature_unadjusted, units: :kwh },
+          { data: ->{ lu23g1_pppk }, name: :previous_day, units: :kwh },
+          { data: ->{ lu23g1_cppk }, name: :layer_down_day,  units: :kwh },
+          { data: ->{ percent_change(lu23g1_pppk, lu23g1_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ lu23g1_pppc }, name: :previous_day, units: :co2 },
+          { data: ->{ lu23g1_cppc }, name: :layer_down_day,  units: :co2 },
+          { data: ->{ percent_change(lu23g1_pppc, lu23g1_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ lu23g1_ppp£ }, name: :previous_day, units: :£ },
+          { data: ->{ lu23g1_cpp£ }, name: :layer_down_day,  units: :£ },
+          { data: ->{ percent_change(lu23g1_ppp£, lu23g1_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
+        ],
+        where:   ->{ !lu23g1_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+        admin_only: true
+      },
+      layer_up_powerdown_day_november_2023_storage_heater_table: {
+        benchmark_class:  BenchmarkLayerUpPowerDownDay2023ComparisonStorageHeaterTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Change in gas for layer up power down day November 2023',
+        columns:  [
+          { data: 'addp_name', name: :name, units: :school_name },
+
+          # kWh
+          { data: ->{ lu23s1_pppu }, name: :previous_day_temperature_unadjusted, units: :kwh },
+          { data: ->{ lu23s1_pppk }, name: :previous_day, units: :kwh },
+          { data: ->{ lu23s1_cppk }, name: :layer_down_day,  units: :kwh },
+          { data: ->{ percent_change(lu23s1_pppk, lu23s1_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ lu23s1_pppc }, name: :previous_day, units: :co2 },
+          { data: ->{ lu23s1_cppc }, name: :layer_down_day,  units: :co2 },
+          { data: ->{ percent_change(lu23s1_pppc, lu23s1_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ lu23s1_ppp£ }, name: :previous_day, units: :£ },
+          { data: ->{ lu23s1_cpp£ }, name: :layer_down_day,  units: :£ },
+          { data: ->{ percent_change(lu23s1_ppp£, lu23s1_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
+
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
+        ],
+        where:   ->{ !lu23s1_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+        admin_only: true
+      }
     }.freeze
   end
 end
