@@ -19,8 +19,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activesupport', '>= 6.0', '< 7.1'
   s.add_dependency 'chroma', '~> 0.2.0'
-  s.add_dependency 'faraday', '>= 1.0.1', '< 2.8.0'
-  s.add_dependency 'faraday_middleware', '~> 1.0.0'
+  s.add_dependency 'faraday', '~> 2'
+  s.add_dependency 'faraday-retry', '~> 2'
   s.add_dependency 'hashdiff', '~> 1.0.0'
   s.add_dependency 'html-table', '~> 1.5.1'
   s.add_dependency 'interpolate', '~> 0.3.0'
