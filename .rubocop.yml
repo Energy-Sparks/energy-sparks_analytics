@@ -36,6 +36,8 @@ require:
 
 Naming/MethodParameterName:
   AllowedNames: ['kw', '£', 'co2']
+Naming/VariableNumber:
+  AllowedPatterns: ['_[0-9]+']
 Naming/VariableName:
   AllowedPatterns: ['_£', '£']
 Naming/MethodName:

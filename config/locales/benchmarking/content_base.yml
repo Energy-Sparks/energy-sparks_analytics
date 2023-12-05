@@ -66,8 +66,8 @@ en:
         holiday_usage_last_year: Cost of energy used in upcoming holiday last year
         hot_water_efficiency: Hot Water Efficiency
         jan_august_2022_2023_energy_comparison: Jan to August 2022 to 2023 energy use
-        layer_up_powerdown_day_november_2023: Change in energy for layer up power down day 24 November 2023 (compared with 17 November 2023)
         layer_up_powerdown_day_november_2022: Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)
+        layer_up_powerdown_day_november_2023: Change in energy for layer up power down day 24 November 2023 (compared with 17 November 2023)
         recent_change_in_baseload: Recent change in baseload
         seasonal_baseload_variation: Seasonal baseload variation
         sept_nov_2021_2022_energy_comparison: September to November 2021 versus 2022 energy use
@@ -393,9 +393,9 @@ en:
         benchmark_holidays_change_base:
           period_type: holiday
           period_types: holidays
-        benchmark_layer_up_powerdown_day_november_2023_gas_table:
-          introduction_text: 'The change columns are calculated using temperature adjusted values:'
         benchmark_jan_august_2022_2023_gas_table:
+          introduction_text: 'The change columns are calculated using temperature adjusted values:'
+        benchmark_layer_up_powerdown_day_november_2023_gas_table:
           introduction_text: 'The change columns are calculated using temperature adjusted values:'
         benchmark_sept_nov_2022_gas_table:
           introduction_text: 'The change columns are calculated using temperature adjusted values:'
@@ -657,6 +657,23 @@ en:
             The first table provides an summary of overall change in energy usage, the other tables provide
             more detail for electricity, gas and storage heaters.
             </p>
+        layer_up_powerdown_day_november_2022:
+          introduction_text_html: |-
+            <p>
+              This comparison below for gas and storage heaters has the
+              the previous period temperature compensated to the current
+              period's temperatures.
+            </p>
+            <p>
+              Schools' solar PV production has been removed from the comparison.
+            </p>
+            <p>
+              CO2 values for electricity (including where the CO2 is
+              aggregated across electricity, gas, storage heaters) is difficult
+              to compare for short periods as it is dependent on the carbon intensity
+              of the national grid on the days being compared and this could vary by up to
+              300&percnt; from day to day.
+            </p>
         layer_up_powerdown_day_november_2023:
           introduction_text_html: |-
             <p>
@@ -677,23 +694,6 @@ en:
             <p>
               The total kWh, CO2 and cost changes will only include the fuel types for which we have data. So, e.g. for a school does not have gas data for the
               17th November it will not appear in the gas table, but may still have its electricity data present.
-            </p>
-        layer_up_powerdown_day_november_2022:
-          introduction_text_html: |-
-            <p>
-              This comparison below for gas and storage heaters has the
-              the previous period temperature compensated to the current
-              period's temperatures.
-            </p>
-            <p>
-              Schools' solar PV production has been removed from the comparison.
-            </p>
-            <p>
-              CO2 values for electricity (including where the CO2 is
-              aggregated across electricity, gas, storage heaters) is difficult
-              to compare for short periods as it is dependent on the carbon intensity
-              of the national grid on the days being compared and this could vary by up to
-              300&percnt; from day to day.
             </p>
         optimum_start_analysis:
           caveat_text_html: |-
