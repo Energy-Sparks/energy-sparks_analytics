@@ -20,8 +20,7 @@ gem 'soda-ruby', require: 'soda'
 # statsample also had a problem where it overrode the definition of Array#sum
 # with dodgy results. This is fixed in master, which is what this release is
 # based upon.
-gem 'statsample', git: 'https://github.com/Energy-Sparks/statsample', tag: '2.1.1-energy-sparks',
-                  branch: 'update-gems-and-awesome-print'
+gem 'statsample', git: 'https://github.com/Energy-Sparks/statsample', branch: 'update-gems-and-awesome-print'
 gem 'structured_warnings'
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw]
 gem 'write_xlsx'
