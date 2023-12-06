@@ -894,4 +894,42 @@ module Benchmarking
   class BenchmarkJanAugust20222023ComparisonStorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
   end
+
+  #========================================================================================
+  class BenchmarkLayerUpPowerDownDay2023Comparison < BenchmarkChangeAdhocComparison
+
+    def electricity_content(school_ids:, filter:)
+      extra_content(:layer_up_powerdown_day_november_2023_electricity_table, filter: filter)
+    end
+
+    def gas_content(school_ids:, filter:)
+      extra_content(:layer_up_powerdown_day_november_2023_gas_table, filter: filter)
+    end
+
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:layer_up_powerdown_day_november_2023_storage_heater_table, filter: filter)
+    end
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.layer_up_powerdown_day_november_2023.introduction_text_html')
+      ERB.new(text).result(binding)
+    end
+
+  end
+
+  class BenchmarkLayerUpPowerDownDay2023ComparisonElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+  end
+
+  class BenchmarkLayerUpPowerDownDay2023ComparisonGasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      I18n.t('analytics.benchmarking.content.benchmark_layer_up_powerdown_day_november_2023_gas_table.introduction_text')
+    end
+  end
+
+  class BenchmarkLayerUpPowerDownDay2023ComparisonStorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
+  end
 end

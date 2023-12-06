@@ -221,3 +221,54 @@ class AlertJanAug20222023StorageHeaterComparison < AlertArbitraryPeriodCompariso
     basic_configuration
   end
 end
+
+#===================================================================================================
+# Power up layer down day November 2023
+module AlertLayerUpPowerdownNovember2023BasicConfigMixIn
+  def basic_configuration
+    {
+      name:                   'Layer up power down day 24 November 2023',
+      max_days_out_of_date:   365,
+      enough_days_data:       1,
+      current_period:         Date.new(2023, 11, 24)..Date.new(2023, 11, 24),
+      previous_period:        Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
+    }
+  end
+end
+
+class AlertLayerUpPowerdownNovember2023ElectricityComparison < AlertArbitraryPeriodComparisonElectricityBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertLayerUpPowerdownNovember2023BasicConfigMixIn
+
+  def comparison_configuration
+    {
+      comparison_chart:       :layerup_powerdown_november_2023_electricity_comparison_alert
+    }.merge(basic_configuration)
+  end
+end
+
+class AlertLayerUpPowerdownNovember2023GasComparison < AlertArbitraryPeriodComparisonGasBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertLayerUpPowerdownNovember2023BasicConfigMixIn
+
+  def comparison_configuration
+    {
+      comparison_chart:       :layerup_powerdown_november_2023_gas_comparison_alert
+    }.merge(basic_configuration)
+  end
+
+  def calculate(asof_date)
+    super(asof_date)
+  end
+end
+
+class AlertLayerUpPowerdownNovember2023StorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertLayerUpPowerdownNovember2023BasicConfigMixIn
+
+  def comparison_configuration
+    {
+      comparison_chart:       :layerup_powerdown_november_2023_storage_heater_comparison_alert
+    }.merge(basic_configuration)
+  end
+end

@@ -8,7 +8,7 @@ module Logging
   logger.level = :error
 end
 
-run_date = Date.new(2023,11,28)
+run_date = Date.new(2023,12,5)
 
 overrides = {
   schools: ['*'], # ['king-ja*', 'crook*', 'hunw*', 'combe*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
@@ -17,7 +17,7 @@ overrides = {
     calculate_and_save_variables: true,
     asof_date: run_date,
     pages: %i[
-      jan_august_2022_2023_energy_comparison
+      layer_up_powerdown_day_november_2023
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }
