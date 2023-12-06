@@ -188,11 +188,11 @@ module Benchmarking
 
     def includes_tariff_changed_column?(school_ids, filter, user_type)
       cols = column_headings(school_ids, filter, user_type)
-      cols.any?{ |col_name| col_name == :tariff_changed }
+      cols.any?{ |col_name| col_name == tariff_changed_column_name }
     end
 
     def tariff_has_changed?(school_ids, filter, user_type)
-      col_index = column_headings(school_ids, filter, user_type).index(:tariff_changed)
+      col_index = column_headings(school_ids, filter, user_type).index(tariff_changed_column_name)
       return false if col_index.nil?
 
       data = raw_data(school_ids, filter, user_type)
@@ -201,6 +201,10 @@ module Benchmarking
       tariff_changes = data.map { |row| row[col_index] }
 
       tariff_changes.any?
+    end
+
+    def tariff_changed_column_name
+      I18n.t("analytics.benchmarking.configuration.column_headings.#{:tariff_changed}")
     end
 
     def tariff_changed_explanation(school_ids, filter, user_type)
@@ -212,4 +216,3 @@ module Benchmarking
     end
   end
 end
-
