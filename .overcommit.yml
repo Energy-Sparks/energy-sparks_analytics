@@ -13,22 +13,107 @@
 # For a complete list of options that you can use to customize hooks, see:
 # https://github.com/sds/overcommit#configuration
 #
-PreCommit:
- RuboCop:
-   enabled: true
-   on_warn: fail # Treat all warnings as failures
-   problem_on_unmodified_line: ignore
+CommitMsg:
+  ALL:
+    requires_files: false
+    quiet: false
 
- TrailingWhitespace:
-   enabled: true
-   exclude:
-     - 'test_output/**/*' # Ignore trailing whitespace in generated files
-#    exclude:
-#      - '**/db/structure.sql' # Ignore trailing whitespace in generated files
-#
-#PostCheckout:
-#  ALL: # Special hook name that customizes all hooks of this type
-#    quiet: true # Change all post-checkout hooks to only display output on failure
-#
-#  IndexTags:
-#    enabled: true # Generate a tags file with `ctags` each time HEAD changes
+  CapitalizedSubject:
+    enabled: true
+    description: 'Check subject capitalization'
+
+  EmptyMessage:
+    enabled: true
+    description: 'Check for empty commit message'
+    quiet: true
+
+  SingleLineSubject:
+    enabled: true
+    description: 'Check subject line'
+
+  TextWidth:
+    enabled: true
+    description: 'Check text width'
+    max_subject_width: 60
+    min_subject_width: 0
+    max_body_width: 72
+
+  TrailingPeriod:
+    enabled: true
+    description: 'Check for trailing periods in subject'
+
+PreCommit:
+  AuthorEmail:
+    enabled: true
+    description: 'Check author email'
+    requires_files: false
+    required: true
+    quiet: true
+    pattern: '^[^@]+@.*$'
+
+  AuthorName:
+    enabled: true
+    description: 'Check for author name'
+    requires_files: false
+    required: true
+    quiet: true
+
+  BrokenSymlinks:
+    enabled: true
+    description: 'Check for broken symlinks'
+    quiet: true
+
+  CaseConflicts:
+    enabled: true
+    description: 'Check for case-insensitivity conflicts'
+    quiet: true
+
+  Fasterer:
+    enabled: true
+    description: 'Analyzing for potential speed improvements'
+    required_executable: 'fasterer'
+    install_command: 'gem install fasterer'
+    include: '**/*.rb'
+
+  ForbiddenBranches:
+    enabled: true
+    description: 'Check for commit to forbidden branch (master)'
+    branch_patterns: ['master']
+
+  HardTabs:
+    enabled: true
+    description: 'Check for hard tabs'
+    quiet: true
+    required_executable: 'grep'
+    flags: ['-IHn', "\t"]
+    exclude:
+      - '**/Makefile'
+      - '**/*.go'
+
+  LocalPathsInGemfile:
+    enabled: true
+    description: 'Check for local paths in Gemfile'
+    required_executable: 'grep'
+    flags: ['-IHnE', "^[^#]*((\\bpath:)|(:path[ \t]*=>))"]
+    include: '**/Gemfile'
+
+  MergeConflicts:
+    enabled: true
+    description: 'Check for merge conflicts'
+    quiet: true
+    required_executable: 'grep'
+    flags: ['-IHn', "^<<<<<<<[ \t]"]
+
+  RuboCop:
+    enabled: true
+    description: 'Analyze with RuboCop'
+    required_executable: 'rubocop'
+    on_warn: fail # Treat all warnings as failures
+    problem_on_unmodified_line: ignore
+    flags: ['--format=simple', '--force-exclusion', '--display-cop-names', 'app', 'lib']
+    install_command: 'gem install rubocop'
+
+  TrailingWhitespace:
+    enabled: true
+    exclude:
+      - 'test_output/**/*' # Ignore trailing whitespace in generated files
