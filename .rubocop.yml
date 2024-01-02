@@ -30,9 +30,11 @@ AllCops:
     - 'log/**/*'
     - 'test_output/**/*'
     - 'test_support/**/*'
+    - 'vendor/**/*'
 require:
   - rubocop-performance
   - rubocop-rspec
+  - rubocop-factory_bot
 
 Naming/MethodParameterName:
   AllowedNames: ['kw', '£', 'co2']
