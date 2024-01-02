@@ -25,7 +25,9 @@ describe CommunityUseBreakdown do
   describe '#days_kwh_x48' do
     let(:community_use_times)   { [] }
     let(:community_use)         { nil }
-    let(:day)                   { Date.new(2023, 10, 30) }
+    let(:last_year)             { Date.today.year - 1 }
+    # to match Autumn holiday in holidays factory
+    let(:day)                   { Date.new(last_year, 10, 16) }
 
     let(:days_kwh_x48)          { open_close_breakdown.days_kwh_x48(day, :kwh, community_use: community_use) }
 
@@ -283,7 +285,9 @@ describe CommunityUseBreakdown do
   describe '#one_day_kwh' do
     let(:community_use_times)   { [] }
     let(:community_use)         { nil }
-    let(:day)                   { Date.new(2023, 10, 30) }
+    let(:last_year)             { Date.today.year - 1 }
+    # to match Autumn holiday in holidays factory
+    let(:day)                   { Date.new(last_year, 10, 16) }
 
     let(:one_day_kwh)          { open_close_breakdown.one_day_kwh(day, :kwh, community_use: community_use) }
 
@@ -403,8 +407,10 @@ describe CommunityUseBreakdown do
     let(:community_use_times)   { [] }
     let(:community_use)         { nil }
     # Should cover a weekend
-    let(:start_date)            { Date.new(2023, 10, 30) - 7 }
-    let(:end_date)              { Date.new(2023, 10, 30) }
+    let(:last_year)             { Date.today.year - 1 }
+    # to match Autumn holiday in holidays factory
+    let(:start_date)            { Date.new(last_year, 10, 16) - 7 }
+    let(:end_date)              { Date.new(last_year, 10, 16) }
 
     let(:kwh_date_range)        { open_close_breakdown.kwh_date_range(start_date, end_date, :kwh, community_use: community_use) }
 
@@ -436,7 +442,9 @@ describe CommunityUseBreakdown do
   describe '#kwh' do
     let(:community_use_times)   { [] }
     let(:community_use)         { { filter: :all, aggregate: :none } }
-    let(:day)                   { Date.new(2023, 10, 30) }
+    let(:last_year)             { Date.today.year - 1 }
+    # to match Autumn holiday in holidays factory
+    let(:day)                   { Date.new(last_year, 10, 16) }
     let(:hh_index)              { 12 }
 
     let(:kwh) { open_close_breakdown.kwh(day, hh_index, :kwh, community_use: community_use) }
