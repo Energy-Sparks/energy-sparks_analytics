@@ -17,12 +17,6 @@ class YAxisScaling
     # rubocop:enable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
   end
 
-  def scale_from_kwh_deprecated(value, unit, scaling_factor_type, fuel_type, meter_collection)
-    unit_scale = scale_unit_from_kwh(unit, fuel_type, meter_collection)
-    factor = scaling_factor(scaling_factor_type, meter_collection)
-    value * factor * unit_scale
-  end
-
   def self.unit_description(unit, scaling_factor_type, value)
     val_str = value.nil? ? 'NA' : value
     Logging.logger.debug "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}"

@@ -30,16 +30,6 @@ class ChartManager
       chart_group_result[:charts].push(chart)
     end
 
-    if chart_group[:advice_text]
-      advice = DashboardChartAdviceBase.advice_factory_group(chart_group[:type], @school, chart_group, chart_group_result[:charts])
-
-      unless advice.nil?
-        advice.generate_advice
-        chart_group_result[:advice_header] = advice.header_advice
-        chart_group_result[:advice_footer] = advice.footer_advice
-      end
-    end
-
     ap(chart_group_result, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
     chart_group_result
   end

@@ -71,9 +71,6 @@ jobs:
     # - name: Run benchmarks tests
     #   run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_benchmarks.rb
 
-    # - name: Run building simulator tests
-    #   run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_building_simulator.rb
-
     # - name: Run charts tests
     #   run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_charts.rb
 

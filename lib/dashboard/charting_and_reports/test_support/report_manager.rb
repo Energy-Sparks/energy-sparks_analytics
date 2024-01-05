@@ -15,7 +15,6 @@ class ReportManager
 =begin
      # 'Main Dashboard'        => %i[benchmark daytype_breakdown group_by_week_gas group_by_week_electricity],
      # 'Heat Analysis'         => %i[thermostatic cusum summer_hot_water],
-     # 'Electricity Analysis'  => %i[group_by_week baseload simulator]
       'Summary'                  => %i[day_of_week group_by_month day],
       'Heating and Hot Water'    => %i[group_by_week thermostatic hotwater],
       'Electricity'              => %i[group_by_week_electric baseload electricity_year electricity_acyear],
