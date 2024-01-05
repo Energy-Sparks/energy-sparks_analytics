@@ -61,10 +61,6 @@ module Dashboard
       process_meter_attributes
     end
 
-    def amr_data=(amr_data)
-      @amr_data = amr_data
-    end
-
     def set_mpan_mprn_id(identifier)
       @id = identifier
       @mpan_mprn = identifier.to_i
@@ -120,6 +116,10 @@ module Dashboard
       case fuel_type
       when :storage_heater
         :storage_heater_aggregated
+      when :solar_pv
+        :solar_pv_consumed_sub_meter
+      when :exported_solar_pv
+        :solar_pv_exported_sub_meter
       else
         :"aggregated_#{fuel_type}"
       end

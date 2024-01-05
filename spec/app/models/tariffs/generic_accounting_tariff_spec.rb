@@ -206,7 +206,7 @@ describe GenericAccountingTariff do
 
         it 'includes the charge' do
           # value is from ClimateChangeLevy
-          expect(accounting_cost.all_costs_x48[:climate_change_levy__2023_24]).to eq Array.new(48, 0.01 * 0.00775)
+          expect(accounting_cost.all_costs_x48[:climate_change_levy]).to eq Array.new(48, 0.01 * 0.00775)
         end
       end
 

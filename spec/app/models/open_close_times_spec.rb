@@ -11,7 +11,9 @@ describe OpenCloseTimes do
     let(:holidays)              { build(:holidays, :with_academic_year) }
     let(:open_close_times)      { described_class.convert_frontend_times(school_times, community_use_times, holidays) }
 
-    let(:day)                   { Date.new(2023, 10, 30) }
+    let(:last_year)             { Date.today.year - 1 }
+    # to match Autumn holiday in holidays factory
+    let(:day)                   { Date.new(last_year, 10, 16) }
 
     describe 'with school times only' do
       it 'creates school times' do

@@ -334,9 +334,9 @@ class MeterAttributes
         tilt:                   MeterAttributeTypes::Integer.define,
         shading:                MeterAttributeTypes::Integer.define,
         fit_£_per_kwh:          MeterAttributeTypes::Float.define,
-        override_generation:    MeterAttributeTypes::Boolean.define(required: true),
-        override_export:        MeterAttributeTypes::Boolean.define(required: true),
-        override_self_consume:  MeterAttributeTypes::Boolean.define(required: true),
+        override_generation:    MeterAttributeTypes::Boolean.define(required: false, hint: 'Check this to override generation data'),
+        override_export:        MeterAttributeTypes::Boolean.define(required: false, hint: 'Check this to override export data'),
+        override_self_consume:  MeterAttributeTypes::Boolean.define(required: false, hint: 'Check this to override self consumption data')
       }
     )
 

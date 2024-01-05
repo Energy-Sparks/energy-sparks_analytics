@@ -15,32 +15,25 @@ Gem::Specification.new do |s|
   # s.files         = `git ls-files`.split("\n")
   # s.test_files    = `git ls-files -- rspec/*`.split("\n")
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 2.7.0'
+  s.required_ruby_version = '>= 2.7'
 
   s.add_dependency 'activesupport', '>= 6.0', '< 7.1'
-  s.add_dependency 'chroma', '~> 0.2.0'
-  s.add_dependency 'faraday', '>= 1.0.1', '< 2.8.0'
-  s.add_dependency 'faraday_middleware', '~> 1.0.0'
-  s.add_dependency 'hashdiff', '~> 1.0.0'
-  s.add_dependency 'html-table', '~> 1.5.1'
-  s.add_dependency 'interpolate', '~> 0.3.0'
-  s.add_dependency 'require_all', '~> 2.0.0'
-  s.add_dependency 'roo'
-  s.add_dependency 'roo-xls', '~> 1.2.0'
-  s.add_dependency 'ruby-limiter', '~> 1.1.0'
-  s.add_dependency 'ruby-sun-times', '~> 0.1.5'
-  s.add_dependency 'soda-ruby', '~> 0.2.25'
-  s.add_dependency 'statsample', '~> 2.1.0'
-  s.add_dependency 'structured_warnings', '~> 0.3.0'
-  s.add_dependency 'write_xlsx', '>= 0.85.5', '< 1.12.0'
+  s.add_dependency 'benchmark-memory', '~> 0'
+  s.add_dependency 'chroma', '~> 0'
+  s.add_dependency 'faraday', '~> 2'
+  s.add_dependency 'faraday-retry', '~> 2'
+  s.add_dependency 'hashdiff', '~> 1'
+  s.add_dependency 'html-table', '~> 1'
+  s.add_dependency 'interpolate', '~> 0.3.0' # upstream repository archived since 2018
+  s.add_dependency 'require_all', '~> 3'
+  s.add_dependency 'roo', '~> 2'
+  s.add_dependency 'roo-xls', '~> 1'
+  s.add_dependency 'ruby-limiter', '~> 2'
+  s.add_dependency 'ruby-sun-times', '~> 0'
+  # doesn't appear to be used - s.add_dependency 'soda-ruby', '~> 0' # version 1 released 2019
+  s.add_dependency 'statsample', '~> 2' # no release since 2017 - using forked version in Gemfile
+  s.add_dependency 'structured_warnings', '~> 0'
+  s.add_dependency 'write_xlsx', '~> 1'
 
-  # For profiling code
-  s.add_dependency 'benchmark-memory', '~> 0.1.2'
-  s.add_dependency 'ruby-prof', '~> 0.17.0'
-
-  # Useful for debugging
-  s.add_dependency 'pry-byebug'
-  # For testing
-  s.add_dependency 'rspec'
   s.metadata['rubygems_mfa_required'] = 'true'
 end

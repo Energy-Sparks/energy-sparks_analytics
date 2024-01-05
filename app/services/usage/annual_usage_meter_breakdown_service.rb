@@ -50,7 +50,7 @@ module Usage
     end
 
     def add_percentages(meter_breakdown, total_kwh)
-      meter_breakdown.each do |_meter, usage|
+      meter_breakdown.each_value do |usage|
         usage[:usage].percent = usage[:usage].kwh / total_kwh
       end
     end

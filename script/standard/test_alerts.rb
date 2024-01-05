@@ -7,16 +7,16 @@ require_rel '../../test_support'
 #   logger.level = :debug
 # end
 
-asof_date = Date.new(2023, 7, 19)
+asof_date = Date.new(2023, 10, 2)
 # schools = ['t*']
-schools = ['acme*']
+schools = ['sy*']
 
 overrides = {
   schools:  schools,
   cache_school: false,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
   alerts:   { alerts: [
-    AlertElectricityBaseloadVersusBenchmark
+#    AlertElectricityBaseloadVersusBenchmark
 #    AlertThermostaticControl
 #    AlertEnergyAnnualVersusBenchmark,
 #    AlertSchoolWeekComparisonGas,
@@ -44,6 +44,11 @@ overrides = {
 #    AlertEaster2023ShutdownStorageHeaterComparison
 #    AlertOutOfHoursElectricityUsagePreviousYear
 #     AlertSolarGeneration
+#    AlertJanAug20222023ElectricityComparison,
+#    AlertJanAug20222023GasComparison,
+#    AlertJanAug20222023StorageHeaterComparison,
+    AlertEnergyAnnualVersusBenchmark,
+    AlertAdditionalPrioritisationData
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [], control: { asof_date: asof_date } }

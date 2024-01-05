@@ -31,13 +31,13 @@ describe OneDaysCostData do
         {
           'flat_rate' => Array.new(48, 0.1),
           'Feed in tariff levy' => Array.new(48, 0.1),
-          :climate_change_levy__2023_24 => Array.new(48, 0.1)
+          :climate_change_levy => Array.new(48, 0.1)
         }
       end
       let(:one_days_cost) { build(:one_days_cost, rates_x48: rates_x48) }
 
       it 'lists all of them' do
-        expect(bill_components).to eq ['flat_rate', 'Feed in tariff levy', :climate_change_levy__2023_24,
+        expect(bill_components).to eq ['flat_rate', 'Feed in tariff levy', :climate_change_levy,
                                        :standing_charge]
       end
     end

@@ -4,35 +4,44 @@ require_relative '../../../../lib/dashboard/data_sources/weather/historic/meteos
 
 describe MeteoStatApi do
   let(:status) { 200 }
-  let(:response) { double(status: status, body: '{"a": "1"}') }
+  let(:stubs) { Faraday::Adapter::Test::Stubs.new }
+  let(:api) { described_class.new('123', stubs) }
 
-  before do
-    allow_any_instance_of(Faraday::Connection).to receive(:get).and_return(response)
+  after do
+    Faraday.default_connection = nil
+    stubs.verify_stubbed_calls
   end
 
-  describe 'when rate limiting' do
+  context 'when rate limiting' do
     it 'is limited' do
-      start_time = Time.now
-      api = described_class.new('123')
-      10.times { api.find_station('xyz') }
-      end_time = Time.now
-      expect(end_time).to be > start_time + 2
+      add_stub(200)
+      expect { 10.times { api.find_station('xyz') } }.to change(Time, :now).by_at_least(2)
     end
   end
 
-  describe 'when response is 200' do
+  context 'when response is 200' do
     it 'returns parsed data' do
-      expect(described_class.new('123').find_station('xyz')).to eq({ 'a' => '1' })
+      add_stub(200)
+      expect(api.find_station('xyz')).to eq({ 'a' => '1' })
     end
   end
 
-  describe 'when response is http error' do
-    let(:status) { 404 }
-
+  context 'when response is http error' do
     it 'tries once only then raise error' do
-      expect  do
-        described_class.new('123').find_station('xyz')
-      end.to raise_error(MeteoStatApi::HttpError)
+      add_stub(404)
+      expect { api.find_station('xyz') }.to raise_error(MeteoStatApi::HttpError)
     end
+  end
+
+  context 'when response is 429' do
+    it 'retries and returns parsed data' do
+      add_stub(429)
+      add_stub(200)
+      expect(api.find_station('xyz')).to eq({ 'a' => '1' })
+    end
+  end
+
+  def add_stub(status_code)
+    stubs.get('/stations/meta') { [status_code, { 'Content-Type': 'application/json' }, '{"a": "1"}'] }
   end
 end

@@ -3,22 +3,22 @@
 FactoryBot.define do
   factory :school, class: 'Dashboard::School' do
     transient do
-      sequence(:id)   { |n| n }
-      sequence(:name) { |n| "test #{n} school" }
-      address         { '1 Station Road' }
-      floor_area      { BigDecimal('1234.567') }
-      sequence(:number_of_pupils)
-      school_type     { :primary }
-      area_name       { 'Bath' }
+      sequence(:id)    { |n| n }
+      sequence(:name)  { |n| "test #{n} school" }
+      address          { '1 Station Road' }
+      floor_area       { 5000 }
+      number_of_pupils { 1000 }
+      school_type      { :primary }
+      area_name        { 'Bath' }
       sequence(:urn)
-      postcode        { 'ab1 2cd' }
-      country         { :england }
-      funding_status  { :state }
-      activation_date { Date.today }
-      created_at      { Date.today }
-      latitude        { 51.509865 }
-      longitude       { -0.118092 }
-      data_enabled    { true }
+      postcode         { 'ab1 2cd' }
+      country          { :england }
+      funding_status   { :state }
+      activation_date  { Date.today }
+      created_at       { Date.today }
+      latitude         { 51.509865 }
+      longitude        { -0.118092 }
+      data_enabled     { true }
     end
 
     initialize_with do

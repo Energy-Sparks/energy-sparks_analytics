@@ -53,5 +53,24 @@ FactoryBot.define do
         end
       end
     end
+
+    trait :with_grid_carbon_intensity do
+      transient do
+        start_date            { Date.yesterday - 7 }
+        end_date              { Date.yesterday }
+        meter_id              { 1234 }
+        flat_rate             { nil }
+        grid_carbon_intensity { nil }
+      end
+
+      after(:build) do |amr_data, evaluator|
+        carbon_intensity = if evaluator.grid_carbon_intensity.nil?
+                             build(:grid_carbon_intensity, start_date: evaluator.start_date, end_date: evaluator.end_date)
+                           else
+                             evaluator.grid_carbon_intensity
+                           end
+        amr_data.set_carbon_emissions(evaluator.meter_id, evaluator.flat_rate, carbon_intensity)
+      end
+    end
   end
 end

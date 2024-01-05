@@ -898,7 +898,11 @@ module AnalyseHeatingAndHotWater
       }
       interpolation = Interpolate::Points.new(optimum_start_regression)
       start_time = interpolation.at(temperature)
-      [TimeOfDay.time_of_day_from_halfhour_index(start_time * 2.0), (start_time * 2).to_i]
+      #previously we calculated time of day using start_time * 2.0. but this produces overly
+      #precise timings, e.g. 05.02, 03:57, 03:38, which we can't confidently use or display
+      #to users. So we now round to the half-hourly index, which aligns better with our
+      #prediction of when heating is on, which is only to an hh index.
+      [TimeOfDay.time_of_day_from_halfhour_index((start_time * 2).to_i), (start_time * 2).to_i]
     end
 
     def model_configuration_pairs_format

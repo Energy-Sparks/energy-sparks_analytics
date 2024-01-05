@@ -165,13 +165,11 @@ module SolarPhotovoltaics
       }
     end
 
-    # rubocop:disable Lint/FloatComparison
     def capital_costs(kwp)
       # Costs estimated using range of data provided by Egni, BWCE, Ebay
       # See internal analysis spreadsheet. Updated 2023-06-09
       kwp == 0.0 ? 0.0 : (1584 * kwp**0.854)
     end
-    # rubocop:enable Lint/FloatComparison
 
     def number_of_panels(kwp)
       # assume 300 Wp per panel

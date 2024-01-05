@@ -8,25 +8,42 @@ AllCops:
     - 'app/services/**/*.rb'
 #    - 'app/models/**/*.rb'
     - 'spec/**/*.rb'
+    - 'lib/dashboard/alerts/common/benchmark_metrics.rb'
   Exclude:
 #    - 'app/models/**/*'
     - 'config/**/*'
     - 'InputData/**/*'
     - 'script/**/*'
-    - 'lib/**/*'
+    - 'lib/dasboard/advice/**/*'
+    - 'lib/dasboard/aggregation/**/*'
+    - 'lib/dashboard/alerts/common/*alert*'
+    - 'lib/dashboard/alerts/electricity/**/*'
+    - 'lib/dashboard/alerts/gas/**/*'
+    - 'lib/dashboard/alerts/storage heaters/**/*'
+    - 'lib/dashboard/alerts/time period comparison/**/*'
+    - 'lib/dashboard/benchmarking/**/*'
+    - 'lib/dashboard/charting_and_reports/**/*'
+    - 'lib/dashboard/corections/**/*'
+    - 'lib/dashboard/data_sources/**/*'
+    - 'lib/dashboard/modelling/**/*'
+    - 'lib/dashboard/utilities/**/*'
     - 'log/**/*'
     - 'test_output/**/*'
     - 'test_support/**/*'
+    - 'vendor/**/*'
 require:
   - rubocop-performance
   - rubocop-rspec
+  - rubocop-factory_bot
 
 Naming/MethodParameterName:
   AllowedNames: ['kw', '£', 'co2']
+Naming/VariableNumber:
+  AllowedPatterns: ['_[0-9]+']
 Naming/VariableName:
-  AllowedPatterns: ['_£','£']
+  AllowedPatterns: ['_£', '£']
 Naming/MethodName:
-  AllowedPatterns: ['_£', 'co2', '£']
+  AllowedPatterns: ['_£','co2', '£']
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:
@@ -44,3 +61,5 @@ RSpec/ScatteredLet:
   Enabled: false
 RSpec/NestedGroups:
   Enabled: false
+RSpec/VariableName:
+  AllowedPatterns: ['_£']

@@ -600,7 +600,13 @@ class AlertAnalysisBase < ContentBase
       AlertEaster2023ShutdownElectricityComparison                => 'e23e',
       AlertEaster2023ShutdownGasComparison                        => 'e23g',
       AlertEaster2023ShutdownStorageHeaterComparison              => 'e23s',
-      AlertSolarGeneration                                        => 'sgen'
+      AlertSolarGeneration                                        => 'sgen',
+      AlertJanAug20222023ElectricityComparison                    => 'py23e',
+      AlertJanAug20222023GasComparison                            => 'py23g',
+      AlertJanAug20222023StorageHeaterComparison                  => 'py23s',
+      AlertLayerUpPowerdownNovember2023ElectricityComparison      => 'lu23e1',
+      AlertLayerUpPowerdownNovember2023GasComparison              => 'lu23g1',
+      AlertLayerUpPowerdownNovember2023StorageHeaterComparison    => 'lu23s1'
     }
   end
 
