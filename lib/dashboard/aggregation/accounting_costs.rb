@@ -1,3 +1,5 @@
+require_relative './cost_schedule'
+
 class AccountingCosts < CostSchedule
   protected def costs(date, days_kwh_x48)
     @meter_tariffs.accounting_cost(date, days_kwh_x48)
