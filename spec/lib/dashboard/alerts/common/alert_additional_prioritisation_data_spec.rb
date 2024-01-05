@@ -20,8 +20,6 @@ describe AlertAdditionalPrioritisationData do
   before do
     allow(meter_collection).to receive(:aggregated_electricity_meters).and_return(meter)
     allow(meter_collection).to receive(:aggregated_heat_meters).and_return(meter)
-    # TODO: this could be moved to factory
-    #    meter.set_tariffs
   end
 
   describe '#benchmark_template_data' do
