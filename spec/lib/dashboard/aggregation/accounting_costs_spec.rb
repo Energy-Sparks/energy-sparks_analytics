@@ -8,27 +8,27 @@ describe AccountingCosts do
 
   let(:rates)       { create_flat_rate(rate: 0.15, standing_charge: 1.0) }
 
-  let(:accounting_tariff) { create_accounting_tariff_generic(start_date: start_date, end_date: end_date, rates: rates) }
-
-  let(:meter_attributes) do
-    { accounting_tariff_generic: [accounting_tariff] }
-  end
-
   let(:kwh_data_x48) { Array.new(48, 0.01) }
 
   let(:combined_meter) { build(:meter) }
   let(:meter1) do
     build(:meter,
+          :with_flat_rate_tariffs,
+          rates: rates,
+          tariff_start_date: start_date,
+          tariff_end_date: end_date,
           type: :electricity,
-          meter_attributes: meter_attributes,
           amr_data: build(:amr_data, :with_days, day_count: 31, end_date: end_date,
                                                  kwh_data_x48: kwh_data_x48))
   end
 
   let(:meter2) do
     build(:meter,
+          :with_flat_rate_tariffs,
+          rates: rates,
+          tariff_start_date: start_date,
+          tariff_end_date: end_date,
           type: :electricity,
-          meter_attributes: meter_attributes,
           amr_data: build(:amr_data, :with_days, day_count: 31, end_date: end_date,
                                                  kwh_data_x48: kwh_data_x48))
   end
@@ -37,11 +37,6 @@ describe AccountingCosts do
 
   let(:combined_start_date) { start_date }
   let(:combined_end_date)   { end_date }
-
-  # Simulate the meters having been through aggregation
-  before do
-    list_of_meters.each(&:set_tariffs)
-  end
 
   describe '#combine_accounting_costs_from_multiple_meters' do
     let(:combined_costs) do

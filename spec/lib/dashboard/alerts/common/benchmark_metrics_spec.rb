@@ -89,24 +89,13 @@ describe BenchmarkMetrics do
     let(:amr_end_date)    { Date.new(2022, 12, 31) }
     let(:amr_data) { build(:amr_data, :with_date_range, start_date: amr_start_date, end_date: amr_end_date) }
 
-    let(:rates)             { create_flat_rate(rate: 0.10, standing_charge: 1.0) }
-    let(:accounting_tariff) { create_accounting_tariff_generic(start_date: amr_start_date, end_date: amr_end_date, rates: rates) }
-
-    let(:meter_attributes) do
-      { accounting_tariff_generic: [accounting_tariff] }
-    end
-
-    let(:meter) { build(:meter, meter_attributes: meter_attributes, amr_data: amr_data) }
+    let(:meter) { build(:meter, :with_flat_rate_tariffs, amr_data: amr_data, tariff_start_date: amr_start_date, tariff_end_date: amr_end_date) }
 
     let(:benchmark_type) { :benchmark }
     let(:asof_date) { Date.new(2022, 12, 31) }
 
     let(:energy_usage_£_per_pupil) do
       BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(benchmark_type, meter_collection, asof_date, list_of_fuels)
-    end
-
-    before do
-      meter.set_tariffs
     end
 
     context 'when only electricity requested' do

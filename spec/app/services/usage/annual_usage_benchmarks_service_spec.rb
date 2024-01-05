@@ -11,20 +11,13 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
   let(:amr_end_date)    { Date.new(2022, 12, 31) }
   let(:amr_data) { build(:amr_data, :with_date_range, :with_grid_carbon_intensity, grid_carbon_intensity: grid_carbon_intensity, start_date: amr_start_date, end_date: amr_end_date, kwh_data_x48: kwh_data_x48) }
 
-  # Tariffs used to calculate costs
-  let(:rates) { create_flat_rate(rate: 0.10, standing_charge: 1.0) }
-  let(:accounting_tariff) { create_accounting_tariff_generic(start_date: amr_start_date, end_date: amr_end_date, rates: rates) }
-  let(:meter_attributes) do
-    { accounting_tariff_generic: [accounting_tariff] }
-  end
-
   # Carbon intensity used to calculate co2 emissions
   let(:grid_carbon_intensity) { build(:grid_carbon_intensity, :with_days, start_date: amr_start_date, end_date: amr_end_date, kwh_data_x48: Array.new(48) { 0.2 }) }
 
   let(:degree_day_adjustment) { 1.0 }
 
   # Meter to use as the aggregate
-  let(:meter) { build(:meter, type: fuel_type, meter_attributes: meter_attributes, amr_data: amr_data) }
+  let(:meter) { build(:meter, :with_flat_rate_tariffs, type: fuel_type, amr_data: amr_data, tariff_start_date: amr_start_date, tariff_end_date: amr_end_date) }
 
   # primary school, with 1000 pupils and 5000 sq m2 by default
   let(:meter_collection) { build(:meter_collection) }

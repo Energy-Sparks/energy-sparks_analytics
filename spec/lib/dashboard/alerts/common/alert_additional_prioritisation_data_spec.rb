@@ -9,15 +9,8 @@ describe AlertAdditionalPrioritisationData do
   let(:amr_end_date)    { Date.new(2022, 12, 31) }
   let(:amr_data) { build(:amr_data, :with_date_range, start_date: amr_start_date, end_date: amr_end_date) }
 
-  # Tariffs used to calculate costs
-  let(:rates) { create_flat_rate(rate: 0.10, standing_charge: 1.0) }
-  let(:accounting_tariff) { create_accounting_tariff_generic(start_date: amr_start_date, end_date: amr_end_date, rates: rates) }
-  let(:meter_attributes) do
-    { accounting_tariff_generic: [accounting_tariff] }
-  end
-
-  # Meter to use as the aggregates
-  let(:meter) { build(:meter, type: fuel_type, meter_attributes: meter_attributes, amr_data: amr_data) }
+  # Meter to use as the aggregate
+  let(:meter) { build(:meter, :with_flat_rate_tariffs, type: fuel_type, amr_data: amr_data, tariff_start_date: amr_start_date, tariff_end_date: amr_end_date) }
 
   let(:meter_collection) { build(:meter_collection) }
 
@@ -28,7 +21,7 @@ describe AlertAdditionalPrioritisationData do
     allow(meter_collection).to receive(:aggregated_electricity_meters).and_return(meter)
     allow(meter_collection).to receive(:aggregated_heat_meters).and_return(meter)
     # TODO: this could be moved to factory
-    meter.set_tariffs
+    #    meter.set_tariffs
   end
 
   describe '#benchmark_template_data' do
