@@ -106,7 +106,7 @@ describe BenchmarkMetrics do
     end
 
     before do
-      amr_data.set_tariffs(meter)
+      meter.set_tariffs
     end
 
     context 'when only electricity requested' do

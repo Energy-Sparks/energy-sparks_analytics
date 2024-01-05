@@ -40,9 +40,7 @@ describe AccountingCosts do
 
   # Simulate the meters having been through aggregation
   before do
-    list_of_meters.each do |m|
-      m.amr_data.set_tariffs(m)
-    end
+    list_of_meters.each(&:set_tariffs)
   end
 
   describe '#combine_accounting_costs_from_multiple_meters' do

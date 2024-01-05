@@ -393,6 +393,36 @@ module Dashboard
         raise EnergySparksUnexpectedStateException.new("Unexpected type #{type} for modified mpan/mprn")
       end
     end
+
+    #Sets the default cost schedules for this meter, allowing calculation of £/co2 values
+    def set_tariffs
+      set_economic_tariff
+      set_current_economic_tariff
+      set_accounting_tariff
+    end
+
+    private def set_economic_tariff
+      logger.info "Creating an economic cost schedule for #{mpan_mprn} #{fuel_type}"
+      @amr_data.set_economic_tariff_schedule(CachingEconomicCosts.new(@meter_tariffs, @amr_data, fuel_type))
+    end
+
+    private def set_current_economic_tariff
+      logger.info "Creating current economic cost schedule for meter #{name}"
+      if @meter_tariffs.economic_tariffs_change_over_time?
+        @amr_data.set_current_economic_tariff_schedule(CachingCurrentEconomicCosts.new(@meter_tariffs, @amr_data, fuel_type))
+      else
+        # there no computational benefit in doing this,
+        # given the tariff for amr_data.end_date is always re-looked up rather than cached
+        # but perhaps a slight memory benefit
+        @amr_data.set_current_economic_tariff_schedule_to_economic_tariff
+      end
+    end
+
+    private def set_accounting_tariff
+      logger.info "Creating accounting cost schedule for meter #{mpan_mprn} #{fuel_type}"
+      @amr_data.set_accounting_tariff_schedule(CachingAccountingCosts.new(@meter_tariffs, @amr_data, fuel_type))
+    end
+
   end
 
   class AggregateMeter < Meter

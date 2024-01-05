@@ -27,9 +27,8 @@ describe AlertAdditionalPrioritisationData do
   before do
     allow(meter_collection).to receive(:aggregated_electricity_meters).and_return(meter)
     allow(meter_collection).to receive(:aggregated_heat_meters).and_return(meter)
-    # TODO: this is not yet in factory because of circular dependency, need to
-    # refactor meter/amr_data/aggregation_mixin
-    amr_data.set_tariffs(meter)
+    # TODO: this could be moved to factory
+    meter.set_tariffs
   end
 
   describe '#benchmark_template_data' do

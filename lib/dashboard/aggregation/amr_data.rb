@@ -30,53 +30,20 @@ class AMRData < HalfHourlyData
     @accounting_tariff.post_aggregation_state       = true if @accounting_tariff.is_a?(CachingAccountingCosts)
   end
 
-  #Called from aggregation_mixin, SyntheticMeter and TargetMeter
-  def set_tariffs(meter)
-    set_economic_tariff(meter)
-    set_current_economic_tariff(meter)
-    set_accounting_tariff(meter)
-  end
-
-  private def set_economic_tariff(meter)
-    logger.info "Creating an economic cost schedule for #{meter.mpan_mprn} #{meter.fuel_type}"
-    @economic_tariff = CachingEconomicCosts.new(meter.meter_tariffs, meter.amr_data, meter.fuel_type)
-  end
-
-  private def set_current_economic_tariff(meter)
-    logger.info "Creating current economic cost schedule for meter #{meter.name}"
-    if meter.meter_tariffs.economic_tariffs_change_over_time?
-      @current_economic_tariff = CachingCurrentEconomicCosts.new(meter.meter_tariffs, meter.amr_data, meter.fuel_type)
-    else
-      # there no computational benefit in doing this,
-      # given the tariff for amr_data.end_date is always re-looked up rather than cached
-      # but perhaps a slight memory benefit
-      @current_economic_tariff = @economic_tariff
-    end
-  end
-
-  private def set_accounting_tariff(meter)
-    logger.info "Creating accounting cost schedule for meter #{meter.mpan_mprn} #{meter.fuel_type}"
-    @accounting_tariff = CachingAccountingCosts.new(meter.meter_tariffs, meter.amr_data, meter.fuel_type)
-  end
-
-  #Called from aggregation service, for combined meter
   def set_economic_tariff_schedule(tariff)
     @economic_tariff = tariff
   end
 
-  #Called from aggregation service, for combined meter
   def set_current_economic_tariff_schedule(tariff)
     logger.info  "Setting current economic cost schedule"
     @current_economic_tariff = tariff
   end
 
-  #Called from aggregation service, for combined meter
   def set_current_economic_tariff_schedule_to_economic_tariff
     logger.info "Setting current economic cost schedule to existing economic cost schedule"
     @current_economic_tariff = @economic_tariff
   end
 
-  #Called from aggregation service, for combined meter
   def set_accounting_tariff_schedule(tariff)
     @accounting_tariff = tariff
   end
