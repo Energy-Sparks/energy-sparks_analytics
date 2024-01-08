@@ -1,7 +1,7 @@
-# This is a copy of the standard_tests.rb test script, adapted so we can run it on Github actions without 
+# This is a copy of the standard_tests.rb test script, adapted so we can run it on Github actions without
 # error logging and using an anonymised meter reading file.
-# It requires a test output folder with a meter collections yaml file with 'acme-academy' in the 
-# name (e.g. unvalidated-data-acme-academy.yaml). This needs to be stored in a `MeterCollections` folder, 
+# It requires a test output folder with a meter collections yaml file with 'acme-academy' in the
+# name (e.g. unvalidated-data-acme-academy.yaml). This needs to be stored in a `MeterCollections` folder,
 # within your test_ouputs folder at run time, for example:
 #
 # energy-sparks_analytics
@@ -9,10 +9,10 @@
 #     - MeterCollections
 #       - unvalidated-data-acme-academy.yaml
 #
-# To run this test you need to set the ANALYTICSTESTDIR environment variable to point to the test output 
+# To run this test you need to set the ANALYTICSTESTDIR environment variable to point to the test output
 # directory as described above. e.g.
 #
-# ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_electricity_simulator.rb
+# ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_alerts.rb
 #
 
 require 'require_all'
@@ -23,7 +23,7 @@ schools = [
   { name: 'acme-academy*', example_of: 'Github actions test data' }
 ]
 
-overrides = { 
+overrides = {
   schools: schools.map{ |sc| sc[:name] },
 }
 

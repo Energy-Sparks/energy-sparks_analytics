@@ -40,7 +40,6 @@ class ChartToMeterMap
     when :allelectricity_without_community_use;       school.aggregated_electricity_meter_without_community_usage
     when :allheat_without_community_use;              school.aggregated_heat_meters_without_community_usage
     when :storage_heaters_without_community_use;      school.storage_heater_meter_without_community_usage
-    when :electricity_simulator;                      school.electricity_simulation_meter
     when :storage_heater_meter;                       school.storage_heater_meter
     when :solar_pv_meter, :solar_pv;                  school.aggregated_electricity_meters.sub_meters[:generation]
     when :unscaled_aggregate_target_electricity;      school.unscaled_target_meters[:electricity]

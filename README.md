@@ -12,7 +12,6 @@ This library provides a number of functions
 - 'alerts' - used to monitor schools energy usage and provide feedback to schools where they can save energy and how their energy usage has changed (presented on the website, and emailed/texted by the 'front end' to users'
 - contextual advice to schools
 - building energy modelling - currently implemented within a regression modelling framework
-- an electrical simulator which synthetically breaks down a school's electricity use into different appliance types
 - tools for comparing and benchmarking schools with each other
 - meter aggregation and disaggregation including special handling of solar PV and storage heaters
 - a variety of external mainly JSON interfaces for pulling in relevant weather, solar PV, carbon emissions and meter data
@@ -31,7 +30,7 @@ TBD
 
 ## Running the tests
 
-We use RSpec, which is a testing tool for Ruby.  You can read more about RSpec here https://rspec.info/ 
+We use RSpec, which is a testing tool for Ruby.  You can read more about RSpec here https://rspec.info/
 You can run all tests by running rspec at the command line with:
 `bundle exec rspec`
 
@@ -42,4 +41,3 @@ where `ANALYTICSTESTDIR` equals the directory that you want all test output to b
 ### Break down into end to end tests
 
 TBD
-

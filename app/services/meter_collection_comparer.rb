@@ -40,7 +40,7 @@ class MeterCollectionReconciler
     end
     return unless verbosity >= 1
 
-    @meter_reading_comparisons.each do |_id, meter_readings_comparison|
+    @meter_reading_comparisons.each_value do |meter_readings_comparison|
       meter_readings_comparison.print_comparison(verbosity)
     end
   end
