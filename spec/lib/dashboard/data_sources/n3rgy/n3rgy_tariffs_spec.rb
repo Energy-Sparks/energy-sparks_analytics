@@ -21,7 +21,7 @@ describe N3rgyTariffs do
 
       let(:early_range) { TimeOfDay30mins.new(0, 0)..TimeOfDay30mins.new(6, 30) }
 
-      let(:tariff_data) { YAML.load_file('spec/fixtures/n3rgy/tariffs-basic-tiered.yaml') }
+      let(:tariff_data) { YAML.unsafe_load_file('spec/fixtures/n3rgy/tariffs-basic-tiered.yaml') }
 
       let(:results) { subject.parameterise }
 
@@ -68,7 +68,7 @@ describe N3rgyTariffs do
     end
 
     describe 'with Weekday Tariffs' do
-      let(:tariff_data) { YAML.load_file('spec/fixtures/n3rgy/tariffs-weekday.yaml') }
+      let(:tariff_data) { YAML.unsafe_load_file('spec/fixtures/n3rgy/tariffs-weekday.yaml') }
 
       let(:weekend_start_date) { Date.parse('2012-05-12') }
       let(:weekend_end_date) { Date.parse('2014-02-23') }

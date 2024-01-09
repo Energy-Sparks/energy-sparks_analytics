@@ -8,8 +8,11 @@ gem 'roo', git: 'https://github.com/Energy-Sparks/roo.git', branch: 'bug-fix-bra
 # Forked statsample to do proper relases and to remove dependency on awesome_print which is no longer supported
 # Last official release of statsample also had a problem where it overrode the definition of Array#sum with dodgy
 # results
+
 # This is fixed in master, which is what this release is based upon.
-gem 'statsample', git: 'https://github.com/Energy-Sparks/statsample', branch: 'update-gems-and-awesome-print'
+gem 'statsample', github: 'tbhi/statsample', branch: 'ruby32'
+# gem 'statsample', path: '../statsample'
+
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw]
 
 group :development, :test do
