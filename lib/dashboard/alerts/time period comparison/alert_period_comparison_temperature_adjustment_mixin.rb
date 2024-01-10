@@ -24,7 +24,7 @@ module AlertPeriodComparisonTemperatureAdjustmentMixin
       },
       previous_period_kwhs_adjusted: {
         description: 'Previous period kwh values adjusted for temperature',
-        units:  String 
+        units:  String
       }
     }
   end

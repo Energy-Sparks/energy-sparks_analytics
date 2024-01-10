@@ -18,9 +18,9 @@ script = {
   # generate_analytics_school_meta_data: true,
   schools:                  ['st-mart*','paul*','long*','prend*','saund*','fresh*'],
   schools:                  ['belv*'], #['pentrehafod*'],
-  no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection, 
+  no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection,
   source:                   :unvalidated_meter_data, #  :aggregated_meter_collection,
-  # 
+  #
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
@@ -43,10 +43,10 @@ script = {
                               ],
                               control: {
                                 display_average_calculation_rate: true,
-                                report_failed_charts:   :summary, 
+                                report_failed_charts:   :summary,
                                 # :detailed
-                                compare_results:        [ 
-                                  :summary, 
+                                compare_results:        [
+                                  :summary,
                                   # :quick_comparison,
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Charts\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Charts\New' },
@@ -54,7 +54,7 @@ script = {
                                   :report_differences
                               ] # :quick_comparison,
                               }
-                            }, 
+                            },
 }
 
 RunTests.new(script).run

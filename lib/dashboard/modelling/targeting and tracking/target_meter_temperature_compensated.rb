@@ -73,7 +73,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
   # =========================================================================================
   # general functions both future and past target date
 
-  def averaged_temperature_target_profile(synthetic_amr_data, synthetic_date, target_date, target_temperature)   
+  def averaged_temperature_target_profile(synthetic_amr_data, synthetic_date, target_date, target_temperature)
     heating_on = should_heating_be_on?(synthetic_date, target_date, target_temperature, synthetic_amr_data)
 
     profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_date, target_temperature, heating_on, synthetic_amr_data)
@@ -212,7 +212,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
 
     sum_normalised_profiles_x48 = AMRData.fast_add_multiple_x48_x_x48(normalised_profiles)
 
-    AMRData.fast_multiply_x48_x_scalar(sum_normalised_profiles_x48, predicated_kwh / normalised_profiles.length) 
+    AMRData.fast_multiply_x48_x_scalar(sum_normalised_profiles_x48, predicated_kwh / normalised_profiles.length)
   end
 
   def temperature_within_range?(temperature, range_temperature, heating_on)

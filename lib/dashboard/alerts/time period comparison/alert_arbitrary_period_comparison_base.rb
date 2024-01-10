@@ -1,7 +1,7 @@
 require_relative './alert_period_comparison_gas_mixin.rb'
 require_relative './alert_period_comparison_temperature_adjustment_mixin.rb'
 
-class AlertArbitraryPeriodComparisonBase < AlertHolidayComparisonBase 
+class AlertArbitraryPeriodComparisonBase < AlertHolidayComparisonBase
   def initialize(school, type = :arbitrarycomparison)
     super(school, type)
   end
@@ -27,7 +27,7 @@ end
 class AlertArbitraryPeriodComparisonGasBase < AlertArbitraryPeriodComparisonBase
   include AlertPeriodComparisonTemperatureAdjustmentMixin
   include AlertPeriodComparisonGasMixin
-  
+
   def self.template_variables
     AlertPeriodComparisonGasMixin.template_variables.merge(superclass.template_variables)
   end
@@ -40,7 +40,7 @@ class AlertArbitraryPeriodComparisonStorageHeaterBase < AlertArbitraryPeriodComp
   include AlertPeriodComparisonGasMixin
   include AlertGasToStorageHeaterSubstitutionMixIn
   include ElectricityCostCo2Mixin
-  
+
   def self.template_variables
     AlertPeriodComparisonGasMixin.template_variables.merge(superclass.template_variables)
   end

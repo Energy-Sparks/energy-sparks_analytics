@@ -1,4 +1,4 @@
-  # 
+  #
 # test report manager
 require 'ruby-prof'
 require 'benchmark/memory'

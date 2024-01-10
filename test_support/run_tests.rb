@@ -166,7 +166,7 @@ class RunTests
                   puts "Drilling down onto standard chart #{chart_name} by column (#{drilldown_column}) #{chart_column.map(&:to_s)}"
                   chart_config[:name] += " (drilldown col #{drilldown_column})"
                   chart_name, chart_config = chart_manager.drilldown(chart_name, chart_config, nil, chart_column)
-                  
+
                   result = chart_manager.run_chart(chart_config, chart_name)
 
                   excel_charts[excel_workheet_name].push(result)

@@ -16,7 +16,7 @@ class BoilerStartAndEndTimeAnalysis
 
   def interpret
     analysis = analyse
-    hours_earlier_on_monday = analysis[:restofweek][:average_start_time] - analysis[:monday][:average_start_time] 
+    hours_earlier_on_monday = analysis[:restofweek][:average_start_time] - analysis[:monday][:average_start_time]
 
     {
       fixed_start_time:                 analysis[:restofweek][:start_time_standard_devation] < 1.0,
@@ -47,7 +47,7 @@ class BoilerStartAndEndTimeAnalysis
       friday:     [5]
     }
   end
-  
+
   def optimum_start_analysis
     return {} if heating_model.nil?
 

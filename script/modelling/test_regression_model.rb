@@ -11,9 +11,9 @@ script = {
   model_fitting:            {
     control: {
       display_average_calculation_rate: true,
-      report_failed_charts:   :summary, 
+      report_failed_charts:   :summary,
       compare_results:        %i[summary quick_comparison]
     }
-  }, 
+  },
 }
 RunTests.new(script).run

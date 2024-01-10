@@ -19,7 +19,7 @@ def save_csv(results)
 
   CSV.open(filename, 'w') do |csv|
     csv << column_names
-    
+
     results.each do |name, school_data|
 
       electric = data_column_names.map { |cn| school_data.key?(:electricity) ? school_data[:electricity][cn] : nil}
@@ -50,7 +50,7 @@ def annual_estimate(meter)
   estimator = TargetingAndTrackingAnnualKwhEstimate.new(meter)
   estimator.calculate_apportioned_annual_estimate
 rescue BivariateSolarTemperatureModel::BivariateModel::BivariateModelCalculationFailed => e
-  puts "Electrical model failure: #{e.message}" 
+  puts "Electrical model failure: #{e.message}"
 end
 
 school_pattern_match = ['*']

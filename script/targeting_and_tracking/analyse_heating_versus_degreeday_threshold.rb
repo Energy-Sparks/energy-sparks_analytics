@@ -31,7 +31,7 @@ def analyse_degree_days_versus_heating_on_for_degree_day_base(school, heating_mo
     next unless school.holidays.day_type(date) == :schoolday
 
     if school.temperatures.degree_days(date, degree_day_base_temperature) > 0.0
-      days_of_degree_day_days += 1 
+      days_of_degree_day_days += 1
       days_heating_on_when_cold += 1 if heating_model.heating_on?(date)
     else
       days_of_non_degree_day_days += 1

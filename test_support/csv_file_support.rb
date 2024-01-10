@@ -28,7 +28,7 @@ class TestCSVFileSupport
   end
 
   def append_lines_and_close(lines)
-    mode = exists? ?  'Appending' : 'Writing' 
+    mode = exists? ?  'Appending' : 'Writing'
     logger.info "#{mode} #{lines.length} lines to #{@filename}"
     File.open(full_filename, exists? ? 'a' : 'w') do |file|
       lines.each do |date, one_days_values|

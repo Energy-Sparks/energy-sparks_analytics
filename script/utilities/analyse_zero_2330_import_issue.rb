@@ -31,7 +31,7 @@ end
 def save_to_csv(data)
   dir = TestDirectory.instance.results_directory('modelling')
   filename = File.join(dir, 'zero 2330 issue.csv')
-  
+
   puts "Saving to #{filename}"
 
   CSV.open(filename, 'w') do |csv|

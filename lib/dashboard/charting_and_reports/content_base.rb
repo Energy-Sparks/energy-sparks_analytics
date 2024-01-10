@@ -507,7 +507,7 @@ class ContentBase
   # for alerts and advice to a single piece of code
   # no ideal in that it that the argument
   def saving_rate(*args)
-    EconomicCostCalculations.instance.saving_rate *args 
+    EconomicCostCalculations.instance.saving_rate *args
   end
 
   # technically usage of a blended rate can be imperfect but sometimes when

@@ -79,7 +79,7 @@ def school_days(school)
 end
 
 def analyse_meter(school, meter)
-  
+
   results = {}
 
   end_date = meter.amr_data.end_date

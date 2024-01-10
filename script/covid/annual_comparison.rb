@@ -145,7 +145,7 @@ def moving_average_dates(moving_average_kwhs)
     fuel_types:   fuel_types.keys.sort,
     data_types:   data_types.keys.sort,
     dates:        dates.keys.sort
-  } 
+  }
 end
 
 def save_moving_averages_to_csv(moving_average_kwhs, file_type)

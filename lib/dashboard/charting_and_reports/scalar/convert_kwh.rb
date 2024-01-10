@@ -44,7 +44,7 @@ class ConvertKwh
     end
     unit_scale
   end
-  
+
   def self.convert(from_unit, to_unit, fuel_type, from_value)
     from_scaling = ConvertKwh.scale_unit_from_kwh(from_unit, fuel_type)
     to_scaling = ConvertKwh.scale_unit_from_kwh(to_unit, fuel_type)

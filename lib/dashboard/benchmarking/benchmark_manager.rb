@@ -142,7 +142,7 @@ module Benchmarking
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
-        
+
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -406,12 +406,12 @@ module Benchmarking
     end
 
     def y_axis_label_name(unit)
-      unit_names = { 
+      unit_names = {
         kwh: I18n.t('chart_configuration.y_axis_label_name.kwh'),
         kw: I18n.t('chart_configuration.y_axis_label_name.kw'),
-        co2: I18n.t('chart_configuration.y_axis_label_name.co2'), 
-        £: I18n.t('chart_configuration.y_axis_label_name.£'), 
-        w: I18n.t('chart_configuration.y_axis_label_name.w'), 
+        co2: I18n.t('chart_configuration.y_axis_label_name.co2'),
+        £: I18n.t('chart_configuration.y_axis_label_name.£'),
+        w: I18n.t('chart_configuration.y_axis_label_name.w'),
         £_0dp: I18n.t('chart_configuration.y_axis_label_name.£_0dp'),
         timeofday: I18n.t('chart_configuration.y_axis_label_name.timeofday'),
         percent: I18n.t('chart_configuration.y_axis_label_name.percent'),

@@ -71,7 +71,7 @@ class EnergyEquivalences
 
   COMPUTER_CONSOLE_POWER_KW = 0.2 # also kWh/hour
   COMPUTER_CONSOLE_HOUR_£ = COMPUTER_CONSOLE_POWER_KW * ONE_HOUR * UK_ELECTRIC_GRID_£_KWH
-  
+
   TREE_LIFE_YEARS = 40
   TREE_CO2_KG_YEAR = 22
   TREE_CO2_KG = TREE_LIFE_YEARS * TREE_CO2_KG_YEAR # https://www.quora.com/How-many-trees-do-I-need-to-plant-to-offset-the-carbon-dioxide-released-in-a-flight
@@ -132,7 +132,7 @@ class EnergyEquivalences
 
   private_class_method def self.create_configuration(uk_electric_grid_co2_kg_kwh)
     water_energy_description = "It takes #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} of energy to heat 1 litre of water by 1C. "
-    
+
     shower_description_to_kwh =\
       "1 shower uses #{X.format(:litre, SHOWER_LITRES)} of water, which is heated from 15C to 40C (25C rise). " +
       water_energy_description +
@@ -150,7 +150,7 @@ class EnergyEquivalences
       "= #{X.format(:kwh, KETTLE_KWH)} of energy to boil 1 kettle. ".freeze
 
       ice_car_efficiency = "A petrol car uses #{X.format(:litre, ICE_LITRES_PER_100KM)} of fuel to travel 100 km (40 mpg). "
-      
+
       ice_description_to_kwh =\
             ice_car_efficiency +
             "Each litre of petrol contains #{X.format(:kwh, LITRE_PETROL_KWH)} of energy, thus it takes "\
@@ -172,7 +172,7 @@ class EnergyEquivalences
     bev_co2_per_km = BEV_KWH_PER_KM * uk_electric_grid_co2_kg_kwh
     bev_efficiency_description = "An electric car uses #{X.format(:kwh, BEV_KWH_PER_KM)} of electricity to travel 1 km. "
     bev_co2_description = "An electric car emits #{X.format(:co2, bev_co2_per_km)} of electricity to travel 1 km (emissons from the National Grid). "
-          
+
     homes_electricity_co2_year = HOMES_ELECTRICITY_KWH_YEAR * uk_electric_grid_co2_kg_kwh
     homes_co2_year = homes_electricity_co2_year + HOMES_GAS_CO2_YEAR
 

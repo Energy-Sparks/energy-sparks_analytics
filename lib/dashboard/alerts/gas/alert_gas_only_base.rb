@@ -38,7 +38,7 @@ class AlertGasOnlyBase < AlertAnalysisBase
   }.freeze
 
   def blended_gas_£_per_kwh
-    @blended_gas_£_per_kwh ||= blended_rate(:£)   
+    @blended_gas_£_per_kwh ||= blended_rate(:£)
   end
 
   def last_meter_data_date

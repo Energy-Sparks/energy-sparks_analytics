@@ -22,7 +22,7 @@ class AllEquivalences
   def front_end_description(equivalence_type = tree,  kwh_or_co2_or_£ = :kwh)
     conversion(equivalence_type, kwh_or_co2_or_£)[:front_end_description]
   end
-  
+
   private
 
   def conversion(equivalence_type, kwh_or_co2_or_£)

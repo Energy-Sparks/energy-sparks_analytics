@@ -28,7 +28,7 @@ module AlertGasToStorageHeaterSubstitutionMixIn
         definition[:units] = { kwh: fuel_sym } if definition.key?(:units) && definition[:units].is_a?(Hash) && definition[:units].key?(:kwh)
         definition[:units] = { £:   fuel_sym } if definition.key?(:units) && definition[:units].is_a?(Hash) && definition[:units].key?(:£)
         if definition.key?(:description) && !definition[:description].nil?
-          definition[:description] = definition[:description].gsub(from_lc, to_lc).gsub(from_cap, to_cap) 
+          definition[:description] = definition[:description].gsub(from_lc, to_lc).gsub(from_cap, to_cap)
         end
       end
     end

@@ -4,7 +4,7 @@ module AlertModelCacheMixin
     return call_model(asof_date) unless AlertAnalysisBase.test_mode
 
     @@model_cache_results ||= {}
-    
+
     return @@model_cache_results[meter.object_id] if @@model_cache_results.key?(meter.object_id)
 
     # limit cache size
@@ -30,6 +30,6 @@ module AlertModelCacheMixin
   end
 
   private def call_model(asof_date)
-    aggregate_meter.model_cache.create_and_fit_model(:best, one_year_period(asof_date)) 
+    aggregate_meter.model_cache.create_and_fit_model(:best, one_year_period(asof_date))
   end
 end

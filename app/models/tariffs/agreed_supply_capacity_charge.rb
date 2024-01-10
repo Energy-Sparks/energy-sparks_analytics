@@ -15,4 +15,3 @@ class AgreedSupplyCapacityCharge < MaxMonthlyDemandChargesBase
     end
   end
 end
-  

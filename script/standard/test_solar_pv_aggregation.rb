@@ -37,15 +37,15 @@ script = {
                               ],
                               control: {
                                 display_average_calculation_rate: true,
-                                report_failed_charts:   :summary, 
-                                compare_results:        [ 
+                                report_failed_charts:   :summary,
+                                compare_results:        [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\SolarPVAggregation\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\SolarPVAggregation\New' },
-                                  :summary, 
+                                  :summary,
                                   :quick_comparison,
-                                ] 
+                                ]
                               }
-                            }, 
+                            },
 }
 
 RunTests.new(script).run

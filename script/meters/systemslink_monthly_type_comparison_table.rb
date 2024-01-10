@@ -36,7 +36,7 @@ start_date = Date.new(2019, 4, 1)
 end_date    = Date.new(2021,3,31)
 
 # replicate systems link monthly comparison table
-school_name_pattern_match = ['durham-st*'] # 'n3rgy*', 
+school_name_pattern_match = ['durham-st*'] # 'n3rgy*',
 source_db = :unvalidated_meter_data
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 

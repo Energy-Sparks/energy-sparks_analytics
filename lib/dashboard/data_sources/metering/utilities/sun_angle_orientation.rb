@@ -97,14 +97,14 @@
       @i2 ||= mod(280.46646+g2*(36000.76983 + g2*0.0003032),360)
     end
     alias_method :geom_mean_long_sun, :i2
-    
+
     def g2
       @g2 ||= (f2-2451545)/36525
     end
     alias_method :julian_century, :g2
 
     def l2
-      @l2 ||= sin(radians(j2))*(1.914602-g2*(0.004817+0.000014*g2))+sin(radians(2*j2))*(0.019993-0.000101*g2)+sin(radians(3*j2))*0.000289 
+      @l2 ||= sin(radians(j2))*(1.914602-g2*(0.004817+0.000014*g2))+sin(radians(2*j2))*(0.019993-0.000101*g2)+sin(radians(3*j2))*0.000289
     end
     alias_method :sun_eq_of_centre, :l2
 
@@ -167,7 +167,7 @@
     def radians(d)
       d.to_f / 360.0 * 2.0 * Math::PI
     end
-  
+
     def degrees(r)
       r.to_f * 360.0 / (2.0 * Math::PI)
     end

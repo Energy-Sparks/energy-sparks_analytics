@@ -19,7 +19,7 @@ schools = [
   { name: 'ph-school*',             example_of: 'DCC school with differential tariffs' },
 ]
 
-overrides = { 
+overrides = {
   schools: schools.map{ |sc| sc[:name] },
 }
 

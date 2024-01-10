@@ -16,7 +16,7 @@ class UKGridCarbonIntensityFeed
     readings = download_data(@start_date, @end_date)
 
     readings = check_for_missing_data(readings, @start_date, @end_date)
-  
+
     @day_readings = convert_to_date_arrays(readings)
   end
 
@@ -30,14 +30,14 @@ class UKGridCarbonIntensityFeed
     logger.info "URL = #{url}"
     url
   end
-  
+
   def download_data_from_web(start_date, end_date)
     url = make_url(start_date, end_date)
     response = Net::HTTP.get(URI(url))
     data = JSON.parse(response)
     data['data']
   end
-  
+
   # converts JSON into data[datetime] = carbon intensity
   def extract_readings(readings)
     data = {}
@@ -54,7 +54,7 @@ class UKGridCarbonIntensityFeed
     end
     data
   end
-  
+
   # downloads data between date range, splitting into API max 30 day chunks and avoiding year end bug
   def download_data(start_date, end_date)
     data = {}
@@ -76,12 +76,12 @@ class UKGridCarbonIntensityFeed
     logger.info "Got #{data.length} values"
     data
   end
-  
+
   # explicitly loop through expected readings, so can spot gaps in returned data;
   # midnight on year end always seems to be missing......
   def check_for_missing_data(readings, start_date, end_date)
     mins30step = (1.to_f/48)
-  
+
     start_date.to_datetime.step(end_date.to_datetime, mins30step).each do |datetime|
       if !readings.key?(datetime)
         substitute_datetime = readings.keys.bsearch{|x, _| x >= datetime }
@@ -91,7 +91,7 @@ class UKGridCarbonIntensityFeed
     end
     readings
   end
-  
+
   # convert data[datetime] = carbon into data[date] = [48x 1/2 hour carbon readings]
   def convert_to_date_arrays(readings)
     data = {}

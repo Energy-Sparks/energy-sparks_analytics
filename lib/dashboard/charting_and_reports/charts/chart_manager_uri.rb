@@ -92,14 +92,14 @@ class ChartManager
           end
           next
         end
-      
+
         _all, _type_with_array_index, type_value = sub_query.split(/(series_breakdown\[\d+\])=(\w+)/)
         unless type_value.nil?
           chart_config[:series_breakdown] = [] if !chart_config.key?(:series_breakdown)
           chart_config[:series_breakdown].push(type_value.to_sym)
           next
         end
-        
+
         puts "Unhandled query #{sub_query}"
         exit
       end
@@ -151,7 +151,7 @@ class Hash
       end
     end
 
-    params.chop! 
+    params.chop!
     params
   end
 

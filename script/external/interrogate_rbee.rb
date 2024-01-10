@@ -53,7 +53,7 @@ if true
     219207157,
     219011104
   ]
-  
+
   meter_ids = rbee.available_meter_ids
 
   puts "Processing #{meter_ids.length} meters"

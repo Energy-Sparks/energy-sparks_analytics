@@ -21,7 +21,7 @@ end
 def pack_dates(dates)
   dates.slice_when do |curr, prev|
     curr + 1 != prev
-  end.map{|a| a[0]..a[-1]} 
+  end.map{|a| a[0]..a[-1]}
 end
 
 def present_missing(school, meter, missing)
@@ -34,7 +34,7 @@ def present_missing(school, meter, missing)
 end
 
 # replicate systems link monthly comparison table
-school_name_pattern_match = ['*'] # 'n3rgy*', 
+school_name_pattern_match = ['*'] # 'n3rgy*',
 source_db = :unvalidated_meter_data
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 
@@ -42,6 +42,6 @@ school_names.each do |school_name|
   school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
   school.real_meters.each do |meter|
     missing = monthly_meter_comparison_table(meter)
-    present_missing(school, meter, missing) unless missing.empty? 
+    present_missing(school, meter, missing) unless missing.empty?
   end
 end

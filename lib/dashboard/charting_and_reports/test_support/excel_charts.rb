@@ -257,7 +257,7 @@ class ExcelCharts
 
   def create_chart_series(worksheet, column_number, x_axis, x_data, chart_type, sub_type = nil, on_y2_axis = false)
     chart = new_chart(chart_type, sub_type)
-      
+
     column_number = add_data_to_excel_worksheet(
       worksheet,
       column_number,

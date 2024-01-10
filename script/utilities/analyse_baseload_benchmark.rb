@@ -47,7 +47,7 @@ data = []
 school_names.each do |school_name|
   begin
     school = SchoolFactory.instance.load_school(source, school_name, cache: false)
-    data.push(analyse_meter(school, school.aggregated_electricity_meters)) unless school.aggregated_electricity_meters.nil? 
+    data.push(analyse_meter(school, school.aggregated_electricity_meters)) unless school.aggregated_electricity_meters.nil?
   rescue => e
     puts "#{school_name} #{e.message}"
     puts e.backtrace

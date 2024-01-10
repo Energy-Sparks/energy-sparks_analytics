@@ -35,7 +35,7 @@ class EnergyConversions
     value = kwh_co2_or_£ == :kwh ? kwh : scalar_value(time_period, meter_type, kwh_co2_or_£, false)
     calc = basic_unit ? 'no conversion' : calculation_description(kwh, meter_type, convert_to, kwh_co2_or_£, grid_intensity)
     equivalence = value / conversion
-    formatted_equivalence = format_equivalance_for_front_end(units_of_equivalance, equivalence) 
+    formatted_equivalence = format_equivalance_for_front_end(units_of_equivalance, equivalence)
 
     {
       equivalence:                  equivalence,
@@ -89,7 +89,7 @@ class EnergyConversions
 
   private def scaled_results(conversion, time_period, unscaled_results)
     scale = scale_conversion_period(time_period, conversion[:equivalence_timescale])
-    scaled_equivalence = unscaled_results[:equivalence] * scale 
+    scaled_equivalence = unscaled_results[:equivalence] * scale
     old_formatted_equivalence = FormatEnergyUnit.format(conversion[:timescale_units], scaled_equivalence)
     formatted_equivalence = format_equivalance_for_front_end(conversion[:timescale_units], scaled_equivalence)
     {
