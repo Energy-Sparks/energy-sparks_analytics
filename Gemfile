@@ -25,6 +25,7 @@ group :development do
   gem 'rubocop-performance'
   gem 'rubocop-rspec'
   gem 'ruby-prof'
+  gem 'overcommit'
 end
 
 # For tests
