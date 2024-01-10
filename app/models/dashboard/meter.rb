@@ -15,7 +15,7 @@ module Dashboard
     attr_reader :constituent_meters
 
     # Energy Sparks activerecord fields:
-    attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn, :dcc_meter
+    attr_reader :active, :created_at, :meter_type, :school, :updated_at, :mpan_mprn, :dcc_meter
     attr_accessor :id, :name, :external_meter_id
     # enum meter_type: [:electricity, :gas]
 
@@ -59,10 +59,6 @@ module Dashboard
     def set_meter_attributes(meter_attributes)
       @meter_attributes = meter_attributes
       process_meter_attributes
-    end
-
-    def amr_data=(amr_data)
-      @amr_data = amr_data
     end
 
     def set_mpan_mprn_id(identifier)
@@ -321,32 +317,31 @@ module Dashboard
       [:electricity, :solar_pv, :aggregated_electricity].include?(fuel_type)
     end
 
-    def set_meter_no(meter_no)
-      @meter_no = meter_no
-    end
-
     def insert_correction_rules_first(rules)
       @meter_correction_rules = rules + @meter_correction_rules
     end
 
     # Matches ES AR version
     def display_name
-      name.present? ? "#{meter_no} (#{name})" : display_meter_number
+      name.present? ? "#{mpan_mprn} (#{name})" : mpan_mprn.to_s
     end
 
+    #Default series name for this meter when displayed on a chart
     def series_name
-      name.present? ? name : mpxn.to_s
+      name.present? ? name : mpan_mprn.to_s
+    end
+
+    #Used to create a qualified series name for charts, when 2 meters for
+    #this school have the same name.
+    def qualified_series_name
+      name.present? ? "#{name} (#{mpan_mprn})" : mpan_mprn.to_s
     end
 
     def analytics_name
-      return mpxn.to_s unless name.present?
+      return mpan_mprn.to_s unless name.present?
 
-      bracketed_text = name.include?(mpxn.to_s) ? 'MPAN' : mpxn.to_s
+      bracketed_text = name.include?(mpan_mprn.to_s) ? 'MPAN' : mpxn.to_s
       "#{name} (#{bracketed_text})"
-    end
-
-    def display_meter_number
-      meter_no.present? ? meter_no : mpan_mprn.to_s
     end
 
     def synthetic_mpan_mprn?
