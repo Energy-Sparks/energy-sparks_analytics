@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'aggregation_mixin'
 require 'benchmark/memory'
 
 # Service responsible for carrying out the data "validation" and "aggregation" processes
