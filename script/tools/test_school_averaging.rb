@@ -23,7 +23,7 @@ aggregation_definition = {
               { urn: 109328 },  # St Marks
               { urn: 109005 },  # St Johns
               { urn: 109081 }   # Castle
-  ]  
+  ]
 }
 
 if ARGV.include?('-save')

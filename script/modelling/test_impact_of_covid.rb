@@ -18,7 +18,7 @@ class COVIDMeterAnalysis
   DATE_IN_SUMMER_HOLIDAYS = Date.new(2020, 8, 9) # Scottish and English schools
   COVID_DATE_RANGE = START_OF_LOCKDOWN..DATE_IN_SUMMER_HOLIDAYS
   WEEKS = COVID_DATE_RANGE.each_slice(7).map { |week| week }
-  
+
   def initialize(school, meter)
     @school = school
     @meter = meter
@@ -94,9 +94,9 @@ class COVIDMeterAnalysis
   end
 
   def daily_occupied_criteria_kwh(above_percent = 0.5)
-    average_summer_holiday_work_day_daily_consumption_kwh + 
+    average_summer_holiday_work_day_daily_consumption_kwh +
     (above_percent *
-    (average_summer_school_day_daily_consumption_kwh - average_summer_holiday_work_day_daily_consumption_kwh)) 
+    (average_summer_school_day_daily_consumption_kwh - average_summer_holiday_work_day_daily_consumption_kwh))
   end
 
   def average_summer_holiday_work_day_daily_consumption_kwh
@@ -105,7 +105,7 @@ class COVIDMeterAnalysis
 
   def calc_average_summer_holiday_work_day_daily_consumption_kwh
     kwhs = []
-    (Date.new(2019, 5, 30)..Date.new(2020, 9, 10)).each do |date|  
+    (Date.new(2019, 5, 30)..Date.new(2020, 9, 10)).each do |date|
       kwhs.push(days_kwh(date)) if summer_holiday_workday?(date)
     end
     kwhs.sum / kwhs.count
@@ -121,7 +121,7 @@ class COVIDMeterAnalysis
 
   def calc_average_summer_school_day_daily_consumption_kwh
     kwhs = []
-    (Date.new(2019, 5, 30)..Date.new(2019, 9, 10)).each do |date|  
+    (Date.new(2019, 5, 30)..Date.new(2019, 9, 10)).each do |date|
       kwhs.push(days_kwh(date)) if summer_schoolday?(date)
     end
     kwhs.sum / kwhs.count

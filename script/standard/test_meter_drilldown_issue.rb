@@ -50,7 +50,7 @@ school_names.each do |school_name|
   puts '=' * 80
   puts "School: #{school_name}"
   puts "Chart: #{chart_name}"
-  
+
   charts = run_drilldowns(school, chart_name, column_drilldown_numbers, max_drilldowns)
 
   filename = "Results\\meter-drilldown-test-charts #{school_name}.xlsx"

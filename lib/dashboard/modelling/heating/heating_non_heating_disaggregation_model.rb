@@ -275,7 +275,7 @@ module AnalyseHeatingAndHotWater
       model_prediction(REPRESENTATIVE_SUMMER_TEMPERATURE)
     end
   end
-  
+
   # basic regression model
   class HeatingNonHeatingDisaggregationWithRegressionModel < HeatingNonHeatingRegressionFixedTemperatureDisaggregationModel
     def self.type; :temperature_sensitive_regression_model end
@@ -284,7 +284,7 @@ module AnalyseHeatingAndHotWater
       avg_temp = temperatures.average_temperature(date)
       [model_prediction(avg_temp), 0.0].max
     end
-    
+
     def t_description
       'T'
     end

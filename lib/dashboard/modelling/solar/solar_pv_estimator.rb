@@ -55,7 +55,7 @@ class ExistingSolarPVCapacityEstimator
     y = Daru::Vector.new(shef_pv)
     sr = Statsample::Regression.simple(x, y)
     results = { a: sr.a, b: sr.b, pv: 1.0 / sr.b, r2: sr.r2, has_solar_pv: true}
-  
+
     save_lcc_debug_csv(times, prod, shef_pv) if @super_debug
 
     results
@@ -112,9 +112,9 @@ class ExistingSolarPVCapacityEstimator
     solar_pv_yield_kw = []
     times = []
     baseloads = []
-    
+
     start_date, end_date = date_range_for_meter(meter, years_offset)
-    
+
     (start_date..end_date).each do |date|
       if date.saturday? || date.sunday?
         baseload_kw = meter.amr_data.overnight_baseload_kw(date)

@@ -35,7 +35,7 @@ def calculate_average_school(results)
       by_type[type] ||= []
       by_type[type].push(x48)
     end
-  end 
+  end
 
   normalised_by_model = by_type.transform_values do |days_kwh_x48|
     average_by_model = AMRData.fast_average_multiple_x48(days_kwh_x48)
@@ -45,7 +45,7 @@ end
 
 def calculate_average_profile_heating(school, heat_meter)
   puts "Calculating heating meter data for #{school.name}"
-  
+
   unless heat_meter.amr_data.days > 364
     puts "Unable to calculatemodel as only #{heat_meter.amr_data.days} of data"
     return
@@ -73,7 +73,7 @@ end
 
 def calculate_average_profile_electricity(school, electric_meter)
   puts "Calculating electricity meter data for #{school.name}"
-  
+
   unless electric_meter.amr_data.days > 364
     puts "Unable to calculate as only #{electric_meter.amr_data.days} of data"
     return

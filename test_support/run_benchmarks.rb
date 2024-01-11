@@ -36,7 +36,7 @@ class RunBenchmarks
         asof_date:      Date.new(2022, 1, 20),
         user:          { user_role: :admin }, # { user_role: :analytics, staff_role: nil }, # { user_role: :admin },
         filter:        nil, #->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
-        
+
       },
       # pages: [:change_in_gas_holiday_consumption_previous_holiday],
       compare_results: [
@@ -44,7 +44,7 @@ class RunBenchmarks
       ]
     }
   end
-  
+
   private
 
   def self.test_type
@@ -82,7 +82,7 @@ class RunBenchmarks
 
     content_manager = Benchmarking::BenchmarkContentManager.new(config[:asof_date])
 
-    content_list = content_manager.available_pages(filter: config[:filter]) 
+    content_list = content_manager.available_pages(filter: config[:filter])
 
     content_list = content_list.select { |t, _c| @control[:pages].include?(t) } unless @control[:pages].nil? || @control[:pages].empty?
 
@@ -164,7 +164,7 @@ class RunBenchmarks
 
     Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG.each do |chart_table_name, definition|
       if definition[:type].include?(:table)
-        table = benchmarks.run_benchmark_table(asof_date, chart_table_name, nil, nil, control[:filter], nil, control[:user]) 
+        table = benchmarks.run_benchmark_table(asof_date, chart_table_name, nil, nil, control[:filter], nil, control[:user])
         html += "<h2>#{definition[:name]}</h2>"
         html += html_table(definition, table)
       end

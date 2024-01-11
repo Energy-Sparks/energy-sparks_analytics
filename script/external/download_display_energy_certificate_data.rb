@@ -51,17 +51,17 @@ def annual_kwh(school, fuel_type, dec_date)
     {
       kwh:              meter.amr_data.kwh_date_range(dec_date - 365, dec_date),
       status:           :matches_dec_dates
-    } 
+    }
   elsif meter.amr_data.days >= 365
     {
       kwh:             meter.amr_data.kwh_date_range(meter.amr_data.end_date - 365, meter.amr_data.end_date),
       status:          :latest_data_only
-    } 
+    }
   else
     {
       kwh:             meter.amr_data.kwh_date_range(meter.amr_data.start_date, meter.amr_data.end_date),
       status:          :partial_year_only
-    } 
+    }
   end
 
   data.merge! (

@@ -155,7 +155,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
 
         it 'calculates usage for all holidays' do
-          holiday_comparison.each do |_holiday, usage|
+          holiday_comparison.each_value do |usage|
             expect(usage.usage).not_to be_nil
           end
         end
@@ -179,7 +179,7 @@ describe Usage::HolidayUsageCalculationService, type: :service do
         end
 
         it 'calculates usage for all holidays' do
-          holiday_comparison.each do |_holiday, usage|
+          holiday_comparison.each_value do |usage|
             expect(usage.usage).not_to be_nil
           end
         end

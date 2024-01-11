@@ -20,7 +20,7 @@ class AggregatorTrendlines < AggregatorBase
       add_trendlines_for_rails_2_points
     else
       analytics_excel_trendlines
-    end 
+    end
   end
 
   def analytics_excel_trendlines

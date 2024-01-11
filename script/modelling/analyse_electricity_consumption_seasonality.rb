@@ -102,7 +102,7 @@ class AnalyseElectricitySeasonality
       [@school.name, sa, sb, sr2, ta, tb, tr2, mr2, school_days.length, model_percent_standard_deviation],
       {
         name:                    @school.name,
-        mpan:                    @school.aggregated_electricity_meters.mpan_mprn, 
+        mpan:                    @school.aggregated_electricity_meters.mpan_mprn,
         solar_meta:              { constant: sa, slope: sb, r2: sr2, n: n, label: slb},
         temperature_meta:        { constant: ta, slope: tb, r2: tr2, n: n, label: tlb},
         solar_temperature_meta:  { constant: mc, slope_solar: ms, slope_temperature: mt, r2: mr2, n: n, label: mlb, sd: sd},
@@ -254,7 +254,7 @@ class ExcelScatterChart
   def scatter_chart(worksheet, brd, base_column, c1, c2, len, name, label)
     chart = @workbook.add_chart(type: 'scatter', embedded: 1)
     chart.set_legend( :position => 'top' )
-    
+
     chart.add_series(
         categories:  sheet_ref(worksheet, brd + 1, base_column + c1, brd + len, base_column + c1),
         values:      sheet_ref(worksheet, brd + 1, base_column + c2, brd + len, base_column + c2),
@@ -317,7 +317,7 @@ school_names.each do |school_name|
   summary, raw_data1 = analyser.analyse(:without_bottom_10_percent)
   summary, raw_data2 = analyser.analyse(:most_recent_300_school_days_without_bottom_10_percent)
   results.push(summary)
-  
+
   next if summary.nil?
 
   excel.save([raw_data, raw_data1, raw_data2], school_name[0..14])

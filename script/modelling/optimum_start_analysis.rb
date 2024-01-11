@@ -19,14 +19,14 @@ def save_csv(results)
 
   CSV.open(filename, 'w') do |csv|
     csv << ['School name', 'mpxn', column_names].flatten
-    
+
     results.each do |name, school_data|
       next if school_data.nil?
       school_data.each do |mpxn, d|
         next if d.nil?
         row_data = d.map { |type, data| data.values }.flatten
         csv << [name, mpxn, row_data].flatten
-      end     
+      end
     end
   end
 end

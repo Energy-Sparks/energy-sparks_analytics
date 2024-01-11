@@ -39,7 +39,7 @@ schools = school_names.map do |school_name|
 
       peak_kw_stats = school.holidays.calculate_statistics(meter.amr_data.start_date, meter.amr_data.end_date, -> (date) { meter.amr_data.peak_kw(date) })
       gen_kw_stats= school.holidays.calculate_statistics(meter.amr_data.start_date, meter.amr_data.end_date, -> (date) { meter.sub_meters[:generation].amr_data.peak_kw(date) })
-      
+
       school_stats[school_name][meter.mpxn][:school_day_average_peak_kw] = peak_kw_stats[:schoolday][:average]
       school_stats[school_name][meter.mpxn][:panel_capacity_kw] = gen_kw_stats[:schoolday][:max]
     end

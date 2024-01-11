@@ -91,7 +91,7 @@ class MissingElectricityEstimation < MissingEnergyFittingBase
       }
       raise MoreDataAlreadyThanEstimate, error
     end
-    
+
     total_normalised_missing = missing_days_normalised_total
 
     school_day_profile_x48 = average_profile_for_day_type_x48(:schoolday)

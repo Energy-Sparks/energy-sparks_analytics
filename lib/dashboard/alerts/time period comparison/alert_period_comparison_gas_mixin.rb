@@ -4,7 +4,7 @@ module AlertPeriodComparisonGasMixin
     specific['Change in between last 2 holidays'] = AlertPeriodComparisonBase.dynamic_template_variables(:gas)
     specific['Unadjusted previous period consumption'] = AlertPeriodComparisonTemperatureAdjustmentMixin.unadjusted_template_variables
     specific
-  end  
+  end
 
   def self.holiday_adjusted_gas_variables
     {}

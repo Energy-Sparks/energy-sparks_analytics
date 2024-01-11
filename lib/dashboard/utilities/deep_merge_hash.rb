@@ -8,7 +8,7 @@ module HashRecursive
               block_actual = Proc.new {|key, oldval, newval|
                   newval = block.call(key, oldval, newval) if block_given?
                   [oldval, newval].all? {|v| v.is_a?(Hash)} ? oldval.merge(newval, &block_actual) : newval
-              }   
+              }
               self.merge(other_hash, &block_actual)
           else
               super(other_hash, &block)

@@ -61,7 +61,7 @@ class AggregatorFilter < AggregatorBase
     end
 
     logger.info "Filtering start #{results.bucketed_data.keys}"
-    logger.debug "Filters are: #{chart_config.filters}" 
+    logger.debug "Filters are: #{chart_config.filters}"
     if chart_config.series_breakdown == :submeter
       if chart_config.submeter_filter?
         keep_key_list += pattern_match_list_with_list(results.bucketed_data.keys, chart_config.submeter_filter)
@@ -74,7 +74,7 @@ class AggregatorFilter < AggregatorBase
       keep_key_list += pattern_match_list_with_list(results.bucketed_data.keys, filter)
     end
     if chart_config.model_type_filter?
-      # for model filters, copy in any trendlines for those models to avoid filtering 
+      # for model filters, copy in any trendlines for those models to avoid filtering
       model_filter = [chart_config.model_type_filters].flatten(1)
       trendline_filters = model_filter.map { |model_name| Series::ManagerBase.trendline_for_series_name(model_name) }
       trendline_filters_with_parameters = pattern_match_two_symbol_lists(trendline_filters, results.bucketed_data.keys)

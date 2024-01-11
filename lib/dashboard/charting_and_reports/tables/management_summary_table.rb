@@ -281,7 +281,7 @@ class ManagementSummaryTable < ContentBase
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
-    
+
     valid               = current_period_kwh.nil? || previous_period_kwh.nil? || out_of_date
     percent_change      = valid ? nil : percent_change_with_zero(current_period_kwh, previous_period_kwh)
 

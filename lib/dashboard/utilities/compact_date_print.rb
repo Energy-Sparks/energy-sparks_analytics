@@ -67,4 +67,4 @@ class CompactDatePrint
     return '' unless include_count
     sprintf(' * %4d', date_range.last - date_range.first + 1)
   end
-end 
+end

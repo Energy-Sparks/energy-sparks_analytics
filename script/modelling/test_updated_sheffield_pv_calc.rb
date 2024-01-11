@@ -232,7 +232,7 @@ end
 def dates(date)
   return [date]                    if date.is_a?(Date)
   return date.map { |d| dates(d) } if date.is_a?(Array)
-  return date.to_a                 if date.is_a?(Range) 
+  return date.to_a                 if date.is_a?(Range)
 end
 
 def annual_kwh(chart_results)
@@ -298,7 +298,7 @@ school_names.each do |school_name|
   overrides.each do |override|
     c2_before.push(run_chart(school, :management_dashboard_group_by_month_solar_pv, override))
   end
- 
+
   half_hour_offset = calculate_solar_azimuth_half_hour_offset(school, config[school.name])
   puts "Offset = #{half_hour_offset}"
 

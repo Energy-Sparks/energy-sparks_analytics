@@ -89,7 +89,7 @@ class AverageSchoolAggregator < VirtualSchool
     amr_data_count = Hash.new(0.0)
     average_school_meter = aggregated_meter(average_school, fuel_type)
     average_amr_data = average_school_meter.amr_data
-    
+
     schools.each do |school|
       meter = aggregated_meter(school, fuel_type)
       amr_data = meter.amr_data

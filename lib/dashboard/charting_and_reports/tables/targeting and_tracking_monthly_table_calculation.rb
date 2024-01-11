@@ -88,7 +88,7 @@ class CalculateMonthlyTrackAndTraceData
             0.0
           else
             kwh_zero_if_not_exists(target_meter, date)
-          end 
+          end
         end.sum.to_f
 
         total == 0.0 ? nil : total
@@ -152,7 +152,7 @@ class CalculateMonthlyTrackAndTraceData
     ed = corresponding_date_in_previous_year(partial_month_range.last)
     sd..ed
   end
-  
+
   def corresponding_date_in_previous_year(date)
     if Date.leap?(date.year) && date.month == 2 && date.day == 29
       Date.new(date.year - 1, date.month, 28)

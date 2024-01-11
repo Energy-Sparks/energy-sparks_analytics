@@ -1,4 +1,4 @@
-# 
+#
 # given up to 52 weeks of data fit a seasonal profile
 # to the weekly electricity data
 # general documentation for approach under:

@@ -19,13 +19,13 @@ class TargetingAndTrackingTable < ContentBase
   def self.template_variables
     { 'Targeting and tracking summary' => TEMPLATE_VARIABLES}
   end
-  
+
   TEMPLATE_VARIABLES = {
     summary_table: {
       description: 'Targeting and tracking summary',
       units:          :table,
       header:         ['unknown - dynamic not static'],
-      column_types:   [String] 
+      column_types:   [String]
     }
   }
 
@@ -98,7 +98,7 @@ class TargetingAndTrackingTable < ContentBase
   end
 
   def year_to_date_percent_absolute_html
-    format_cell(:relative_percent, cumulative_target_percent.magnitude) 
+    format_cell(:relative_percent, cumulative_target_percent.magnitude)
   end
 
   private
@@ -145,7 +145,7 @@ class TargetingAndTrackingTable < ContentBase
   end
 
   def format_cell(datatype, value)
-    FormatEnergyUnit.format(datatype, value, :html, false, true, :target) 
+    FormatEnergyUnit.format(datatype, value, :html, false, true, :target)
   end
 
   def html_table_formatting(header, rows, row_estimates: nil)

@@ -53,13 +53,13 @@ script = {
                               ],
                               control: {
                                 display_average_calculation_rate: true,
-                                report_failed_charts:   :summary, 
-                                no_compare_results:        [ 
-                                  :summary, 
+                                report_failed_charts:   :summary,
+                                no_compare_results:        [
+                                  :summary,
                                   :quick_comparison,
                                 ]
                               }
-                            }, 
+                            },
 }
 
 RunTests.new(script).run

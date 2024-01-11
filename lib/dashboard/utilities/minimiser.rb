@@ -32,4 +32,3 @@ require 'minimization'
       @f_minimum = f(@x_minimum)
     end
   end
-  

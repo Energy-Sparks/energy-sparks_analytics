@@ -19,12 +19,14 @@ end
 
 group :development do
   gem 'aws-sdk-s3'
+  gem 'fasterer'
   gem 'i18n-tasks'
   gem 'climate_control'
   gem 'rubocop'
   gem 'rubocop-performance'
   gem 'rubocop-rspec'
   gem 'ruby-prof'
+  gem 'overcommit'
 end
 
 # For tests

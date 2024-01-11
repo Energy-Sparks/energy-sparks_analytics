@@ -201,7 +201,7 @@ class HtmlTableFormattingWithHighlightedCellsEstimatedData < HtmlTableFormatting
       <%= column_td(column_number, right_justified_columns, val) %>
       <%= highlight_start %><%= format_value(val, column_number) %> <%= highlight_end %></td>
     }.gsub(/^  /, '')
- 
+
     generate_html(template, binding)
   end
 
@@ -209,7 +209,7 @@ class HtmlTableFormattingWithHighlightedCellsEstimatedData < HtmlTableFormatting
     return false if @row_estimates.nil?
 
     return false unless @row_estimates.key?(row_number)
-    
+
     @row_estimates[row_number][data_column_number] > 0.0
   end
 end

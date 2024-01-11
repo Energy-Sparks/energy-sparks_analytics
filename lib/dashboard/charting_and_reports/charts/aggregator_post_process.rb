@@ -7,7 +7,7 @@ class AggregatorPostProcess < AggregatorBase
     inject_benchmarks                   if chart_config.inject_benchmark?
 
     filter.remove_filtered_series       if chart_config.chart_has_filter? && chart_config.series_breakdown != :none
-  
+
     create_y2_axis_data                 if chart_config.y2_axis?
 
     reorganise_buckets                  if chart_config.chart1_type == :scatter

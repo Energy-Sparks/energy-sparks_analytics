@@ -16,7 +16,7 @@ class VisualCrossingWeatherForecastRaw
       JSON.parse(res.body)
     else
       raise HttpError, "status #{res.status} #{res.body}"
-    end 
+    end
   end
 
   private

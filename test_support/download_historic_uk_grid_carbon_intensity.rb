@@ -41,7 +41,7 @@ class DownloadUKGridCarbonIntensity
   def download
     logger.info '=' * 120
     logger.info 'UK CARBON INTENSITY DOWNLOAD'
-    
+
     last_reading_date_from_csv = csv_last_reading(@csv_filename)
 
     if !last_reading_date_from_csv.nil? && last_reading_date_from_csv >= @end_date
