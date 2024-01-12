@@ -31,9 +31,7 @@ describe Holidays do
         let(:include_partial_period) { true }
 
         it 'returns a single period' do
-          expect(periods.length).to eq 1
-          expect(periods[0].start_date).to eq start_date
-          expect(periods[0].end_date).to eq end_date
+          expect(periods).to match([have_attributes(start_date: start_date, end_date: end_date)])
         end
       end
     end
@@ -41,19 +39,15 @@ describe Holidays do
     context 'with 364 days' do
       let(:start_date) { end_date - 363 }
 
-      it 'returns single period' do
-        expect(periods.length).to eq 1
-        expect(periods[0].start_date).to eq start_date
-        expect(periods[0].end_date).to eq end_date
+      it 'returns a single period' do
+        expect(periods).to match([have_attributes(start_date: start_date, end_date: end_date)])
       end
 
       context 'when partial periods allowed' do
         let(:include_partial_period) { true }
 
         it 'returns a single period' do
-          expect(periods.length).to eq 1
-          expect(periods[0].start_date).to eq start_date
-          expect(periods[0].end_date).to eq end_date
+          expect(periods).to match([have_attributes(start_date: start_date, end_date: end_date)])
         end
       end
     end
@@ -61,44 +55,43 @@ describe Holidays do
     context 'with 365 days' do
       let(:start_date) { end_date - 364 }
 
-      it 'returns single period' do
-        expect(periods.length).to eq 1
+      it 'returns a single period' do
+        expect(periods).to match([have_attributes(start_date: Date.new(2023, 1, 3), end_date: end_date)])
       end
 
       context 'when partial periods allowed' do
         let(:include_partial_period) { true }
 
-        it 'returns two periods' do
-          expect(periods.length).to eq 2
-          expect(periods[0].start_date).to eq(Date.new(2023, 1, 3))
-          expect(periods[0].end_date).to eq end_date
-
-          expect(periods[1].start_date).to eq(start_date)
-          expect(periods[1].end_date).to eq(Date.new(2023, 1, 2))
+        it 'returns 2 periods' do
+          expect(periods).to match([have_attributes(start_date: Date.new(2023, 1, 3), end_date: end_date),
+                                    have_attributes(start_date: start_date, end_date: start_date)])
         end
 
         context 'with minimum days per period' do
           let(:minimum_days) { 7 }
 
           it 'returns a single period' do
-            expect(periods.length).to eq 1
-            expect(periods[0].start_date).to eq(Date.new(2023, 1, 3))
-            expect(periods[0].end_date).to eq end_date
+            expect(periods).to match([have_attributes(start_date: Date.new(2023, 1, 3), end_date: end_date)])
           end
         end
       end
     end
 
     context 'with 2 years' do
-      let(:start_date) { end_date - 364 * 2.0 }
+      let(:start_date) { end_date - ((363 * 2) + 1) }
 
       it 'returns 2 periods' do
-        expect(periods.length).to eq 2
-        expect(periods[0].start_date).to eq(Date.new(2023, 1, 3))
-        expect(periods[0].end_date).to eq end_date
+        expect(periods).to match([have_attributes(start_date: Date.new(2023, 1, 3), end_date: end_date),
+                                  have_attributes(start_date: start_date, end_date: Date.new(2023, 1, 2))])
+      end
 
-        expect(periods[1].start_date).to eq(Date.new(2022, 1, 4))
-        expect(periods[1].end_date).to eq(Date.new(2023, 1, 2))
+      context 'when partial periods allowed' do
+        let(:include_partial_period) { true }
+
+        it 'returns 2 periods' do
+          expect(periods).to match([have_attributes(start_date: Date.new(2023, 1, 3), end_date: end_date),
+                                    have_attributes(start_date: start_date, end_date: Date.new(2023, 1, 2))])
+        end
       end
     end
 
@@ -113,18 +106,14 @@ describe Holidays do
 
       it 'returns period ending on the previous saturday' do
         # saturday before the 1st
-        expect(periods[0].end_date).to eq(saturday_before_end_date)
-        expect(periods[0].start_date).to eq(start_date)
-        expect(periods.length).to eq 1
+        expect(periods).to match([have_attributes(start_date: start_date, end_date: saturday_before_end_date)])
       end
 
       context 'with an end date on a saturday' do
         let(:end_date) { Date.new(2023, 12, 30) }
 
-        it 'doesnt change the date' do
-          expect(periods[0].end_date).to eq(end_date)
-          expect(periods[0].start_date).to eq(start_date)
-          expect(periods.length).to eq 1
+        it "doesn't change the date" do
+          expect(periods).to match([have_attributes(start_date: start_date, end_date: end_date)])
         end
       end
     end
