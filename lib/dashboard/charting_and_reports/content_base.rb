@@ -503,13 +503,6 @@ class ContentBase
     puts var unless Object.const_defined?('Rails')
   end
 
-  # an attempt to consolidate all conversion between kWh to economic costs
-  # for alerts and advice to a single piece of code
-  # no ideal in that it that the argument
-  def saving_rate(*args)
-    EconomicCostCalculations.instance.saving_rate *args
-  end
-
   # technically usage of a blended rate can be imperfect but sometimes when
   # estimating savings its the best you can do
   def blended_rate(datatype = :£)
