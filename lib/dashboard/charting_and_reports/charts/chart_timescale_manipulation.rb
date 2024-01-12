@@ -216,7 +216,7 @@ class ChartManagerTimescaleManipulation
       ((end_date - start_date + 1) / 365.0).floor
     when :up_to_a_year
       #allow navigation back to partial years
-      #aligning with saturday boundays ensures code is in sync with UpToAYearPeriods
+      #aligning with saturday boundarys ensures code is in sync with UpToAYearPeriods
       move_to_saturday_boundary = weekly_x_axis?(chart_config_original) ? true : false
       minimum_days = weekly_x_axis?(chart_config_original) ? 7 : nil
       Holidays.periods_cadence(start_date, end_date, include_partial_period: true, move_to_saturday_boundary: move_to_saturday_boundary, minimum_days: minimum_days).count
