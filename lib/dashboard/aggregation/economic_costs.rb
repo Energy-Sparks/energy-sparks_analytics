@@ -1,6 +1,6 @@
 class EconomicCosts < CostSchedule
-  protected def costs(date, meter, days_kwh_x48)
-    meter.meter_tariffs.economic_cost(date, days_kwh_x48)
+  protected def costs(date, days_kwh_x48)
+    @meter_tariffs.economic_cost(date, days_kwh_x48)
   end
 
   # Processes the tariff and consumption data for a list of meters, to
@@ -12,7 +12,7 @@ class EconomicCosts < CostSchedule
   # @param Date combined_end_date end date of range
   # @return EconomicCostsPrecalculated
   def self.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :economic_tariff, EconomicCostsPrecalculated.new(combined_meter))
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :economic_tariff, EconomicCostsPrecalculated.new(combined_meter.meter_tariffs, combined_meter.amr_data, combined_meter.fuel_type))
   end
 
   # Processes the tariff and consumption data for a list of meters, to
@@ -24,7 +24,7 @@ class EconomicCosts < CostSchedule
   # @param Date combined_end_date end date of range
   # @return CurrentEconomicCostsPrecalculated
   def self.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :current_economic_tariff, CurrentEconomicCostsPrecalculated.new(combined_meter))
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :current_economic_tariff, CurrentEconomicCostsPrecalculated.new(combined_meter.meter_tariffs, combined_meter.amr_data, combined_meter.fuel_type))
   end
 end
 
@@ -40,8 +40,8 @@ class CachingEconomicCosts < EconomicCosts
   # @param Date date
   # @return OneDaysCostData
   def one_days_cost_data(date)
-    return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
+    return calculate_tariff_for_date(date) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date)) unless calculated?(date)
     self[date]
   end
 
@@ -66,7 +66,7 @@ class CachingCurrentEconomicCosts < CachingEconomicCosts
   # perhaps use an '@@asof_date || end_date' to pass down this far?
   #
   private def tariff_date(_date)
-    meter.amr_data.end_date
+    @amr_data.end_date
   end
 end
 

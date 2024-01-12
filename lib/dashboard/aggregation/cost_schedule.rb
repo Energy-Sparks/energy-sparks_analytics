@@ -30,7 +30,7 @@ require_relative '../utilities/half_hourly_loader'
 # and may override:
 # one_day_total_cost(date)
 class CostSchedule < HalfHourlyData
-  attr_reader :meter, :fuel_type, :amr_data, :fuel_type
+  attr_reader :fuel_type, :amr_data
 
   #This class is initially false but will be set to true at the end
   #of the aggregation process. Indicating that any changes to meter data
@@ -68,11 +68,11 @@ class CostSchedule < HalfHourlyData
   end
 
   #@param Dashboard::Meter meter the meter whose costs this schedule describes
-  def initialize(meter)
+  def initialize(meter_tariffs, amr_data, fuel_type)
     super(:amr_data_accounting_tariff)
-    @meter = meter
-    @amr_data = meter.amr_data
-    @fuel_type = meter.fuel_type
+    @meter_tariffs = meter_tariffs
+    @amr_data = amr_data
+    @fuel_type = fuel_type
     @bill_component_types_internal = Hash.new(nil) # only interested in (quick access) to keys, so maintain as hash rather than array
     @post_aggregation_state = false
   end
@@ -134,18 +134,17 @@ class CostSchedule < HalfHourlyData
   # Calculate the cost for a given date
   #
   # @param Date date the date to calculate. Used to lookup consumption and tariff data
-  # @param Dashboard::Meter meter the meter whose tariff and consumption data will be used
   # @return OneDaysCostData
-  public def calculate_tariff_for_date(date, meter)
-    raise EnergySparksNotEnoughDataException, "Doing cost calculations for date #{date} meter start_date #{meter.amr_data.start_date}" if date < meter.amr_data.start_date
-    kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
-    costs(tariff_date(date), meter, kwh_x48)
+  public def calculate_tariff_for_date(date)
+    raise EnergySparksNotEnoughDataException, "Doing cost calculations for date #{date} meter start_date #{@amr_data.start_date}" if date < @amr_data.start_date
+    kwh_x48 = @amr_data.days_kwh_x48(date, :kwh)
+    costs(tariff_date(date), kwh_x48)
   end
 
   #Log summary of costs for a day
   public def costs_summary
     type_info = "with the following bill components: #{bill_component_types}"
-    "costs for meter #{meter.mpan_mprn}, #{self.length} days from #{start_date} to #{end_date}, £#{total_costs.round(0)} of which standing charges £#{total_standing_charges.round(0)}, #{type_info}"
+    "costs for #{@fuel_type} meter, #{self.length} days from #{start_date} to #{end_date}, £#{total_costs.round(0)} of which standing charges £#{total_standing_charges.round(0)}, #{type_info}"
   end
 
   #Calculate total cost across the entire date range
@@ -219,7 +218,7 @@ class CostSchedule < HalfHourlyData
   # @param Date _date the date for which tariffs should be returned
   # @param Dashboard::Meter meter the meter whose tariff information is to be retrieved
   # @param Array _days_kwh_x48 the consumption to use to calculate costs
-  protected def costs(_date, _meter, _days_kwh_x48)
+  protected def costs(_date, _meter_tariffs, _days_kwh_x48)
     raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class for CostSchedule: costs')
   end
 end

@@ -1,6 +1,8 @@
+require_relative './cost_schedule'
+
 class AccountingCosts < CostSchedule
-  protected def costs(date, meter, days_kwh_x48)
-    meter.meter_tariffs.accounting_cost(date, days_kwh_x48)
+  protected def costs(date, days_kwh_x48)
+    @meter_tariffs.accounting_cost(date, days_kwh_x48)
   end
 
   # Processes the tariff and consumption data for a list of meters, to
@@ -15,7 +17,7 @@ class AccountingCosts < CostSchedule
   # @param Date combined_end_date end date of range
   # @return AccountingCostsPrecalculated
   def self.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
-    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :accounting_tariff, AccountingCostsPrecalculated.new(combined_meter)) do |date, list_of_meters_on_date|
+    combine_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date, :accounting_tariff, AccountingCostsPrecalculated.new(combined_meter.meter_tariffs, combined_meter.amr_data, combined_meter.fuel_type)) do |date, list_of_meters_on_date|
       missing_accounting_costs = list_of_meters_on_date.select { |m| !m.amr_data.date_exists_by_type?(date, :accounting_cost) }
       missing_accounting_costs.length > 0
     end
@@ -23,8 +25,8 @@ class AccountingCosts < CostSchedule
 
   # returns a x48 array of half hourly costs
   def one_days_cost_data(date)
-    return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
+    return calculate_tariff_for_date(date) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date)) unless calculated?(date)
     self[date]
   end
 
@@ -37,8 +39,8 @@ end
 class CachingAccountingCosts < AccountingCosts
   # returns a x48 array of half hourly costs, only caches post aggregation, and front end cache
   def one_days_cost_data(date)
-    return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
+    return calculate_tariff_for_date(date) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date)) unless calculated?(date)
     self[date]
   end
 

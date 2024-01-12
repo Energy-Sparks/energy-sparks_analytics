@@ -27,5 +27,56 @@ FactoryBot.define do
           dcc_meter: dcc_meter,
           meter_attributes: meter_attributes)
     end
+
+    trait :with_flat_rate_tariffs do
+      transient do
+        rates { create_flat_rate(rate: 0.10, standing_charge: 1.0) }
+        tariff_start_date { nil }
+        tariff_end_date   { nil }
+      end
+
+      initialize_with do
+        accounting_tariff = create_accounting_tariff_generic(
+          start_date: tariff_start_date,
+          end_date: tariff_end_date,
+          rates: rates
+        )
+        meter_attributes = { accounting_tariff_generic: [accounting_tariff] }
+        new(meter_collection: meter_collection,
+            amr_data: amr_data, type: type, identifier: identifier,
+            name: name, floor_area: floor_area, number_of_pupils: number_of_pupils,
+            solar_pv_installation: solar_pv_installation,
+            storage_heater_config: storage_heater_config,
+            external_meter_id: external_meter_id,
+            dcc_meter: dcc_meter,
+            meter_attributes: meter_attributes)
+      end
+
+      after(:build) do |meter, _evaluator|
+        meter.set_tariffs
+      end
+    end
+
+    trait :with_tariffs do
+      transient do
+        accounting_tariffs { [] }
+      end
+
+      initialize_with do
+        meter_attributes = { accounting_tariff_generic: accounting_tariffs }
+        new(meter_collection: meter_collection,
+            amr_data: amr_data, type: type, identifier: identifier,
+            name: name, floor_area: floor_area, number_of_pupils: number_of_pupils,
+            solar_pv_installation: solar_pv_installation,
+            storage_heater_config: storage_heater_config,
+            external_meter_id: external_meter_id,
+            dcc_meter: dcc_meter,
+            meter_attributes: meter_attributes)
+      end
+
+      after(:build) do |meter, _evaluator|
+        meter.set_tariffs
+      end
+    end
   end
 end
