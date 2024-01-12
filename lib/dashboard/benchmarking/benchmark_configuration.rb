@@ -1,6 +1,6 @@
 require_relative './benchmark_content_base.rb'
 require_relative './benchmark_content_general.rb'
-require_relative '../charting_and_reports/tables/management_summary_table.rb'
+require_relative '../alerts/common/management_summary_table.rb'
 
 module Benchmarking
 
