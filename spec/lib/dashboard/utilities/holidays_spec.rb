@@ -75,5 +75,32 @@ describe Holidays do
         expect(periods.length).to eq 2
       end
     end
+
+    context 'when moving to saturday' do
+      let(:end_date) { Date.new(2024, 1, 1) }
+      let(:start_date) { Date.new(2023, 12, 2) }
+
+      let(:include_partial_period) { true }
+      let(:move_to_saturday_boundary) { true }
+
+      let(:saturday_before_end_date) { Date.new(2023, 12, 30) }
+
+      it 'returns period ending on the previous saturday' do
+        # saturday before the 1st
+        expect(periods[0].end_date).to eq(saturday_before_end_date)
+        expect(periods[0].start_date).to eq(start_date)
+        expect(periods.length).to eq 1
+      end
+
+      context 'with an end date on a saturday' do
+        let(:end_date) { Date.new(2023, 12, 30) }
+
+        it 'doesnt change the date' do
+          expect(periods[0].end_date).to eq(end_date)
+          expect(periods[0].start_date).to eq(start_date)
+          expect(periods.length).to eq 1
+        end
+      end
+    end
   end
 end
