@@ -176,15 +176,6 @@ module Dashboard
       end
     end
 
-    private def process_meter_attributes
-      @storage_heater_setup     = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
-      @solar_pv_setup           = SolarPVPanels.new(attributes(:solar_pv), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv)
-      @solar_pv_overrides       = SolarPVPanels.new(attributes(:solar_pv_override), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv_override)
-      @solar_pv_real_metering   = true if @meter_attributes.key?(:solar_pv_mpan_meter_mapping)
-      @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
-      @meter_tariffs = GenericTariffManager.new(self)
-    end
-
     # Centrica
     def has_community_use?
       # TODO check real attribute
@@ -195,10 +186,6 @@ module Dashboard
     def has_exclusive_community_use?
       # TODO check real attribute
       mpxn.to_i % 2 == 1
-    end
-
-    private def check_fuel_type(fuel_type)
-      raise EnergySparksUnexpectedStateException.new("Unexpected fuel type #{fuel_type}") if [:electricity, :gas].include?(fuel_type)
     end
 
     def inspect
@@ -285,11 +272,6 @@ module Dashboard
 
     def heating_only?
       function_includes?(:heating_only)
-    end
-
-    private def function_includes?(*function_list)
-      function = attributes(:function)
-      !function.nil? && !(function_list & function).empty?
     end
 
     def up_to_one_year_model_period
@@ -401,12 +383,15 @@ module Dashboard
       set_accounting_tariff
     end
 
-    private def set_economic_tariff
+
+    private
+
+    def set_economic_tariff
       logger.info "Creating an economic cost schedule for #{mpan_mprn} #{fuel_type}"
       @amr_data.set_economic_tariff_schedule(CachingEconomicCosts.new(@meter_tariffs, @amr_data, fuel_type))
     end
 
-    private def set_current_economic_tariff
+    def set_current_economic_tariff
       logger.info "Creating current economic cost schedule for meter #{name}"
       if @meter_tariffs.economic_tariffs_change_over_time?
         @amr_data.set_current_economic_tariff_schedule(CachingCurrentEconomicCosts.new(@meter_tariffs, @amr_data, fuel_type))
@@ -418,9 +403,27 @@ module Dashboard
       end
     end
 
-    private def set_accounting_tariff
+    def set_accounting_tariff
       logger.info "Creating accounting cost schedule for meter #{mpan_mprn} #{fuel_type}"
       @amr_data.set_accounting_tariff_schedule(CachingAccountingCosts.new(@meter_tariffs, @amr_data, fuel_type))
+    end
+
+    def process_meter_attributes
+      @storage_heater_setup     = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
+      @solar_pv_setup           = SolarPVPanels.new(attributes(:solar_pv), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv)
+      @solar_pv_overrides       = SolarPVPanels.new(attributes(:solar_pv_override), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv_override)
+      @solar_pv_real_metering   = true if @meter_attributes.key?(:solar_pv_mpan_meter_mapping)
+      @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
+      @meter_tariffs = GenericTariffManager.new(self)
+    end
+
+    def check_fuel_type(fuel_type)
+      raise EnergySparksUnexpectedStateException.new("Unexpected fuel type #{fuel_type}") if [:electricity, :gas].include?(fuel_type)
+    end
+
+    def function_includes?(*function_list)
+      function = attributes(:function)
+      !function.nil? && !(function_list & function).empty?
     end
 
   end
