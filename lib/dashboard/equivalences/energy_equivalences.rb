@@ -110,4 +110,3 @@ class EnergyEquivalences
     end
   end
 end
-
