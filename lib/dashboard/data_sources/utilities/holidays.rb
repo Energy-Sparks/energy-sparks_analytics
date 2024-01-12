@@ -401,7 +401,6 @@ class Holidays
     [saturday - 6, saturday, week_count]
   end
 
-  # was originally included in ActiveSupport code base, may be lost in rails integration
   # not sure whether it includes current Saturday, assume not, so if date is already a Saturday, returns date - 7
   def self.nearest_previous_saturday(date)
     date - (date.wday + 1)
@@ -477,7 +476,7 @@ class Holidays
   def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false, move_to_saturday_boundary: false, minimum_days: nil)
 
     last_date_of_period = end_date
-    # move to previous Saturday, so last date a Saturday - better for getting weekends and holidays on right boundaries
+    # move to previous Saturday, so last date always Saturday - better for getting weekends and holidays on right boundaries
     if move_to_saturday_boundary
       last_date_of_period = last_date_of_period.saturday? ? last_date_of_period : nearest_previous_saturday(last_date_of_period)
     end
