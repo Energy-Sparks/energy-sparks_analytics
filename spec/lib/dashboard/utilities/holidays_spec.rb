@@ -9,7 +9,7 @@ describe Holidays do
     let(:minimum_days) { nil }
 
     let(:periods) do
-      Holidays.periods_cadence(
+      described_class.periods_cadence(
         start_date,
         end_date,
         include_partial_period: include_partial_period,
@@ -21,10 +21,20 @@ describe Holidays do
     let(:end_date) { Date.new(2024, 1, 1) }
 
     context 'with less than a year' do
-      let(:start_date) { end_date - 30 }
+      let(:start_date) { end_date - 362 }
 
-      it 'returns single period' do
-        expect(periods.length).to eq 0
+      it 'returns no periods' do
+        expect(periods).to be_empty
+      end
+
+      context 'when partial periods allowed' do
+        let(:include_partial_period) { true }
+
+        it 'returns a single period' do
+          expect(periods.length).to eq 1
+          expect(periods[0].start_date).to eq start_date
+          expect(periods[0].end_date).to eq end_date
+        end
       end
     end
 
@@ -33,13 +43,17 @@ describe Holidays do
 
       it 'returns single period' do
         expect(periods.length).to eq 1
+        expect(periods[0].start_date).to eq start_date
+        expect(periods[0].end_date).to eq end_date
       end
 
       context 'when partial periods allowed' do
         let(:include_partial_period) { true }
 
-        it 'returns single periods' do
+        it 'returns a single period' do
           expect(periods.length).to eq 1
+          expect(periods[0].start_date).to eq start_date
+          expect(periods[0].end_date).to eq end_date
         end
       end
     end
@@ -56,6 +70,11 @@ describe Holidays do
 
         it 'returns two periods' do
           expect(periods.length).to eq 2
+          expect(periods[0].start_date).to eq(Date.new(2023, 1, 3))
+          expect(periods[0].end_date).to eq end_date
+
+          expect(periods[1].start_date).to eq(start_date)
+          expect(periods[1].end_date).to eq(Date.new(2023, 1, 2))
         end
 
         context 'with minimum days per period' do
@@ -63,6 +82,8 @@ describe Holidays do
 
           it 'returns a single period' do
             expect(periods.length).to eq 1
+            expect(periods[0].start_date).to eq(Date.new(2023, 1, 3))
+            expect(periods[0].end_date).to eq end_date
           end
         end
       end
@@ -73,6 +94,11 @@ describe Holidays do
 
       it 'returns 2 periods' do
         expect(periods.length).to eq 2
+        expect(periods[0].start_date).to eq(Date.new(2023, 1, 3))
+        expect(periods[0].end_date).to eq end_date
+
+        expect(periods[1].start_date).to eq(Date.new(2022, 1, 4))
+        expect(periods[1].end_date).to eq(Date.new(2023, 1, 2))
       end
     end
 
