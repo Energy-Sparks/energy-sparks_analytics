@@ -19,7 +19,7 @@ class ManagementSummaryTable < ContentBase
 
   def initialize(school)
     super(school)
-    @scalar = ScalarkWhCO2CostValues.new(@school)
+    @scalar = CalculateAggregateValues.new(@school)
     @rating = nil
   end
 
@@ -314,7 +314,7 @@ class ManagementSummaryTable < ContentBase
   end
 
   def electricity_co2_with_solar_offset(period = { year: 0})
-    scalar = ScalarkWhCO2CostValues.new(@school)
+    scalar = CalculateAggregateValues.new(@school)
     consumption   = checked_get_aggregate(period, :electricity, :co2)
     pv_production = checked_get_aggregate(period, :solar_pv,    :co2)
     # NB solar pv panel putput CO2 is -tve, sign reversed in AMRData

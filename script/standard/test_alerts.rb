@@ -9,7 +9,7 @@ require_rel '../../test_support'
 
 asof_date = Date.new(2023, 10, 2)
 # schools = ['t*']
-schools = ['sy*']
+schools = ['k*']
 
 overrides = {
   schools:  schools,

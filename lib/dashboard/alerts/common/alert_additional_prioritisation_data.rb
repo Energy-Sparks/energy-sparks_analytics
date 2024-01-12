@@ -236,7 +236,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     asof_date = [asof_date, meter.amr_data.end_date].min
     chart_end_date = { asof_date: asof_date }
     begin
-      ScalarkWhCO2CostValues.new(@school).aggregate_value({ year: 0 }, fuel_type, data_type, chart_end_date)
+      CalculateAggregateValues.new(@school).aggregate_value({ year: 0 }, fuel_type, data_type, chart_end_date)
     rescue StandardError => e
       logger.info e.message
       0.0
