@@ -543,7 +543,8 @@ module Series
       breakdown = default_breakdown
       @component_meters.each do |component_meter|
         sd, ed, ok = truncated_date_range(component_meter, d1, d2)
-        breakdown[component_meter.series_name] = amr_data_date_range(component_meter, sd, ed, kwh_cost_or_co2) if ok
+        series_name = @meter_to_series_names[component_meter]
+        breakdown[series_name] = amr_data_date_range(component_meter, sd, ed, kwh_cost_or_co2) if ok
       end
       breakdown
     end
@@ -553,13 +554,19 @@ module Series
 
       @component_meters.each do |component_meter|
         sd, ed, ok = truncated_date_range(component_meter, date, date)
-        breakdown[component_meter.series_name] = amr_data_by_half_hour(component_meter, date, hhi, kwh_cost_or_co2) if ok
+        series_name = @meter_to_series_names[component_meter]
+        breakdown[series_name] = amr_data_by_half_hour(component_meter, date, hhi, kwh_cost_or_co2) if ok
       end
 
       breakdown
     end
 
     private
+
+    def meter_to_series_names
+      name_count = @component_meters.map(&:series_name).tally
+      @component_meters.map { |m| [m, name_count[m.series_name] > 1 ? m.qualified_series_name : m.series_name] }.to_h
+    end
 
     def configure_meters
       if meter.fuel_type == :electricity
@@ -569,10 +576,11 @@ module Series
         @aggregate_meter  = school.aggregated_heat_meters
         @component_meters = [school.heat_meters, school.storage_heater_meters].flatten
       end
+      @meter_to_series_names = meter_to_series_names
     end
 
     def meter_names
-      @component_meters.map(&:series_name)
+      @meter_to_series_names.values
     end
 
     def truncated_date_range(component_meter, start_date, end_date)

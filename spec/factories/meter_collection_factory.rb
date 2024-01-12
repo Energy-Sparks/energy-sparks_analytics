@@ -42,5 +42,27 @@ FactoryBot.define do
       with_electricity_meter
       with_gas_meter
     end
+
+    trait :with_aggregate_meter do
+      transient do
+        fuel_type { :electricity }
+      end
+      after(:build) do |meter_collection, evaluator|
+        amr_data = build(:amr_data, :with_date_range, start_date: evaluator.start_date, end_date: evaluator.end_date)
+        meter = build(:meter, meter_collection: meter_collection, type: evaluator.fuel_type, amr_data: amr_data)
+        meter_collection.set_aggregate_meter(evaluator.fuel_type, meter)
+      end
+    end
+
+    trait :with_electricity_meters do
+      transient do
+        meters { [] }
+      end
+      after(:build) do |meter_collection, evaluator|
+        evaluator.meters.each do |m|
+          meter_collection.add_electricity_meter(m)
+        end
+      end
+    end
   end
 end
