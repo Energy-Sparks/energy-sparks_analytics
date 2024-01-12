@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 describe Series::MeterBreakdown do
+  subject(:series_manager) do
+    Series::MeterBreakdown.new(meter_collection, chart_config)
+  end
+
   let(:meters) { build_list(:meter, 3) }
   let(:meter_collection) { build(:meter_collection, :with_aggregate_meter, :with_electricity_meters, meters: meters) }
 
@@ -11,10 +15,6 @@ describe Series::MeterBreakdown do
       meter_definition: :allelectricity,
       series_breakdown: :meter
     }
-  end
-
-  subject(:series_manager) do
-    Series::MeterBreakdown.new(meter_collection, chart_config)
   end
 
   describe '#series_name' do
