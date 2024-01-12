@@ -163,3 +163,10 @@ RSpec.configure do |config|
     end
   end
 end
+
+# Allow factories to call the helpers
+module FactoryBot
+  class SyntaxRunner
+    include EnergySparksAnalyticsDataHelpers
+  end
+end

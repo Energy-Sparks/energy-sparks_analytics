@@ -30,34 +30,6 @@ class AMRData < HalfHourlyData
     @accounting_tariff.post_aggregation_state       = true if @accounting_tariff.is_a?(CachingAccountingCosts)
   end
 
-  def set_tariffs(meter)
-    set_economic_tariff(meter)
-    set_current_economic_tariff(meter)
-    set_accounting_tariff(meter)
-  end
-
-  def set_economic_tariff(meter)
-    logger.info "Creating an economic cost schedule for #{meter.mpan_mprn} #{meter.fuel_type}"
-    @economic_tariff = CachingEconomicCosts.new(meter)
-  end
-
-  def set_current_economic_tariff(meter)
-    logger.info "Creating current economic cost schedule for meter #{meter.name}"
-    if meter.meter_tariffs.economic_tariffs_change_over_time?
-      @current_economic_tariff = CachingCurrentEconomicCosts.new(meter)
-    else
-      # there no computational benefit in doing this,
-      # given the tariff for amr_data.end_date is always re-looked up rather than cached
-      # but perhaps a slight memory benefit
-      @current_economic_tariff = @economic_tariff
-    end
-  end
-
-  def set_accounting_tariff(meter)
-    logger.info "Creating accounting cost schedule for meter #{meter.mpan_mprn} #{meter.fuel_type}"
-    @accounting_tariff = CachingAccountingCosts.new(meter)
-  end
-
   def set_economic_tariff_schedule(tariff)
     @economic_tariff = tariff
   end
@@ -76,12 +48,11 @@ class AMRData < HalfHourlyData
     @accounting_tariff = tariff
   end
 
-  # only accessed for combined meters, where calculation is the summation of 'sub' meters
   def set_carbon_schedule(co2)
     @carbon_emissions = co2
   end
 
-  # access point for single meters, not combined meters
+  # Called from aggregation_mixin, SyntheticMeter and TargetMeter
   def set_carbon_emissions(meter_id_for_debug, flat_rate, grid_carbon)
     @carbon_emissions = CarbonEmissionsParameterised.create_carbon_emissions(meter_id_for_debug, self, flat_rate, grid_carbon)
   end
