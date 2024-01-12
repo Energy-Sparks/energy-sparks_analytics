@@ -162,7 +162,6 @@ class XBucketWeek < XBucketBase
     first_day_of_period = data_start_date
     # move to next Sunday boundaries so holiday/weekend bucketing looks ok
     @first_sunday = first_day_of_period + ((7 - first_day_of_period.wday) % 7)
-
     @key_string = "%d %b %Y"
   end
 
@@ -177,9 +176,6 @@ class XBucketWeek < XBucketBase
   end
 
   def create_x_axis
-    puts "First sunday: #{@first_sunday}"
-    puts "data_end_date: #{data_end_date}"
-    puts "data_start_date: #{data_start_date}"
     (@first_sunday..data_end_date).step(7) do |date|
       if date + 6 <= data_end_date # make sure it use the final week if partial
         @x_axis_bucket_date_ranges.push([date, date + 6])
