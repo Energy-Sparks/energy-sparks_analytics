@@ -204,6 +204,10 @@ class ChartManagerTimescaleManipulation
     type == :optimum_start ? 5 : 1
   end
 
+  private def weekly_x_axis?(chart_config)
+   chart_config.key?(:x_axis) && chart_config[:x_axis] == :week
+  end
+
   private def available_periods_by_type(chart_config_original)
     start_date, end_date = determine_chart_range(chart_config_original)
     timescale_type, value = timescale_type(chart_config_original)
@@ -211,9 +215,11 @@ class ChartManagerTimescaleManipulation
     when :year
       ((end_date - start_date + 1) / 365.0).floor
     when :up_to_a_year
-      # Replaced older logic to allow dashboard charts to navigate through the entire
-      # range of data.
-      Holidays.periods_cadence(start_date, end_date, include_partial_period: true).count
+      #allow navigation back to partial years
+      #aligning with saturday boundarys ensures code is in sync with UpToAYearPeriods
+      move_to_saturday_boundary = weekly_x_axis?(chart_config_original) ? true : false
+      minimum_days = weekly_x_axis?(chart_config_original) ? 7 : nil
+      Holidays.periods_cadence(start_date, end_date, include_partial_period: true, move_to_saturday_boundary: move_to_saturday_boundary, minimum_days: minimum_days).count
     when :academicyear
       @school.holidays.academic_years(start_date, end_date).length
     when :workweek

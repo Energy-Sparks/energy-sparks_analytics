@@ -401,7 +401,6 @@ class Holidays
     [saturday - 6, saturday, week_count]
   end
 
-  # was originally included in ActiveSupport code base, may be lost in rails integration
   # not sure whether it includes current Saturday, assume not, so if date is already a Saturday, returns date - 7
   def self.nearest_previous_saturday(date)
     date - (date.wday + 1)
@@ -473,12 +472,13 @@ class Holidays
     yrs_to_date
   end
 
-  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false, move_to_saturday_boundary: false)
+  #Currently only used by the ChartManagerTimescaleManipulation and UpToAYearPeriods
+  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false, move_to_saturday_boundary: false, minimum_days: nil)
 
     last_date_of_period = end_date
-    # move to previous Saturday, so last date a Saturday - better for getting weekends and holidays on right boundaries
+    # move to previous Saturday, so last date always Saturday - better for getting weekends and holidays on right boundaries
     if move_to_saturday_boundary
-      last_date_of_period =nearest_previous_saturday(last_date_of_period)
+      last_date_of_period = last_date_of_period.saturday? ? last_date_of_period : nearest_previous_saturday(last_date_of_period)
     end
 
     days = last_date_of_period - start_date + 1
@@ -487,16 +487,20 @@ class Holidays
     whole_periods = include_partial_period ? periods.ceil : periods.floor
 
     i = -1
+
     period_index_list = Array.new(whole_periods){ i += 1 }
 
     period_dates = period_index_list.map { |v| [[last_date_of_period - (v + 1) * cadence_days + 1, start_date].max, last_date_of_period - v * cadence_days] }
 
     cadence = "cadence_#{cadence_days.to_i}_days".to_sym
 
-    period_dates.map.with_index do |period_range, period|
+    periods = period_dates.map.with_index do |period_range, period|
       description = "period #{-period} cadence #{cadence_days}"
       SchoolDatePeriod.new(cadence, description, period_range[0], period_range[1])
     end
+
+    periods.reject! {|period| period.days < minimum_days } if minimum_days
+    periods
   end
 
   # differs from 'year_to_date' as datum (0) if first whole year before activation
