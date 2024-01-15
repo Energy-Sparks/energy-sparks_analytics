@@ -472,34 +472,34 @@ class Holidays
     yrs_to_date
   end
 
-  #Currently only used by the ChartManagerTimescaleManipulation and UpToAYearPeriods
-  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false, move_to_saturday_boundary: false, minimum_days: nil)
+  def self.reverse_date_range_periods(start_date, end_date, period_length, include_partial_period)
+    Enumerator.new do |enum|
+      range_end = end_date
+      loop do
+        range_start = range_end - (period_length - 1)
+        break unless range_start >= start_date
 
-    last_date_of_period = end_date
-    # move to previous Saturday, so last date always Saturday - better for getting weekends and holidays on right boundaries
-    if move_to_saturday_boundary
-      last_date_of_period = last_date_of_period.saturday? ? last_date_of_period : nearest_previous_saturday(last_date_of_period)
+        enum << [range_start, range_end]
+        range_end = range_start - 1
+      end
+      enum << [start_date, range_end] if include_partial_period && range_end >= start_date
     end
+  end
 
-    days = last_date_of_period - start_date + 1
-    periods = days / cadence_days
-
-    whole_periods = include_partial_period ? periods.ceil : periods.floor
-
-    i = -1
-
-    period_index_list = Array.new(whole_periods){ i += 1 }
-
-    period_dates = period_index_list.map { |v| [[last_date_of_period - (v + 1) * cadence_days + 1, start_date].max, last_date_of_period - v * cadence_days] }
-
-    cadence = "cadence_#{cadence_days.to_i}_days".to_sym
-
-    periods = period_dates.map.with_index do |period_range, period|
-      description = "period #{-period} cadence #{cadence_days}"
-      SchoolDatePeriod.new(cadence, description, period_range[0], period_range[1])
+  # Currently only used by the ChartManagerTimescaleManipulation and UpToAYearPeriods
+  def self.periods_cadence(start_date, end_date, cadence_days: 52 * 7, include_partial_period: false, move_to_saturday_boundary: false, minimum_days: nil)
+    last_date_of_period = if move_to_saturday_boundary && !end_date.saturday?
+                            nearest_previous_saturday(end_date)
+                          else
+                            end_date
+                          end
+    cadence = :"cadence_#{cadence_days}_days"
+    periods = reverse_date_range_periods(start_date, last_date_of_period, cadence_days, include_partial_period)
+              .map.with_index do |period, i|
+      description = "period #{-i} cadence #{cadence_days}"
+      SchoolDatePeriod.new(cadence, description, period[0], period[1])
     end
-
-    periods.reject! {|period| period.days < minimum_days } if minimum_days
+    periods.reject! { |period| period.days < minimum_days } if minimum_days
     periods
   end
 
