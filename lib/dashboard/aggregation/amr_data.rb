@@ -4,8 +4,17 @@ require_relative '../../../app/services/baseload/baseload_calculator.rb'
 require_relative '../../../app/services/baseload/statistical_baseload_calculator.rb'
 require_relative '../../../app/services/baseload/overnight_baseload_calculator.rb'
 
+# Timed data from a meter
+# references consumption data, costs and carbon emissions
 class AMRData < HalfHourlyData
-  attr_reader :economic_tariff, :current_economic_tariff, :accounting_tariff, :carbon_emissions
+  # usage * consumption costs
+  attr_reader :economic_tariff
+  # usage * consumption costs * usage -
+  #   added since energy prices went up in the 2022 energy crisis to help predict increased costs
+  attr_reader :current_economic_tariff
+  # usage * consumption charge and standing charges, VAT, and other fixed charges
+  attr_reader :accounting_tariff
+  attr_reader :carbon_emissions
   attr_accessor :open_close_breakdown
 
   class UnexpectedDataType < StandardError; end
