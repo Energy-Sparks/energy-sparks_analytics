@@ -64,5 +64,17 @@ FactoryBot.define do
         end
       end
     end
+
+    trait :with_sub_meters do
+      with_aggregate_meter
+
+      transient do
+        sub_meters { {} }
+      end
+      after(:build) do |meter_collection, evaluator|
+        aggregate_meter = meter_collection.aggregate_meter(evaluator.fuel_type)
+        aggregate_meter.sub_meters.merge!(evaluator.sub_meters)
+      end
+    end
   end
 end

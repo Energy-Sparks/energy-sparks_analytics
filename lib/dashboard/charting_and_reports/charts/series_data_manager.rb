@@ -597,6 +597,7 @@ module Series
     def configure_meters
       @aggregate_meter  = meter
       @component_meters = meter.sub_meters.values
+      @meter_to_series_names = meter_to_series_names
     end
   end
 
