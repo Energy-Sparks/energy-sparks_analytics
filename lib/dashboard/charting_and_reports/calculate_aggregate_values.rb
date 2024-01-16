@@ -163,7 +163,7 @@ class CalculateAggregateValues
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No gas meter data available') unless @meter_collection.gas?
     when :electricity, :allelectricity_unmodified
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No electricity meter data available') unless @meter_collection.electricity?
-    when :storage_heaters
+    when :storage_heaters, :storage_heater
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No storage heater meter data available') unless @meter_collection.storage_heaters?
     when :solar_pv
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No solar pv meter data available') unless @meter_collection.solar_pv_panels?
@@ -182,7 +182,7 @@ class CalculateAggregateValues
       :allelectricity
     when :allelectricity_unmodified
       :allelectricity_unmodified
-    when :storage_heaters
+    when :storage_heaters, :storage_heater
       :storage_heater_meter
     when :solar_pv
       :solar_pv_meter
