@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'aggregation_mixin'
 require 'benchmark/memory'
 
 # Service responsible for carrying out the data "validation" and "aggregation" processes
@@ -66,6 +67,13 @@ class AggregateDataService
   #
   # Should be called after the validation process to ensure that the underlying
   # meter data has first been corrected.
+  #
+  # - combines multiple meters
+  # - potentially over different time periods (e.g. when school structure changes)
+  #   - uses smallest range of overlap by default (can be tweaked with MeterAttributes)
+  # - synthetic solar polar data for schools we don't have access to meters for (from Sheffield Data)
+  # - split out storage heater electricity usage ()
+  # - create heating model for gas and storage meters (for predictions into the future)
   #
   # This is called by the EnergySparks codebase
   def aggregate_heat_and_electricity_meters

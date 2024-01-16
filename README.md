@@ -7,14 +7,21 @@ Energy Sparks analytics library and test framework
 Energy Sparks is a UK based charity which helps schools reduce their carbon emissions, saves energy costs, and provides energy and climate change education to school pupils. The charity provides an online platform https://energysparks.uk/ which provides these educational resources and analysis of half hourly gas and electricity smart meter data. This library analyses the smart meter data to provide insight into a school's energy usage and carbon emissions. The library is used by the 'front end' to provide the Energy Sparks website, which is held in a separate repository: https://github.com/BathHacked/energy-sparks#.
 
 This library provides a number of functions
-- aggregation used to produce a wide variety of energy and carbon emission charts
+- validation and aggregation used to produce a wide variety of energy and carbon emission charts
+  - validation via `AggregateDataService.validate_meter_data` and `ValidateAMRData` which it uses
+  - aggregation via `AggregateDataService.aggregate_heat_and_electricity_meters`
 - energy equivalences to aid understanding e.g. 'the energy you used today is equivalent to the carbon emissions of driving a car 100 km'
-- 'alerts' - used to monitor schools energy usage and provide feedback to schools where they can save energy and how their energy usage has changed (presented on the website, and emailed/texted by the 'front end' to users'
+- 'alerts' framework
+  - used to monitor schools energy usage and provide feedback to schools where they can save energy and how their energy usage has changed - presented on the website and emailed/texted by the https://github.com/Energy-Sparks/energy-sparks to users'
+  - generates variables used to drive application alert messages and weekly alerts
+  - generates the benchmark metrics used in school comparison tool
 - contextual advice to schools
 - building energy modelling - currently implemented within a regression modelling framework
 - tools for comparing and benchmarking schools with each other
 - meter aggregation and disaggregation including special handling of solar PV and storage heaters
 - a variety of external mainly JSON interfaces for pulling in relevant weather, solar PV, carbon emissions and meter data
+  - mostly used directly by https://github.com/Energy-Sparks/energy-sparks
+  - under `lib/dashboard/data_sources`
 
 ## Getting Started
 

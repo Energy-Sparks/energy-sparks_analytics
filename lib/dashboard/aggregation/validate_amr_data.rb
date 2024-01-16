@@ -1,12 +1,9 @@
-
-# validates AMR data
-# - checks for missing data
-#   - if there is too big a gap it reduces the start and end dates for the amr data
-#   - if th
 # validates AMR data
 # - checks for missing data
 #   - if there is too big a gap it reduces the start and end dates for the amr data
 #   - if there are smaller gaps it attempts to fill them in using nearby data
+#     - electricity; tries to find nearest similar day
+#     - gas; looks for a day where temperature was similar
 #   - and if its heat/gas data then it adjusts for temperature
 class ValidateAMRData
   class NotEnoughTemperaturedata < StandardError; end

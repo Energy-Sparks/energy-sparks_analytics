@@ -1,5 +1,5 @@
 module Dashboard
-  # meter: holds basic information descrbing a meter and hald hourly AMR data associated with it
+  # meter: holds basic information describing a meter and held hourly AMR data associated with it
   class Meter
     class MissingOriginalMainsMeter < StandardError; end
     include Logging
