@@ -174,7 +174,7 @@ class AggregateDataServiceSolar
   # Results in the meter having a reference to itself as a mains consumption meter
   # in its Dashboard::Submeters hash?
   def reference_as_sub_meter_for_subsequent_aggregation(mains_electricity_meter)
-    log 'Referencing mains consumption meter {mains_electricity_meter.mpan_mprn} without pv as sub meter for subsequent aggregation'
+    log "Referencing mains consumption meter #{mains_electricity_meter.mpan_mprn} without pv as sub meter for subsequent aggregation"
     mains_electricity_meter.sub_meters[:mains_consume] = mains_electricity_meter
   end
 
