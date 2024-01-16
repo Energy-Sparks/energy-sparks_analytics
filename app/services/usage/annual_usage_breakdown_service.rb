@@ -83,14 +83,18 @@ module Usage
       OpenCloseTime.humanize_symbol(OpenCloseTime::COMMUNITY)
     end
 
-    def calculate_kwh!
-      daytype_breakdown = CalculateAggregateValues.new(@meter_collection).day_type_breakdown(:year, @fuel_type, :kwh)
+    def calculate_breakdown(unit = :kwh)
+      CalculateAggregateValues.new(@meter_collection).day_type_breakdown(:year, @fuel_type, unit)
+    end
 
-      @holiday.kwh = daytype_breakdown[Series::DayType::HOLIDAY] || 0
-      @weekend.kwh = daytype_breakdown[Series::DayType::WEEKEND] || 0
-      @school_day_open.kwh       = daytype_breakdown[Series::DayType::SCHOOLDAYOPEN] || 0
-      @school_day_closed.kwh     = daytype_breakdown[Series::DayType::SCHOOLDAYCLOSED] || 0
-      @community.kwh             = daytype_breakdown[community_key] || 0.0
+    def calculate_kwh!
+      day_type_breakdown = calculate_breakdown(:kwh)
+
+      @holiday.kwh = day_type_breakdown[Series::DayType::HOLIDAY] || 0.0
+      @weekend.kwh = day_type_breakdown[Series::DayType::WEEKEND] || 0.0
+      @school_day_open.kwh       = day_type_breakdown[Series::DayType::SCHOOLDAYOPEN] || 0.0
+      @school_day_closed.kwh     = day_type_breakdown[Series::DayType::SCHOOLDAYCLOSED] || 0.0
+      @community.kwh             = day_type_breakdown[community_key] || 0.0
 
       @out_of_hours.kwh = total_annual_kwh - @school_day_open.kwh
     end
@@ -104,28 +108,27 @@ module Usage
       @out_of_hours.percent = @holiday.percent + @weekend.percent + @school_day_closed.percent + @community.percent
     end
 
-    # Extracted from AlertOutOfHoursBaseUsage#calculate_£
     def calculate_pounds_sterling!
-      daytype_breakdown = CalculateAggregateValues.new(@meter_collection).day_type_breakdown(:year, @fuel_type, :£)
+      day_type_breakdown = calculate_breakdown(:£)
 
-      @holiday.£ = daytype_breakdown[Series::DayType::HOLIDAY] || 0
-      @weekend.£ = daytype_breakdown[Series::DayType::WEEKEND] || 0
-      @school_day_open.£       = daytype_breakdown[Series::DayType::SCHOOLDAYOPEN] || 0
-      @school_day_closed.£     = daytype_breakdown[Series::DayType::SCHOOLDAYCLOSED] || 0
-      @community.£             = daytype_breakdown[community_key] || 0.0
+      @holiday.£ = day_type_breakdown[Series::DayType::HOLIDAY] || 0.0
+      @weekend.£ = day_type_breakdown[Series::DayType::WEEKEND] || 0.0
+      @school_day_open.£       = day_type_breakdown[Series::DayType::SCHOOLDAYOPEN] || 0.0
+      @school_day_closed.£     = day_type_breakdown[Series::DayType::SCHOOLDAYCLOSED] || 0.0
+      @community.£             = day_type_breakdown[community_key] || 0.0
 
       # @total_annual_£ total need to be consistent with kwh total for implied tariff calculation
       @out_of_hours.£ = total_annual_pounds_sterling - @school_day_open.£
     end
 
     def calculate_co2!
-      daytype_breakdown = CalculateAggregateValues.new(@meter_collection).day_type_breakdown(:year, @fuel_type, :co2)
+      day_type_breakdown = calculate_breakdown(:co2)
 
-      @holiday.co2 = daytype_breakdown[Series::DayType::HOLIDAY] || 0
-      @weekend.co2 = daytype_breakdown[Series::DayType::WEEKEND] || 0
-      @school_day_open.co2       = daytype_breakdown[Series::DayType::SCHOOLDAYOPEN] || 0
-      @school_day_closed.co2     = daytype_breakdown[Series::DayType::SCHOOLDAYCLOSED] || 0
-      @community.co2             = daytype_breakdown[community_key] || 0.0
+      @holiday.co2 = day_type_breakdown[Series::DayType::HOLIDAY] || 0.0
+      @weekend.co2 = day_type_breakdown[Series::DayType::WEEKEND] || 0.0
+      @school_day_open.co2       = day_type_breakdown[Series::DayType::SCHOOLDAYOPEN] || 0.0
+      @school_day_closed.co2     = day_type_breakdown[Series::DayType::SCHOOLDAYCLOSED] || 0.0
+      @community.co2             = day_type_breakdown[community_key] || 0.0
       @out_of_hours.co2 = total_annual_co2 - @school_day_open.co2
     end
 
