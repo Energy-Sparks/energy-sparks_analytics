@@ -192,8 +192,6 @@ class ExcelCharts
   def add_chart(worksheet, graph_definition, data_col_offset, chart_row_offset)
     chart2 = nil
 
-    # @colours = ChartColour.new(graph_definition)
-
     logger.error "Error: null graph definition" if graph_definition.nil?
 
     x_data_1, x_data_2 = split_xdata(graph_definition[:x_data], graph_definition.dig(:configuration, :change_series_chart_configuration, :series_names))

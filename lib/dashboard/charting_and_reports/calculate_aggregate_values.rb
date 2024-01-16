@@ -1,10 +1,10 @@
-# uses charting aggregation engine to calculate single aggregate
-# kWh, CO2, economic cost or accounting cost values over a given
-# time period (e.g. :week, :month, :year)
-# has to configure a pseudo chart config to tell aggregation
-# engine what to do
+# Uses the charting aggregation engine to calculate single aggregate values
+# (e.g. kWh, CO2, economic cost or accounting cost ) over a given time period
+# (e.g. :week, :month, :year)
 #
-class ScalarkWhCO2CostValues
+# Configures a pseudo chart config to tell aggregation
+# engine what to do
+class CalculateAggregateValues
   def initialize(meter_collection)
     @meter_collection = meter_collection
   end
@@ -40,26 +40,6 @@ class ScalarkWhCO2CostValues
     }
   end
 
-  private def aggregate_multiple_fuel_types(time_scale, fuel_types, data_type, sync_energy_data_time_scales = true)
-    asof_date = sync_energy_data_time_scales ? { asof_date: @meter_collection.last_combined_meter_date } : nil
-    total = fuel_types.map do |fuel_type|
-      aggregate_but_nan_if_not_enough_data(time_scale, fuel_type, data_type, asof_date)
-    end.sum # map then sum to avoid statsample .sum bug
-    nan_to_nil(total)
-  end
-
-  private def aggregate_but_nan_if_not_enough_data(time_scale, fuel_type, data_type, override = nil)
-    begin
-      aggregate_value(time_scale, fuel_type, data_type, override)
-    rescue EnergySparksNotEnoughDataException => _e
-      Float::NAN
-    end
-  end
-
-  private def nan_to_nil(val)
-    val.nan? ? nil : val
-  end
-
   def aggregate_value(time_scale, fuel_type, data_type = :kwh, override = nil, max_days_out_of_date = nil)
     check_data_available_for_fuel_type(fuel_type)
     aggregation_configuration(time_scale, fuel_type, data_type, override, false, max_days_out_of_date)
@@ -81,16 +61,6 @@ class ScalarkWhCO2CostValues
     extract_data_from_chart_calculation_result(aggregator, percent, data_type, format_data)
   end
 
-  private def extract_data_from_chart_calculation_result(aggregator, percent, data_type, format_data)
-    data = aggregator.bucketed_data
-    data.transform_values! { |v| v[0] }
-    total = data.values.sum if percent
-    data.transform_values! { |v| v / total } if percent
-    format_unit_type = percent ? :percent : data_type
-    data.transform_values! { |v| FormatEnergyUnit.format(format_unit_type, v) } if format_data
-    data
-  end
-
   def aggregation_configuration(timescales, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
     results = non_contiguous_timescale_breakdown(timescales).map do |timescale|
       aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
@@ -104,7 +74,39 @@ class ScalarkWhCO2CostValues
     with_dates ? [value, start_date, end_date] : value
   end
 
-  private def aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
+  private
+
+  def aggregate_multiple_fuel_types(time_scale, fuel_types, data_type, sync_energy_data_time_scales = true)
+    asof_date = sync_energy_data_time_scales ? { asof_date: @meter_collection.last_combined_meter_date } : nil
+    total = fuel_types.map do |fuel_type|
+      aggregate_but_nan_if_not_enough_data(time_scale, fuel_type, data_type, asof_date)
+    end.sum # map then sum to avoid statsample .sum bug
+    nan_to_nil(total)
+  end
+
+  def aggregate_but_nan_if_not_enough_data(time_scale, fuel_type, data_type, override = nil)
+    begin
+      aggregate_value(time_scale, fuel_type, data_type, override)
+    rescue EnergySparksNotEnoughDataException => _e
+      Float::NAN
+    end
+  end
+
+  def nan_to_nil(val)
+    val.nan? ? nil : val
+  end
+
+  def extract_data_from_chart_calculation_result(aggregator, percent, data_type, format_data)
+    data = aggregator.bucketed_data
+    data.transform_values! { |v| v[0] }
+    total = data.values.sum if percent
+    data.transform_values! { |v| v / total } if percent
+    format_unit_type = percent ? :percent : data_type
+    data.transform_values! { |v| FormatEnergyUnit.format(format_unit_type, v) } if format_data
+    data
+  end
+
+  def aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
     aggregator = generic_aggregation_calculation(timescale, fuel_type, data_type, override)
     dates = aggregator.x_axis_bucket_date_ranges
     check_dates(aggregator.last_meter_date, max_days_out_of_date)
@@ -112,7 +114,7 @@ class ScalarkWhCO2CostValues
     { value: value, start_date: dates[0][0], end_date: dates[0][1] }
   end
 
-  private def check_dates(last_meter_date, max_days_out_of_date)
+  def check_dates(last_meter_date, max_days_out_of_date)
     return if max_days_out_of_date.nil?
     days_out_of_date = Date.today - max_days_out_of_date
     if last_meter_date < days_out_of_date
@@ -123,7 +125,7 @@ class ScalarkWhCO2CostValues
   # convert { schoolweek: -1..0 } into [ { schoolweek: 0 }, { schoolweek: -1 } ] or [ timescale ]
   # deals with case school week range covers a holiday, so just the school weeks are calculated
   # not the span of weeks including the holiday
-  private def non_contiguous_timescale_breakdown(timescale)
+  def non_contiguous_timescale_breakdown(timescale)
     return [timescale] unless timescale.is_a?(Hash)
     if timescale.key?(:schoolweek) && timescale[:schoolweek].is_a?(Range)
       timescale[:schoolweek].map{ |swn| {schoolweek: swn} }
@@ -132,7 +134,7 @@ class ScalarkWhCO2CostValues
     end
   end
 
-  private def generic_aggregation_calculation(time_scale, fuel_type, data_type, override = nil)
+  def generic_aggregation_calculation(time_scale, fuel_type, data_type, override = nil)
     config = {
       name:             'Scalar aggregation request',
       meter_definition: meter_type_from_fuel_type(fuel_type),
@@ -155,7 +157,7 @@ class ScalarkWhCO2CostValues
     aggregator
   end
 
-  private def check_data_available_for_fuel_type(fuel_type)
+  def check_data_available_for_fuel_type(fuel_type)
     case fuel_type
     when :gas
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No gas meter data available') unless @meter_collection.gas?
@@ -172,7 +174,7 @@ class ScalarkWhCO2CostValues
     end
   end
 
-  private def meter_type_from_fuel_type(fuel_type)
+  def meter_type_from_fuel_type(fuel_type)
     case fuel_type
     when :gas
       :allheat

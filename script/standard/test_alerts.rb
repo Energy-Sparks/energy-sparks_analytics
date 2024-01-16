@@ -9,7 +9,7 @@ require_rel '../../test_support'
 
 asof_date = Date.new(2023, 10, 2)
 # schools = ['t*']
-schools = ['ki*']
+schools = ['k*']
 
 overrides = {
   schools:  schools,
@@ -48,7 +48,8 @@ overrides = {
 #    AlertJanAug20222023GasComparison,
 #    AlertJanAug20222023StorageHeaterComparison,
     AlertEnergyAnnualVersusBenchmark,
-    AlertAdditionalPrioritisationData
+    AlertAdditionalPrioritisationData,
+    AlertHotWaterEfficiency
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [], control: { asof_date: asof_date } }

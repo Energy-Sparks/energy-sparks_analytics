@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SolarPVProfitLoss
   def initialize(meter_collection)
     @meter_collection = meter_collection
@@ -16,10 +18,10 @@ class SolarPVProfitLoss
   end
 
   def annual_solar_pv_kwh
-    #report using data from the generation meter, rather than adding up the other
-    #figures. This aligns this class with what the charts and the change in
-    #solar pv benchmark use
-    #annual_solar_pv_consumed_onsite_kwh + annual_exported_solar_pv_kwh
+    # report using data from the generation meter, rather than adding up the other
+    # figures. This aligns this class with what the charts and the change in
+    # solar pv benchmark use
+    # annual_solar_pv_consumed_onsite_kwh + annual_exported_solar_pv_kwh
     last_years_kwh(sub_meter(:generation))[:kwh]
   end
 
@@ -41,16 +43,12 @@ class SolarPVProfitLoss
 
   private
 
-  def sub_meter(meter_type)
-    @meter_collection.aggregated_electricity_meters.sub_meters[meter_type]
-  end
-
-  private def last_years_kwh(meter)
+  def last_years_kwh(meter)
     @last_years_kwh_cache ||= {}
     @last_years_kwh_cache[meter.name] ||= calculate_years_kwh(meter)
   end
 
-  private def calculate_years_kwh(meter)
+  def calculate_years_kwh(meter)
     end_date = meter.amr_data.end_date
     start_date = [end_date - 365, meter.amr_data.start_date].max
     days = end_date - start_date + 1
@@ -59,20 +57,22 @@ class SolarPVProfitLoss
     co2 = meter.amr_data.kwh_date_range(start_date, end_date, :co2)
 
     {
-      start_date:             start_date,
-      end_date:               end_date,
-      kwh:                    kwh.magnitude,
-      days:                   days,
-      co2:                    co2.magnitude,
-      period_description:     FormatEnergyUnit.format(:years, days / 365.0, :text)
+      start_date: start_date,
+      end_date: end_date,
+      kwh: kwh.magnitude,
+      days: days,
+      co2: co2.magnitude,
+      period_description: FormatEnergyUnit.format(:years, days / 365.0, :text)
     }
   end
 
-  private def period_description(days)
-    if days >= 364 - 15
-      'last year'
-    else
-    end
+  def period_description(days)
+    return unless days >= 364 - 15
+
+    'last year'
   end
 
+  def sub_meter(meter_type)
+    @meter_collection.aggregated_electricity_meters.sub_meters[meter_type]
+  end
 end

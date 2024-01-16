@@ -497,7 +497,7 @@ class ChangeInEnergyUse < AlertAnalysisBase
   end
 
   def scalar(timescale, fuel_type, datatype)
-    scale = ScalarkWhCO2CostValues.new(@school)
+    scale = CalculateAggregateValues.new(@school)
     begin
       scale.scalar(timescale, fuel_type, datatype)
     rescue EnergySparksNotEnoughDataException => _e

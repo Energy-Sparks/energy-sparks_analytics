@@ -148,7 +148,7 @@ class AlertLongTermTrend < AlertAnalysisBase
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 2 years of data required, got #{days_amr_data.to_i} days" if enough_data == :not_enough
 
-    scalar = ScalarkWhCO2CostValues.new(@school)
+    scalar = CalculateAggregateValues.new(@school)
 
     @this_year_£          = scalar.aggregate_value({ year:  0 }, fuel_type, :£,   { asof_date: asof_date})
     @last_year_£          = scalar.aggregate_value({ year: -1 }, fuel_type, :£,   { asof_date: asof_date})
@@ -246,7 +246,7 @@ class AlertGasLongTermTrend < AlertLongTermTrend
   end
 
   def temperature_compensation_factor
-    scalar = ScalarkWhCO2CostValues.new(@school)
+    scalar = CalculateAggregateValues.new(@school)
 
     # aggregate to get dates - inefficient
     y0 = scalar.scalar({ year:   0 }, fuel_type, :£,  { asof_date: @asof_date})

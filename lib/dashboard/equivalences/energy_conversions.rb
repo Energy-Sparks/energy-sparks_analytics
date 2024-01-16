@@ -59,7 +59,7 @@ class EnergyConversions
 
   private def grid_intensity(time_scale, meter_type)
     if %i[electricity storage_heaters].include?(meter_type)
-      ScalarkWhCO2CostValues.new(@meter_collection).uk_electricity_grid_carbon_intensity_for_period_kg_per_kwh(time_scale)
+      CalculateAggregateValues.new(@meter_collection).uk_electricity_grid_carbon_intensity_for_period_kg_per_kwh(time_scale)
     else
       EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH # default for cashing purposes if not electricity
     end
@@ -77,9 +77,9 @@ class EnergyConversions
 
   protected def scalar_value(time_period, meter_type, kwh_co2_or_£, with_dates)
     if with_dates
-      ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value_with_dates(time_period, meter_type, kwh_co2_or_£)
+      CalculateAggregateValues.new(@meter_collection).aggregate_value_with_dates(time_period, meter_type, kwh_co2_or_£)
     else
-      ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, kwh_co2_or_£)
+      CalculateAggregateValues.new(@meter_collection).aggregate_value(time_period, meter_type, kwh_co2_or_£)
     end
   end
 
@@ -231,7 +231,7 @@ class EnergyConversionsOutOfHours < EnergyConversions
   end
 
   private def saving_to_examplar(time_period, meter_type, kwh_co2_or_£, exemplar_percent)
-    daytype_breakdown = ScalarkWhCO2CostValues.new(@meter_collection).day_type_breakdown(time_period, meter_type, kwh_co2_or_£)
+    daytype_breakdown = CalculateAggregateValues.new(@meter_collection).day_type_breakdown(time_period, meter_type, kwh_co2_or_£)
     out_of_hours_value = daytype_breakdown.select{ |daytype, value| daytype != 'School Day Open' }.values.sum
     total_value = daytype_breakdown.values.sum
     percent_out_of_hours = out_of_hours_value / total_value
