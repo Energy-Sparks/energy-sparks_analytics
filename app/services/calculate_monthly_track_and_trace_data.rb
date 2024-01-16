@@ -72,8 +72,6 @@ class CalculateMonthlyTrackAndTraceData
       if date_range.nil? || target_start_date > date_range.last
         nil
       else
-        [target_start_date, date_range.first].max
-        [target_start_date, date_range.last].max
         kwh_date_range(meter, date_range.first, date_range.last)
       end
     end
