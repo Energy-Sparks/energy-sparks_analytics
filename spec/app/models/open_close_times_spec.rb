@@ -8,11 +8,11 @@ describe OpenCloseTimes do
       [{ day: :monday, usage_type: :school_day, opening_time: TimeOfDay.new(7, 30), closing_time: TimeOfDay.new(16, 20), calendar_period: :term_times }]
     end
     let(:community_use_times)   { [] }
-    let(:holidays)              { build(:holidays, :with_academic_year) }
+    let(:holidays)              { build(:holidays, :with_calendar_year) }
     let(:open_close_times)      { described_class.convert_frontend_times(school_times, community_use_times, holidays) }
 
     let(:last_year)             { Date.today.year - 1 }
-    # to match Autumn holiday in holidays factory
+    # before Autumn holiday
     let(:day)                   { Date.new(last_year, 10, 16) }
 
     describe 'with school times only' do

@@ -9,7 +9,7 @@ describe CommunityUseBreakdown do
 
   let(:amr_data)     { build(:amr_data, :with_date_range, start_date: amr_start_date, end_date: amr_end_date, kwh_data_x48: kwh_data_x48) }
   let(:meter)        { build(:meter, type: :electricity, amr_data: amr_data) }
-  let(:holidays)     { build(:holidays, :with_academic_year) }
+  let(:holidays)     { build(:holidays, :with_calendar_year) }
 
   let(:school_times) do
     [{ day: :monday, usage_type: :school_day, opening_time: TimeOfDay.new(7, 30), closing_time: TimeOfDay.new(16, 20), calendar_period: :term_times }]
