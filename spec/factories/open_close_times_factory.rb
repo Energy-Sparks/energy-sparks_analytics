@@ -6,7 +6,7 @@ FactoryBot.define do
       transient do
         school_times { [] }
         community_times { [] }
-        holidays { build(:holidays, :with_academic_year) }
+        holidays { build(:holidays, :with_calendar_year) }
       end
 
       # Equivalent to OpenCloseTimes.convert_frontend_times allows the object
