@@ -1,35 +1,9 @@
 # frozen_string_literal: true
 
+require_relative './usage_breakdown'
+
 module Usage
-  class AnnualUsageCategoryBreakdown
-    attr_reader :holiday, :school_day_closed, :school_day_open, :weekend, :out_of_hours, :community
-
-    def initialize(
-      holiday:,
-      school_day_closed:,
-      school_day_open:,
-      weekend:,
-      out_of_hours:,
-      community:,
-      fuel_type:
-    )
-      @holiday = holiday
-      @school_day_closed = school_day_closed
-      @school_day_open = school_day_open
-      @weekend = weekend
-      @out_of_hours = out_of_hours
-      @community = community
-      @fuel_type = fuel_type
-    end
-
-    def total
-      CombinedUsageMetric.new(
-        kwh: total_annual_kwh,
-        co2: total_annual_co2,
-        £: total_annual_£
-      )
-    end
-
+  class AnnualUsageCategoryBreakdown < UsageBreakdown
     def potential_savings(versus: :exemplar_school)
       case versus
       when :exemplar_school

@@ -37,7 +37,7 @@ class Holiday < SchoolDatePeriod
   end
 
   def to_s
-    super + ' ' + type.to_s + ' ' + academic_year.first.to_s + '/' + academic_year.last.to_s
+    super + ' ' + @type.to_s + ' ' + (@academic_year.nil? ? '' : @academic_year.first.to_s + '/' + @academic_year.last.to_s)
   end
 end
 
