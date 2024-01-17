@@ -98,7 +98,9 @@ describe Usage::UsageBreakdownService, type: :service do
 
   describe '#out_of_hours_kwh' do
     let(:days) { (amr_start_date..amr_end_date).count }
-    let(:expected_total)  { days * 48 * usage_per_hh }
+    let(:expected_total) { days * 48 * usage_per_hh }
+
+    subject(:usage) { service.out_of_hours_kwh }
 
     context 'with a month of usage' do
       # Usage when closed during the week
@@ -111,7 +113,6 @@ describe Usage::UsageBreakdownService, type: :service do
       let(:expected_out_of_hours) { weekend_usage + weekday_usage + holiday_usage }
 
       it 'returns the expected totals' do
-        usage = service.out_of_hours_kwh
         expect(usage[:total]).to eq(expected_total)
         expect(usage[:out_of_hours]).to eq(expected_out_of_hours)
       end
@@ -141,7 +142,6 @@ describe Usage::UsageBreakdownService, type: :service do
         end
 
         it 'returns the expected totals' do
-          usage = service.out_of_hours_kwh
           expect(usage[:total]).to eq(expected_total)
           expect(usage[:out_of_hours]).to eq(expected_out_of_hours)
         end
@@ -192,8 +192,9 @@ describe Usage::UsageBreakdownService, type: :service do
     let(:days) { (amr_start_date..amr_end_date).count }
     let(:expected_total_kwh) { days * 48 * usage_per_hh }
 
+    subject(:day_type_breakdown) { service.usage_breakdown }
+
     it 'returns the totals' do
-      day_type_breakdown = service.usage_breakdown
       expect(day_type_breakdown.total.kwh).to eq expected_total_kwh
       expect(day_type_breakdown.total.co2).to eq days * 48 * carbon_intensity * usage_per_hh
     end
@@ -203,7 +204,6 @@ describe Usage::UsageBreakdownService, type: :service do
       holiday_usage_kwh = 16 * 48 * usage_per_hh
       weekend_usage_kwh = 4 * 48 * usage_per_hh
       out_of_hours_kwh = weekend_usage_kwh + weekday_closed_usage_kwh + holiday_usage_kwh
-      day_type_breakdown = service.usage_breakdown
       expect(day_type_breakdown.out_of_hours.kwh).to eq out_of_hours_kwh
       expect(day_type_breakdown.out_of_hours.co2).to eq out_of_hours_kwh * carbon_intensity
       expect(day_type_breakdown.out_of_hours.£).to eq out_of_hours_kwh * flat_rate
@@ -212,7 +212,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
     it 'returns the holiday usage analysis' do
       holiday_usage_kwh = 16 * 48 * usage_per_hh
-      day_type_breakdown = service.usage_breakdown
       expect(day_type_breakdown.holiday.kwh).to eq holiday_usage_kwh
       expect(day_type_breakdown.holiday.co2).to eq holiday_usage_kwh * carbon_intensity
       expect(day_type_breakdown.holiday.£).to eq holiday_usage_kwh * flat_rate
@@ -221,7 +220,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
     it 'returns the school day closed usage analysis' do
       weekday_closed_usage_kwh = 11 * (48 - 16) * usage_per_hh
-      day_type_breakdown = service.usage_breakdown
       expect(day_type_breakdown.school_day_closed.kwh).to eq weekday_closed_usage_kwh
       expect(day_type_breakdown.school_day_closed.co2).to eq weekday_closed_usage_kwh * carbon_intensity
       expect(day_type_breakdown.school_day_closed.£).to eq weekday_closed_usage_kwh * flat_rate
@@ -230,7 +228,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
     it 'returns the school day open usage analysis' do
       weekday_open_usage_kwh = 11 * 16 * usage_per_hh
-      day_type_breakdown = service.usage_breakdown
       expect(day_type_breakdown.school_day_open.kwh).to eq weekday_open_usage_kwh
       expect(day_type_breakdown.school_day_open.co2).to eq weekday_open_usage_kwh * carbon_intensity
       expect(day_type_breakdown.school_day_open.£).to eq weekday_open_usage_kwh * flat_rate
@@ -239,7 +236,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
     it 'returns the weekend usage analysis' do
       weekend_usage_kwh = 4 * 48 * usage_per_hh
-      day_type_breakdown = service.usage_breakdown
       expect(day_type_breakdown.weekend.kwh).to eq weekend_usage_kwh
       expect(day_type_breakdown.weekend.co2).to eq weekend_usage_kwh * carbon_intensity
       expect(day_type_breakdown.weekend.£).to eq weekend_usage_kwh * flat_rate
@@ -247,7 +243,6 @@ describe Usage::UsageBreakdownService, type: :service do
     end
 
     it 'returns the community use analysis' do
-      day_type_breakdown = service.usage_breakdown
       expect(day_type_breakdown.community.kwh).to eq(0.0)
       expect(day_type_breakdown.community.co2).to eq(0.0)
       expect(day_type_breakdown.community.percent).to eq(0.0)
@@ -279,14 +274,12 @@ describe Usage::UsageBreakdownService, type: :service do
       end
 
       it 'returns the totals' do
-        day_type_breakdown = service.usage_breakdown
         expect(day_type_breakdown.total.kwh).to eq expected_total_kwh
         expect(day_type_breakdown.total.co2).to eq days * 48 * carbon_intensity * usage_per_hh
       end
 
       it 'returns the community use analysis' do
         community_use_kwh = 11 * 2 * usage_per_hh
-        day_type_breakdown = service.usage_breakdown
         expect(day_type_breakdown.community.kwh).to eq community_use_kwh
         expect(day_type_breakdown.community.co2).to eq community_use_kwh * carbon_intensity
         expect(day_type_breakdown.community.£).to eq community_use_kwh * flat_rate
@@ -300,7 +293,6 @@ describe Usage::UsageBreakdownService, type: :service do
         community_use_kwh = 11 * 2 * usage_per_hh
 
         out_of_hours_kwh = weekend_usage_kwh + community_use_kwh + weekday_closed_usage_kwh + holiday_usage_kwh
-        day_type_breakdown = service.usage_breakdown
         expect(day_type_breakdown.out_of_hours.kwh).to eq out_of_hours_kwh
         expect(day_type_breakdown.out_of_hours.co2).to eq out_of_hours_kwh * carbon_intensity
         expect(day_type_breakdown.out_of_hours.£).to eq out_of_hours_kwh * flat_rate
@@ -309,7 +301,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
       it 'returns the holiday usage analysis' do
         holiday_usage_kwh = 16 * 48 * usage_per_hh
-        day_type_breakdown = service.usage_breakdown
         expect(day_type_breakdown.holiday.kwh).to eq holiday_usage_kwh
         expect(day_type_breakdown.holiday.co2).to eq holiday_usage_kwh * carbon_intensity
         expect(day_type_breakdown.holiday.£).to eq holiday_usage_kwh * flat_rate
@@ -318,7 +309,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
       it 'returns the school day closed usage analysis' do
         weekday_closed_usage_kwh = 11 * (48 - 16 - 2) * usage_per_hh
-        day_type_breakdown = service.usage_breakdown
         expect(day_type_breakdown.school_day_closed.kwh).to eq weekday_closed_usage_kwh
         expect(day_type_breakdown.school_day_closed.co2).to eq weekday_closed_usage_kwh * carbon_intensity
         expect(day_type_breakdown.school_day_closed.£).to eq weekday_closed_usage_kwh * flat_rate
@@ -327,7 +317,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
       it 'returns the school day open usage analysis' do
         weekday_open_usage_kwh = 11 * 16 * usage_per_hh
-        day_type_breakdown = service.usage_breakdown
         expect(day_type_breakdown.school_day_open.kwh).to eq weekday_open_usage_kwh
         expect(day_type_breakdown.school_day_open.co2).to eq weekday_open_usage_kwh * carbon_intensity
         expect(day_type_breakdown.school_day_open.£).to eq weekday_open_usage_kwh * flat_rate
@@ -336,7 +325,6 @@ describe Usage::UsageBreakdownService, type: :service do
 
       it 'returns the weekend usage analysis' do
         weekend_usage_kwh = 4 * 48 * usage_per_hh
-        day_type_breakdown = service.usage_breakdown
         expect(day_type_breakdown.weekend.kwh).to eq weekend_usage_kwh
         expect(day_type_breakdown.weekend.co2).to eq weekend_usage_kwh * carbon_intensity
         expect(day_type_breakdown.weekend.£).to eq weekend_usage_kwh * flat_rate
