@@ -26,6 +26,7 @@ module Usage
 
     delegate :one_years_data?, to: :meter_data_checker
     delegate :at_least_x_days_data?, to: :meter_data_checker
+    delegate :date_when_enough_data_available, to: :meter_data_checker
 
     # If we don't have enough data, then when will it be available?
     def data_available_from
