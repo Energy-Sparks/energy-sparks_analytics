@@ -2,7 +2,7 @@
 
 module Baseload
   class BaseService
-    DEFAULT_DAYS_OF_DATA_REQUIRED = 21
+    DEFAULT_DAYS_OF_DATA_REQUIRED = 14
 
     # Calculate the co2 per kwh rate for this school, to convert kwh values
     # into co2 emission
