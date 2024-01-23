@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/module'
+
 module Usage
   class AnnualUsageCalculationService
     include AnalysableMixin
@@ -23,6 +25,10 @@ module Usage
     def enough_data?
       meter_data_checker.one_years_data?
     end
+
+    delegate :one_years_data?, to: :meter_data_checker
+    delegate :at_least_x_days_data?, to: :meter_data_checker
+    delegate :date_when_enough_data_available, to: :meter_data_checker
 
     # If we don't have enough data, then when will it be available?
     def data_available_from
@@ -78,9 +84,11 @@ module Usage
     # :this_year is last 12 months
     # :last_year is previous 12 months
     def dates_for_period(period)
+      start_date = @asof_date - DAYSINYEAR
+      start_date = @meter.amr_data.start_date if start_date < @meter.amr_data.start_date
       case period
       when :this_year
-        [@asof_date - DAYSINYEAR, @asof_date]
+        [start_date, @asof_date]
       when :last_year
         prev_date = @asof_date - DAYSINYEAR - 1
         [prev_date - DAYSINYEAR, prev_date]
