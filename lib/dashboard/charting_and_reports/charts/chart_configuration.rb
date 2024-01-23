@@ -1487,7 +1487,7 @@ class ChartManager
     heating_on_off_by_week: {
       name:                     'Heating season analysis',
       inherits_from:            :thermostatic_model_by_week,
-      timescale:                :year,
+      timescale:                :up_to_a_year,
       model:                    :best,
       series_breakdown:         :heating
     },
