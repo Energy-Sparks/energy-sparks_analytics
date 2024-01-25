@@ -5,7 +5,6 @@ require 'active_support/core_ext/integer'
 require 'spec_helper'
 
 describe Usage::PeakUsageCalculationService, type: :service do
-  # Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
   subject(:service) { described_class.new(meter_collection: meter_collection, asof_date: asof_date) }
 
   let(:meter_collection) do
