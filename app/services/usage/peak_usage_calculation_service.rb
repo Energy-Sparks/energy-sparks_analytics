@@ -8,7 +8,12 @@ module Usage
     def initialize(meter_collection:, asof_date:)
       @meter_collection = meter_collection
       @asof_date = asof_date
+      @enough_data = Util::EnoughData.new(asof_date, aggregate_meter,
+                                          AlertElectricityPeakKWVersusBenchmark::DAYS_REQUIRED)
     end
+
+    delegate :enough_data?, to: :@enough_data
+    delegate :data_available_from, to: :@enough_data
 
     def average_peak_kw
       return 0.0 if peak_kws.empty?
@@ -16,19 +21,7 @@ module Usage
       peak_kws.sum / peak_kws.length
     end
 
-    def enough_data?
-      meter_data_checker.at_least_x_days_data?(AlertElectricityPeakKWVersusBenchmark::DAYS_REQUIRED)
-    end
-
-    def data_available_from
-      meter_data_checker.date_when_enough_data_available(AlertElectricityPeakKWVersusBenchmark::DAYS_REQUIRED)
-    end
-
     private
-
-    def meter_data_checker
-      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
-    end
 
     def peak_kws
       @peak_kws ||= calculate_peak_kws

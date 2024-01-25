@@ -7,7 +7,12 @@ module Usage
     def initialize(meter_collection:, asof_date:)
       @meter_collection = meter_collection
       @asof_date = asof_date
+      @enough_data = Util::EnoughData.new(asof_date, aggregate_meter,
+                                          AlertElectricityPeakKWVersusBenchmark::DAYS_REQUIRED)
     end
+
+    delegate :enough_data?, to: :@enough_data
+    delegate :data_available_from, to: :@enough_data
 
     def average_peak_usage_kw(compare: :exemplar_school)
       case compare
@@ -31,19 +36,7 @@ module Usage
       end
     end
 
-    def enough_data?
-      meter_data_checker.one_years_data?
-    end
-
-    def data_available_from
-      meter_data_checker.date_when_enough_data_available(364)
-    end
-
     private
-
-    def meter_data_checker
-      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
-    end
 
     def consumption_above_peak(peak_kwh)
       totals = consumption_above_peak_totals(peak_kwh)

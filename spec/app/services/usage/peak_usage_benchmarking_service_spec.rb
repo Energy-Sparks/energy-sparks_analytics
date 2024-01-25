@@ -2,25 +2,30 @@
 
 require 'spec_helper'
 
-# rubocop:disable Metrics/BlockLength
-describe Usage::PeakUsageBenchmarkingService, type: :service do
-  Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
+describe Usage::PeakUsageBenchmarkingService, :aggregate_failures, type: :service do
+  # Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
+  subject(:service) { described_class.new(meter_collection: meter_collection, asof_date: asof_date) }
 
-  let(:meter_collection)          { @acme_academy }
-  let(:service) do
-    described_class.new(
-      meter_collection: meter_collection,
-      asof_date: Date.new(2022, 1, 1)
-    )
-  end
-
-  before(:all) do
-    @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
+  let(:asof_date) { Date.new(2022, 1, 1) }
+  let(:start_date) { asof_date - 59.days }
+  let(:meter_collection) do
+    collection = build(:meter_collection, start_date: start_date)
+    carbon_intensity = build(:grid_carbon_intensity, :with_days, start_date: start_date, kwh: 0.2)
+    amr_data = build(:amr_data, :with_date_range, :with_grid_carbon_intensity,
+                     start_date: start_date, reading: 50, grid_carbon_intensity: carbon_intensity)
+    meter = build(:meter, :with_flat_rate_tariffs,
+                  meter_collection: collection, type: :electricity, amr_data: amr_data)
+    collection.set_aggregate_meter(:electricity, meter)
+    collection
   end
 
   describe '#enough_data?' do
-    it 'returns true if there is a years worth of data' do
-      expect(service.enough_data?).to eq(true)
+    it { is_expected.to be_enough_data }
+
+    context 'with not enough data' do
+      let(:start_date) { asof_date - 58.day }
+
+      it { is_expected.not_to be_enough_data }
     end
   end
 
@@ -34,29 +39,28 @@ describe Usage::PeakUsageBenchmarkingService, type: :service do
   describe '#estimated_savings' do
     it 'returns estimated savings when compared against an benchmark school' do
       savings = service.estimated_savings(versus: :benchmark_school)
-      expect(savings.kwh).to be_within(0.01).of(22_352.35)
-      expect(savings.£).to be_within(0.01).of(2856.26)
-      expect(savings.co2).to be_within(0.01).of(4500.11)
-      expect(savings.percent).to eq(nil)
+      expect(savings.kwh).to be_within(0.01).of(96_360)
+      expect(savings.£).to be_within(0.01).of(9_636)
+      expect(savings.co2).to be_within(0.01).of(19_272)
+      expect(savings.percent).to be_nil
     end
 
     it 'returns estimated savings when compared against an examplar school' do
       savings = service.estimated_savings(versus: :exemplar_school)
-      expect(savings.kwh).to be_within(0.01).of(33_607.53)
-      expect(savings.£).to be_within(0.01).of(4279.17)
-      expect(savings.co2).to be_within(0.01).of(6727.27)
+      expect(savings.kwh).to be_within(0.01).of(192_720)
+      expect(savings.£).to be_within(0.01).of(19_272)
+      expect(savings.co2).to be_within(0.01).of(38_544)
       expect(savings.percent).to eq(nil)
     end
   end
 
   describe '#average_peak_usage_kw' do
     it 'returns average peak usage kw when compared against an examplar school' do
-      expect(service.average_peak_usage_kw(compare: :exemplar_school)).to be_within(0.01).of(107.63)
+      expect(service.average_peak_usage_kw(compare: :exemplar_school)).to be_within(0.01).of(78)
     end
 
     it 'returns average peak usage kw when compared against a benchmark school' do
-      expect(service.average_peak_usage_kw(compare: :benchmark_school)).to be_within(0.01).of(120.13)
+      expect(service.average_peak_usage_kw(compare: :benchmark_school)).to be_within(0.01).of(89)
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

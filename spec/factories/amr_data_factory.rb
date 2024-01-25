@@ -65,12 +65,7 @@ FactoryBot.define do
       end
 
       after(:build) do |amr_data, evaluator|
-        carbon_intensity = if evaluator.grid_carbon_intensity.nil?
-                             build(:grid_carbon_intensity, start_date: evaluator.start_date, end_date: evaluator.end_date)
-                           else
-                             evaluator.grid_carbon_intensity
-                           end
-        amr_data.set_carbon_emissions(evaluator.meter_id, evaluator.flat_rate, carbon_intensity)
+        amr_data.set_carbon_emissions(evaluator.meter_id, evaluator.flat_rate, evaluator.grid_carbon_intensity)
       end
     end
   end

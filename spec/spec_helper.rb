@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support'
+require 'active_support/core_ext/integer'
 require 'simplecov'
 require 'pry'
 require 'rollbar'
