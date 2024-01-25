@@ -8,12 +8,13 @@ describe Usage::PeakUsageBenchmarkingService, :aggregate_failures, type: :servic
   let(:asof_date) { Date.new(2022, 1, 1) }
   let(:start_date) { asof_date - 59.days }
   let(:meter_collection) do
-    collection = build(:meter_collection, start_date: start_date)
-    amr_data = build(:amr_data, :with_date_range, :with_grid_carbon_intensity,
-                     start_date: start_date, reading: 50)
-    amr_data.set_carbon_emissions(1, nil, build(:grid_carbon_intensity, :with_days, start_date: start_date, kwh: 0.2))
+    amr_data = build(:amr_data, :with_date_range, start_date: start_date, kwh_data_x48: [50] * 48)
+    amr_data.set_carbon_emissions(
+      1, nil, build(:grid_carbon_intensity, :with_days, start_date: start_date, kwh_data_x48: [0.2] * 48)
+    )
     meter = build(:meter, :with_flat_rate_tariffs,
                   meter_collection: collection, type: :electricity, amr_data: amr_data)
+    collection = build(:meter_collection, start_date: start_date)
     collection.set_aggregate_meter(:electricity, meter)
     collection
   end

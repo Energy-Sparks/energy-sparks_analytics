@@ -8,7 +8,13 @@ describe Usage::PeakUsageCalculationService, type: :service do
   # Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
   subject(:service) { described_class.new(meter_collection: meter_collection, asof_date: asof_date) }
 
-  let(:meter_collection) { build(:meter_collection, :with_aggregate_meter, start_date: start_date, reading: 0.5) }
+  let(:meter_collection) do
+    amr_data = build(:amr_data, :with_date_range, start_date: start_date, kwh_data_x48: [0.5] * 48)
+    meter = build(:meter, meter_collection: collection, type: :electricity, amr_data: amr_data)
+    collection = build(:meter_collection, start_date: start_date)
+    collection.set_aggregate_meter(:electricity, meter)
+    collection
+  end
   let(:asof_date) { Date.new(2022, 1, 1) }
   let(:start_date) { asof_date - 59.days }
 
