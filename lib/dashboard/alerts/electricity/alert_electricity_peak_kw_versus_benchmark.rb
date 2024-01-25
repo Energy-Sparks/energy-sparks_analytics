@@ -1,5 +1,6 @@
 require_relative '../common/alert_floor_area_pupils_mixin.rb'
 class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
+  DAYS_REQUIRED = 60
   include AlertFloorAreaMixin
   attr_reader :average_school_day_last_year_kw, :average_school_day_last_year_kw_per_pupil
   attr_reader :average_school_day_last_year_kw_per_floor_area, :exemplar_kw
@@ -60,7 +61,7 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
 
   def enough_data
     # scales result to 1 year
-    days_amr_data >= 60 ? :enough : :not_enough
+    days_amr_data >= DAYS_REQUIRED ? :enough : :not_enough
   end
 
   def timescale

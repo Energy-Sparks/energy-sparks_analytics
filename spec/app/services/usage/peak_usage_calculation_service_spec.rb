@@ -1,25 +1,24 @@
 # frozen_string_literal: true
 
+require 'active_support'
+require 'active_support/core_ext/integer'
 require 'spec_helper'
 
 describe Usage::PeakUsageCalculationService, type: :service do
-  Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
+  # Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
+  subject(:service) { described_class.new(meter_collection: meter_collection, asof_date: asof_date) }
 
-  let(:meter_collection)          { @acme_academy }
-  let(:service) do
-    described_class.new(
-      meter_collection: meter_collection,
-      asof_date: Date.new(2022, 1, 1)
-    )
-  end
-
-  before(:all) do
-    @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
-  end
+  let(:meter_collection) { build(:meter_collection, :with_aggregate_meter, start_date: start_date, reading: 0.5) }
+  let(:asof_date) { Date.new(2022, 1, 1) }
+  let(:start_date) { asof_date - 59.days }
 
   describe '#enough_data?' do
-    it 'returns true if there is a years worth of data' do
-      expect(service.enough_data?).to eq(true)
+    it { is_expected.to be_enough_data }
+
+    context 'with not enough data' do
+      let(:start_date) { asof_date - 58.day }
+
+      it { is_expected.not_to be_enough_data }
     end
   end
 
@@ -32,7 +31,7 @@ describe Usage::PeakUsageCalculationService, type: :service do
 
   describe '#average_school_day_peak_usage_kw' do
     it 'calculates the average school day peak usage in kw from a given asof date' do
-      expect(service.average_peak_kw).to be_within(0.01).of(135.92)
+      expect(service.average_peak_kw.to_s).to eq('1.0')
     end
   end
 end
