@@ -12,9 +12,9 @@ describe Usage::PeakUsageBenchmarkingService, :aggregate_failures, type: :servic
     amr_data.set_carbon_emissions(
       1, nil, build(:grid_carbon_intensity, :with_days, start_date: start_date, kwh_data_x48: [0.2] * 48)
     )
+    collection = build(:meter_collection, start_date: start_date)
     meter = build(:meter, :with_flat_rate_tariffs,
                   meter_collection: collection, type: :electricity, amr_data: amr_data)
-    collection = build(:meter_collection, start_date: start_date)
     collection.set_aggregate_meter(:electricity, meter)
     collection
   end

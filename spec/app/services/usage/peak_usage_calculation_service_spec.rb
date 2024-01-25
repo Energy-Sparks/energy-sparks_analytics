@@ -10,8 +10,8 @@ describe Usage::PeakUsageCalculationService, type: :service do
 
   let(:meter_collection) do
     amr_data = build(:amr_data, :with_date_range, start_date: start_date, kwh_data_x48: [0.5] * 48)
-    meter = build(:meter, meter_collection: collection, type: :electricity, amr_data: amr_data)
     collection = build(:meter_collection, start_date: start_date)
+    meter = build(:meter, meter_collection: collection, type: :electricity, amr_data: amr_data)
     collection.set_aggregate_meter(:electricity, meter)
     collection
   end
