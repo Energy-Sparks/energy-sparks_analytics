@@ -31,7 +31,7 @@ module Usage
       meter_data_checker.date_when_enough_data_available(365)
     end
 
-    # Calcualte the annual electricity usage for a benchmark school of the
+    # Calculate the annual electricity usage for a benchmark school of the
     # specified type, with a similar number of pupils
     def annual_usage_kwh(compare: :benchmark_school)
       case compare

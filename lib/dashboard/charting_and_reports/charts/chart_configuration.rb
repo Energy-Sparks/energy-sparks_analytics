@@ -1064,10 +1064,11 @@ class ChartManager
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
       x_axis:           :month_excluding_year,
-      timescale:        [{ year: 0 }, { year: -1 }],
+      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :none
+      yaxis_scaling:    :none,
+      ignore_single_series_failure: true
     },
     # 8 finance tab charts
     electricity_by_month_year_0_1_finance_advice: {
@@ -1486,7 +1487,7 @@ class ChartManager
     heating_on_off_by_week: {
       name:                     'Heating season analysis',
       inherits_from:            :thermostatic_model_by_week,
-      timescale:                :year,
+      timescale:                :up_to_a_year,
       model:                    :best,
       series_breakdown:         :heating
     },
