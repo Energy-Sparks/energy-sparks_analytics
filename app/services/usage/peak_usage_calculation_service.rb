@@ -8,12 +8,7 @@ module Usage
     def initialize(meter_collection:, asof_date:)
       @meter_collection = meter_collection
       @asof_date = asof_date
-      @enough_data = Util::EnoughData.new(asof_date, aggregate_meter,
-                                          AlertElectricityPeakKWVersusBenchmark::DAYS_REQUIRED)
     end
-
-    delegate :enough_data?, to: :@enough_data
-    delegate :data_available_from, to: :@enough_data
 
     def average_peak_kw
       return 0.0 if peak_kws.empty?

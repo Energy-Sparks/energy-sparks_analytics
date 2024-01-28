@@ -17,23 +17,6 @@ describe Usage::PeakUsageCalculationService, type: :service do
   let(:asof_date) { Date.new(2022, 1, 1) }
   let(:start_date) { asof_date - 59.days }
 
-  describe '#enough_data?' do
-    it { is_expected.to be_enough_data }
-
-    context 'with not enough data' do
-      let(:start_date) { asof_date - 58.day }
-
-      it { is_expected.not_to be_enough_data }
-    end
-  end
-
-  describe '#determines when data is available' do
-    it 'returns the date that meter data is available from' do
-      # returns nil as days_of_data >= days_required
-      expect(service.data_available_from).to eq(nil)
-    end
-  end
-
   describe '#average_school_day_peak_usage_kw' do
     it 'calculates the average school day peak usage in kw from a given asof date' do
       expect(service.average_peak_kw.to_s).to eq('1.0')

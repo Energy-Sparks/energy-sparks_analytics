@@ -19,23 +19,6 @@ describe Usage::PeakUsageBenchmarkingService, :aggregate_failures, type: :servic
     collection
   end
 
-  describe '#enough_data?' do
-    it { is_expected.to be_enough_data }
-
-    context 'with not enough data' do
-      let(:start_date) { asof_date - 58.day }
-
-      it { is_expected.not_to be_enough_data }
-    end
-  end
-
-  describe '#determines when data is available' do
-    it 'returns the date that meter data is available from' do
-      # returns nil as days_of_data >= days_required
-      expect(service.data_available_from).to eq(nil)
-    end
-  end
-
   describe '#estimated_savings' do
     it 'returns estimated savings when compared against an benchmark school' do
       savings = service.estimated_savings(versus: :benchmark_school)
