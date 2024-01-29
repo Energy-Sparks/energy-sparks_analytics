@@ -16,6 +16,11 @@ module Usage
       peak_kws.sum / peak_kws.length
     end
 
+    def date_range
+      start_date = [@asof_date - DATE_RANGE_DAYS_AGO, aggregate_meter.amr_data.start_date].max
+      start_date..@asof_date
+    end
+
     private
 
     def peak_kws
@@ -40,11 +45,6 @@ module Usage
 
     def occupied?(date)
       !(weekend?(date) || holiday?(date))
-    end
-
-    def date_range
-      start_date = [@asof_date - DATE_RANGE_DAYS_AGO, aggregate_meter.amr_data.start_date].max
-      start_date..@asof_date
     end
 
     def aggregate_meter
