@@ -212,9 +212,8 @@ describe GenericAccountingTariff, :aggregate_failures do
 
       context 'with duos charges' do
         let(:accounting_cost) do
-          travel_to(Time.utc(2024, 1, 26, 12)) do
-            accounting_tariff.costs(end_date, kwh_data_x48)
-          end
+          # expects weekday
+          travel_to(Time.utc(2024, 1, 26, 12)) { accounting_tariff.costs(end_date, kwh_data_x48) }
         end
 
         let(:other_charges) do
