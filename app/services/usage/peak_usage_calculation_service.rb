@@ -24,6 +24,11 @@ module Usage
       meter_data_checker.date_when_enough_data_available(AlertElectricityPeakKWVersusBenchmark::DAYS_REQUIRED)
     end
 
+    def date_range
+      start_date = [@asof_date - DATE_RANGE_DAYS_AGO, aggregate_meter.amr_data.start_date].max
+      start_date..@asof_date
+    end
+
     private
 
     def meter_data_checker
