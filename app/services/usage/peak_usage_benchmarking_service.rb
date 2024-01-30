@@ -2,8 +2,6 @@
 
 module Usage
   class PeakUsageBenchmarkingService
-    include AnalysableMixin
-
     def initialize(meter_collection:, asof_date:)
       @meter_collection = meter_collection
       @asof_date = asof_date

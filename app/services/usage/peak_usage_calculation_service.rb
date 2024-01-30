@@ -2,7 +2,6 @@
 
 module Usage
   class PeakUsageCalculationService
-    include AnalysableMixin
     DATE_RANGE_DAYS_AGO = 364
 
     def initialize(meter_collection:, asof_date:)
