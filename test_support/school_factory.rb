@@ -114,7 +114,7 @@ class SchoolFactory
 
     if !File.exist?(marshal_filename) || File.mtime(yaml_filename) > File.mtime(marshal_filename)
       RecordTestTimes.instance.record_time(school_filename, 'yamlload', ''){
-        school = YAML.load_file(yaml_filename)
+        school = YAML.unsafe_load_file(yaml_filename)
       }
       # save to marshal for subsequent speedy load
       File.open(marshal_filename, 'wb') { |f| f.write(Marshal.dump(school)) }

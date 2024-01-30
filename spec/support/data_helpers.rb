@@ -17,7 +17,7 @@ module EnergySparksAnalyticsDataHelpers
   # load YAML file
   def load_meter_collection(file_name:)
     # $stderr.puts "Loading #{file_name}"
-    YAML.load_file(file_name)
+    YAML.unsafe_load_file(file_name)
   end
 
   # Create a MeterCollection object from a loaded YAML file

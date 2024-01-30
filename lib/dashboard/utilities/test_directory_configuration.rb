@@ -12,7 +12,7 @@ class TestDirectory
   end
 
   def meter_collection_directory
-    unless File.exists?(meter_collection_dir_path)
+    unless File.exist?(meter_collection_dir_path)
       make_dir(meter_collection_dir_path)
       puts "Please add meter collection files to #{meter_collection_dir_path}"
     end
@@ -103,7 +103,7 @@ class TestDirectory
   def make_dir(dir_name)
     return if Object.const_defined?('Rails')
 
-    unless File.exists?(dir_name)
+    unless File.exist?(dir_name)
       puts "Creating directory #{dir_name}"
       Dir.mkdir(dir_name)
     end
@@ -119,7 +119,7 @@ class TestDirectory
     scripts.each do |script|
       target_file_name = File.join(test_dir, script)
 
-      unless File.exists?(target_file_name)
+      unless File.exist?(target_file_name)
         puts "Creating test support script #{target_file_name}"
         source_file_name = File.join('./test_support', script)
         FileUtils.cp(source_file_name, target_file_name)

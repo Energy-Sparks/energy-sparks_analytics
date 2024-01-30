@@ -241,7 +241,7 @@ class ReportConfigSupport
 
   def yml_filepath(path, chart_name)
     full_path ||= File.join(File.dirname(__FILE__), path)
-    Dir.mkdir(full_path) unless File.exists?(full_path)
+    Dir.mkdir(full_path) unless File.exist?(full_path)
     extension = @@energysparksanalyticsautotest.key?(:name_extension) ? ('- ' + @@energysparksanalyticsautotest[:name_extension].to_s) : ''
     yaml_filename = full_path + @school_name + '-' + chart_name.to_s + extension + '.yaml'
     yaml_filename.length > 259 ? shorten_filename(yaml_filename) : yaml_filename
