@@ -483,8 +483,8 @@ class AMRData < HalfHourlyData
   end
 
   def statistical_peak_kw(date)
-    highest_sorted_kwh = days_kwh_x48(date).sort[45..47]
-    average_kwh = highest_sorted_kwh.inject { |sum, el| sum + el }.to_f / highest_sorted_kwh.size
+    highest_sorted_kwh = days_kwh_x48(date).sort.last(3)
+    average_kwh = highest_sorted_kwh.sum.to_f / highest_sorted_kwh.size
     average_kwh * 2.0 # convert to kW
   end
 
