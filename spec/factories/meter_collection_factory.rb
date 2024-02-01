@@ -6,7 +6,7 @@ FactoryBot.define do
       start_date              { Date.yesterday - 7 }
       end_date                { Date.yesterday }
       school                  { build(:school) }
-      holidays                { build(:holidays, :with_academic_year) }
+      holidays                { build(:holidays, :with_calendar_year) }
       temperatures            { build(:temperatures, :with_days, start_date: start_date, end_date: end_date) }
       solar_pv                { build(:solar_pv, :with_days, start_date: start_date, end_date: end_date) }
       grid_carbon_intensity   { build(:grid_carbon_intensity, :with_days, start_date: start_date, end_date: end_date) }

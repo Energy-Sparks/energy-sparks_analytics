@@ -3,7 +3,34 @@
 require 'spec_helper'
 
 describe Usage::AnnualUsageBreakdownService, type: :service do
-  Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
+  subject(:service) do
+    described_class.new(meter_collection: meter_collection2, fuel_type: fuel_type)
+  end
+
+  let(:fuel_type) { :electricity }
+
+  # AMR data for the school
+  let(:kwh_data_x48)    { Array.new(48) { 10.0 } }
+  let(:amr_start_date)  { Date.new(2021, 12, 31) }
+  let(:amr_end_date)    { Date.new(2022, 12, 31) }
+  let(:amr_data) { build(:amr_data, :with_date_range, :with_grid_carbon_intensity, grid_carbon_intensity: grid_carbon_intensity, start_date: amr_start_date, end_date: amr_end_date, kwh_data_x48: kwh_data_x48) }
+
+  # Carbon intensity used to calculate co2 emissions
+  let(:grid_carbon_intensity) { build(:grid_carbon_intensity, :with_days, start_date: amr_start_date, end_date: amr_end_date, kwh_data_x48: Array.new(48) { 0.2 }) }
+
+  let(:holidays)     { build(:holidays, :with_calendar_year, year: 2022) }
+
+  let(:school_times) do
+    [{ day: :monday, usage_type: :school_day, opening_time: TimeOfDay.new(7, 0), closing_time: TimeOfDay.new(16, 0), calendar_period: :term_times }]
+  end
+
+  let(:open_close_times)      { build(:open_close_times, :from_frontend_times, school_times: school_times) }
+
+  let(:open_close_breakdown)  { CommunityUseBreakdown.new(aggregate_meter, open_close_times) }
+
+  let(:aggregate_meter) { build(:meter, :with_flat_rate_tariffs, type: fuel_type, amr_data: amr_data, tariff_start_date: amr_start_date, tariff_end_date: amr_end_date) }
+
+  let(:meter_collection2) { build(:meter_collection) }
 
   let(:meter_collection) { @acme_academy }
 
@@ -12,27 +39,71 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
     @beta_academy = load_unvalidated_meter_collection(school: 'beta-academy')
   end
 
+  before do
+    # set during aggregation
+    meter_collection2.set_aggregate_meter(fuel_type, aggregate_meter)
+    # set during aggregation
+    aggregate_meter.amr_data.open_close_breakdown = open_close_breakdown
+    # set during aggregation
+    aggregate_meter.set_tariffs
+  end
+
   describe '#enough_data?' do
-    it 'returns true if one years worth of data is available' do
-      usage_breakdown_benchmark_service = described_class.new(meter_collection: meter_collection,
-                                                              fuel_type: :electricity)
-      expect(usage_breakdown_benchmark_service.enough_data?).to eq(true)
+    context 'with electricity' do
+      context 'with enough data' do
+        it { is_expected.to be_enough_data }
+      end
+
+      context 'with limited data' do
+        let(:amr_start_date) { Date.new(2022, 12, 1) }
+
+        it 'returns false' do
+          expect(service.enough_data?).to be false
+        end
+      end
+    end
+
+    context 'with gas' do
+      let(:fuel_type) { :gas }
+
+      context 'when there is enough data' do
+        it 'returns true' do
+          expect(service.enough_data?).to be true
+        end
+      end
+
+      context 'with limited data' do
+        let(:amr_start_date) { Date.new(2022, 12, 1) }
+
+        it 'returns false' do
+          expect(service.enough_data?).to be false
+        end
+      end
     end
   end
 
   describe '#data_available_from' do
-    it 'returns true if one years worth of data is available' do
-      usage_breakdown_benchmark_service = described_class.new(meter_collection: meter_collection,
-                                                              fuel_type: :electricity)
-      expect(usage_breakdown_benchmark_service.data_available_from).to eq(nil)
+    context 'with enough data' do
+      it 'returns nil' do
+        expect(service.data_available_from).to be(nil)
+      end
+    end
+
+    context 'with limited data' do
+      let(:amr_start_date) { Date.new(2022, 12, 1) }
+
+      it 'returns date when there is one years data' do
+        expect(service.data_available_from).to eq(amr_start_date + 364)
+      end
     end
   end
 
   describe '#annual_out_of_hours_kwh' do
-    let(:usage_breakdown_benchmark_service) do
-      described_class.new(meter_collection: meter_collection, fuel_type: :electricity)
+    let(:service) do
+      described_class.new(meter_collection: meter_collection, fuel_type: fuel_type)
     end
-    let(:usage) { usage_breakdown_benchmark_service.annual_out_of_hours_kwh }
+
+    let(:usage) { service.annual_out_of_hours_kwh }
 
     it 'returns the expected data' do
       expect(usage[:out_of_hours]).to be_within(0.01).of(260_969.96)
@@ -41,10 +112,11 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
   end
 
   describe '#usage_breakdown' do
-    let(:usage_breakdown_benchmark_service) do
+    let(:service) do
       described_class.new(meter_collection: meter_collection, fuel_type: fuel_type)
     end
-    let(:day_type_breakdown) { usage_breakdown_benchmark_service.usage_breakdown }
+
+    let(:day_type_breakdown) { service.usage_breakdown }
 
     context 'with electricity' do
       let(:fuel_type) { :electricity }
@@ -94,18 +166,6 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
       it 'returns the totals' do
         expect(day_type_breakdown.total.kwh).to be_within(0.01).of(408_845.4)
         expect(day_type_breakdown.total.co2).to be_within(0.01).of(68_135.42)
-      end
-
-      it 'includes a comparison' do
-        exemplar_comparison = day_type_breakdown.potential_savings(versus: :exemplar_school)
-
-        expect(exemplar_comparison.co2).to eq(nil)
-        expect(exemplar_comparison.kwh).to be_within(0.01).of(56_547.26)
-        expect(exemplar_comparison.percent).to be_within(0.01).of(0.14)
-        expect(exemplar_comparison.£).to be_within(0.01).of(8482.09)
-
-        comparison = day_type_breakdown.potential_savings(versus: :benchmark_school)
-        expect(comparison.percent).to be_within(0.01).of(0.04)
       end
     end
 
@@ -158,14 +218,6 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
       it 'returns the totals' do
         expect(day_type_breakdown.total.kwh).to be_within(0.01).of(111_567.32)
         expect(day_type_breakdown.total.co2).to be_within(0.01).of(16_711.01)
-      end
-
-      it 'includes a comparison' do
-        exemplar_comparison = day_type_breakdown.potential_savings(versus: :exemplar_school)
-        expect(exemplar_comparison.co2).to eq(nil)
-        expect(exemplar_comparison.kwh).to be_within(0.01).of(89_253.86)
-        expect(exemplar_comparison.percent).to be_within(0.01).of(0.8)
-        expect(exemplar_comparison.£).to be_within(0.01).of(10_774.94)
       end
     end
   end

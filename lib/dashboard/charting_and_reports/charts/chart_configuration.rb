@@ -892,6 +892,10 @@ class ChartManager
       inherits_from:    :alert_group_by_week_gas,
       timescale:        { month: -13..0 } # 14 months so can see previous year's holiday (max requirement - 1 year + 6 weeks summer holiday
     },
+    alert_group_by_week_storage_heaters_14_months: {
+      inherits_from:    :alert_group_by_week_gas,
+      timescale:        { month: -13..0 } # 14 months so can see previous year's holiday (max requirement - 1 year + 6 weeks summer holiday
+    },
     alert_group_by_week_electricity_4_months: {
       inherits_from:    :alert_group_by_week_electricity,
       timescale:        { month: -3..0 } # previous holiday alert, 4 months is minium required to cover, Whitsun (x 1 wk), term (x6), sum hol (x6), term (x3)
