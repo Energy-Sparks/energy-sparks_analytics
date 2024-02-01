@@ -24,28 +24,16 @@ module Usage
 
     def total
       CombinedUsageMetric.new(
-        kwh: total_annual_kwh,
-        co2: total_annual_co2,
-        £: total_annual_£
+        kwh: periods_total(:kwh),
+        co2: periods_total(:co2),
+        £: periods_total(:£)
       )
     end
 
     private
 
-    def total_annual_£
-      holiday.£ +
-        weekend.£ +
-        school_day_open.£ +
-        school_day_closed.£ +
-        community.£
-    end
-
-    def total_annual_co2
-      @holiday.co2 + @weekend.co2 + @school_day_open.co2 + @school_day_closed.co2 + @community.co2
-    end
-
-    def total_annual_kwh
-      @holiday.kwh + @weekend.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
+    def periods_total(metric)
+      [@holiday, @weekend, @school_day_open, @school_day_closed, @community].sum { |period| period.public_send(metric) }
     end
   end
 end

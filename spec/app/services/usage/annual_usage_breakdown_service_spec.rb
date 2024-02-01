@@ -51,9 +51,7 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
   describe '#enough_data?' do
     context 'with electricity' do
       context 'with enough data' do
-        it 'returns true' do
-          expect(service.enough_data?).to be true
-        end
+        it { is_expected.to be_enough_data }
       end
 
       context 'with limited data' do
@@ -87,7 +85,7 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
   describe '#data_available_from' do
     context 'with enough data' do
       it 'returns nil' do
-        expect(service.data_available_from).to eq(nil)
+        expect(service.data_available_from).to be(nil)
       end
     end
 

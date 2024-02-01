@@ -83,7 +83,7 @@ describe Usage::UsageBreakdownService, type: :service do
   describe '#data_available_from' do
     context 'with enough data' do
       it 'returns nil' do
-        expect(service.data_available_from).to eq(nil)
+        expect(service.data_available_from).to be(nil)
       end
     end
 
@@ -97,10 +97,10 @@ describe Usage::UsageBreakdownService, type: :service do
   end
 
   describe '#out_of_hours_kwh' do
+    subject(:usage) { service.out_of_hours_kwh }
+
     let(:days) { (amr_start_date..amr_end_date).count }
     let(:expected_total) { days * 48 * usage_per_hh }
-
-    subject(:usage) { service.out_of_hours_kwh }
 
     context 'with a month of usage' do
       # Usage when closed during the week
