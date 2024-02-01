@@ -192,6 +192,28 @@ describe Usage::UsageBreakdownService, type: :service do
     let(:days) { (amr_start_date..amr_end_date).count }
     let(:expected_total_kwh) { days * 48 * usage_per_hh }
 
+    # 11 weekdays in period of meter data
+    # 48 - 16 is number of half-hourly periods in day minus number of half-hourly school is open
+    # school_times defines an 8 hour day, so 16 hh periods when open
+    def weekday_closed_usage_kwh
+      11 * (48 - 16) * usage_per_hh
+    end
+
+    # 16 days classed as holidays
+    def holiday_usage_kwh
+      16 * 48 * usage_per_hh
+    end
+
+    # 4 weekends in period of meter data that aren't holidays
+    def weekend_usage_kwh
+      4 * 48 * usage_per_hh
+    end
+
+    def check_analysis(usage, kwh, expected_total_kwh)
+      expect(usage).to have_attributes(kwh: kwh, co2: kwh * carbon_intensity, £: kwh * flat_rate)
+      expect(usage.percent).to be_within(0.001).of(kwh / expected_total_kwh)
+    end
+
     subject(:day_type_breakdown) { service.usage_breakdown }
 
     it 'returns the totals' do
@@ -200,46 +222,26 @@ describe Usage::UsageBreakdownService, type: :service do
     end
 
     it 'returns the out of hours usage analysis' do
-      weekday_closed_usage_kwh = 11 * (48 - 16) * usage_per_hh
-      holiday_usage_kwh = 16 * 48 * usage_per_hh
-      weekend_usage_kwh = 4 * 48 * usage_per_hh
       out_of_hours_kwh = weekend_usage_kwh + weekday_closed_usage_kwh + holiday_usage_kwh
-      expect(day_type_breakdown.out_of_hours.kwh).to eq out_of_hours_kwh
-      expect(day_type_breakdown.out_of_hours.co2).to eq out_of_hours_kwh * carbon_intensity
-      expect(day_type_breakdown.out_of_hours.£).to eq out_of_hours_kwh * flat_rate
-      expect(day_type_breakdown.out_of_hours.percent).to be_within(0.001).of(out_of_hours_kwh / expected_total_kwh)
+      check_analysis(day_type_breakdown.out_of_hours, out_of_hours_kwh, expected_total_kwh)
     end
 
     it 'returns the holiday usage analysis' do
-      holiday_usage_kwh = 16 * 48 * usage_per_hh
-      expect(day_type_breakdown.holiday.kwh).to eq holiday_usage_kwh
-      expect(day_type_breakdown.holiday.co2).to eq holiday_usage_kwh * carbon_intensity
-      expect(day_type_breakdown.holiday.£).to eq holiday_usage_kwh * flat_rate
-      expect(day_type_breakdown.holiday.percent).to be_within(0.001).of(holiday_usage_kwh / expected_total_kwh)
+      check_analysis(day_type_breakdown.holiday, holiday_usage_kwh, expected_total_kwh)
     end
 
     it 'returns the school day closed usage analysis' do
-      weekday_closed_usage_kwh = 11 * (48 - 16) * usage_per_hh
-      expect(day_type_breakdown.school_day_closed.kwh).to eq weekday_closed_usage_kwh
-      expect(day_type_breakdown.school_day_closed.co2).to eq weekday_closed_usage_kwh * carbon_intensity
-      expect(day_type_breakdown.school_day_closed.£).to eq weekday_closed_usage_kwh * flat_rate
-      expect(day_type_breakdown.school_day_closed.percent).to be_within(0.001).of(weekday_closed_usage_kwh / expected_total_kwh)
+      check_analysis(day_type_breakdown.school_day_closed, weekday_closed_usage_kwh, expected_total_kwh)
     end
 
     it 'returns the school day open usage analysis' do
       weekday_open_usage_kwh = 11 * 16 * usage_per_hh
-      expect(day_type_breakdown.school_day_open.kwh).to eq weekday_open_usage_kwh
-      expect(day_type_breakdown.school_day_open.co2).to eq weekday_open_usage_kwh * carbon_intensity
-      expect(day_type_breakdown.school_day_open.£).to eq weekday_open_usage_kwh * flat_rate
-      expect(day_type_breakdown.school_day_open.percent).to be_within(0.001).of(weekday_open_usage_kwh / expected_total_kwh)
+      check_analysis(day_type_breakdown.school_day_open, weekday_open_usage_kwh, expected_total_kwh)
     end
 
     it 'returns the weekend usage analysis' do
       weekend_usage_kwh = 4 * 48 * usage_per_hh
-      expect(day_type_breakdown.weekend.kwh).to eq weekend_usage_kwh
-      expect(day_type_breakdown.weekend.co2).to eq weekend_usage_kwh * carbon_intensity
-      expect(day_type_breakdown.weekend.£).to eq weekend_usage_kwh * flat_rate
-      expect(day_type_breakdown.weekend.percent).to be_within(0.001).of(weekend_usage_kwh / expected_total_kwh)
+      check_analysis(day_type_breakdown.weekend, weekend_usage_kwh, expected_total_kwh)
     end
 
     it 'returns the community use analysis' do
@@ -280,55 +282,33 @@ describe Usage::UsageBreakdownService, type: :service do
 
       it 'returns the community use analysis' do
         community_use_kwh = 11 * 2 * usage_per_hh
-        expect(day_type_breakdown.community.kwh).to eq community_use_kwh
-        expect(day_type_breakdown.community.co2).to eq community_use_kwh * carbon_intensity
-        expect(day_type_breakdown.community.£).to eq community_use_kwh * flat_rate
-        expect(day_type_breakdown.community.percent).to eq community_use_kwh / expected_total_kwh
+        check_analysis(day_type_breakdown.community, community_use_kwh, expected_total_kwh)
       end
 
       it 'returns the out of hours usage analysis' do
         weekday_closed_usage_kwh = 11 * (48 - 16 - 2) * usage_per_hh
-        holiday_usage_kwh = 16 * 48 * usage_per_hh
-        weekend_usage_kwh = 4 * 48 * usage_per_hh
         community_use_kwh = 11 * 2 * usage_per_hh
 
         out_of_hours_kwh = weekend_usage_kwh + community_use_kwh + weekday_closed_usage_kwh + holiday_usage_kwh
-        expect(day_type_breakdown.out_of_hours.kwh).to eq out_of_hours_kwh
-        expect(day_type_breakdown.out_of_hours.co2).to eq out_of_hours_kwh * carbon_intensity
-        expect(day_type_breakdown.out_of_hours.£).to eq out_of_hours_kwh * flat_rate
-        expect(day_type_breakdown.out_of_hours.percent).to be_within(0.001).of(out_of_hours_kwh / expected_total_kwh)
+        check_analysis(day_type_breakdown.out_of_hours, out_of_hours_kwh, expected_total_kwh)
       end
 
       it 'returns the holiday usage analysis' do
-        holiday_usage_kwh = 16 * 48 * usage_per_hh
-        expect(day_type_breakdown.holiday.kwh).to eq holiday_usage_kwh
-        expect(day_type_breakdown.holiday.co2).to eq holiday_usage_kwh * carbon_intensity
-        expect(day_type_breakdown.holiday.£).to eq holiday_usage_kwh * flat_rate
-        expect(day_type_breakdown.holiday.percent).to be_within(0.001).of(holiday_usage_kwh / expected_total_kwh)
+        check_analysis(day_type_breakdown.holiday, holiday_usage_kwh, expected_total_kwh)
       end
 
       it 'returns the school day closed usage analysis' do
         weekday_closed_usage_kwh = 11 * (48 - 16 - 2) * usage_per_hh
-        expect(day_type_breakdown.school_day_closed.kwh).to eq weekday_closed_usage_kwh
-        expect(day_type_breakdown.school_day_closed.co2).to eq weekday_closed_usage_kwh * carbon_intensity
-        expect(day_type_breakdown.school_day_closed.£).to eq weekday_closed_usage_kwh * flat_rate
-        expect(day_type_breakdown.school_day_closed.percent).to be_within(0.001).of(weekday_closed_usage_kwh / expected_total_kwh)
+        check_analysis(day_type_breakdown.school_day_closed, weekday_closed_usage_kwh, expected_total_kwh)
       end
 
       it 'returns the school day open usage analysis' do
         weekday_open_usage_kwh = 11 * 16 * usage_per_hh
-        expect(day_type_breakdown.school_day_open.kwh).to eq weekday_open_usage_kwh
-        expect(day_type_breakdown.school_day_open.co2).to eq weekday_open_usage_kwh * carbon_intensity
-        expect(day_type_breakdown.school_day_open.£).to eq weekday_open_usage_kwh * flat_rate
-        expect(day_type_breakdown.school_day_open.percent).to be_within(0.001).of(weekday_open_usage_kwh / expected_total_kwh)
+        check_analysis(day_type_breakdown.school_day_open, weekday_open_usage_kwh, expected_total_kwh)
       end
 
       it 'returns the weekend usage analysis' do
-        weekend_usage_kwh = 4 * 48 * usage_per_hh
-        expect(day_type_breakdown.weekend.kwh).to eq weekend_usage_kwh
-        expect(day_type_breakdown.weekend.co2).to eq weekend_usage_kwh * carbon_intensity
-        expect(day_type_breakdown.weekend.£).to eq weekend_usage_kwh * flat_rate
-        expect(day_type_breakdown.weekend.percent).to be_within(0.001).of(weekend_usage_kwh / expected_total_kwh)
+        check_analysis(day_type_breakdown.weekend, weekend_usage_kwh, expected_total_kwh)
       end
     end
   end
