@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'active_support'
+require 'active_support/core_ext/integer'
+require 'active_support/testing/time_helpers'
 require 'simplecov'
 require 'pry'
 require 'rollbar'
@@ -136,6 +139,8 @@ RSpec.configure do |config|
   config.before(:suite) do
     FactoryBot.find_definitions
   end
+
+  config.include ActiveSupport::Testing::TimeHelpers
 
   # Adapted from https://makandracards.com/makandra/505308-rspec-matcher-to-compare-two-html-fragments
   RSpec::Matchers.define :match_html do |expected_html, **options|

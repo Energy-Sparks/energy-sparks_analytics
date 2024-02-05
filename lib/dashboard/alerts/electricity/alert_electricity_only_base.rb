@@ -1,10 +1,7 @@
-require_relative '../common/alert_analysis_base.rb'
+require_relative '../common/alert_analysis_base'
 
 class AlertElectricityOnlyBase < AlertAnalysisBase
   include ElectricityCostCo2Mixin
-  def initialize(school, _report_type)
-    super(school, _report_type)
-  end
 
   def maximum_alert_date
     aggregate_meter.amr_data.end_date

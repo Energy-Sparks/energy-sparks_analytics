@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GenericAccountingTariff do
+describe GenericAccountingTariff, :aggregate_failures do
   let(:end_date)          { Date.today }
   let(:start_date)        { Date.today - 30 }
   let(:tariff_type)       { :flat }
@@ -211,6 +211,11 @@ describe GenericAccountingTariff do
       end
 
       context 'with duos charges' do
+        let(:accounting_cost) do
+          # expects weekday
+          travel_to(Time.utc(2024, 1, 26, 12)) { accounting_tariff.costs(end_date, kwh_data_x48) }
+        end
+
         let(:other_charges) do
           {
             duos_red: 0.025,
@@ -222,7 +227,7 @@ describe GenericAccountingTariff do
 
         it 'includes the charges' do
           # check it calculates and we have non-zero values for each period
-          expect(accounting_cost.all_costs_x48[:duos_green].sum).not_to be 0.0
+          expect(accounting_cost.all_costs_x48[:duos_red].sum).not_to be 0.0
           expect(accounting_cost.all_costs_x48[:duos_amber].sum).not_to be 0.0
           expect(accounting_cost.all_costs_x48[:duos_green].sum).not_to be 0.0
         end

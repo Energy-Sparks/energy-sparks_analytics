@@ -33,8 +33,7 @@ module Util
       days_of_data >= days
     end
 
-    # How many days of data to be have between the date we're
-    # checking and the start data of the meter
+    # How many days of data do we have between the date we're checking and the start data of the meter
     def days_of_data
       (@asof_date - @meter.amr_data.start_date) + 1
     end

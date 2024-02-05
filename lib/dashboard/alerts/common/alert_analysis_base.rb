@@ -1,6 +1,4 @@
-require_rel '../../charting_and_reports/content_base.rb'
-# rubocop:disable Metrics/LineLength, Style/FormatStringToken, Style/FormatString, Lint/UnneededDisable
-#
+require_rel '../../charting_and_reports/content_base'
 # Alerts: Energy Sparks alerts
 #         this is a mix of short-term alerts e.g. your energy consumption has gone up since last week
 #         and longer term alerts - energy assessments e.g. your energy consumption at weekends it high
@@ -10,8 +8,6 @@ require_rel '../../charting_and_reports/content_base.rb'
 #
 # plus a reporting class for alerts which can return a mixture of text, html, charts etc., although
 # much of the potential complexity of this framework will not be implemented in the first iteration
-#
-
 class AlertAnalysisBase < ContentBase
   include Logging
 
@@ -31,7 +27,6 @@ class AlertAnalysisBase < ContentBase
 
   def initialize(school, _report_type)
     super(school)
-    @school = school
     @capital_cost = 0.0..0.0
     clear_model_cache
   end

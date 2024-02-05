@@ -2,7 +2,6 @@
 
 module Usage
   class PeakUsageCalculationService
-    include AnalysableMixin
     DATE_RANGE_DAYS_AGO = 364
 
     def initialize(meter_collection:, asof_date:)
@@ -16,19 +15,12 @@ module Usage
       peak_kws.sum / peak_kws.length
     end
 
-    def enough_data?
-      meter_data_checker.one_years_data?
-    end
-
-    def data_available_from
-      meter_data_checker.date_when_enough_data_available(365)
+    def date_range
+      start_date = [@asof_date - DATE_RANGE_DAYS_AGO, aggregate_meter.amr_data.start_date].max
+      start_date..@asof_date
     end
 
     private
-
-    def meter_data_checker
-      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
-    end
 
     def peak_kws
       @peak_kws ||= calculate_peak_kws
@@ -52,11 +44,6 @@ module Usage
 
     def occupied?(date)
       !(weekend?(date) || holiday?(date))
-    end
-
-    def date_range
-      start_date = [@asof_date - DATE_RANGE_DAYS_AGO, aggregate_meter.amr_data.start_date].max
-      start_date..@asof_date
     end
 
     def aggregate_meter
