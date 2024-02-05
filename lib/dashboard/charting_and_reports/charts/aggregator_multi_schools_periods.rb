@@ -8,12 +8,9 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
 
   attr_reader :min_combined_school_date, :max_combined_school_date
   attr_reader :single_series_aggregators
-  attr_reader :multi_chart_x_axis_ranges # TODO(PH, 1Spr2022) remove post refactor
 
   def initialize(school, chart_config, results)
     @single_series_aggregators = []
-    # results = new_results if results.nil?
-    @multi_chart_x_axis_ranges = [] # TODO(PH, 1Apr2022) remove legacy refactor result return
     super(school, chart_config, results)
   end
 
@@ -92,8 +89,6 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
 
     valid_aggregators.reverse.each.with_index do |period_data, index|
       bucket_date_ranges = period_data.results.x_axis_bucket_date_ranges
-      @multi_chart_x_axis_ranges.push(bucket_date_ranges) # TODO(PH, 1Apr2022) remove after refactor not used
-
       time_description = period_data.results.xbucketor.compact_date_range_description
 
       if index == 0
@@ -133,8 +128,6 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
       time_description = unique_periods <= 1 ? '' : (':' + data.results.time_description)
       school_name = (schools.nil? || schools.length <= 1 || data.results.school_name.nil?) ? '' : (':' + data.results.school_name)
       school_name = '' if number_of_schools <= 1 # TODO(PH, 9May2022) is schools.length <= 1 test in line above sufficient?
-
-      @multi_chart_x_axis_ranges.push(data.results[:x_axis_date_ranges]) # TODO(PH, 1Apr2022) remove after refactor not used
 
       data.results.bucketed_data.each do |series_name, x_data|
         new_series_name = series_name.to_s + time_description + school_name

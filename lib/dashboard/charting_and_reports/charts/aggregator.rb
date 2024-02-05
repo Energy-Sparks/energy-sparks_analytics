@@ -12,13 +12,12 @@ class Aggregator
 
   attr_reader :bucketed_data, :total_of_unit, :x_axis, :y2_axis
   attr_reader :x_axis_bucket_date_ranges, :data_labels, :x_axis_label
-  attr_reader :first_meter_date, :last_meter_date, :multi_chart_x_axis_ranges
+  attr_reader :first_meter_date, :last_meter_date
   attr_reader :school
 
   def initialize(school, chart_config)
     @school = school
     @chart_config = chart_config
-    @multi_chart_x_axis_ranges = []
   end
 
   def valid?
@@ -41,8 +40,6 @@ class Aggregator
 
     @bucketed_data        = multi_school_period_aggregator.results.bucketed_data
     @bucketed_data_count  = multi_school_period_aggregator.results.bucketed_data_count
-
-    @multi_chart_x_axis_ranges = multi_school_period_aggregator.multi_chart_x_axis_ranges # TODO(PH, 1Spr2022) remove post refactor
 
     post_process = AggregatorPostProcess.new(multi_school_period_aggregator)
     post_process.calculate
