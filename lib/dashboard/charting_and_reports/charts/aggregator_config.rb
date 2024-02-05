@@ -126,7 +126,8 @@ class AggregatorConfig < OpenStruct
   end
 
   def up_to_a_year_month_comparison?
-    return false if timescale.nil? || !timescale.is_a?(Array) || x_axis!= :month
+    return false if timescale.nil? || !timescale.is_a?(Array)
+    return false unless [:month, :month_excluding_year].include?(x_axis)
 
     return false unless timescale.length > 1
 
