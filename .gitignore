@@ -43,3 +43,7 @@ Rails/*
 Rails/webapp/*
 webapp/*
 webapp
+
+serverless/.serverless
+serverless/node_modules
+serverless/.env*

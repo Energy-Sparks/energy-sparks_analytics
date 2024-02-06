@@ -1,0 +1,130 @@
+GIT
+  remote: https://github.com/Energy-Sparks/statsample.git
+  revision: 4a361a39ab1e8a76e0f73f8e8b1749902748b79c
+  branch: ruby32
+  specs:
+    statsample (2.1.0)
+      awesome_print (~> 1.6)
+      daru (~> 0.1.6)
+      dirty-memoize (~> 0.0.4)
+      distribution (~> 0.7)
+      extendmatrix (~> 0.4)
+      minimization (~> 0.2)
+      reportbuilder (~> 1.4)
+      rserve-client (~> 0.3)
+      rubyvis (~> 0.6.1)
+      spreadsheet (~> 1.1)
+
+PATH
+  remote: ..
+  specs:
+    energy-sparks_analytics (1.2.1)
+      activesupport (>= 6.0, < 7.1)
+      benchmark-memory (~> 0)
+      chroma (~> 0)
+      faraday (~> 2)
+      faraday-retry (~> 2)
+      hashdiff (~> 1)
+      html-table (~> 1)
+      interpolate (~> 0.3.0)
+      require_all (~> 3)
+      roo (~> 2)
+      roo-xls (~> 1)
+      ruby-limiter (~> 2)
+      ruby-sun-times (~> 0)
+      statsample (~> 2)
+      structured_warnings (~> 0)
+      write_xlsx (~> 1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (7.0.8)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+    awesome_print (1.9.2)
+    backports (3.24.1)
+    benchmark-memory (0.2.0)
+      memory_profiler (~> 1)
+    bigdecimal (3.1.6)
+    chroma (0.2.0)
+    clbustos-rtf (0.4.2)
+    concurrent-ruby (1.2.3)
+    daru (0.1.6)
+      backports
+    dirty-memoize (0.0.4)
+    distribution (0.8.0)
+    extendmatrix (0.4)
+    faraday (2.9.0)
+      faraday-net_http (>= 2.0, < 3.2)
+    faraday-net_http (3.1.0)
+      net-http
+    faraday-retry (2.2.0)
+      faraday (~> 2.0)
+    hashdiff (1.1.0)
+    html-table (1.7.0)
+      structured_warnings (~> 0.4.0)
+    i18n (1.14.1)
+      concurrent-ruby (~> 1.0)
+    interpolate (0.3.0)
+    memory_profiler (1.0.1)
+    minimization (0.2.5)
+      text-table (~> 1.2)
+    minitest (5.22.0)
+    net-http (0.4.1)
+      uri
+    nkf (0.2.0)
+    nokogiri (1.16.2-x86_64-linux)
+      racc (~> 1.4)
+    prawn (0.8.4)
+      prawn-core (>= 0.8.4, < 0.9)
+      prawn-layout (>= 0.8.4, < 0.9)
+      prawn-security (>= 0.8.4, < 0.9)
+    prawn-core (0.8.4)
+    prawn-layout (0.8.4)
+    prawn-security (0.8.4)
+    prawn-svg (0.9.1.11)
+      prawn (>= 0.8.4)
+    racc (1.7.3)
+    reportbuilder (1.4.2)
+      clbustos-rtf (~> 0.4.0)
+      prawn (~> 0.8.4)
+      prawn-svg (~> 0.9.1)
+      text-table (~> 1.2)
+    require_all (3.0.0)
+    roo (2.10.1)
+      nokogiri (~> 1)
+      rubyzip (>= 1.3.0, < 3.0.0)
+    roo-xls (1.2.0)
+      nokogiri
+      roo (>= 2.0.0, < 3)
+      spreadsheet (> 0.9.0)
+    rserve-client (0.3.5)
+    ruby-limiter (2.3.0)
+    ruby-ole (1.2.12.2)
+    ruby-sun-times (0.1.5)
+    rubyvis (0.6.1)
+    rubyzip (2.3.2)
+    spreadsheet (1.3.1)
+      bigdecimal
+      ruby-ole
+    structured_warnings (0.4.0)
+    text-table (1.2.4)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
+    uri (0.13.0)
+    write_xlsx (1.11.2)
+      nkf
+      rubyzip (>= 1.0.0)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  energy-sparks_analytics!
+  statsample!
+
+BUNDLED WITH
+   2.4.19

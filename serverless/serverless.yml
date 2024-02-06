@@ -1,0 +1,65 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service: analytics-pipeline
+frameworkVersion: '3'
+useDotenv: true
+configValidationMode: error
+
+plugins:
+  - serverless-ruby-layer
+
+custom:
+  rubyLayer:
+    use_docker: true
+  currentStage: ${opt:stage, 'development'}
+  buckets:
+    in_bucket: es-${self:custom.currentStage}-analytics-in
+    out_bucket: es-${self:custom.currentStage}-analytics-out
+
+provider:
+  name: aws
+  runtime: ruby3.2
+  # profile: serverless
+  region: eu-west-2
+  stage: ${opt:stage, 'development'}
+  environment:
+    IN_BUCKET: ${self:custom.buckets.in_bucket}
+    OUT_BUCKET: ${self:custom.buckets.out_bucket}
+    ROLLBAR_ACCESS_TOKEN: ${env:ROLLBAR_ACCESS_TOKEN}
+    # this allows bundler to pick up git gems in /opt/ruby/3.2.0/bundler from the ruby layer
+    BUNDLE_PATH: /opt
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:*"
+          Resource:
+            - { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ]]}
+            - "arn:aws:s3:::${self:custom.buckets.in_bucket}/*"
+            - "arn:aws:s3:::${self:custom.buckets.out_bucket}/*"
+
+package:
+  patterns:
+    - '!**'
+    - 'handler.rb'
+    - 'Gemfile'
+    - 'Gemfile.lock'
+
+functions:
+  process:
+    handler: handler.run
+    events:
+      - s3: ${self:provider.environment.IN_BUCKET}
+
+resources:
+  Resources:
+    S3BucketIn:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.IN_BUCKET}
+    S3BucketOut:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.OUT_BUCKET}

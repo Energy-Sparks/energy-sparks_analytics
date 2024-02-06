@@ -1,0 +1,7 @@
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
+# gem 'energy-sparks_analytics', path: '..'
+gem 'energy-sparks_analytics', github: 'Energy-Sparks/energy-sparks_analytics', branch: '20230109-ruby32'
+
+gem 'statsample', github: 'Energy-Sparks/statsample', branch: 'ruby32'
