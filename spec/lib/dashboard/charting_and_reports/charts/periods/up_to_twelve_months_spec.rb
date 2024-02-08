@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UpToTwelveMonths do
+describe Periods::UpToTwelveMonths do
   subject(:period) do
     UpToTwelveMonths.new(chart_config, meter_collection, amr_start_date, amr_end_date, chart_config[:timescale])
   end

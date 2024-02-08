@@ -1,6 +1,5 @@
 require_relative '../periods.rb'
 
-require 'active_support'
 module Periods
   class UpToTwelveMonths < PeriodsBase
     # Within the available meter date range, generate a list of 12 months periods
