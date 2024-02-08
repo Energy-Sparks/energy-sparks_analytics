@@ -77,7 +77,7 @@ class XBucketMonthExcludingYear < XBucketBase
     I18n.l(date, format: "%b")
   end
 
-  # TODO: there's an resolved issue with this x-axis configuration and use of
+  # TODO: there's an unresolved issue with this x-axis configuration and use of
   # a year/up_to_a_year time period. The bucket names include only the month, e.g. Jan,
   # but over a 52 * 7 week period we might end up with Jan twice.
   # AggregatorSingleSeries.aggregate_by_day does not expect duplicate series names
