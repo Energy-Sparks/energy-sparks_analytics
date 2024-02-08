@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Periods::UpToTwelveMonths do
   subject(:period) do
-    UpToTwelveMonths.new(chart_config, meter_collection, amr_start_date, amr_end_date, chart_config[:timescale])
+    described_class.new(chart_config, meter_collection, amr_start_date, amr_end_date, chart_config[:timescale])
   end
 
   let(:meter_collection) do
