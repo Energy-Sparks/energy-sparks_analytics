@@ -49,7 +49,8 @@ class PeriodsBase
       optimum_start:  OptimumStartPeriods,
       daterange:      DateRangePeriods,
       hotwater:       HotWaterPeriod,
-      none:           NoPeriod
+      none:           NoPeriod,
+      twelve_months:  Periods::UpToTwelveMonths
     }
 
     timescale_type = timescale_from_chart_config(chart_config)

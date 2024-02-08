@@ -132,7 +132,7 @@ class AggregatorConfig < OpenStruct
     return false unless timescale.length > 1
 
     timescale.all? do |ts|
-      ts.is_a?(Hash) && ts.keys[0] == :up_to_a_year
+      ts.is_a?(Hash) && [:up_to_a_year, :twelve_months].include?(ts.keys[0])
     end
   end
 

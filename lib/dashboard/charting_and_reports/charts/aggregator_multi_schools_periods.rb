@@ -87,18 +87,29 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   def merge_monthly_comparison_charts
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
 
+    # Assumption about ordering here? i.e that last series will be most complete
+    # so reverse to make that first.
     valid_aggregators.reverse.each.with_index do |period_data, index|
       bucket_date_ranges = period_data.results.x_axis_bucket_date_ranges
       time_description = period_data.results.xbucketor.compact_date_range_description
 
       if index == 0
+        # Relabels the series from 'Energy' to a date range describing the series
+        # Also relabels the y-axis to strip the year if there is one
+        # E.g. ["Jan", "Feb", ...], ["Jan 2023", "Feb 2023", ...]
         results.x_axis = period_data.results.x_axis.map{ |month_year| month_year[0..2]} # MMM YYYY to MMM
         time_description = number_of_periods <= 1 ? '' : time_description
         results.bucketed_data[time_description] = period_data.results.bucketed_data.values[0]
         results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
       else
+        # This is assumed to be the series with fewer values. Prior series may have
+        # values for Jan-Dec, this one will have, e.g. Jun-Jan
+        #
+        # Strip year if there is one
         keys = period_data.results.x_axis.map{ |month_year| month_year[0..2]}
 
+        # Loop through the full list of months, copy data from this series to new
+        # position in array
         new_x_data = results.x_axis.map do |month|
           column = keys.find_index(month)
           column.nil? ? 0.0 : period_data.results.bucketed_data.values[0][column]

@@ -119,6 +119,21 @@ describe AggregatorMultiSchoolsPeriods do
           end
         end
 
+        context 'with less than 18 months of data' do
+          let(:amr_start_date) { Date.new(2022, 10, 1) }
+          let(:amr_end_date) { Date.new(2024, 1, 16) }
+
+          before { aggregator.calculate }
+
+          it_behaves_like 'a successful chart', series_count: 2
+          it 'has aligned the series correctly' do
+            bucketed_data = aggregator.results.bucketed_data
+            # in this instance the two series should have the same number of entries
+            # otherwise the monthly values for the current and previous years dont align on the chart
+            expect(bucketed_data.values.first.size).to eq(bucketed_data.values.last.size)
+          end
+        end
+
         context 'when there is over two years data' do
           let(:amr_start_date) { Date.new(2022, 1, 3) } # two years of 52 * 7 weeks before 2023-12-31
 
