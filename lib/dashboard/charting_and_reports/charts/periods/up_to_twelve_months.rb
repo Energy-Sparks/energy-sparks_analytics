@@ -30,11 +30,11 @@ module Periods
       period_list[offset.magnitude]
     end
 
-    # Not sure if required
     protected def calculate_period_from_date(date)
       period_list.each do |period|
-        return period if period.between?(period.start_date, period.end_date)
+        return period if date.between?(period.start_date, period.end_date)
       end
+      nil
     end
 
     private
