@@ -87,8 +87,8 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   def merge_monthly_comparison_charts
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
 
-    # Assumption about ordering here? i.e that last series will be most complete
-    # so reverse to make that first.
+    # Note, there is an assumption about ordering here, that the last series will be
+    # the most complete, the reverse ensures this is processed first.
     valid_aggregators.reverse.each.with_index do |period_data, index|
       bucket_date_ranges = period_data.results.x_axis_bucket_date_ranges
       time_description = period_data.results.xbucketor.compact_date_range_description
@@ -108,22 +108,45 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
         # Strip year if there is one
         keys = period_data.results.x_axis.map{ |month_year| month_year[0..2]}
 
-        # Loop through the full list of months, copy data from this series to new
-        # position in array
-        new_x_data = results.x_axis.map do |month|
-          column = keys.find_index(month)
-          column.nil? ? 0.0 : period_data.results.bucketed_data.values[0][column]
-        end
+        # This series will have either the same number or fewer months than the other range
+        #
+        # If we have same number of months then we're comparing, e.g. two full year (52*7) week periods
+        # So the columns are already aligned.
+        #
+        # If we have fewer months than the full range then we need to copy into a new array with the
+        # monthly values in the right position.
+        #
+        # When we have fewer months then the months will correspond with the months at the final part of the
+        # full range. So use the last occurence of the month name when finding the right index.
+        if results.x_axis.length == keys.length
+          results.bucketed_data[time_description]       = period_data.results.bucketed_data.values[0]
+          results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
+        else
+          new_x_data = Array.new(results.x_axis.length, 0.0)
+          keys.each_with_index do |month, index|
+            new_index = find_column(results.x_axis, month)
+            new_x_data[new_index] = period_data.results.bucketed_data.values[0][index] unless new_index.nil?
+          end
 
-        new_x_count_data = results.x_axis.map do |month|
-          column = keys.find_index(month)
-          column.nil? ? 0.0 : period_data.results.bucketed_data_count.values[0][column]
+          new_x_count_data = Array.new(results.x_axis.length, 0.0)
+          keys.each_with_index do |month, index|
+            new_index = find_column(results.x_axis, month)
+            new_x_count_data[new_index] = period_data.results.bucketed_data_count.values[0][index] unless new_index.nil?
+          end
+          results.bucketed_data[time_description]       = new_x_data
+          results.bucketed_data_count[time_description] = new_x_count_data
         end
-
-        results.bucketed_data[time_description]       = new_x_data
-        results.bucketed_data_count[time_description] = new_x_count_data
       end
     end
+  end
+
+  # Find index of month in a list of column names. Because a monthly series may have
+  # the same month twice we cant rely on `find_index`.
+  private def find_column(columns, month)
+    # might have duplicate months
+    indexes = columns.each_index.select{|i| columns[i] == month}
+    return nil if indexes.empty?
+    indexes.last
   end
 
   def valid_aggregators

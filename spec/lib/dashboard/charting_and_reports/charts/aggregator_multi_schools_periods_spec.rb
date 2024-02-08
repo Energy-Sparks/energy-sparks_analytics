@@ -46,7 +46,7 @@ describe AggregatorMultiSchoolsPeriods do
     context 'with a month x-axis' do
       let(:x_axis) { :month }
 
-      context 'with two year periods' do
+      context 'with two :year periods' do
         let(:timescale) do
           [{ year: 0 }, { year: -1 }]
         end
@@ -81,12 +81,8 @@ describe AggregatorMultiSchoolsPeriods do
           it_behaves_like 'a successful chart', series_count: 2
         end
       end
-    end
 
-    context 'with a month_excluding_year x-axis' do
-      let(:x_axis) { :month_excluding_year }
-
-      context 'with two up_to_a_year periods' do
+      context 'with two periods of :up_to_a_year' do
         let(:timescale) do
           [{ up_to_a_year: 0 }, { up_to_a_year: -1 }]
         end
@@ -126,20 +122,40 @@ describe AggregatorMultiSchoolsPeriods do
           before { aggregator.calculate }
 
           it_behaves_like 'a successful chart', series_count: 2
+
           it 'has aligned the series correctly' do
             bucketed_data = aggregator.results.bucketed_data
             # in this instance the two series should have the same number of entries
             # otherwise the monthly values for the current and previous years dont align on the chart
             expect(bucketed_data.values.first.size).to eq(bucketed_data.values.last.size)
+            # The two series will be:
+            # 2023-01-18 - 2024-01-16 = [Jan, Feb,...Dec, Jan]
+            # 2022-10-01 - 2023-01-17 = [Oct, Nov, Dec, Jan]
+            #
+            # The four months should be at the end of the range
+            daily_kwh = 48.0 * usage_per_hh # from the shared context
+            # Oct, Nov, Dec, and 17 days in Jan
+            monthly_usage = [daily_kwh * 31, daily_kwh * 30, daily_kwh * 31, daily_kwh * 17]
+            # 9 months with no values, then the above
+            expect(bucketed_data.values.last).to eq(Array.new(9, 0.0) + monthly_usage)
           end
         end
 
         context 'when there is over two years data' do
+          # Will result in 2 ranges in comparison
+          # 2023-01-02 - 2023-12-31
+          # 2022-01-03 - 2023-01-01
           let(:amr_start_date) { Date.new(2022, 1, 3) } # two years of 52 * 7 weeks before 2023-12-31
 
           before { aggregator.calculate }
 
           it_behaves_like 'a successful chart', series_count: 2
+
+          it 'has aligned the series correctly' do
+            bucketed_data = aggregator.results.bucketed_data
+            expect(bucketed_data.values.first.size).to eq(bucketed_data.values.last.size)
+            expect(bucketed_data.values.last.all? { |kwh| kwh > 0.0 }).to be true
+          end
         end
       end
     end
