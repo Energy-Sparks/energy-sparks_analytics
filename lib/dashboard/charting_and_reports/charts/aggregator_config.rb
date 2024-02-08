@@ -99,7 +99,7 @@ class AggregatorConfig < OpenStruct
   end
 
   def relabel_legend?
-    # note set to a value:
+    # NOTE: set to a value:
     key?(:replace_series_label) && dig(:replace_series_label)
   end
 
@@ -121,18 +121,17 @@ class AggregatorConfig < OpenStruct
 
   def temperature_compensation_hash?
     adjust_by_temperature? &&
-    dig(:adjust_by_temperature).is_a?(Hash) &&
-    !key?(:temperature_adjustment_map)
+      dig(:adjust_by_temperature).is_a?(Hash) &&
+      !key?(:temperature_adjustment_map)
   end
 
   def up_to_a_year_month_comparison?
-    return false if timescale.nil? || !timescale.is_a?(Array)
-    return false unless [:month, :month_excluding_year].include?(x_axis)
-
+    return false unless array_of_timescales?
     return false unless timescale.length > 1
+    return false unless %i[month month_excluding_year].include?(x_axis)
 
-    timescale.all? do |ts|
-      ts.is_a?(Hash) && [:up_to_a_year, :twelve_months].include?(ts.keys[0])
+    timescale.all? do |scale|
+      scale.is_a?(Hash) && %i[up_to_a_year twelve_months].include?(scale.keys[0])
     end
   end
 
