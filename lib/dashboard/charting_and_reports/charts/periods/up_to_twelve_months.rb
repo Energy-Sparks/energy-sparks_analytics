@@ -20,8 +20,10 @@ module Periods
         period_end = period_start - 1
       end
       if first_meter_date < period_end
-        period_start = first_full_month(first_meter_date) #start of first full month of data
-        periods << new_school_period(period_start, period_end)
+        # start of first full month of data
+        period_start = first_full_month(first_meter_date)
+        # add partial year if there's more than a month of data
+        periods << new_school_period(period_start, period_end) if period_start < period_end
       end
       periods
     end
