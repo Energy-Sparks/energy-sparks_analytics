@@ -228,16 +228,39 @@ class ContentBase
     list.merge(convert_range_template_data_to_high_low(list, lookup, raw_data))
   end
 
+  # Called by the application to save variables and values used for building reports,
+  # e.g. for school benchmarking/comparisons.
+  #
+  # Returns the unformatted values for all variables except those declared as tables or
+  # charts. Variables that are Ranges are 'flattened' into new variables, e.g.
+  # `cost = 100..200` becomes `cost_low=100, cost_high=200`.
+  #
+  # Unlike +front_end_template_data+ this does not strip boolean types
+  def variables_for_reporting
+    lookup = flatten_template_variables
+    raw_variables = raw_template_variables.reject { |type, _value| [:chart, :table].include?(lookup[type][:units]) }
+
+    variables = {}
+    raw_variables.each do |name, value|
+      if value && value.is_a?(Range)
+        variables[self.class.convert_range_symbol_to_low(name)] = value.first
+        variables[self.class.convert_range_symbol_to_high(name)] = value.last
+      else
+        variables[name] = value
+      end
+    end
+    variables
+  end
+
+  # DEPRECATED
+  # TODO: Replace code that uses this with the saved values produced by +variables_for_reporting+
   def priority_template_data
     lookup = flatten_template_variables
     raw_template_variables.select { |type, _value| lookup[type].key?(:priority_code) }
   end
 
-  def benchmark_template_data_deprecated
-    lookup = flatten_template_variables
-    raw_template_variables.select { |type, _value| lookup[type].key?(:benchmark_code) }
-  end
-
+  # DEPRECATED
+  # Will be replaced by saved values returned by +variables_for_reporting+
   def benchmark_template_data
     lookup = flatten_template_variables
     benchmark_vars = raw_template_variables.select { |type, _value| lookup[type].key?(:benchmark_code) }
