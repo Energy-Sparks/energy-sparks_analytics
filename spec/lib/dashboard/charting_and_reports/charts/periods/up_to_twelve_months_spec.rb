@@ -93,6 +93,16 @@ describe Periods::UpToTwelveMonths do
         expect(period_list[3]).to have_attributes(start_date: Date.new(2020, 3, 1), end_date: Date.new(2020, 5, 31))
       end
     end
+
+    context 'when there is not quite 13 months of data' do
+      let(:amr_start_date)  { Date.new(2022, 12, 12) }
+      let(:amr_end_date)    { Date.new(2024, 1, 15) }
+
+      it 'returns periods' do
+        expect(period_list.size).to eq(1)
+        expect(period_list[0]).to have_attributes(start_date: Date.new(2023, 1, 1), end_date: Date.new(2023, 12, 31))
+      end
+    end
   end
 
   describe '#calculate_period_from_date' do
