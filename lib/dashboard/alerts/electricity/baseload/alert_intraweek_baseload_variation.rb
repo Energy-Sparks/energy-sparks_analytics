@@ -2,7 +2,7 @@
 require_relative '../alert_electricity_only_base.rb'
 
 class AlertIntraweekBaseloadVariation < AlertBaseloadBase
-  attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation
+  attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation, :max_day, :min_day
   attr_reader :annual_cost_kwh, :annual_cost_£,  :annual_cost_£current, :annual_co2
 
   def initialize(school, report_type = :intraweekbaseload, meter = school.aggregated_electricity_meters)
@@ -178,16 +178,8 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     I18nHelper.day_name(@min_day)
   end
 
-  def min_day
-    @min_day
-  end
-
   def max_day_str
     I18nHelper.day_name(@max_day)
-  end
-
-  def max_day_str
-    @max_day
   end
 
   def adjective
