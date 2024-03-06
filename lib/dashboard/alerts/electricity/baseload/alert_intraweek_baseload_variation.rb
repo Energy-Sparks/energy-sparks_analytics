@@ -20,6 +20,10 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       units:  String,
       benchmark_code: 'mxbd'
     },
+    max_day: {
+      description: 'Day of week name with max average baseload',
+      units:  String,
+    },
     min_day_kw: {
       description: 'min average day baseload kw',
       units:  :kw,
@@ -29,6 +33,10 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       description: 'Day of week name with min average baseload',
       units:  String,
       benchmark_code: 'mnbd'
+    },
+    min_day: {
+      description: 'Day of week name with min average baseload',
+      units:  String
     },
     percent_intraday_variation: {
       description: 'seasonal baseload variation percent (relative)',
@@ -170,8 +178,16 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     I18nHelper.day_name(@min_day)
   end
 
+  def min_day
+    @min_day
+  end
+
   def max_day_str
     I18nHelper.day_name(@max_day)
+  end
+
+  def max_day_str
+    @max_day
   end
 
   def adjective
