@@ -21,7 +21,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       benchmark_code: 'mxbd'
     },
     max_day: {
-      description: 'Number for day of week name with max average baseload',
+      description: 'Day of the week number with max average baseload',
       units:  Integer,
     },
     min_day_kw: {
@@ -30,7 +30,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       benchmark_code: 'mnbk'
     },
     min_day_str: {
-      description: 'Day of week name with min average baseload',
+      description: 'Day of the week number with min average baseload',
       units:  String,
       benchmark_code: 'mnbd'
     },
