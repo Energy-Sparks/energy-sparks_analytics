@@ -73,6 +73,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       current_period_end_date:   { description: 'Current period end date',            units:  :date  },
       days_in_current_period:    { description: 'No. of days in current period',      units: Integer },
       name_of_current_period:    { description: 'name of current period e.g. Easter', units: String, benchmark_code: 'cper' },
+      current_period_type:       { description: 'Current period type e.g. easter',    units: String },
 
       previous_period_kwh:        { description: 'Previous period kwh (equivalent no. of days to current period)', units:  { kwh: fuel_type }, benchmark_code: 'pppk' },
       previous_period_kwh_unadjusted: { description: 'Previous period kwh (equivalent no. of days to current period, unadjusted for temperature)', units:  { kwh: fuel_type }, benchmark_code: 'pppu' },
@@ -83,6 +84,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
       name_of_previous_period:    { description: 'name of previous period',         units: String, benchmark_code: 'pper' },
+      previous_period_type:       { description: 'Previous period type',            units: String },
 
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
       previous_period_average_kwh: { description: 'Previous period average adjusted daily',    units:  { kwh: fuel_type } },
@@ -287,9 +289,17 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     current_period_name(@current_period)
   end
 
+  def current_period_type
+    @current_period&.type
+  end
+
   def name_of_previous_period
     return nil if @previous_period.nil?
     previous_period_name(@previous_period)
+  end
+
+  def previous_period_type
+    @previous_period&.type
   end
 
   protected def current_period_name(period)
