@@ -94,7 +94,6 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   private
 
   def calculate(asof_date)
-    # binding.pry
     if @school.holidays.holiday?(asof_date)
       @relevance = :relevant
       @asof_date = asof_date
