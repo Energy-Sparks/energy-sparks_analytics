@@ -24,6 +24,18 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
       units:  String,
       benchmark_code: 'hnam',
     },
+    holiday_type: {
+      description: 'Type of holiday',
+      units:  String,
+    },
+    holiday_start_date: {
+      description: 'Start date of holiday',
+      units: :date,
+    },
+    holiday_end_date: {
+      description: 'End date of holiday',
+      units: :date,
+    },
     holiday_usage_to_date_kwh: {
       description: 'Usage so far this holiday - kwh',
       units:  :kwh
@@ -146,6 +158,18 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
 
   def holiday_name
     @holiday_period.nil? ? 'Not a holiday' : @holiday_period.title
+  end
+
+  def holiday_type
+    @holiday_period&.type
+  end
+
+  def holiday_start_date
+    @holiday_period&.start_date
+  end
+
+  def holiday_end_date
+    @holiday_period&.end_date
   end
 
   def summary_text
