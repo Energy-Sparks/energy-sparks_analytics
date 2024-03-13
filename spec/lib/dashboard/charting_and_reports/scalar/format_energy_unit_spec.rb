@@ -67,14 +67,18 @@ describe FormatEnergyUnit do
 
   context 'when percentage formatting' do
     context 'with :percent' do
-      it 'formats correctly' do
+      it 'uses text medium by default' do
         expect(FormatUnit.format(:percent, 0.37019427511151964)).to eq('37%')
+        expect(FormatUnit.format(:percent, 0.37019427511151964, :text)).to eq('37%')
+        expect(FormatUnit.format(:percent, 0.37019427511151964, :html)).to eq('37&percnt;')
       end
     end
 
     context 'with :percent_0dp' do
       it 'formats correctly' do
-        expect(FormatUnit.format(:percent_0dp, 0.37019427511151964)).to eq('37%')
+        expect(FormatUnit.format(:percent_0dp, 0.37119427511151964)).to eq('37%')
+        expect(FormatUnit.format(:percent_0dp, 0.37119427511151964, :text)).to eq('37%')
+        expect(FormatUnit.format(:percent_0dp, 0.37019427511151964, :html)).to eq('37&percnt;')
       end
     end
 
@@ -82,6 +86,10 @@ describe FormatEnergyUnit do
       it 'formats correctly' do
         expect(FormatUnit.format(:relative_percent, -0.1188911792177762)).to eq('-12%')
         expect(FormatUnit.format(:relative_percent, 0.1188911792177762)).to eq('+12%')
+        expect(FormatUnit.format(:relative_percent, -0.1188911792177762, :text)).to eq('-12%')
+        expect(FormatUnit.format(:relative_percent, 0.1188911792177762, :text)).to eq('+12%')
+        expect(FormatUnit.format(:relative_percent, -0.1188911792177762, :html)).to eq('-12&percnt;')
+        expect(FormatUnit.format(:relative_percent, 0.1188911792177762, :html)).to eq('+12&percnt;')
       end
     end
 
@@ -89,6 +97,10 @@ describe FormatEnergyUnit do
       it 'formats correctly' do
         expect(FormatUnit.format(:relative_percent_0dp, -0.1188911792177762)).to eq('-12%')
         expect(FormatUnit.format(:relative_percent_0dp, 0.1188911792177762)).to eq('+12%')
+        expect(FormatUnit.format(:relative_percent_0dp, -0.1188911792177762, :text)).to eq('-12%')
+        expect(FormatUnit.format(:relative_percent_0dp, 0.1188911792177762, :text)).to eq('+12%')
+        expect(FormatUnit.format(:relative_percent_0dp, -0.1188911792177762, :html)).to eq('-12&percnt;')
+        expect(FormatUnit.format(:relative_percent_0dp, 0.1188911792177762, :html)).to eq('+12&percnt;')
       end
     end
 
@@ -99,6 +111,8 @@ describe FormatEnergyUnit do
         expect(FormatUnit.format(:comparison_percent, -0.5)).to eq('-50%')
         expect(FormatUnit.format(:comparison_percent, 10)).to eq('+1,000%')
         expect(FormatUnit.format(:comparison_percent, 4.125)).to eq('+410%')
+        expect(FormatUnit.format(:comparison_percent, 0.005, :text)).to eq('+0.5%')
+        expect(FormatUnit.format(:comparison_percent, 0.005, :html)).to eq('+0.5&percnt;')
       end
     end
   end
