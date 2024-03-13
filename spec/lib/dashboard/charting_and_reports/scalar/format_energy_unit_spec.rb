@@ -67,7 +67,7 @@ describe FormatEnergyUnit do
 
   context 'when percentage formatting' do
     context 'with :percent' do
-      it 'uses text medium by default' do
+      it 'formats correctly' do
         expect(FormatUnit.format(:percent, 0.37019427511151964)).to eq('37%')
         expect(FormatUnit.format(:percent, 0.37019427511151964, :text)).to eq('37%')
         expect(FormatUnit.format(:percent, 0.37019427511151964, :html)).to eq('37&percnt;')
