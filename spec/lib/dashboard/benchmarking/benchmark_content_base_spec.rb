@@ -47,7 +47,7 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
                   x_axis_ranges: nil,
                   x_data: { 'Last year electricity kWh/pupil' => [361.7098785425103, nil, nil],
                             'Last year gas kWh/pupil' => [nil, 567.4328947285189, 596.2005734714177],
-                            'Last year storage heater  kWh/pupil' => [nil, nil, nil] },
+                            'Last year storage heater kWh/pupil' => [nil, nil, nil] },
                   chart1_type: :bar,
                   chart1_subtype: :stacked,
                   y_axis_label: 'kWh',
@@ -70,7 +70,7 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
          "            \n" \
          "              <th scope=\"col\" class=\"text-center\" > Last year gas kWh/pupil </th>\n" \
          "            \n" \
-         "              <th scope=\"col\" class=\"text-center\" > Last year storage heater  kWh/pupil </th>\n" \
+         "              <th scope=\"col\" class=\"text-center\" > Last year storage heater kWh/pupil </th>\n" \
          "            \n" \
          "              <th scope=\"col\" class=\"text-center\" > Last year energy kWh/pupil </th>\n" \
          "            \n" \
@@ -203,7 +203,7 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
                   header: ['School',
                            'Last year electricity kWh/pupil',
                            'Last year gas kWh/pupil',
-                           'Last year storage heater  kWh/pupil',
+                           'Last year storage heater kWh/pupil',
                            'Last year energy kWh/pupil',
                            'Last year energy £/pupil',
                            'Last year energy kgCO2/pupil',
@@ -230,7 +230,7 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
                   header: ['School',
                            'Last year electricity kWh/pupil',
                            'Last year gas kWh/pupil',
-                           'Last year storage heater  kWh/pupil',
+                           'Last year storage heater kWh/pupil',
                            'Last year energy kWh/pupil',
                            'Last year energy £/pupil',
                            'Last year energy kgCO2/pupil',
