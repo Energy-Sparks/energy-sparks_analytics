@@ -43,3 +43,4 @@ Rails/*
 Rails/webapp/*
 webapp/*
 webapp
+Guardfile
