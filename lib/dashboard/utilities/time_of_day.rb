@@ -43,6 +43,11 @@ class TimeOfDay
     TimeOfDay.new(hours_fraction.to_i, 60 * (hours_fraction - hours_fraction.to_i))
   end
 
+  def self.from_time(time)
+    array = time.to_a
+    TimeOfDay.new(array[2], array[1])
+  end
+
   def self.time_of_day_since_midnight(minutes_since_midnight)
     hours = (minutes_since_midnight / 60).to_i
     minutes = (minutes_since_midnight - hours * 60).to_i
