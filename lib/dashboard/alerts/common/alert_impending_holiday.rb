@@ -11,7 +11,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   attr_reader :saving_kwh, :saving_co2, :daytype_breakdown_table, :total_annual_£, :holidays_percent
   attr_reader :holiday_length_days
   attr_reader :holiday_length_weekdays, :holiday_length_weeks
-  attr_reader :holiday_start_date, :holiday_end_date, :holiday_type
+  attr_reader :holiday_start_date, :holiday_end_date
+  attr_reader :last_year_holiday_type, :last_year_holiday_start_date, :last_year_holiday_end_date
   attr_reader :last_year_holiday_gas_kwh, :last_year_holiday_gas_£, :last_year_holiday_gas_£current, :last_year_holiday_gas_co2
   attr_reader :last_year_holiday_electricity_kwh, :last_year_holiday_electricity_£, :last_year_holiday_electricity_£current, :last_year_holiday_electricity_co2
   attr_reader :last_year_holiday_energy_costs_£, :last_year_holiday_energy_costs_£current, :last_year_holiday_energy_costs_co2
@@ -86,10 +87,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       description: 'Holiday first day - name e.g. Saturday',
       units:  String
     },
-    holiday_type: {
-      description: 'Type of holiday',
-      units:  String,
-    },
     meter_fuel_type_availability: {
       description: 'returns meter availability information both electricity and gas or gas only or electricity only, and or storage heaters',
       units:  String
@@ -115,6 +112,18 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     last_year_holiday_electricity_kwh: {
       description: 'Electricity consumption (kWh) in corresponding holiday last year',
       units:  { kwh: :electricity },
+    },
+    last_year_holiday_type: {
+      description: 'Type of last year holiday',
+      units:  String
+    },
+    last_year_holiday_start_date: {
+      description: 'Last year holiday start date',
+      units:  :date
+    },
+    last_year_holiday_end_date: {
+      description: 'Last year holiday end date',
+      units:  :date
     },
     holiday_floor_area: {
       description: 'Floor area during holiday',
@@ -257,7 +266,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     @holiday_period = holiday_information[:period]
 
     @last_year_holiday = same_holiday_previous_year(@holiday_period)
-    set_last_year_holiday_consumption_variables(@last_year_holiday.start_date, @last_year_holiday.end_date, @last_year_holiday.nil?)
+    set_last_year_holiday_consumption_variables(@last_year_holiday)
 
     potential_saving_kwh = nil_to_zero(@electricity_potential_saving_kwh) + nil_to_zero(@gas_potential_saving_kwh)
     potential_saving_£ = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
@@ -288,8 +297,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     set_time_of_year_relevance(priority)
   end
 
-  private def set_last_year_holiday_consumption_variables(start_date, end_date, no_data)
-    if no_data
+  private def set_last_year_holiday_consumption_variables(last_year_holiday)
+    if last_year_holiday.nil?
       @last_year_holiday_gas_kwh               = 0.0
       @last_year_holiday_gas_£                 = 0.0
       @last_year_holiday_gas_£current          = 0.0
@@ -301,6 +310,9 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       @last_year_holiday_energy_costs_£current = 0.0
       @last_year_holiday_energy_costs_co2      = 0.0
     else
+      start_date = @last_year_holiday.start_date
+      end_date = @last_year_holiday.end_date
+
       @holiday_floor_area = floor_area(start_date, end_date)
       @holiday_pupils     = pupils(start_date, end_date)
 
@@ -317,6 +329,10 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       @last_year_holiday_energy_costs_£ = nil_to_zero(@last_year_holiday_gas_£) + nil_to_zero(@last_year_holiday_electricity_£)
       @last_year_holiday_energy_costs_£current = nil_to_zero(@last_year_holiday_gas_£current) + nil_to_zero(@last_year_holiday_electricity_£current)
       @last_year_holiday_energy_costs_co2 = nil_to_zero(@last_year_holiday_gas_co2) + nil_to_zero(@last_year_holiday_electricity_co2)
+
+      @last_year_holiday_type = @last_year_holiday.type
+      @last_year_holiday_start_date = start_date
+      @last_year_holiday_end_date = end_date
     end
   end
 
