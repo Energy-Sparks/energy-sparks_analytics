@@ -11,7 +11,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   attr_reader :saving_kwh, :saving_co2, :daytype_breakdown_table, :total_annual_£, :holidays_percent
   attr_reader :holiday_length_days
   attr_reader :holiday_length_weekdays, :holiday_length_weeks
-  attr_reader :holiday_start_date, :holiday_end_date
+  attr_reader :holiday_start_date, :holiday_end_date, :holiday_type
   attr_reader :last_year_holiday_gas_kwh, :last_year_holiday_gas_£, :last_year_holiday_gas_£current, :last_year_holiday_gas_co2
   attr_reader :last_year_holiday_electricity_kwh, :last_year_holiday_electricity_£, :last_year_holiday_electricity_£current, :last_year_holiday_electricity_co2
   attr_reader :last_year_holiday_energy_costs_£, :last_year_holiday_energy_costs_£current, :last_year_holiday_energy_costs_co2
@@ -85,6 +85,10 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     holiday_start_date_doy: {
       description: 'Holiday first day - name e.g. Saturday',
       units:  String
+    },
+    holiday_type: {
+      description: 'Type of holiday',
+      units:  String,
     },
     meter_fuel_type_availability: {
       description: 'returns meter availability information both electricity and gas or gas only or electricity only, and or storage heaters',
