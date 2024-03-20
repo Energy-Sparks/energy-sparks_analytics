@@ -310,29 +310,27 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       @last_year_holiday_energy_costs_£current = 0.0
       @last_year_holiday_energy_costs_co2      = 0.0
     else
-      start_date = @last_year_holiday.start_date
-      end_date = @last_year_holiday.end_date
 
-      @holiday_floor_area = floor_area(start_date, end_date)
-      @holiday_pupils     = pupils(start_date, end_date)
+      @last_year_holiday_type = @last_year_holiday.type
+      @last_year_holiday_start_date = @last_year_holiday.start_date
+      @last_year_holiday_end_date = @last_year_holiday.end_date
+
+      @holiday_floor_area = floor_area(@last_year_holiday_start_date, @last_year_holiday_end_date)
+      @holiday_pupils     = pupils(@last_year_holiday_start_date, @last_year_holiday_end_date)
 
       @last_year_holiday_gas_kwh, @last_year_holiday_gas_£,
         @last_year_holiday_gas_£current, @last_year_holiday_gas_co2 =
-          consumption_in_holiday_period(gas?, @school.aggregated_heat_meters, start_date, end_date)
+          consumption_in_holiday_period(gas?, @school.aggregated_heat_meters, @last_year_holiday_start_date, @last_year_holiday_end_date)
       @last_year_holiday_gas_kwh_per_floor_area = @last_year_holiday_gas_kwh / @holiday_floor_area unless @last_year_holiday_gas_kwh.nil?
 
       @last_year_holiday_electricity_kwh, @last_year_holiday_electricity_£,
         @last_year_holiday_electricity_£current, @last_year_holiday_electricity_co2 =
-          consumption_in_holiday_period(electricity?, @school.aggregated_electricity_meters, start_date, end_date)
+          consumption_in_holiday_period(electricity?, @school.aggregated_electricity_meters, @last_year_holiday_start_date, @last_year_holiday_end_date)
       @last_year_holiday_electricity_kwh_per_floor_area = @last_year_holiday_electricity_kwh / @holiday_pupils unless @last_year_holiday_gas_kwh.nil?
 
       @last_year_holiday_energy_costs_£ = nil_to_zero(@last_year_holiday_gas_£) + nil_to_zero(@last_year_holiday_electricity_£)
       @last_year_holiday_energy_costs_£current = nil_to_zero(@last_year_holiday_gas_£current) + nil_to_zero(@last_year_holiday_electricity_£current)
       @last_year_holiday_energy_costs_co2 = nil_to_zero(@last_year_holiday_gas_co2) + nil_to_zero(@last_year_holiday_electricity_co2)
-
-      @last_year_holiday_type = @last_year_holiday.type
-      @last_year_holiday_start_date = start_date
-      @last_year_holiday_end_date = end_date
     end
   end
 
