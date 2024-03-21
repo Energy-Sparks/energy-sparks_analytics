@@ -120,7 +120,13 @@ class TargetMeter < Dashboard::Meter
       TargetMeterMonthlyDayType.new(meter_to_clone)
     when :day
       if meter_to_clone.fuel_type == :gas || storage_heater_fuel_type?(meter_to_clone.fuel_type)
-        TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays.new(meter_to_clone)
+        # LD 2024-03-21. Remove gas specific modelling pending further work on the targets
+        # feature. This means instead of estimating the target usage for a day based on the heating model, and
+        # the profile of daily usage based on additional information such as when the heating was on,
+        # we instead just use the same process as electricity: taking the average usage over a few
+        # simialr days in the last year.
+        # TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays.new(meter_to_clone)
+        TargetMeterDailyDayType.new(meter_to_clone)
       else
         TargetMeterDailyDayType.new(meter_to_clone)
       end
