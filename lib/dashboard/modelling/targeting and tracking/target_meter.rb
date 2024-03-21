@@ -124,7 +124,7 @@ class TargetMeter < Dashboard::Meter
         # feature. This means instead of estimating the target usage for a day based on the heating model, and
         # the profile of daily usage based on additional information such as when the heating was on,
         # we instead just use the same process as electricity: taking the average usage over a few
-        # simialr days in the last year.
+        # similar days in the last year.
         # TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays.new(meter_to_clone)
         TargetMeterDailyDayType.new(meter_to_clone)
       else
