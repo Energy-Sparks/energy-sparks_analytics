@@ -31,7 +31,7 @@ class AlertAnalysisBase < ContentBase
     clear_model_cache
   end
 
-  def analyse(asof_date, use_max_meter_date_if_less_than_asof_date = false)
+  def analyse(asof_date, use_max_meter_date_if_less_than_asof_date = false, **kwargs)
     begin
       @asof_date = asof_date
       @max_asofdate = maximum_alert_date
