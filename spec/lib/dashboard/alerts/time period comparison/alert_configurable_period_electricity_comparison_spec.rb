@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AlertLayerUpPowerdownNovember2023ElectricityComparison do
+describe AlertConfigurablePeriodElectricityComparison do
   let(:alert) do
     described_class.new(build(:target_school, start_date: Date.new(2022, 11, 1),
                                               end_date: Date.new(2023, 11, 30)))
@@ -10,7 +10,14 @@ describe AlertLayerUpPowerdownNovember2023ElectricityComparison do
 
   describe '#calculate' do
     it 'period_kwh' do
-      alert.analyse(Date.new(2023, 11, 30))
+      configuration = {
+        name: 'Layer up power down day 24 November 2023',
+        max_days_out_of_date: 365,
+        enough_days_data: 1,
+        current_period: Date.new(2023, 11, 24)..Date.new(2023, 11, 24),
+        previous_period: Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
+      }
+      alert.analyse(Date.new(2023, 11, 30), comparison_configuration: configuration)
       expect(alert.previous_period_kwh).to be_within(0.01).of(45.6)
       expect(alert.current_period_kwh).to be_within(0.01).of(45.6)
     end
