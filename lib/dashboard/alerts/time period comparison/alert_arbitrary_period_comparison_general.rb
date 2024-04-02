@@ -256,10 +256,6 @@ class AlertLayerUpPowerdownNovember2023GasComparison < AlertArbitraryPeriodCompa
       comparison_chart:       :layerup_powerdown_november_2023_gas_comparison_alert
     }.merge(basic_configuration)
   end
-
-  def calculate(asof_date)
-    super(asof_date)
-  end
 end
 
 class AlertLayerUpPowerdownNovember2023StorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
