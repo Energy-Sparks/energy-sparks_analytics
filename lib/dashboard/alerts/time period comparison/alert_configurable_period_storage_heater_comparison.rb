@@ -3,5 +3,5 @@
 require_relative 'alert_arbitrary_period_configurable_comparison_mixin'
 
 class AlertConfigurablePeriodStorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
-  include AlertArbitraryPeriodConfigurableMixIn
+  include AlertArbitraryPeriodConfigurableComparisonMixIn
 end
