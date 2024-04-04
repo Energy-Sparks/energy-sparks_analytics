@@ -4,25 +4,13 @@ require 'spec_helper'
 
 describe AlertLayerUpPowerdownNovember2023ElectricityComparison do
   let(:alert) do
-    start_date = Date.new(2021, 11, 30)
-    end_date = Date.new(2023, 11, 30)
-    meter_collection = build(
-      :meter_collection, :with_aggregate_meter,
-      start_date: start_date, end_date: end_date, fuel_type: :electricity,
-      pseudo_meter_attributes: { aggregated_electricity: { targeting_and_tracking: [{ start_date: start_date,
-                                                                                      target: 0.95 }] } }
-    )
-    meter = build(:meter, :with_flat_rate_tariffs,
-                  meter_collection: meter_collection, type: :electricity,
-                  amr_data: build(:amr_data, :with_date_range,
-                                  type: :electricity, start_date: start_date, end_date: end_date,
-                                  kwh_data_x48: Array.new(48, 1)))
-    meter_collection.add_electricity_meter(meter)
+    meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
+                             start_date: Date.new(2021, 11, 30), end_date: Date.new(2023, 11, 30))
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
     described_class.new(meter_collection)
   end
 
-  describe '#calculate' do
+  describe '#analyse' do
     it 'period_kwh' do
       alert.analyse(Date.new(2023, 11, 30))
       expect(alert.previous_period_kwh).to be_within(0.01).of(48)
