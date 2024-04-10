@@ -5,7 +5,8 @@ require 'spec_helper'
 describe AlertConfigurablePeriodGasComparison do
   let(:alert) do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
-                             fuel_type: :gas, start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30))
+                             start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30),
+                             fuel_type: :gas)
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
     described_class.new(meter_collection)
   end

@@ -37,17 +37,27 @@ FactoryBot.define do
           key = fuel_type == :electricity ? :aggregated_electricity : :aggregated_gas
           { key => { targeting_and_tracking: [{ start_date: start_date, target: 0.95 }] } }
         end
+        storage_heaters { false }
       end
       with_aggregate_meter
 
       after(:build) do |meter_collection, evaluator|
+        kwh_data_x48 = Array.new(48, 1)
+        meter_attributes = {}
+        if evaluator.storage_heaters
+          meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
+                                                  charge_end_time: TimeOfDay.parse('06:00') }]
+          kwh_data_x48[4, 10] = [4] * 10 # match charge times
+        end
+
         meter = build(:meter, :with_flat_rate_tariffs,
                       meter_collection: meter_collection, type: evaluator.fuel_type,
+                      meter_attributes: meter_attributes,
                       amr_data: build(:amr_data, :with_date_range,
                                       type: evaluator.fuel_type,
                                       start_date: evaluator.start_date,
                                       end_date: evaluator.end_date,
-                                      kwh_data_x48: Array.new(48, 1)))
+                                      kwh_data_x48: kwh_data_x48))
         meter_collection.send(evaluator.fuel_type == :electricity ? :add_electricity_meter : :add_heat_meter, meter)
       end
     end

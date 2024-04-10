@@ -5,7 +5,8 @@ require 'spec_helper'
 describe AlertConfigurablePeriodStorageHeaterComparison do
   let(:alert) do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
-                             start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30))
+                             start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30),
+                             storage_heaters: true)
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
     described_class.new(meter_collection)
   end
@@ -20,8 +21,8 @@ describe AlertConfigurablePeriodStorageHeaterComparison do
         previous_period: Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
       }
       alert.analyse(Date.new(2023, 11, 30), comparison_configuration: configuration)
-      expect(alert.previous_period_kwh).to be_within(0.01).of(48)
-      expect(alert.current_period_kwh).to be_within(0.01).of(48)
+      expect(alert.previous_period_kwh).to be_within(0.01).of(27)
+      expect(alert.current_period_kwh).to be_within(0.01).of(27)
     end
   end
 end
