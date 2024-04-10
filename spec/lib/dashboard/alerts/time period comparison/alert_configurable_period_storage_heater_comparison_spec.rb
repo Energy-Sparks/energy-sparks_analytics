@@ -12,7 +12,7 @@ describe AlertConfigurablePeriodStorageHeaterComparison do
   end
 
   describe '#analyse' do
-    it 'period_kwh' do
+    it 'runs and sets variables' do
       configuration = {
         name: 'Layer up power down day 24 November 2023',
         max_days_out_of_date: 365,

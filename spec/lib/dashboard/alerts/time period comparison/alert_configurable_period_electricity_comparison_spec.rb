@@ -9,19 +9,34 @@ describe AlertConfigurablePeriodElectricityComparison do
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
     described_class.new(meter_collection)
   end
+  let(:configuration) do
+    {
+      name: 'Layer up power down day 24 November 2023',
+      max_days_out_of_date: 365,
+      enough_days_data: 1,
+      current_period: Date.new(2023, 11, 24)..Date.new(2023, 11, 24),
+      previous_period: Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
+    }
+  end
 
   describe '#analyse' do
-    it 'period_kwh' do
-      configuration = {
-        name: 'Layer up power down day 24 November 2023',
-        max_days_out_of_date: 365,
-        enough_days_data: 1,
-        current_period: Date.new(2023, 11, 24)..Date.new(2023, 11, 24),
-        previous_period: Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
-      }
+    it 'runs and sets variables' do
       alert.analyse(Date.new(2023, 11, 30), comparison_configuration: configuration)
+      expect(alert.analysis_date).to eq(Date.new(2023, 11, 30))
       expect(alert.previous_period_kwh).to be_within(0.01).of(48)
       expect(alert.current_period_kwh).to be_within(0.01).of(48)
+    end
+
+    it 'errors with not enough days of data' do
+      configuration[:enough_days_data] = 1000
+      alert.analyse(Date.new(2023, 11, 30), comparison_configuration: configuration)
+      expect(alert.error_message).to start_with('Not enough data in current period: ')
+    end
+
+    it 'does not run when max_days_out_of_date' do
+      configuration[:max_days_out_of_date] = 1
+      alert.analyse(Date.new(2023, 12, 5), comparison_configuration: configuration)
+      expect(alert.analysis_date).to be_nil
     end
   end
 end
