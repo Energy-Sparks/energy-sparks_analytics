@@ -7,10 +7,15 @@ describe AnalyseHeatingAndHotWater::HeatingNonHeatingDisaggregationWithRegressio
     it 'produces not default figure' do
       start_date = Date.new(2023, 5, 1) # needs to include months 6, 7, 8
       end_date = Date.new(2023, 7, 1)
-      meter_collection = build(:meter_collection, start_date: start_date, end_date: end_date)
       meter = build(:meter, :with_flat_rate_tariffs,
                     type: :gas,
-                    meter_collection: meter_collection,
+                    meter_collection: build(
+                      :meter_collection, start_date: start_date, end_date: end_date,
+                                         temperatures: build(
+                                           :temperatures, :with_days, start_date: start_date, end_date: end_date,
+                                                                      kwh_data_x48: Array.new(48, 10.1)
+                                         )
+                    ),
                     amr_data: build(:amr_data, :with_date_range,
                                     type: :gas, start_date: start_date, end_date: end_date,
                                     # if the daily kwh is less than 20kwh (@max_zero_daily_kwh) the regression is
