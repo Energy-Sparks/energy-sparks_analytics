@@ -47,7 +47,8 @@ FactoryBot.define do
         if evaluator.storage_heaters
           meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
                                                   charge_end_time: TimeOfDay.parse('06:00') }]
-          kwh_data_x48[4, 10] = [4] * 10 # match charge times
+          # match charge times, increases usage just enough for model to consider heating on
+          kwh_data_x48[4, 10] = [4] * 10
         end
 
         meter = build(:meter, :with_flat_rate_tariffs,

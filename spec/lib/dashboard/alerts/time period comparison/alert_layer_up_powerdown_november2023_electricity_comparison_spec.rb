@@ -11,7 +11,7 @@ describe AlertLayerUpPowerdownNovember2023ElectricityComparison do
   end
 
   describe '#analyse' do
-    it 'period_kwh' do
+    it 'runs and sets variables' do
       alert.analyse(Date.new(2023, 11, 30))
       expect(alert.previous_period_kwh).to be_within(0.01).of(48)
       expect(alert.current_period_kwh).to be_within(0.01).of(48)
