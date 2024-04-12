@@ -7,7 +7,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
 
   def initialize(school)
     super(school, :holiday_electricity_usage_to_date)
-    @relevance = :never_relevant unless @school.holidays.holiday?(@today)
+    @relevance = @school.holidays.holiday?(@today) ? :relevant : :not_relevant
   end
 
   def self.template_variables
@@ -92,9 +92,14 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   private
 
   def calculate(asof_date)
+    # We can't reach here without a holiday as valid_content? will be false if alert isn't
+    # :relevant. This is set in the constructor.
+    #
+    # The application also doesnt call analyse if alert isn't :relevant
+    #
+    # We might get here without enough data within the period though, so the results might
+    # be zero from the calculations, but alert is later ignored.
     if @school.holidays.holiday?(asof_date)
-      @relevance = :relevant
-      # @asof_date = asof_date
       @holiday_period     = @school.holidays.holiday(asof_date)
       holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
 
@@ -106,7 +111,6 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
 
       # Calculate number of work and weekend days in holiday as a whole
       workdays_days, weekend_days = holiday_weekday_workday_stats(holiday_date_range)
-
       # Project usage for the entire holiday, based on current usage
       projected_totals = calculate_projected_totals(usage_to_date, workdays_days, weekend_days)
 
@@ -122,18 +126,10 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
 
       @rating = 0.0
     else
-      @relevance = :never_relevant
       @holiday_period = nil
-      # @asof_date = nil
-      @holiday_usage_to_date_£   = 0.0
-      @holiday_projected_usage_£ = 0.0
-
       @rating = 10.0
     end
-
-    @term = :shortterm
   end
-  alias_method :analyse_private, :calculate
 
   def calculate_usage_to_date(holiday_date_range)
     amr = aggregate_meter.amr_data
@@ -145,12 +141,12 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     # classified used to identify day type, into :workday, :weekend
     classifier = -> (date) { day_type(date) }
 
-    # Calculate total, average, count for each day type across kwh, £ and co2
+    # Calculate total, average for each day type for each data type (kwh, £ and co2)
     # Produces hash of data type => { weekend: {}, workday: {} }
     %i[kwh £ co2].map do |data_type|
       [
         data_type,
-        @school.holidays.calculate_statistics(start_date, end_date, lamda, classifier: classifier, args: data_type, statistics: %i[total average count])
+        @school.holidays.calculate_statistics(start_date, end_date, lamda, classifier: classifier, args: data_type, statistics: %i[total average])
       ]
     end.to_h
   end
@@ -176,8 +172,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def day_type(date)
-    # TODO: weekend?(date)
-    date.saturday? || date.sunday? ? :weekend : :workday
+    weekend?(date) ? :weekend : :workday
   end
 
   # Calculate number of days of each type in holiday period
