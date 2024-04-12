@@ -4,6 +4,7 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasOnlyBase
   attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh
   attr_reader :holiday_usage_to_date_£,   :holiday_projected_usage_£
   attr_reader :holiday_usage_to_date_co2, :holiday_projected_usage_co2
+  attr_reader :relevance
 
   def initialize(school, fuel_type)
     super(school, :heating_hotwater_on_during_holidays)
@@ -75,10 +76,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasOnlyBase
       benchmark_code: 'ftyp',
     }
   }
-
-  def relevance
-    @relevance
-  end
 
   def enough_data
     days_amr_data > 2 ? :enough : :not_enough
