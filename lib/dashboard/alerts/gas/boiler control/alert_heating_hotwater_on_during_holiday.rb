@@ -1,10 +1,9 @@
 # only during holidays this alert send message about heating or hot water
-class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
+class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasOnlyBase
   attr_reader :summary, :fuel_type
   attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh
   attr_reader :holiday_usage_to_date_£,   :holiday_projected_usage_£
   attr_reader :holiday_usage_to_date_co2, :holiday_projected_usage_co2
-  attr_reader :heating_days_so_far_this_holiday, :hotwater_days_so_far_this_holiday
 
   def initialize(school, fuel_type)
     super(school, :heating_hotwater_on_during_holidays)
@@ -62,14 +61,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
       description: 'Projected usage for whole holiday - co2',
       units:  :co2
     },
-    heating_days_so_far_this_holiday: {
-      description: 'Number of heating days so far (to analysis date)',
-      units:  Integer
-    },
-    hotwater_days_so_far_this_holiday: {
-      description: 'Number of hot water days so far (to analysis date)',
-      units:  Integer
-    },
     summary: {
       description: 'Summary of holiday usage',
       units:  String
@@ -90,7 +81,7 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
   end
 
   def enough_data
-    enough_data_for_model_fit ? :enough : :not_enough
+    days_amr_data > 2 ? :enough : :not_enough
   end
 
   def time_of_year_relevance
@@ -112,8 +103,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
   private
 
   def calculate(asof_date)
-    calculate_model(asof_date)
-
     if @school.holidays.holiday?(asof_date)
       @relevance = :relevant
 
@@ -133,8 +122,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
       @holiday_projected_usage_co2 = calc[:projected_usage]
 
       boiler_usage = characterise_boiler_usage(holiday_date_range, :kwh, asof_date)
-      @heating_days_so_far_this_holiday  = count_days(boiler_usage, :heating)
-      @hotwater_days_so_far_this_holiday = count_days(boiler_usage, :hotwater)
 
       @relevance, @rating = if @holiday_usage_to_date_kwh.zero?
                               [:not_relevant, 10.0]
@@ -174,27 +161,14 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
 
   def summary_text
     if @rating == 0.0
-      if @heating_days_so_far_this_holiday == 0
-        left_on_message = I18n.t("#{i18n_prefix}.only_hotwater",
-          hotwater_days: FormatUnit.format(:days, @hotwater_days_so_far_this_holiday))
-      elsif @hotwater_days_so_far_this_holiday == 0
-        left_on_message = I18n.t("#{i18n_prefix}.only_heating",
-          heating_days: FormatUnit.format(:days, @heating_days_so_far_this_holiday))
-      else
-        left_on_message = I18n.t("#{i18n_prefix}.only_heating",
-          hotwater_days: FormatUnit.format(:days, @hotwater_days_so_far_this_holiday),
-          heating_days: FormatUnit.format(:days, @heating_days_so_far_this_holiday))
-      end
       I18n.t("#{i18n_prefix}.summary",
         heating_type: heating_type,
         holiday_name: holiday_name,
         date: I18n.l(@asof_date, format: '%A %e %b %Y'),
-        left_on_message: left_on_message,
         cost: FormatUnit.format(:£, @holiday_usage_to_date_£, :html),
         project_cost: FormatUnit.format(:£, @holiday_projected_usage_£, :html)
       )
       else
-        #TODO: message refers to using no gas, but this text also used for storage heaters
         I18n.t("#{i18n_prefix}.heating_not_on")
       end
   end
@@ -214,7 +188,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
         [
           date,
           {
-            usage:    boiler_usage(date),
             weekend:  weekend?(date),
             val:      aggregate_meter.amr_data.one_day_kwh(date, data_type),
           }
@@ -227,12 +200,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
 
   def weekend?(date)
     [0, 6].include?(date.wday)
-  end
-
-  def count_days(calc, usage)
-    calc.values.count do |v|
-      !v.nil? && v[:usage] == usage
-    end
   end
 
   def calculate_projected_usage(boiler_usage, holiday_date_range)
@@ -267,15 +234,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
     valid_days.map { |v| v[:val] }.sum
   end
 
-  def boiler_usage(date)
-    if @heating_model.heating_on?(date)
-      :heating
-    elsif @heating_model.boiler_on?(date)
-      :hotwater
-    else
-      nil
-    end
-  end
 end
 
 class AlertGasHeatingHotWaterOnDuringHoliday < AlertHeatingHotWaterOnDuringHolidayBase
