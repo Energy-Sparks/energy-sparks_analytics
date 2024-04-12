@@ -1,9 +1,8 @@
+# frozen_string_literal: true
+
 # only during holidays this alert send messages or for school comparison/benchmark
 class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
-  attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh
-  attr_reader :holiday_usage_to_date_£,   :holiday_projected_usage_£
-  attr_reader :holiday_usage_to_date_co2, :holiday_projected_usage_co2
-  attr_reader :relevance
+  attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh, :holiday_usage_to_date_£, :holiday_projected_usage_£, :holiday_usage_to_date_co2, :holiday_projected_usage_co2, :relevance
 
   def initialize(school)
     super(school, :holiday_electricity_usage_to_date)
@@ -11,59 +10,59 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def self.template_variables
-    specific = {'Electricity usage during current holiday' => TEMPLATE_VARIABLES}
-    specific.merge(self.superclass.template_variables)
+    specific = { 'Electricity usage during current holiday' => TEMPLATE_VARIABLES }
+    specific.merge(superclass.template_variables)
   end
 
   TEMPLATE_VARIABLES = {
     holiday_name: {
       description: 'Name of holiday',
-      units:  String,
-      benchmark_code: 'hnam',
+      units: String,
+      benchmark_code: 'hnam'
     },
     holiday_type: {
       description: 'Type of holiday',
-      units:  String,
+      units: String
     },
     holiday_start_date: {
       description: 'Start date of holiday',
-      units: :date,
+      units: :date
     },
     holiday_end_date: {
       description: 'End date of holiday',
-      units: :date,
+      units: :date
     },
     holiday_usage_to_date_kwh: {
       description: 'Usage so far this holiday - kwh',
-      units:  :kwh
+      units: :kwh
     },
     holiday_projected_usage_kwh: {
       description: 'Projected usage for whole holiday - kwh',
-      units:  :kwh
+      units: :kwh
     },
     holiday_usage_to_date_£: {
       description: 'Usage so far this holiday - £',
-      units:  :£,
+      units: :£,
       benchmark_code: '£sfr'
     },
     holiday_projected_usage_£: {
       description: 'Projected usage for whole holiday - £',
-      units:  :£,
+      units: :£,
       benchmark_code: '£pro'
     },
     holiday_usage_to_date_co2: {
       description: 'Usage so far this holiday - co2',
-      units:  :co2
+      units: :co2
     },
     holiday_projected_usage_co2: {
       description: 'Projected usage for whole holiday - co2',
-      units:  :co2
+      units: :co2
     },
     summary: {
       description: 'Summary of holiday usage',
-      units:  String
-    },
-  }
+      units: String
+    }
+  }.freeze
 
   # We have enough data so long as there is some recorded usage within the current holiday
   def enough_data
@@ -81,12 +80,14 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     set_time_of_year_relevance(@relevance == :relevant ? 10.0 : 0.0)
   end
 
-  protected def max_days_out_of_date_while_still_relevant
-    14
-  end
-
   def timescale
     I18n.t("#{i18n_prefix}.timescale")
+  end
+
+  protected
+
+  def max_days_out_of_date_while_still_relevant
+    14
   end
 
   private
@@ -137,9 +138,9 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     end_date   = [holiday_date_range.last,  amr.end_date, @today].min
 
     # lambda used to access data for a data typ
-    lamda = -> (date, data_type) { amr.one_day_kwh(date, data_type) }
+    lamda = ->(date, data_type) { amr.one_day_kwh(date, data_type) }
     # classified used to identify day type, into :workday, :weekend
-    classifier = -> (date) { day_type(date) }
+    classifier = ->(date) { day_type(date) }
 
     # Calculate total, average for each day type for each data type (kwh, £ and co2)
     # Produces hash of data type => { weekend: {}, workday: {} }
@@ -152,7 +153,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def holiday_name
-    @holiday_period.nil? ? nil : @holiday_period.title
+    @holiday_period&.title
   end
 
   def holiday_type
@@ -168,7 +169,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def totals(usage_to_date)
-    usage_to_date.transform_values{ |v| v.values.map { |vv| vv[:total] }.compact.sum }
+    usage_to_date.transform_values { |v| v.values.map { |vv| vv[:total] }.compact.sum }
   end
 
   def day_type(date)
@@ -188,24 +189,25 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
       # at start of holiday may only have sample weekend or weekday,
       # so use backup type if missing sample i.e. workday if no weekend day sample etc.
       workdays_days * (v.dig(:workday, :average) || v.dig(:weekend, :average)) +
-      weekend_days  * (v.dig(:weekend, :average) || v.dig(:workday, :average))
+        weekend_days * (v.dig(:weekend, :average) || v.dig(:workday, :average))
     end
   end
 
   def summary
     return nil if @holiday_period.nil?
+
     if @today < @holiday_period.end_date
       I18n.t("#{i18n_prefix}.holiday_cost_to_date",
-        holiday_name: holiday_name,
-        date: I18n.l(@asof_date, format: '%A %e %b %Y'),
-        cost_to_date: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£) ) +
-      I18n.t("#{i18n_prefix}.holiday_predicted_cost",
-        predicted_cost: FormatEnergyUnit.format(:£, @holiday_projected_usage_£))
+             holiday_name: holiday_name,
+             date: I18n.l(@asof_date, format: '%A %e %b %Y'),
+             cost_to_date: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£)) +
+        I18n.t("#{i18n_prefix}.holiday_predicted_cost",
+               predicted_cost: FormatEnergyUnit.format(:£, @holiday_projected_usage_£))
     else
       I18n.t("#{i18n_prefix}.holiday_cost_to_date",
-        holiday_name: holiday_name,
-        date: I18n.l(@asof_date, format: '%A %e %b %Y'),
-        usage_to_date: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£) )
+             holiday_name: holiday_name,
+             date: I18n.l(@asof_date, format: '%A %e %b %Y'),
+             usage_to_date: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£))
     end
   end
 end
