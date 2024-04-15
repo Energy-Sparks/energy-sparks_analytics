@@ -86,12 +86,13 @@ RSpec.shared_examples 'a holiday usage alert' do
           # usage_per_hh * 48 * 7 days
           expect(alert.holiday_usage_to_date_kwh).to be_within(0.001).of(33.60)
           # flat_rate tariff * kwh above
+          # This is less than the £10 usage threshold
           expect(alert.holiday_usage_to_date_£).to be_within(0.001).of(3.36)
           # carbon_intensity * kwh above
           expect(alert.holiday_usage_to_date_co2).to be_within(0.001).of(6.72)
         end
 
-        it 'assigns nil rating when less than £10 saving' do
+        it 'assigns nil rating when usage is less than threshold' do
           expect(alert.rating).to eq(nil)
         end
       end
