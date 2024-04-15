@@ -6,7 +6,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
 
   def initialize(school, report_type)
     super(school, report_type)
-    @relevance = @school.holidays.holiday?(@today) ? :relevant : :not_relevant
+    @relevance = @school.holidays.holiday?(@today) ? :relevant : :never_relevant
     @rating = 10.0
   end
 
