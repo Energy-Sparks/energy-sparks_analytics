@@ -23,10 +23,12 @@ describe AlertConfigurablePeriodElectricityComparison do
     it 'runs and sets variables' do
       alert.analyse(Date.new(2023, 11, 30), comparison_configuration: configuration)
       expect(alert.analysis_date).to eq(Date.new(2023, 11, 30))
-      expect(alert.previous_period_kwh).to be_within(0.01).of(48)
       expect(alert.current_period_kwh).to be_within(0.01).of(48)
       expect(alert.current_period_start_date).to eq(Date.new(2023, 11, 24))
       expect(alert.current_period_end_date).to eq(Date.new(2023, 11, 24))
+      expect(alert.previous_period_kwh).to be_within(0.01).of(48)
+      expect(alert.previous_period_start_date).to eq(Date.new(2023, 11, 17))
+      expect(alert.previous_period_end_date).to eq(Date.new(2023, 11, 17))
     end
 
     it 'errors with not enough days of data' do
