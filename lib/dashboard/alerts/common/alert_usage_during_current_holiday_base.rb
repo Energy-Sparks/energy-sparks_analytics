@@ -7,6 +7,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   def initialize(school, report_type)
     super(school, report_type)
     @relevance = @school.holidays.holiday?(@today) ? :relevant : :not_relevant
+    @rating = 10.0
   end
 
   def self.template_variables
@@ -117,44 +118,33 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
 
   private
 
+  # Calculate will only be called if this is a +valid_alert?+ which is only true if we
+  # are currently within a holiday (@relevance) and we have the necessary aggregate
+  # meter
   def calculate(asof_date)
-    # We can't reach here without a holiday as valid_content? will be false if alert isn't
-    # :relevant. This is set in the constructor.
-    #
-    # The application also doesnt call analyse if alert isn't :relevant
-    #
-    # We might get here without enough data within the period though, so the results might
-    # be zero from the calculations, but alert is later ignored.
-    if @school.holidays.holiday?(asof_date)
-      @holiday_period     = @school.holidays.holiday(asof_date)
-      holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
+    @holiday_period     = @school.holidays.holiday(asof_date)
+    holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
 
-      # Calculate summary of usage by day type
-      usage_to_date  = calculate_usage_to_date(holiday_date_range)
+    # Calculate summary of usage by day type
+    usage_to_date  = calculate_usage_to_date(holiday_date_range)
 
-      # Calculate total usage across all day type
-      totals_to_date = totals(usage_to_date)
+    # Calculate total usage across both day types
+    totals_to_date = totals(usage_to_date)
 
-      # Calculate number of work and weekend days in holiday as a whole
-      workdays_days, weekend_days = holiday_weekday_workday_stats(holiday_date_range)
-      # Project usage for the entire holiday, based on current usage
-      projected_totals = calculate_projected_totals(usage_to_date, workdays_days, weekend_days)
+    @holiday_usage_to_date_kwh   = totals_to_date[:kwh]
+    @holiday_usage_to_date_£   = totals_to_date[:£]
+    @holiday_usage_to_date_co2   = totals_to_date[:co2]
 
-      # Set attributes to return
-      @holiday_usage_to_date_kwh   = totals_to_date[:kwh]
-      @holiday_projected_usage_kwh = projected_totals[:kwh]
+    # Calculate number of work and weekend days in holiday as a whole
+    workdays_days, weekend_days = holiday_weekday_workday_stats(holiday_date_range)
+    # Project usage for the entire holiday, based on current usage
+    projected_totals = calculate_projected_totals(usage_to_date, workdays_days, weekend_days)
 
-      @holiday_usage_to_date_£   = totals_to_date[:£]
-      @holiday_projected_usage_£ = projected_totals[:£]
+    @holiday_projected_usage_kwh = projected_totals[:kwh]
+    @holiday_projected_usage_£ = projected_totals[:£]
+    @holiday_projected_usage_co2 = projected_totals[:co2]
 
-      @holiday_usage_to_date_co2   = totals_to_date[:co2]
-      @holiday_projected_usage_co2 = projected_totals[:co2]
-
-      @rating = 0.0
-    else
-      @holiday_period = nil
-      @rating = 10.0
-    end
+    @rating = 0.0
   end
 
   def calculate_usage_to_date(holiday_date_range)
