@@ -2,7 +2,7 @@
 
 # During holidays alert schools if they are consuming energy
 class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
-  attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh, :holiday_usage_to_date_£, :holiday_projected_usage_£, :holiday_usage_to_date_co2, :holiday_projected_usage_co2, :relevance, :heating_type, :fuel_type
+  attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh, :holiday_usage_to_date_£, :holiday_projected_usage_£, :holiday_usage_to_date_co2, :holiday_projected_usage_co2, :relevance
 
   def initialize(school, report_type)
     super(school, report_type)
@@ -64,12 +64,12 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
     },
     fuel_type: {
       description: 'Fuel: gas, electricity or storage heaters',
-      units:  :fuel_type
+      units: :fuel_type
     },
     heating_type: {
       description: 'gas boiler or storage heaters, or nil',
-      units:  String,
-      benchmark_code: 'ftyp',
+      units: String,
+      benchmark_code: 'ftyp'
     }
   }.freeze
 
@@ -102,7 +102,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   end
 
   def fuel_type
-    raise "Subclass must implement"
+    raise 'Subclass must implement'
   end
 
   protected
@@ -112,7 +112,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   end
 
   def aggregate_meter
-    raise "Subclass must implement"
+    raise 'Subclass must implement'
   end
 
   private
