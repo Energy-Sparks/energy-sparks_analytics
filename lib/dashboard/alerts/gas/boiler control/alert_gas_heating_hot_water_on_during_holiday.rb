@@ -35,7 +35,7 @@ class AlertGasHeatingHotWaterOnDuringHoliday < AlertUsageDuringCurrentHolidayBas
   protected
 
   def needs_electricity_data?
-    true
+    false
   end
 
   def needs_gas_data?

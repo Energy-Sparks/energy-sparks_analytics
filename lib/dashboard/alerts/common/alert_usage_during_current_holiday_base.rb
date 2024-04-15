@@ -6,7 +6,6 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
 
   def initialize(school, report_type)
     super(school, report_type)
-    @relevance = @school.holidays.holiday?(@today) ? :relevant : :never_relevant
     @rating = 10.0
   end
 
@@ -74,6 +73,12 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
     }
   }.freeze
 
+  # Check whether we are in a holiday, otherwise delegate to parent
+  def relevance
+    return :never_relevant unless @school.holidays.holiday?(@today)
+    super
+  end
+
   # We have enough data so long as there is some recorded usage within the current holiday
   def enough_data
     holiday_period = @school.holidays.holiday(@today)
@@ -122,6 +127,8 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   # are currently within a holiday (@relevance) and we have the necessary aggregate
   # meter
   def calculate(asof_date)
+    return unless @school.holidays.holiday?(asof_date)
+
     @holiday_period     = @school.holidays.holiday(asof_date)
     holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
 

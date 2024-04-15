@@ -43,6 +43,18 @@ RSpec.shared_examples 'a holiday usage alert' do
       alert.analyse(asof_date)
     end
 
+    context 'when outside holiday period' do
+      let(:asof_date) { Date.new(2023, 12, 15) }
+
+      it 'is not relevant' do
+        expect(alert.relevance).to eq(:never_relevant)
+      end
+
+      it 'returns default rating' do
+        expect(alert.rating).to eq(10.0)
+      end
+    end
+
     context 'when 1 week into a holiday' do
       # 7 days from 16th December to 23rd December
       let(:asof_date) { Date.new(2023, 12, 22) }
