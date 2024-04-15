@@ -33,10 +33,6 @@ FactoryBot.define do
     trait :with_fuel_and_aggregate_meters do
       fuel_type { :electricity }
       transient do
-        pseudo_meter_attributes do
-          key = fuel_type == :electricity ? :aggregated_electricity : :aggregated_gas
-          { key => { targeting_and_tracking: [{ start_date: start_date, target: 0.95 }] } }
-        end
         storage_heaters { false }
       end
       with_aggregate_meter
