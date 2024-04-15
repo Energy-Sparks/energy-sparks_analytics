@@ -102,7 +102,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   end
 
   def fuel_type
-    raise "Sub-class must implement"
+    raise "Subclass must implement"
   end
 
   protected
@@ -112,7 +112,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   end
 
   def aggregate_meter
-    raise "Sub-class must implement"
+    raise "Subclass must implement"
   end
 
   private
