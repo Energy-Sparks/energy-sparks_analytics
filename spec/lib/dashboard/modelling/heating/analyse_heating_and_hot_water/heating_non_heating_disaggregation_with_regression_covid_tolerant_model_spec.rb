@@ -21,6 +21,7 @@ describe AnalyseHeatingAndHotWater::HeatingNonHeatingDisaggregationWithRegressio
                                     # if the daily kwh is less than 20kwh (@max_zero_daily_kwh) the regression is
                                     # skipped
                                     # certain values like 0.5, 1 cause the regression r2 to be NaN which also break it
+                                    # (perhaps float represention related)
                                     kwh_data_x48: Array.new(48, 0.8)))
       model = described_class.new(meter, {})
       model.calculate_max_summer_hotwater_kitchen_kwh(SchoolDatePeriod.new(nil, nil, start_date, end_date))
