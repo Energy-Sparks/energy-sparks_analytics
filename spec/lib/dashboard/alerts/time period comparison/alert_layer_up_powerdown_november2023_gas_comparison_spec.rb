@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe AlertLayerUpPowerdownNovember2023GasComparison do
-  let(:alert) do
+  subject(:alert) do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
                              fuel_type: :gas, start_date: Date.new(2021, 11, 30), end_date: Date.new(2023, 11, 30))
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters

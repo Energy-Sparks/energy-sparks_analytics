@@ -3,12 +3,13 @@
 require 'spec_helper'
 
 describe AlertConfigurablePeriodElectricityComparison do
-  let(:alert) do
+  subject(:alert) do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
                              start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30))
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
     described_class.new(meter_collection)
   end
+
   let(:configuration) do
     {
       name: 'Layer up power down day 24 November 2023',

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe AlertConfigurablePeriodStorageHeaterComparison do
-  let(:alert) do
+  subject(:alert) do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
                              start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30),
                              storage_heaters: true)
