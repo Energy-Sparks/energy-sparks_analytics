@@ -5,7 +5,7 @@ FactoryBot.define do
     transient do
       start_date              { Date.yesterday - 7 }
       end_date                { Date.yesterday }
-      school                  { build(:school) }
+      school                  { build(:analytics_school) }
       holidays                { build(:holidays, :with_calendar_year) }
       temperatures            { build(:temperatures, :with_days, start_date: start_date, end_date: end_date) }
       solar_pv                { build(:solar_pv, :with_days, start_date: start_date, end_date: end_date) }

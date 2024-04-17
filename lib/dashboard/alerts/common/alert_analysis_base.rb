@@ -25,7 +25,7 @@ class AlertAnalysisBase < ContentBase
 
   attr_reader :time_of_year_relevance
 
-  def initialize(school, _report_type)
+  def initialize(school, _report_type, **kwargs)
     super(school)
     @capital_cost = 0.0..0.0
     clear_model_cache

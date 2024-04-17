@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :school, class: 'Dashboard::School' do
+  factory :analytics_school, class: 'Dashboard::School' do
     transient do
       sequence(:id)    { |n| n }
       sequence(:name)  { |n| "test #{n} school" }
