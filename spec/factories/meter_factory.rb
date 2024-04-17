@@ -41,7 +41,6 @@ FactoryBot.define do
           end_date: tariff_end_date,
           rates: rates
         )
-        meter_attributes = { accounting_tariff_generic: [accounting_tariff] }
         new(meter_collection: meter_collection,
             amr_data: amr_data, type: type, identifier: identifier,
             name: name, floor_area: floor_area, number_of_pupils: number_of_pupils,
@@ -49,7 +48,7 @@ FactoryBot.define do
             storage_heater_config: storage_heater_config,
             external_meter_id: external_meter_id,
             dcc_meter: dcc_meter,
-            meter_attributes: meter_attributes)
+            meter_attributes: { accounting_tariff_generic: [accounting_tariff] }.merge(meter_attributes))
       end
 
       after(:build) do |meter, _evaluator|

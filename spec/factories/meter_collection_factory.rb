@@ -30,6 +30,35 @@ FactoryBot.define do
       end
     end
 
+    trait :with_fuel_and_aggregate_meters do
+      fuel_type { :electricity }
+      transient do
+        storage_heaters { false }
+      end
+      with_aggregate_meter
+
+      after(:build) do |meter_collection, evaluator|
+        kwh_data_x48 = Array.new(48, 1)
+        meter_attributes = {}
+        if evaluator.storage_heaters
+          meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
+                                                  charge_end_time: TimeOfDay.parse('06:00') }]
+          # match charge times, increases usage just enough for model to consider heating on
+          kwh_data_x48[4, 10] = [4] * 10
+        end
+
+        meter = build(:meter, :with_flat_rate_tariffs,
+                      meter_collection: meter_collection, type: evaluator.fuel_type,
+                      meter_attributes: meter_attributes,
+                      amr_data: build(:amr_data, :with_date_range,
+                                      type: evaluator.fuel_type,
+                                      start_date: evaluator.start_date,
+                                      end_date: evaluator.end_date,
+                                      kwh_data_x48: kwh_data_x48))
+        meter_collection.send(evaluator.fuel_type == :electricity ? :add_electricity_meter : :add_heat_meter, meter)
+      end
+    end
+
     trait :with_gas_meter do
       after(:build) do |meter_collection, evaluator|
         amr_data = build(:amr_data, :with_date_range, start_date: evaluator.start_date, end_date: evaluator.end_date)
