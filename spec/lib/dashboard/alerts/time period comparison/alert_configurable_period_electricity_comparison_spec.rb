@@ -7,7 +7,7 @@ describe AlertConfigurablePeriodElectricityComparison do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
                              start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30))
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
-    described_class.new(meter_collection)
+    described_class.new(meter_collection, comparison_configuration: configuration)
   end
 
   let(:configuration) do
@@ -22,7 +22,8 @@ describe AlertConfigurablePeriodElectricityComparison do
 
   describe '#analyse' do
     it 'runs and sets variables' do
-      alert.analyse(Date.new(2023, 11, 30), comparison_configuration: configuration)
+      expect(alert.valid_alert?).to be true
+      alert.analyse(Date.new(2023, 11, 30))
       expect(alert.analysis_date).to eq(Date.new(2023, 11, 30))
       expect(alert.current_period_kwh).to be_within(0.01).of(48)
       expect(alert.current_period_start_date).to eq(Date.new(2023, 11, 24))
@@ -34,13 +35,13 @@ describe AlertConfigurablePeriodElectricityComparison do
 
     it 'errors with not enough days of data' do
       configuration[:enough_days_data] = 1000
-      alert.analyse(Date.new(2023, 11, 30), comparison_configuration: configuration)
+      alert.analyse(Date.new(2023, 11, 30))
       expect(alert.error_message).to start_with('Not enough data in current period: ')
     end
 
     it 'does not run when max_days_out_of_date' do
       configuration[:max_days_out_of_date] = 1
-      alert.analyse(Date.new(2023, 12, 5), comparison_configuration: configuration)
+      alert.analyse(Date.new(2023, 12, 5))
       expect(alert.analysis_date).to be_nil
     end
   end
