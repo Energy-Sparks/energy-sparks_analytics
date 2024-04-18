@@ -303,10 +303,6 @@ class AlertHeatSaver2024GasComparison < AlertArbitraryPeriodComparisonGasBase
       comparison_chart:       :heat_saver_march_2024_gas_comparison_alert
     }.merge(basic_configuration)
   end
-
-  def calculate(asof_date)
-    super(asof_date)
-  end
 end
 
 class AlertHeatSaver2024StorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
