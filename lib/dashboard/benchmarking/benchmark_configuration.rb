@@ -150,7 +150,8 @@ module Benchmarking
       date_limited_comparisons: [
         :change_in_energy_use_since_joined_energy_sparks,
         :jan_august_2022_2023_energy_comparison,
-        :layer_up_powerdown_day_november_2023
+        :layer_up_powerdown_day_november_2023,
+        :heat_saver_march_2024
       ]
     }
 
@@ -2189,7 +2190,10 @@ module Benchmarking
         sort_by:  [9],
         type: %i[table],
         admin_only: true
-      }
+      },
+      heat_saver_march_2024: {
+        admin_only: true
+      } # only implemented in the application
     }.freeze
   end
 end
