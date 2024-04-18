@@ -10,7 +10,7 @@ end
 describe AggregateDataService, type: :service do
   describe '#validate_meter_data' do
     context 'when validation fails' do
-      let(:school)                  { build(:school) }
+      let(:school)                  { build(:analytics_school) }
       let(:meter_collection)        { build(:meter_collection) }
       let(:service)                 { described_class.new(meter_collection) }
       let(:meter)                   { build(:meter) }
