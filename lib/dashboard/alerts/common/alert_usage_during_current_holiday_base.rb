@@ -3,7 +3,7 @@
 # During holidays alert schools if they are consuming energy
 class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   USAGE_THRESHOLD_£ = 10.0
-  attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh, :holiday_usage_to_date_£, :holiday_projected_usage_£, :holiday_usage_to_date_co2, :holiday_projected_usage_co2, :relevance
+  attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh, :holiday_usage_to_date_£, :holiday_projected_usage_£, :holiday_usage_to_date_co2, :holiday_projected_usage_co2
 
   def initialize(school, report_type)
     super(school, report_type)
@@ -154,11 +154,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
 
     # Ignore usage less than a threshold. A nil rating means the alert calculation
     # will be ignored by the application
-    @rating = if @holiday_usage_to_date_£ < USAGE_THRESHOLD_£
-      nil
-    else
-      0.0
-    end
+    @rating = @holiday_usage_to_date_£ < USAGE_THRESHOLD_£ ? nil : 0.0
   end
 
   def calculate_usage_to_date(holiday_date_range)
@@ -198,7 +194,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   end
 
   def totals(usage_to_date)
-    usage_to_date.transform_values { |v| v.values.map { |vv| vv[:total] }.compact.sum }
+    usage_to_date.transform_values { |v| v.values.map { |vv| vv[:total] }.sum }
   end
 
   def day_type(date)

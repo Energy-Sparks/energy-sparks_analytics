@@ -45,6 +45,6 @@ class AlertStorageHeaterHeatingOnDuringHoliday < AlertUsageDuringCurrentHolidayB
   end
 
   def needs_storage_heater_data?
-     true
+    true
   end
 end
