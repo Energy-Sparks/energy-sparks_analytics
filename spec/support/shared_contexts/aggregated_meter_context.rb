@@ -55,20 +55,22 @@ RSpec.shared_context 'with an aggregated meter with tariffs and school times', s
     end
   end
 
-  # Xmas holiday from 2023-12-16 to 2024-1-1, which is 10 weekdays during
+  # Xmas holiday from 2023-12-16 to 2024-1-1, which is 11 weekdays during
   # the default period defined by amr_start_date and amr_end_date
+  let(:holidays) { build(:holidays, :with_calendar_year, year: 2023) }
+
   let(:open_close_times) do
     build(
       :open_close_times,
       :from_frontend_times,
       school_times: school_times,
-      holidays: build(:holidays, :with_calendar_year, year: 2023),
+      holidays: holidays,
       community_times: community_use_times
     )
   end
 
   # TODO: add holidays, temperatures, solar
-  let(:meter_collection) { build(:meter_collection) }
+  let(:meter_collection) { build(:meter_collection, holidays: holidays) }
 
   # Configure objects as if we've run the aggregation process
   before do
