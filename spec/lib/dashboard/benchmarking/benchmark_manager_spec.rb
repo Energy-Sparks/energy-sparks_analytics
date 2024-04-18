@@ -78,7 +78,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             benchmarks: {
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
               jan_august_2022_2023_energy_comparison: 'Jan to August 2022 to 2023 energy use',
-              layer_up_powerdown_day_november_2023: 'Change in energy for layer up power down day 24 November 2023 (compared with 17 November 2023)'
+              layer_up_powerdown_day_november_2023: 'Change in energy for layer up power down day 24 November 2023 (compared with 17 November 2023)',
+              heat_saver_march_2024: 'Heat Saver March 2024'
             }
           }
         ]
@@ -158,7 +159,8 @@ describe Benchmarking::BenchmarkManager, type: :service do
             benchmarks: {
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
               jan_august_2022_2023_energy_comparison: 'Jan to August 2022 to 2023 energy use',
-              layer_up_powerdown_day_november_2023: 'Change in energy for layer up power down day 24 November 2023 (compared with 17 November 2023)'
+              layer_up_powerdown_day_november_2023: 'Change in energy for layer up power down day 24 November 2023 (compared with 17 November 2023)',
+              heat_saver_march_2024: 'Heat Saver March 2024'
             }
           }
         ]

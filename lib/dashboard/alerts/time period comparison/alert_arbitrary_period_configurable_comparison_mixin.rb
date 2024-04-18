@@ -7,19 +7,14 @@ module AlertArbitraryPeriodConfigurableComparisonMixIn
 
   def initialize(*args, **kwargs)
     super(*args, **kwargs)
+    # configuration example
+    # {
+    #   name: 'Layer up power down day 24 November 2023',
+    #   max_days_out_of_date: 365,
+    #   enough_days_data: 1,
+    #   current_period: Date.new(2023, 11, 24)..Date.new(2023, 11, 24),
+    #   previous_period: Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
+    # }
     @comparison_configuration = kwargs[:comparison_configuration]
   end
-
-  # def analyse(*args, **kwargs)
-  #   # {
-  #   #   name: 'Layer up power down day 24 November 2023',
-  #   #   max_days_out_of_date: 365,
-  #   #   enough_days_data: 1,
-  #   #   current_period: Date.new(2023, 11, 24)..Date.new(2023, 11, 24),
-  #   #   previous_period: Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
-  #   # }
-  #   binding.pry
-  #   @comparison_configuration = kwargs[:comparison_configuration]
-  #   super(*args, **kwargs)
-  # end
 end
