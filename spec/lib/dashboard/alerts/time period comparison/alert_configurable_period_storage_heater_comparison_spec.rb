@@ -15,7 +15,9 @@ describe AlertConfigurablePeriodStorageHeaterComparison do
       current_period: Date.new(2023, 11, 24)..Date.new(2023, 11, 24),
       previous_period: Date.new(2023, 11, 17)..Date.new(2023, 11, 17)
     }
-    described_class.new(meter_collection, comparison_configuration: configuration)
+    alert = described_class.new(meter_collection)
+    alert.comparison_configuration = configuration
+    alert
   end
 
   describe '#analyse' do

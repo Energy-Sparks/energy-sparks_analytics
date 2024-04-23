@@ -7,7 +7,9 @@ describe AlertConfigurablePeriodElectricityComparison do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
                              start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30))
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
-    described_class.new(meter_collection, comparison_configuration: configuration)
+    alert = described_class.new(meter_collection)
+    alert.comparison_configuration = configuration
+    alert
   end
 
   let(:configuration) do
