@@ -20,4 +20,8 @@ class AlertPreviousYearHolidayComparisonGas < AlertPreviousYearHolidayComparison
   def comparison_chart
     :alert_group_by_week_gas_14_months
   end
+
+  def reporting_period
+    :same_holidays
+  end
 end
