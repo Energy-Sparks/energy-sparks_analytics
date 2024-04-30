@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../support/tariff_helpers'
+
 FactoryBot.define do
   factory :meter, class: 'Dashboard::Meter' do
     transient do
