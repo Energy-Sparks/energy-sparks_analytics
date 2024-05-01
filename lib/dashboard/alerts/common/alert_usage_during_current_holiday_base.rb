@@ -112,6 +112,10 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
     raise 'Subclass must implement'
   end
 
+  def reporting_period
+    :current_holiday
+  end
+
   protected
 
   def max_days_out_of_date_while_still_relevant

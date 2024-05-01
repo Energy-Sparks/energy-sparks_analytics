@@ -9,10 +9,6 @@ class AlertPreviousHolidayComparisonElectricity < AlertHolidayComparisonBase
     :alert_group_by_week_electricity_4_months
   end
 
-  protected def max_days_out_of_date_while_still_relevant
-    60
-  end
-
   def fuel_type; :electricity end
 
   def self.template_variables
@@ -20,7 +16,17 @@ class AlertPreviousHolidayComparisonElectricity < AlertHolidayComparisonBase
     specific.merge(superclass.template_variables)
   end
 
-  protected def last_two_periods(asof_date)
+  def reporting_period
+    :last_2_holidays
+  end
+
+  protected
+
+  def max_days_out_of_date_while_still_relevant
+    60
+  end
+
+  def last_two_periods(asof_date)
     date_with_margin_for_enough_data = asof_date - minimum_days_for_period
     current_holiday = @school.holidays.find_previous_or_current_holiday(date_with_margin_for_enough_data, 100, MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD)
     #not enough data checks in base class will stop alert being processed

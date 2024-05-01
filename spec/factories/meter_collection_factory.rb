@@ -46,7 +46,6 @@ FactoryBot.define do
           # match charge times, increases usage just enough for model to consider heating on
           kwh_data_x48[4, 10] = [4] * 10
         end
-
         meter = build(:meter, :with_flat_rate_tariffs,
                       meter_collection: meter_collection, type: evaluator.fuel_type,
                       meter_attributes: meter_attributes,
@@ -56,6 +55,7 @@ FactoryBot.define do
                                       end_date: evaluator.end_date,
                                       kwh_data_x48: kwh_data_x48))
         meter_collection.send(evaluator.fuel_type == :electricity ? :add_electricity_meter : :add_heat_meter, meter)
+        AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
       end
     end
 

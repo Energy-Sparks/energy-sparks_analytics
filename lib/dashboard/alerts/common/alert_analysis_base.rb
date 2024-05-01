@@ -229,10 +229,6 @@ class AlertAnalysisBase < ContentBase
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for timeescale template variable ' + self.class.name)
   end
 
-  protected def set_time_of_year_relevance(weight)
-    @time_of_year_relevance = weight
-  end
-
   def time_of_year_relevance
     set_time_of_year_relevance(5.0)
     # TODO(PH, 26Aug2019) - remove return in favour of raise once all derived classes defined
@@ -257,7 +253,15 @@ class AlertAnalysisBase < ContentBase
     end
   end
 
+  def reporting_period
+    :last_12_months
+  end
+
   protected
+
+  def set_time_of_year_relevance(weight)
+    @time_of_year_relevance = weight
+  end
 
   def add_book_mark_to_base_url(bookmark)
     @help_url = ALERT_HELP_URL + '#' + bookmark

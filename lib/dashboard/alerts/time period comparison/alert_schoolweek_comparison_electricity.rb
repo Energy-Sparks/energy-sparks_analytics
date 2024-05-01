@@ -24,14 +24,6 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
 
   def fuel_type; :electricity end
 
-  protected def max_days_out_of_date_while_still_relevant
-    21
-  end
-
-  private def period_type
-    'school week'
-  end
-
   def comparison_chart
     :last_2_school_weeks_electricity_comparison_alert
   end
@@ -40,11 +32,6 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
     super(asof_date)
   end
   alias_method :analyse_private, :calculate
-
-  private def format_date(date)
-    #rely on .ordinalize here so we can hook in custom formatting for Welsh
-    I18n.l(date, format: "#{date.day.ordinalize} %B")
-  end
 
   def current_period_start_short_date
     format_date(@current_period_start_date)
@@ -64,6 +51,23 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
 
   def timescale
     I18n.t("#{i18n_prefix}.timescale")
+  end
+
+  def reporting_period
+    :last_2_weeks
+  end
+
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
+  private def period_type
+    'school week'
+  end
+
+  private def format_date(date)
+    #rely on .ordinalize here so we can hook in custom formatting for Welsh
+    I18n.l(date, format: "#{date.day.ordinalize} %B")
   end
 
   protected def period_name(period)
