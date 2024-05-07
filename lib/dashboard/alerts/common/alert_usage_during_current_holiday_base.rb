@@ -113,7 +113,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   end
 
   def reporting_period
-    :current_holiday
+    :current_holidays
   end
 
   protected
