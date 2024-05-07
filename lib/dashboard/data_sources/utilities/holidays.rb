@@ -39,6 +39,10 @@ class Holiday < SchoolDatePeriod
   def to_s
     super + ' ' + @type.to_s + ' ' + (@academic_year.nil? ? '' : @academic_year.first.to_s + '/' + @academic_year.last.to_s)
   end
+
+  def translation_type
+    Holidays.holiday_type(middle_date(@start_date, @end_date))
+  end
 end
 
 # holds holiday data as an array of hashes - one hash for each holiday period

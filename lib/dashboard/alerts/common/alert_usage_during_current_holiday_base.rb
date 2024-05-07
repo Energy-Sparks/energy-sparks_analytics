@@ -186,7 +186,7 @@ class AlertUsageDuringCurrentHolidayBase < AlertAnalysisBase
   end
 
   def holiday_type
-    @holiday_period&.type
+    @holiday_period&.translation_type
   end
 
   def holiday_start_date
