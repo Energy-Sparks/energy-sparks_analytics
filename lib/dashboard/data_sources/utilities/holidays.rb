@@ -41,7 +41,7 @@ class Holiday < SchoolDatePeriod
   end
 
   def translation_type
-    Holidays.holiday_type(middle_date(@start_date, @end_date))
+    Holidays.holiday_type(middle_date)
   end
 end
 
