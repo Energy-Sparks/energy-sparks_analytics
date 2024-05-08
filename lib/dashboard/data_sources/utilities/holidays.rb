@@ -41,6 +41,8 @@ class Holiday < SchoolDatePeriod
   end
 
   def translation_type
+    # set_holiday_types overwrites the type using Holidays.holiday_type but only does so for school holidays and not
+    # additional holidays so Mayday doesn't get set as it is classed as a bank holiday
     Holidays.holiday_type(middle_date)
   end
 end
