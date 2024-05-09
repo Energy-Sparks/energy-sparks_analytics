@@ -310,8 +310,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       @last_year_holiday_energy_costs_£current = 0.0
       @last_year_holiday_energy_costs_co2      = 0.0
     else
-
-      @last_year_holiday_type = @last_year_holiday.type
+      @last_year_holiday_type = @last_year_holiday.translation_type
       @last_year_holiday_start_date = @last_year_holiday.start_date
       @last_year_holiday_end_date = @last_year_holiday.end_date
 

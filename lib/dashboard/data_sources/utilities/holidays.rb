@@ -39,6 +39,12 @@ class Holiday < SchoolDatePeriod
   def to_s
     super + ' ' + @type.to_s + ' ' + (@academic_year.nil? ? '' : @academic_year.first.to_s + '/' + @academic_year.last.to_s)
   end
+
+  def translation_type
+    # set_holiday_types overwrites the type using Holidays.holiday_type but only does so for @holidays and not
+    # @additional_holidays so Mayday doesn't get set as it is classed as additional being a bank holiday
+    Holidays.holiday_type(middle_date)
+  end
 end
 
 # holds holiday data as an array of hashes - one hash for each holiday period
