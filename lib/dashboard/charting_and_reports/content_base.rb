@@ -16,6 +16,10 @@ class ContentBase
     @relevance
   end
 
+  def reporting_period
+    :last_12_months
+  end
+
   def no_single_aggregate_meter
     false
   end
