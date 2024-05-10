@@ -15,6 +15,17 @@ describe ManagementSummaryTable do
           start_date: start_date, end_date: today)
   end
 
+  # FIXME
+  # The alert has some code that checks for whether Rails is defined and then formats
+  # dates differently. Not clear why, probably legacy code. For purposes of this test, ensure
+  # const is defined, then reset.
+  around do |example|
+    defined = Object.const_defined?('Rails')
+    Object.const_set('Rails', true) unless defined
+    example.run
+    Object.send(:remove_const, 'Rails') unless defined
+  end
+
   describe '#reporting_period' do
     it 'returns expected period' do
       expect(alert.reporting_period).to eq(:last_12_months)
@@ -33,8 +44,8 @@ describe ManagementSummaryTable do
       expect(result).to be true
       expect(variables.dig(:summary_data, :electricity)).not_to be_nil
       electricity_data = variables.dig(:summary_data, :electricity)
-      expect(electricity_data[:start_date]).to eq(start_date)
-      expect(electricity_data[:end_date]).to eq(today)
+      expect(electricity_data[:start_date]).to eq(start_date.iso8601)
+      expect(electricity_data[:end_date]).to eq(today.iso8601)
 
       expect(electricity_data.dig(:year, :recent)).to be true
       expect(electricity_data.dig(:workweek, :recent)).to be true
