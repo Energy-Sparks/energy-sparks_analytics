@@ -3,9 +3,7 @@
 require 'spec_helper'
 
 describe AggregateDataServiceSolar do
-  subject(:service) do
-    described_class.new(meter_collection)
-  end
+  subject(:processed_meters) { described_class.new(meter_collection).process_solar_pv_electricity_meters }
 
   let(:meter_collection) do
     build(:meter_collection)
@@ -17,9 +15,51 @@ describe AggregateDataServiceSolar do
           type: :electricity, meter_attributes: meter_attributes)
   end
 
-  context 'when school has metered solar' do
-    subject(:processed_meters) { service.process_solar_pv_electricity_meters }
+  let(:meters) { [electricity_meter] }
 
+  before do
+    meters.each do |meter|
+      meter_collection.add_electricity_meter(meter)
+    end
+  end
+
+  context 'when school does not have solar' do
+    let(:meter_attributes) { {} }
+
+    it 'returns the existing electricity meter' do
+      expect(processed_meters).to eq([electricity_meter])
+      # adds itself as a mains consumption meter
+      expect(electricity_meter.sub_meters[:mains_consume]).to eq(electricity_meter)
+    end
+  end
+
+  context 'when school does not have metered solar' do
+    let(:meter_attributes) do
+      {
+        solar_pv: [{ start_date: Date.new(2023, 1, 1), kwp: 10.0 }]
+      }
+    end
+
+    it 'returns a single new electricity meter' do
+      expect(processed_meters.length).to eq(1)
+      expect(processed_meters.first.mpan_mprn).to eq(electricity_meter.mpan_mprn)
+      expect(processed_meters.first.meter_type).to eq(:electricity)
+    end
+
+    it 'configures the electricity meter as a sub meter' do
+      sub_meters = processed_meters.first.sub_meters
+      expect(sub_meters[:mains_consume]).to eq(electricity_meter)
+    end
+
+    it 'creates new generation, self consumption and export meters' do
+      sub_meters = processed_meters.first.sub_meters
+      expect(sub_meters[:generation]).not_to be_nil
+      expect(sub_meters[:self_consume]).not_to be_nil
+      expect(sub_meters[:export]).not_to be_nil
+    end
+  end
+
+  context 'when school has metered solar' do
     let(:meter_attributes) do
       {
         solar_pv_mpan_meter_mapping: [solar_pv_mpan_meter_mapping]
@@ -35,12 +75,6 @@ describe AggregateDataServiceSolar do
     end
 
     let(:meters) { [electricity_meter, solar_production_meter] }
-
-    before do
-      meters.each do |meter|
-        meter_collection.add_electricity_meter(meter)
-      end
-    end
 
     context 'with only production meter' do
       it 'returns a single new electricity meter' do
