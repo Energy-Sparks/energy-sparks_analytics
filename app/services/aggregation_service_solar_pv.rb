@@ -25,7 +25,7 @@ class AggregateDataServiceSolar
 
     processed_electricity_meters = electricity_meters_only.map do |mains_electricity_meter|
       if mains_electricity_meter.solar_pv_panels?
-        # create a PVMap, removing any real solar meters from the meter collection for this meter
+        # create a SolarMeterMap, removing any real solar meters from the meter collection for this meter
         pv_meter_map = setup_meter_map(mains_electricity_meter)
         process_solar_pv_electricity_meter(pv_meter_map)
       else
@@ -57,7 +57,7 @@ class AggregateDataServiceSolar
   end
 
   # Carry out the aggregation process for a single meter, using the information
-  # configured in its PVMap.
+  # configured in its SolarMeterMap.
   #
   # The map will have at least a `:mains_consume` entry (which is the original)
   # electricity meter. It may have additional references, e.g. generation, export
@@ -68,7 +68,7 @@ class AggregateDataServiceSolar
   # any self consumed solar generation. This meter will have sub meters that reference
   # the underlying export, generation, mains consumption meters.
   #
-  # @param PVMap [pv_meter_map] the map.
+  # @param SolarMeterMap [pv_meter_map] the map.
   # @param Dashboard:Meter representing the mains plus self consumption meter
   def process_solar_pv_electricity_meter(pv_meter_map)
     log "Aggregation service: processing mains meter #{pv_meter_map[:mains_consume]} with solar pv"
@@ -276,7 +276,7 @@ class AggregateDataServiceSolar
   def aggregate_multiple_generation_meters(pv_meter_map)
     log 'Aggregating multiple solar pv generation meters'
 
-    generation_meters = pv_meter_map.select { |type, meter| PVMap.generation_meters.include?(type) && !meter.nil? }.values
+    generation_meters = pv_meter_map.select { |type, meter| SolarMeterMap.generation_meters.include?(type) && !meter.nil? }.values
 
     log "Aggregating these generation meters #{generation_meters.map(&:to_s).join(' + ')}"
 
@@ -302,7 +302,7 @@ class AggregateDataServiceSolar
     log "Created aggregate generation meter #{generation_meter} #{generation_meter.amr_data.total.round(0)}"
 
     # hide constituent generation meters
-    pv_meter_map.set_nil_value(PVMap.generation_meters)
+    pv_meter_map.set_nil_value(SolarMeterMap.generation_meters)
     generation_mpans = generation_meters.map { |m1| m1.mpan_mprn.to_s }
     @meter_collection.electricity_meters.delete_if { |m| generation_mpans.include?(m.mpan_mprn.to_s) }
     pv_meter_map[:generation] = generation_meter
@@ -334,7 +334,7 @@ class AggregateDataServiceSolar
   end
 
   # Override the names of meters in the map
-  # See PVMap.meter_type_to_name_map
+  # See SolarMeterMap.meter_type_to_name_map
   def assign_meter_names(pv_meter_map)
     pv_meter_map.each do |meter_type, meter|
       next if not_a_meter?(meter)
@@ -347,7 +347,7 @@ class AggregateDataServiceSolar
                        I18n.t('aggregation_service_solar_pv.mains_plus_self_consume_name', meter_name: meter.mpan_mprn.to_s)
                      end
       else
-        meter.name = PVMap.meter_type_to_name_map[meter_type]
+        meter.name = SolarMeterMap.meter_type_to_name_map[meter_type]
       end
     end
   end
@@ -418,14 +418,14 @@ class AggregateDataServiceSolar
   # zero, or overridden by the synthetic Sheffield data if set
   def earliest_mpan_mapping_attribute(mains_meter, meter_type)
     mains_meter.attributes(:solar_pv_mpan_meter_mapping).map do |mpan_pv_map|
-      mpan_pv_map[PVMap.meter_type_attribute_map(meter_type)].nil? ? nil : meter_start_date(mpan_pv_map)
+      mpan_pv_map[SolarMeterMap.meter_type_attribute_map(meter_type)].nil? ? nil : meter_start_date(mpan_pv_map)
     end.compact.min
   end
 
   def meter_start_date(mpan_pv_map)
     if mpan_pv_map[:start_date].nil?
       # TODO(PH, 18Nov2020) - legacy, remove once now mandatory mapping :start_date set
-      mapped_meters = PVMap::MPAN_KEY_MAPPINGS.values.compact.map do |type|
+      mapped_meters = SolarMeterMap::MPAN_KEY_MAPPINGS.values.compact.map do |type|
         @electricity_meters.detect { |m| m.mpan_mprn.to_s == mpan_pv_map[type] }
       end.compact
       mapped_meters.map { |meter| meter.amr_data.start_date }.max
@@ -458,7 +458,7 @@ class AggregateDataServiceSolar
     end
   end
 
-  # Create a PVMap that will be used to hold references to a range of different
+  # Create a SolarMeterMap that will be used to hold references to a range of different
   # types of solar meter, e.g. export, generation, self consumption
   #
   # The provided mains meter is configured as the mains consumption meter.
@@ -470,15 +470,15 @@ class AggregateDataServiceSolar
   # treated as a mains consumption meter
   #
   # @param Dashboard::Meter mains_electricity_meter an electricity meter
-  # @returns PVMap
+  # @returns SolarMeterMap
   def setup_meter_map(mains_electricity_meter)
-    pv_meter_map = PVMap.instance
+    pv_meter_map = SolarMeterMap.instance
     pv_meter_map[:mains_consume] = mains_electricity_meter
     map_real_meters(pv_meter_map)
     pv_meter_map
   end
 
-  # Populates a PVMap instance using the `solar_pv_mpan_meter_mapping` meter
+  # Populates a SolarMeterMap instance using the `solar_pv_mpan_meter_mapping` meter
   # attribute configuration. If the mapping includes start/end dates then the
   # meters will be truncated to align with those dates, so any data outside of that
   # range will be ignored
@@ -490,16 +490,16 @@ class AggregateDataServiceSolar
   #
   #
   # The meters will later receive special processing
-  # @param PVMap [pv_meter_map] the instance to populate
+  # @param SolarMeterMap [pv_meter_map] the instance to populate
   def map_real_meters(pv_meter_map)
     mappings = pv_meter_map[:mains_consume].attributes(:solar_pv_mpan_meter_mapping)
     return if mappings.nil?
 
     mappings.each do |map|
-      PVMap.mpan_maps(map).each do |meter_type, mpan|
+      SolarMeterMap.mpan_maps(map).each do |meter_type, mpan|
         meter = @meter_collection.electricity_meters.find { |meter1| meter1.mpan_mprn.to_s == mpan }
         @meter_collection.electricity_meters.delete_if { |m| m.mpan_mprn.to_s == mpan.to_s }
-        pv_meter_map[PVMap.attribute_map_meter_type(meter_type)] = meter
+        pv_meter_map[SolarMeterMap.attribute_map_meter_type(meter_type)] = meter
         truncate_meter_dates(meter, map)
       end
     end
@@ -520,7 +520,7 @@ class AggregateDataServiceSolar
   # fully metered date range for the panels. Will also apply any overrides that
   # have been configured for periods of bad/poor data from the generation meter
   #
-  # @param PVMap [pv_meter_map] the pv meter configuration
+  # @param SolarMeterMap [pv_meter_map] the pv meter configuration
   def create_export_self_consumption_where_real_generation_data_but_no_export(pv_meter_map)
     am = pv_meter_map[:generation].amr_data
 

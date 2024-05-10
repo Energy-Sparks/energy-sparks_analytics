@@ -2,13 +2,15 @@
 
 require_relative '../../lib/dashboard/utilities/restricted_key_hash'
 # helper class for main solar aggregation service
-# keeps track of the 5 to 7 meters being manipulated
-class PVMap < RestrictedKeyHash
+# keeps track of the meter (between 7-9) meters being manipulated
+class SolarMeterMap < RestrictedKeyHash
   MPAN_KEY_MAPPINGS = {
     export_mpan: :export,
     production_mpan: :generation,
     production_mpan2: :generation2,
-    production_mpan3: :generation3
+    production_mpan3: :generation3,
+    production_mpan4: :generation4,
+    production_mpan5: :generation5
   }.freeze
 
   def self.unique_keys
@@ -17,6 +19,8 @@ class PVMap < RestrictedKeyHash
       generation
       generation2
       generation3
+      generation4
+      generation5
       self_consume
       mains_consume
       mains_plus_self_consume
@@ -29,6 +33,8 @@ class PVMap < RestrictedKeyHash
       generation
       generation2
       generation3
+      generation4
+      generation5
     ]
   end
 
@@ -36,6 +42,8 @@ class PVMap < RestrictedKeyHash
     %i[
       generation2
       generation3
+      generation4
+      generation5
       generation_meter_list
     ]
   end

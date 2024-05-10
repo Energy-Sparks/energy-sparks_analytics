@@ -368,7 +368,11 @@ describe MeterAttributes do
                                           start_date: '1/1/2017',
                                           end_date: '2/2/2017',
                                           export_mpan: '123456',
-                                          production_mpan: '123457',
+                                          production_mpan: '10123457',
+                                          production_mpan2: '20123457',
+                                          production_mpan3: '30123457',
+                                          production_mpan4: '40123457',
+                                          production_mpan5: '50123457',
                                           self_consume_mpan: '123458'
                                         })
       expect(attribute.to_analytics).to eq(
@@ -376,7 +380,11 @@ describe MeterAttributes do
           start_date: Date.new(2017, 1, 1),
           end_date: Date.new(2017, 2, 2),
           export_mpan: '123456',
-          production_mpan: '123457',
+          production_mpan: '10123457',
+          production_mpan2: '20123457',
+          production_mpan3: '30123457',
+          production_mpan4: '40123457',
+          production_mpan5: '50123457',
           self_consume_mpan: '123458'
         }
       )
