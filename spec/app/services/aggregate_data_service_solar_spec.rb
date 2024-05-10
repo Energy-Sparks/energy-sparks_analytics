@@ -22,7 +22,6 @@ describe AggregateDataServiceSolar do
 
     let(:meter_attributes) do
       {
-        solar_pv: [{ start_date: Date.new(2023, 1, 1), kwp: 10.0 }],
         solar_pv_mpan_meter_mapping: [solar_pv_mpan_meter_mapping]
       }
     end
@@ -30,6 +29,7 @@ describe AggregateDataServiceSolar do
     let(:solar_production_meter) { build(:meter, meter_collection: meter_collection, type: :solar_pv) }
     let(:solar_pv_mpan_meter_mapping) do
       {
+        start_date: Date.new(2023, 1, 1),
         production_mpan: solar_production_meter.mpan_mprn.to_s
       }
     end
@@ -66,6 +66,7 @@ describe AggregateDataServiceSolar do
       let(:solar_export_meter) { build(:meter, meter_collection: meter_collection, type: :exported_solar_pv) }
       let(:solar_pv_mpan_meter_mapping) do
         {
+          start_date: Date.new(2023, 1, 1),
           export_mpan: solar_export_meter.mpan_mprn.to_s,
           production_mpan: solar_production_meter.mpan_mprn.to_s
         }
@@ -95,6 +96,7 @@ describe AggregateDataServiceSolar do
       let(:solar_production_meters) { build_list(:meter, 5, meter_collection: meter_collection, type: :solar_pv) }
       let(:solar_pv_mpan_meter_mapping) do
         {
+          start_date: Date.new(2023, 1, 1),
           production_mpan: solar_production_meters[0].mpan_mprn.to_s,
           production_mpan2: solar_production_meters[1].mpan_mprn.to_s,
           production_mpan3: solar_production_meters[2].mpan_mprn.to_s,
