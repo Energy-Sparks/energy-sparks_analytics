@@ -418,7 +418,7 @@ class AggregateDataServiceSolar
   # zero, or overridden by the synthetic Sheffield data if set
   def earliest_mpan_mapping_attribute(mains_meter, meter_type)
     mains_meter.attributes(:solar_pv_mpan_meter_mapping).map do |mpan_pv_map|
-      mpan_pv_map[SolarMeterMap.meter_type_attribute_map(meter_type)].nil? ? nil : meter_start_date(mpan_pv_map)
+      mpan_pv_map[SolarMeterMap.meter_attribute_key(meter_type)].nil? ? nil : meter_start_date(mpan_pv_map)
     end.compact.min
   end
 
@@ -496,10 +496,10 @@ class AggregateDataServiceSolar
     return if mappings.nil?
 
     mappings.each do |map|
-      SolarMeterMap.mpan_maps(map).each do |meter_type, mpan|
+      SolarMeterMap.meter_mappings(map).each do |meter_attribute_key, mpan|
         meter = @meter_collection.electricity_meters.find { |meter1| meter1.mpan_mprn.to_s == mpan }
         @meter_collection.electricity_meters.delete_if { |m| m.mpan_mprn.to_s == mpan.to_s }
-        pv_meter_map[SolarMeterMap.attribute_map_meter_type(meter_type)] = meter
+        pv_meter_map[SolarMeterMap.meter_type(meter_attribute_key)] = meter
         truncate_meter_dates(meter, map)
       end
     end

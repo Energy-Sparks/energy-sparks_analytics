@@ -355,7 +355,7 @@ class MeterAttributes
         end_date:           MeterAttributeTypes::Date.define,
         export_mpan:        MeterAttributeTypes::String.define,
         production_mpan:    MeterAttributeTypes::String.define,
-        self_consume_mpan:  MeterAttributeTypes::String.define,
+        self_consume_mpan:  MeterAttributeTypes::String.define(hint: 'currently unsupported'),
         production_mpan2:   MeterAttributeTypes::String.define(hint: 'for 2nd generation meter'),
         production_mpan3:   MeterAttributeTypes::String.define(hint: 'for 3rd generation meter'),
         production_mpan4:   MeterAttributeTypes::String.define(hint: 'for 4th generation meter'),

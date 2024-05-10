@@ -48,18 +48,23 @@ class SolarMeterMap < RestrictedKeyHash
     ]
   end
 
-  def self.mpan_maps(mpan_map)
+  # Extract just the meter mappings from a solar_pv_mpan_meter_mapping
+  # meter attribute configuration
+  def self.meter_mappings(mpan_map)
     mpan_map.select { |k, _v| MPAN_KEY_MAPPINGS.key?(k) }
   end
 
-  def self.attribute_map_meter_type(mpan_meter_type)
-    MPAN_KEY_MAPPINGS[mpan_meter_type]
+  # Turn meter attribute key into solar meter type
+  def self.meter_type(meter_attribute_key)
+    MPAN_KEY_MAPPINGS[meter_attribute_key]
   end
 
-  def self.meter_type_attribute_map(meter_type)
+  # Look up meter attribute key for a given solar meter type
+  def self.meter_attribute_key(meter_type)
     MPAN_KEY_MAPPINGS.key(meter_type)
   end
 
+  # Default name for solar meters of a specific type
   def self.meter_type_to_name_map
     {
       export: SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
@@ -81,6 +86,7 @@ class SolarMeterMap < RestrictedKeyHash
     count { |k, v| self.class.generation_meters.include?(k) && !v.nil? }
   end
 
+  # TODO rename / replace with more meaningful
   def set_nil_value(list_of_keys)
     list_of_keys.each do |k|
       self[k] = nil
