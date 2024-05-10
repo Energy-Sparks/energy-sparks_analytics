@@ -97,4 +97,48 @@ describe Dashboard::Meter do
     #   }.to raise_error(EnergySparksUnexpectedStateException.new("Unexpected fuel type fruit"))
     # end
   end
+
+  describe '.synthetic_combined_meter_mpan_mprn_from_urn' do
+    {
+      ['9206222810', :electricity] => 90_009_206_222_810,
+      ['9206222810', :aggregated_electricity] => 90_009_206_222_810,
+      ['9206222810', :gas] => 80_009_206_222_810,
+      ['9206222810', :aggregated_heat] => 80_009_206_222_810,
+      ['9206222810', :storage_heater] => 70_009_206_222_810,
+      ['9206222810', :solar_pv] => 70_009_206_222_810,
+      ['9206222810', :solar_pv, 1] => 71_009_206_222_810,
+      ['9206222810', :exported_solar_pv] => 60_009_206_222_810,
+      ['9206222810', :exported_solar_pv, 1] => 61_009_206_222_810
+    }.each do |args, expected|
+      it "expected #{args[1]} to eq #{expected}" do
+        expect(described_class.synthetic_combined_meter_mpan_mprn_from_urn(*args)).to eq(expected)
+      end
+    end
+  end
+
+  describe '.synthetic_mpan_mprn' do
+    {
+      ['2200012581130', :storage_heater_only] => 72_200_012_581_130,
+      ['2200012581130', :storage_heater_disaggregated_storage_heater] => 72_200_012_581_130,
+      ['2200012581130', :storage_heater_disaggregated_electricity] => 77_200_012_581_130,
+      ['2200012581130', :electricity_minus_storage_heater] => 77_200_012_581_130,
+      ['2200012581130', :solar_pv] => 82_200_012_581_130,
+      ['2319047458', :solar_pv] => 80_002_319_047_458
+    }.each do |args, expected|
+      it "expects #{args[1]} to eq #{expected}" do
+        expect(described_class.synthetic_mpan_mprn(*args)).to eq(expected)
+      end
+    end
+  end
+
+  describe '.synthetic_aggregate_generation_meter' do
+    {
+      ['2200012581130'] => 22_200_012_581_130,
+      ['2319047458'] => 20_002_319_047_458
+    }.each do |args, expected|
+      it "expects #{args[1]} to eq #{expected}" do
+        expect(described_class.synthetic_aggregate_generation_meter(*args)).to eq(expected)
+      end
+    end
+  end
 end
