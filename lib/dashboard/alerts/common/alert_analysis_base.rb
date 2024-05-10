@@ -253,10 +253,6 @@ class AlertAnalysisBase < ContentBase
     end
   end
 
-  def reporting_period
-    :last_12_months
-  end
-
   protected
 
   def set_time_of_year_relevance(weight)
