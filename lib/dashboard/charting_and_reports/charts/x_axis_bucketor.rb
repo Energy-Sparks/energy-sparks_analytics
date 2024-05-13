@@ -77,6 +77,11 @@ class XBucketMonthExcludingYear < XBucketBase
     I18n.l(date, format: "%b")
   end
 
+  # TODO: there's an unresolved issue with this x-axis configuration and use of
+  # a year/up_to_a_year time period. The bucket names include only the month, e.g. Jan,
+  # but over a 52 * 7 week period we might end up with Jan twice.
+  # AggregatorSingleSeries.aggregate_by_day does not expect duplicate series names
+  # The front-end charting framework also does not support that
   def create_x_axis
     first_day_of_month = data_start_date # .beginning_of_month
     while first_day_of_month <= data_end_date

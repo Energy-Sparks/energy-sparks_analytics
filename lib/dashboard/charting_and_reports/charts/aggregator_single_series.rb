@@ -98,12 +98,12 @@ class AggregatorSingleSeries < AggregatorBase
         x_index = results.xbucketor.index(date_range[0], nil)
         multi_day_breakdown = results.series_manager.get_data([:daterange, date_range])
         unless multi_day_breakdown.nil? # added to support future targeted data past end of real meter date
-        multi_day_breakdown.each do |key, value|
-          add_to_bucket(key, x_index, value)
-          count += 1
+          multi_day_breakdown.each do |key, value|
+            add_to_bucket(key, x_index, value)
+            count += 1
+          end
         end
       end
-    end
     end
     logger.info "aggregate_by_day:  aggregated #{count} items"
   end

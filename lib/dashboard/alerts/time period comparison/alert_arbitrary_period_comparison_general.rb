@@ -256,10 +256,6 @@ class AlertLayerUpPowerdownNovember2023GasComparison < AlertArbitraryPeriodCompa
       comparison_chart:       :layerup_powerdown_november_2023_gas_comparison_alert
     }.merge(basic_configuration)
   end
-
-  def calculate(asof_date)
-    super(asof_date)
-  end
 end
 
 class AlertLayerUpPowerdownNovember2023StorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
@@ -269,6 +265,53 @@ class AlertLayerUpPowerdownNovember2023StorageHeaterComparison < AlertArbitraryP
   def comparison_configuration
     {
       comparison_chart:       :layerup_powerdown_november_2023_storage_heater_comparison_alert
+    }.merge(basic_configuration)
+  end
+end
+
+#===================================================================================================
+# Feb/March 2024 competition
+module AlertHeatSaver2024BasicConfigMixIn
+  def basic_configuration
+    {
+      name:                   'Winter Heat Saver Feb-March 2024',
+      max_days_out_of_date:   365,
+      enough_days_data:       1,
+      current_period:         Date.new(2024, 2, 25)..Date.new(2024, 3, 23),
+      previous_period:        Date.new(2023, 2, 26)..Date.new(2023, 3, 25),
+    }
+  end
+end
+
+class AlertHeatSaver2024ElectricityComparison < AlertArbitraryPeriodComparisonElectricityBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertHeatSaver2024BasicConfigMixIn
+
+  def comparison_configuration
+    {
+      comparison_chart:       :heat_saver_march_2024_electricity_comparison_alert
+    }.merge(basic_configuration)
+  end
+end
+
+class AlertHeatSaver2024GasComparison < AlertArbitraryPeriodComparisonGasBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertHeatSaver2024BasicConfigMixIn
+
+  def comparison_configuration
+    {
+      comparison_chart:       :heat_saver_march_2024_gas_comparison_alert
+    }.merge(basic_configuration)
+  end
+end
+
+class AlertHeatSaver2024StorageHeaterComparison < AlertArbitraryPeriodComparisonStorageHeaterBase
+  include ArbitraryPeriodComparisonMixIn
+  include AlertHeatSaver2024BasicConfigMixIn
+
+  def comparison_configuration
+    {
+      comparison_chart:       :heat_saver_march_2024_storage_heater_comparison_alert
     }.merge(basic_configuration)
   end
 end

@@ -39,6 +39,12 @@ class Holiday < SchoolDatePeriod
   def to_s
     super + ' ' + @type.to_s + ' ' + (@academic_year.nil? ? '' : @academic_year.first.to_s + '/' + @academic_year.last.to_s)
   end
+
+  def translation_type
+    # set_holiday_types overwrites the type using Holidays.holiday_type but only does so for @holidays and not
+    # @additional_holidays so Mayday doesn't get set as it is classed as additional being a bank holiday
+    Holidays.holiday_type(middle_date)
+  end
 end
 
 # holds holiday data as an array of hashes - one hash for each holiday period
@@ -171,7 +177,19 @@ class Holidays
     stats
   end
 
-  # NB might have wirtten this somewhere elsewhere?
+  # Calculates summary usage statistics between 2 dates.
+  #
+  # The lambda argument should be a lambda function that returns the usage for a
+  # specific date. Additional arguments for the function are provided via the +args+ param.
+  #
+  # The classifier argument classifies each day into a type. By default it uses +day_type+
+  # but this can be altered to use custom groupings.
+  #
+  # The list of statistics to be generates are provided via the +statistics+ parameter.
+  #
+  # The function is currently only used for the holida usage alert. It could be moved into
+  # that class or be turned into a more general purpose utility, as it is not strictly
+  # speaking limited to summarising holiday usage.
   def calculate_statistics(start_date, end_date, lambda, args: nil, classifier: -> (date) { day_type(date) }, statistics: %i[total average min max count])
     totals = {}
     stats = {}

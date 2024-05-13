@@ -30,7 +30,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
           # Old Building
           # mpan 1591058886735
           percent = usage_breakdown.annual_percent_change(1_591_058_886_735)
-          expect(format_unit(:relative_percent, percent)).to eq '+0.21%'
+          expect(format_unit(:relative_percent, percent)).to eq '+0.21&percnt;'
           old_building = usage_breakdown.usage(1_591_058_886_735)
           expect(format_unit(:kwh, old_building.kwh)).to eq '99,000'
           # expect(old_building.kwh).to round_to_two_digits(98392.4)
@@ -40,7 +40,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
           # New Building
           # mpan, 1580001320420
           percent = usage_breakdown.annual_percent_change(1_580_001_320_420)
-          expect(format_unit(:relative_percent, percent)).to eq '-14%'
+          expect(format_unit(:relative_percent, percent)).to eq '-14&percnt;'
           new_building = usage_breakdown.usage(1_580_001_320_420)
           expect(format_unit(:kwh, new_building.kwh)).to eq '310,000'
           expect(format_unit(:£, new_building.£)).to eq '&pound;47,000'
@@ -48,7 +48,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
 
           # Total
           percent = usage_breakdown.total_annual_percent_change
-          expect(format_unit(:relative_percent, percent)).to eq '-11%'
+          expect(format_unit(:relative_percent, percent)).to eq '-11&percnt;'
           usage_breakdown.total_usage
           expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq '410,000'
           expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq '&pound;61,000'
@@ -68,7 +68,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
 
           # Lodge
           percent = usage_breakdown.annual_percent_change(10_307_706)
-          expect(format_unit(:relative_percent, percent)).to eq '-77%'
+          expect(format_unit(:relative_percent, percent)).to eq '-77&percnt;'
           meter = usage_breakdown.usage(10_307_706)
           expect(format_unit(:kwh, meter.kwh)).to eq '3,400'
           expect(format_unit(:£, meter.£)).to eq '&pound;100'
@@ -76,7 +76,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
 
           # Art Block
           percent = usage_breakdown.annual_percent_change(10_308_203)
-          expect(format_unit(:relative_percent, percent)).to eq '-10%'
+          expect(format_unit(:relative_percent, percent)).to eq '-10&percnt;'
           meter = usage_breakdown.usage(10_308_203)
           expect(format_unit(:kwh, meter.kwh)).to eq '56,000'
           expect(format_unit(:£, meter.£)).to eq '&pound;1,700'
@@ -84,7 +84,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
 
           # Total
           percent = usage_breakdown.total_annual_percent_change
-          expect(format_unit(:relative_percent, percent)).to eq '-8%'
+          expect(format_unit(:relative_percent, percent)).to eq '-8&percnt;'
           usage_breakdown.total_usage
           expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq '550,000'
           expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq '&pound;16,000'

@@ -1,3 +1,4 @@
+# Originally used for gas / storage heater target meters for :day calculations
 class TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays < TargetMeterTemperatureCompensatedDailyDayTypeBase
 
   private

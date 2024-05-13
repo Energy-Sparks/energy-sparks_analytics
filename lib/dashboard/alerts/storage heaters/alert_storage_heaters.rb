@@ -2,7 +2,7 @@ require_relative './alert_storage_heater_mixin.rb'
 require_relative './../gas/boiler control/alert_thermostatic_control.rb'
 require_relative './../gas/boiler control/alert_school_heating_days.rb'
 require_relative './../gas/boiler control/alert_heating_day_base.rb'
-require_relative './../gas/boiler control/alert_heating_hotwater_on_during_holiday.rb'
+#require_relative './../gas/boiler control/alert_gas_heating_hot_water_on_during_holiday.rb'
 require_relative './../gas/boiler control/alert_seasonal_heating_schooldays.rb'
 require_relative './../gas/boiler control/alert_heating_off.rb'
 require_relative './../common/alert_targets.rb'
@@ -127,27 +127,6 @@ end
 class AlertStorageHeaterTarget1Week < AlertStorageHeaterTargetAnnual
   def rating_target_percent
     last_week_percent_of_target
-  end
-end
-
-class AlertStorageHeaterHeatingOnDuringHoliday < AlertHeatingHotWaterOnDuringHolidayBase
-  include AlertGasToStorageHeaterSubstitutionMixIn
-  include ElectricityCostCo2Mixin
-  def initialize(school)
-    super(school, :storage_heaters)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
-  end
-
-  def heating_type
-    I18n.t("analytics.common.storage_heaters")
-  end
-
-  def aggregate_meter
-    @school.storage_heater_meter
-  end
-
-  def needs_storage_heater_data?
-    true
   end
 end
 

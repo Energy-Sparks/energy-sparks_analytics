@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe AlertSolarPVBenefitEstimator do
-  Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
+  Object.const_set('Rails', true) # O
 
   let(:school) { @acme_academy }
   let(:alert) { described_class.new(school) }
@@ -41,6 +41,17 @@ describe AlertSolarPVBenefitEstimator do
       timescale: 'year',
       time_of_year_relevance: '5'
     }
+  end
+
+  # FIXME
+  # The alert depends on some code (Line 118, RecordTestTimes in ChartManager)
+  # that checks for whether Rails is defined. Not clear why, probably legacy code.
+  # For purposes of this test, ensure const is defined, then reset.
+  around do |example|
+    defined = Object.const_defined?('Rails')
+    Object.const_set('Rails', true) unless defined
+    example.run
+    Object.send(:remove_const, 'Rails') unless defined
   end
 
   before(:all) do
