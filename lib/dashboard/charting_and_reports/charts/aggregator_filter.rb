@@ -1,16 +1,15 @@
+# frozen_string_literal: true
+
 # filters can be applied either pre or post calculation depending on expedience/performance
 # so pre-filters determine in advice whether something needs calculating and then don't calculate
 # post-filters - do the calculation and then removes results before passing back fro display
 class AggregatorFilter < AggregatorBase
   attr_reader :filter
-  def initialize(school, chart_config, results)
-    super(school, chart_config, results)
-  end
 
-  # pre-filter
+  # pre-filter, called via AggregatorSingleSeries
   def match_filter_by_day(date)
     # heating_daytype filter gets filtered out post aggregation, reduced performance but simpler
-    return true if !chart_config.chart_has_filter?
+    return true unless chart_config.chart_has_filter?
     return true if chart_config.heating_daytype_filter?
     return true if chart_config.submeter_filter?
 
@@ -22,40 +21,10 @@ class AggregatorFilter < AggregatorBase
     match_daytype && match_heating && match_model
   end
 
-  # pre-filter
-  def match_filter_by_heatingdayday(date)
-    chart_config.heating_filter == results.series_manager.heating_model.heating_on?(date)
-  end
-
-  # pre-filter
-  def match_filter_by_model_type(date)
-    model_list = chart_config.model_type_filters
-    model_list = [ model_list ] if model_list.is_a?(Symbol) # convert to array if not an array
-    model_list.include?(results.series_manager.heating_model.model_type?(date))
-  end
-
-  # pre-filter
-  def match_occupied_type_filter_by_day(date)
-    filter = chart_config.day_type_filter
-    holidays = school.holidays
-    match = false
-    [filter].flatten.each do |one_filter|
-      case one_filter
-      when Series::DayType::HOLIDAY
-        match ||= true if holidays.holiday?(date)
-      when Series::DayType::WEEKEND
-        match ||= true if DateTimeHelper.weekend?(date) && !holidays.holiday?(date)
-      when Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED
-        match ||= true if !(DateTimeHelper.weekend?(date) || holidays.holiday?(date))
-      end
-    end
-    match
-  end
-
-  # post-filter
+  # post-filter, called via AggregatorPostProcess
   def remove_filtered_series
     keep_key_list = []
-    if !chart_config.chart_has_filter?
+    unless chart_config.chart_has_filter?
       logger.info 'No filters set'
       return
     end
@@ -63,11 +32,16 @@ class AggregatorFilter < AggregatorBase
     logger.info "Filtering start #{results.bucketed_data.keys}"
     logger.debug "Filters are: #{chart_config.filters}"
     if chart_config.series_breakdown == :submeter
-      if chart_config.submeter_filter?
-        keep_key_list += pattern_match_list_with_list(results.bucketed_data.keys, chart_config.submeter_filter)
-      else
-        keep_key_list += results.bucketed_data.keys
-      end
+      # logger.debug "Meter: #{results.series_manager.meter}. #{results.series_manager.meter.sub_meters.to_s}"
+      # results.series_manager.meter.sub_meters.each do |k,v|
+      #  puts "#{k}, #{v.to_s} #{v.name}"
+      # end
+
+      keep_key_list += if chart_config.submeter_filter?
+                         pattern_match_list_with_list(results.bucketed_data.keys, chart_config.submeter_filter)
+                       else
+                         results.bucketed_data.keys
+                       end
     end
     if chart_config.heating_filter?
       filter = [Series::HeatingNonHeating::HEATINGDAY]
@@ -100,10 +74,42 @@ class AggregatorFilter < AggregatorBase
     logger.debug "Filtered End #{results.bucketed_data.keys}"
   end
 
+  private
+
+  # pre-filter
+  def match_filter_by_heatingdayday(date)
+    chart_config.heating_filter == results.series_manager.heating_model.heating_on?(date)
+  end
+
+  # pre-filter
+  def match_filter_by_model_type(date)
+    model_list = chart_config.model_type_filters
+    model_list = [model_list] if model_list.is_a?(Symbol) # convert to array if not an array
+    model_list.include?(results.series_manager.heating_model.model_type?(date))
+  end
+
+  # pre-filter
+  def match_occupied_type_filter_by_day(date)
+    filter = chart_config.day_type_filter
+    holidays = school.holidays
+    match = false
+    [filter].flatten.each do |one_filter|
+      case one_filter
+      when Series::DayType::HOLIDAY
+        match ||= true if holidays.holiday?(date)
+      when Series::DayType::WEEKEND
+        match ||= true if DateTimeHelper.weekend?(date) && !holidays.holiday?(date)
+      when Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED
+        match ||= true unless DateTimeHelper.weekend?(date) || holidays.holiday?(date)
+      end
+    end
+    match
+  end
+
   def pattern_match_list_with_list(list, pattern_list)
     filtered_list = []
     pattern_list.each do |pattern|
-      pattern_matched_list = list.select{ |i| i == pattern }
+      pattern_matched_list = list.select { |i| i == pattern }
       filtered_list += pattern_matched_list unless pattern_matched_list.empty?
     end
     filtered_list
@@ -111,9 +117,9 @@ class AggregatorFilter < AggregatorBase
 
   def pattern_match_y2_axis_names
     matched = []
-    Series::ManagerBase.y2_series_types.values.each do |y2_series_name|
+    Series::ManagerBase.y2_series_types.each_value do |y2_series_name|
       base_name_length = y2_series_name.length
-      matched += results.bucketed_data.keys.select{ |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
+      matched += results.bucketed_data.keys.select { |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
     end
     matched
   end
@@ -123,6 +129,6 @@ class AggregatorFilter < AggregatorBase
   # gets around problem with modifying bucket symbols before filtering
   def pattern_match_two_symbol_lists(match_symbol_list, symbol_list)
     matched_pairs = match_symbol_list.product(symbol_list).select { |match, sym| sym.to_s.include?(match.to_s) }
-    matched_pairs.map { |match, symbol| symbol }
+    matched_pairs.map { |_match, symbol| symbol }
   end
 end
