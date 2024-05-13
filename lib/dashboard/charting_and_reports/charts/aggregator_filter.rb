@@ -22,15 +22,15 @@ class AggregatorFilter < AggregatorBase
   end
 
   # post-filter, called via AggregatorPostProcess
-  def remove_filtered_series
+  def filter_series
     to_keep = []
     unless chart_config.chart_has_filter?
-      logger.info 'No filters set'
+      logger.debug { 'No filters set' }
       return
     end
 
-    logger.info "Filtering start #{results.bucketed_data.keys}"
-    logger.debug "Filters are: #{chart_config.filters}"
+    logger.debug { "Filtering start #{results.bucketed_data.keys}" }
+    logger.debug { "Filters are: #{chart_config.filters}" }
 
     to_keep = submeter_filter(to_keep)
     to_keep = heating_filter(to_keep)
@@ -47,38 +47,39 @@ class AggregatorFilter < AggregatorBase
       results.bucketed_data.delete(remove_series_name)
     end
 
-    logger.debug "Filtered End #{results.bucketed_data.keys}"
+    logger.debug { "Filtered End #{results.bucketed_data.keys}" }
   end
 
   private
 
   def submeter_filter(to_keep)
-    if chart_config.series_breakdown == :submeter
-      to_keep += if chart_config.submeter_filter?
-                         pattern_match_list_with_list(results.bucketed_data.keys, chart_config.submeter_filter)
-                       else
-                         results.bucketed_data.keys
-                       end
-    end
+    return to_keep unless chart_config.series_breakdown == :submeter
+
+    to_keep += if chart_config.submeter_filter?
+                 pattern_match_list_with_list(results.bucketed_data.keys, chart_config.submeter_filter)
+               else
+                 results.bucketed_data.keys
+               end
     to_keep
   end
 
   def heating_filter(to_keep)
-    if chart_config.heating_filter?
-      filter = [Series::HeatingNonHeating::HEATINGDAY]
-      to_keep += pattern_match_list_with_list(results.bucketed_data.keys, filter)
-    end
+    return to_keep unless chart_config.heating_filter?
+
+    filter = [Series::HeatingNonHeating::HEATINGDAY]
+    to_keep += pattern_match_list_with_list(results.bucketed_data.keys, filter)
     to_keep
   end
 
   def model_type_filter(to_keep)
-    if chart_config.model_type_filter?
-      # for model filters, copy in any trendlines for those models to avoid filtering
-      model_filter = [chart_config.model_type_filters].flatten(1)
-      trendline_filters = model_filter.map { |model_name| Series::ManagerBase.trendline_for_series_name(model_name) }
-      trendline_filters_with_parameters = pattern_match_two_symbol_lists(trendline_filters, results.bucketed_data.keys)
-      to_keep += pattern_match_list_with_list(results.bucketed_data.keys, model_filter + trendline_filters_with_parameters)
-    end
+    return to_keep unless chart_config.model_type_filter?
+
+    # for model filters, copy in any trendlines for those models to avoid filtering
+    model_filter = [chart_config.model_type_filters].flatten(1)
+    trendline_filters = model_filter.map { |model_name| Series::ManagerBase.trendline_for_series_name(model_name) }
+    trendline_filters_with_parameters = pattern_match_two_symbol_lists(trendline_filters, results.bucketed_data.keys)
+    to_keep += pattern_match_list_with_list(results.bucketed_data.keys, model_filter + trendline_filters_with_parameters)
+
     to_keep
   end
 
@@ -93,7 +94,12 @@ class AggregatorFilter < AggregatorBase
   end
 
   def y2_axis_filter(to_keep)
-    to_keep += pattern_match_y2_axis_names
+    return to_keep unless chart_config.y2_axis?
+
+    Series::ManagerBase.y2_series_types.each_value do |y2_series_name|
+      base_name_length = y2_series_name.length
+      to_keep += results.bucketed_data.keys.select { |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
+    end
     to_keep
   end
 
@@ -134,15 +140,6 @@ class AggregatorFilter < AggregatorBase
       filtered_list += pattern_matched_list unless pattern_matched_list.empty?
     end
     filtered_list
-  end
-
-  def pattern_match_y2_axis_names
-    matched = []
-    Series::ManagerBase.y2_series_types.each_value do |y2_series_name|
-      base_name_length = y2_series_name.length
-      matched += results.bucketed_data.keys.select { |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
-    end
-    matched
   end
 
   # e.g. [:trendline_model_xyz] with [:trendline_model_xyz_a45_b67_r282] => [:trendline_model_xyz_a45_b67_r282]

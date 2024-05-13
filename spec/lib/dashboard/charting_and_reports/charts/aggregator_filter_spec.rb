@@ -19,7 +19,7 @@ describe AggregatorFilter do
     }
   end
 
-  describe '#remove_filtered_series' do
+  describe '#filter_series' do
     let(:bucketed_data) do
       {
         SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME => [],
@@ -37,7 +37,7 @@ describe AggregatorFilter do
 
     context 'with no filter' do
       it 'does nothing' do
-        filter.remove_filtered_series
+        filter.filter_series
         expect(aggregator_results.bucketed_data).to eq(bucketed_data)
       end
     end
@@ -62,7 +62,7 @@ describe AggregatorFilter do
         end
 
         it 'filters the submeter series and retains the y2 axis series' do
-          filter.remove_filtered_series
+          filter.filter_series
           # should drop just the Solar PV production (:generation) meter
           expect(aggregator_results.bucketed_data.keys).to match_array(
             [
@@ -73,7 +73,25 @@ describe AggregatorFilter do
           )
         end
 
-        context 'with a solar irradiance series' do
+        context 'with a solar irradiance y2 axis' do
+          let(:chart_config) do
+            {
+              name: 'Testing',
+              meter_definition: :allelectricity,
+              series_breakdown: :submeter,
+              x_axis: :month,
+              timescale: :up_to_a_year,
+              filter: {
+                submeter: [
+                  SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
+                  SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
+                  SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+                ]
+              },
+              y2_axis: :irradiance
+            }
+          end
+
           let(:bucketed_data) do
             {
               SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME => [],
@@ -85,7 +103,7 @@ describe AggregatorFilter do
           end
 
           it 'keeps that series as its not a submeter' do
-            filter.remove_filtered_series
+            filter.filter_series
             # should drop just the Solar PV production (:generation) meters
             expect(aggregator_results.bucketed_data.keys).to match_array(
               [
@@ -121,7 +139,7 @@ describe AggregatorFilter do
       end
 
       it 'filters to just heating days' do
-        filter.remove_filtered_series
+        filter.filter_series
         expect(aggregator_results.bucketed_data.keys).to match_array(
           [Series::HeatingNonHeating::HEATINGDAY]
         )
@@ -151,7 +169,7 @@ describe AggregatorFilter do
       end
 
       it 'filters to just those day types' do
-        filter.remove_filtered_series
+        filter.filter_series
         expect(aggregator_results.bucketed_data.keys).to match_array(
           [Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED]
         )
