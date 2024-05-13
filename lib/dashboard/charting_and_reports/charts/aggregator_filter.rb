@@ -23,7 +23,6 @@ class AggregatorFilter < AggregatorBase
 
   # post-filter, called via AggregatorPostProcess
   def filter_series
-    to_keep = []
     unless chart_config.chart_has_filter?
       logger.debug { 'No filters set' }
       return
@@ -32,16 +31,14 @@ class AggregatorFilter < AggregatorBase
     logger.debug { "Filtering start #{results.bucketed_data.keys}" }
     logger.debug { "Filters are: #{chart_config.filters}" }
 
+    to_keep = []
     to_keep = submeter_filter(to_keep)
     to_keep = heating_filter(to_keep)
     to_keep = model_type_filter(to_keep)
     to_keep = simple_filters(to_keep)
     to_keep = y2_axis_filter(to_keep)
 
-    remove_list = []
-    results.bucketed_data.each_key do |series_name|
-      remove_list.push(series_name) unless to_keep.include?(series_name)
-    end
+    remove_list = results.bucketed_data.keys - to_keep
 
     remove_list.each do |remove_series_name|
       results.bucketed_data.delete(remove_series_name)
