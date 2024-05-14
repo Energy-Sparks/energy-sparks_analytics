@@ -2,9 +2,9 @@
 
 module Charts
   module Filters
+    # Supporting for filtering out dates from a calculation based on the chart configuration
     class DateFilter < Base
 
-      # pre-filter, called via AggregatorSingleSeries
       def match_filter_by_day(date)
         # heating_daytype filter gets filtered out post aggregation, reduced performance but simpler
         return true unless @chart_config.chart_has_filter?

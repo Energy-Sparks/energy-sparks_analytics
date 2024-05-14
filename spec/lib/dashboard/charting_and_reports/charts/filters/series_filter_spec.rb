@@ -19,7 +19,7 @@ describe Charts::Filters::SeriesFilter do
     }
   end
 
-  describe '#filter_series' do
+  describe '#filter' do
     let(:aggregator_results) { AggregatorResults.new(bucketed_data: bucketed_data) }
 
     let(:bucketed_data) do
@@ -33,7 +33,7 @@ describe Charts::Filters::SeriesFilter do
 
     context 'with no filter' do
       it 'does nothing' do
-        filter.filter_series
+        filter.filter
         expect(aggregator_results.bucketed_data).to eq(bucketed_data)
       end
     end
@@ -77,7 +77,7 @@ describe Charts::Filters::SeriesFilter do
         end
 
         it 'filters to the submeters' do
-          filter.filter_series
+          filter.filter
           # should drop just the Solar PV production (:generation) meter
           expect(aggregator_results.bucketed_data.keys).to match_array(
             [
@@ -118,7 +118,7 @@ describe Charts::Filters::SeriesFilter do
           end
 
           it 'keeps the y2 axis as well' do
-            filter.filter_series
+            filter.filter
             # should drop just the Solar PV production (:generation) meters
             expect(aggregator_results.bucketed_data.keys).to match_array(
               [
@@ -154,7 +154,7 @@ describe Charts::Filters::SeriesFilter do
       end
 
       it 'filters to just heating days' do
-        filter.filter_series
+        filter.filter
         expect(aggregator_results.bucketed_data.keys).to match_array(
           [Series::HeatingNonHeating::HEATINGDAY]
         )
@@ -184,7 +184,7 @@ describe Charts::Filters::SeriesFilter do
       end
 
       it 'filters to just those day types' do
-        filter.filter_series
+        filter.filter
         expect(aggregator_results.bucketed_data.keys).to match_array(
           [Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED]
         )

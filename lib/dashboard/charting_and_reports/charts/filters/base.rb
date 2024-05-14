@@ -3,9 +3,15 @@
 require_relative '../aggregator_config.rb'
 
 module Charts
-  # filters can be applied either pre or post calculation depending on expedience/performance
-  # so pre-filters determine in advice whether something needs calculating and then don't calculate
-  # post-filters - do the calculation and then removes results before passing back fro display
+  # The chart aggregation framework uses filters in two ways:
+  #
+  # - during the process of calculating the series to filter out individual dates based on the chart configuration
+  #   this avoids doing unnecessary calculations
+  # - after calculating the results to prune out individual series that aren't required for display
+  #
+  # The former filters can improve performance, but the latter can sometimes be simpler to implement.
+  #
+  # This modules provides the default implementation of the two types of filter.
   module Filters
     class Base
       include Logging

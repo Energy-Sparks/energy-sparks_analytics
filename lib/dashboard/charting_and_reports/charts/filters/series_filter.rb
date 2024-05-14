@@ -2,9 +2,9 @@
 
 module Charts
   module Filters
+    # Support for filtering out specific series after a calculation has been completed
     class SeriesFilter < Base
-      # post-filter, called via AggregatorPostProcess
-      def filter_series
+      def filter
         unless @chart_config.chart_has_filter?
           logger.debug { 'No filters set' }
           return

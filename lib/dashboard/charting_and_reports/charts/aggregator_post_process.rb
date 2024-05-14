@@ -6,7 +6,7 @@ class AggregatorPostProcess < AggregatorBase
   def calculate
     inject_benchmarks                   if chart_config.inject_benchmark?
 
-    filter.filter_series       if chart_config.chart_has_filter? && chart_config.series_breakdown != :none
+    series_filter.filter                if chart_config.chart_has_filter? && chart_config.series_breakdown != :none
 
     create_y2_axis_data                 if chart_config.y2_axis?
 
@@ -37,8 +37,8 @@ class AggregatorPostProcess < AggregatorBase
 
   private
 
-  def filter
-    @filter ||= Charts::Filters::SeriesFilter.new(school, chart_config, results)
+  def series_filter
+    @series_filter ||= Charts::Filters::SeriesFilter.new(school, chart_config, results)
   end
 
   def inject_benchmarks
