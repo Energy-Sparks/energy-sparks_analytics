@@ -2,13 +2,15 @@
 
 require_relative '../../lib/dashboard/utilities/restricted_key_hash'
 # helper class for main solar aggregation service
-# keeps track of the 5 to 7 meters being manipulated
-class PVMap < RestrictedKeyHash
+# keeps track of the meter (between 7-9) meters being manipulated
+class SolarMeterMap < RestrictedKeyHash
   MPAN_KEY_MAPPINGS = {
     export_mpan: :export,
     production_mpan: :generation,
     production_mpan2: :generation2,
-    production_mpan3: :generation3
+    production_mpan3: :generation3,
+    production_mpan4: :generation4,
+    production_mpan5: :generation5
   }.freeze
 
   def self.unique_keys
@@ -17,6 +19,8 @@ class PVMap < RestrictedKeyHash
       generation
       generation2
       generation3
+      generation4
+      generation5
       self_consume
       mains_consume
       mains_plus_self_consume
@@ -29,6 +33,8 @@ class PVMap < RestrictedKeyHash
       generation
       generation2
       generation3
+      generation4
+      generation5
     ]
   end
 
@@ -36,22 +42,29 @@ class PVMap < RestrictedKeyHash
     %i[
       generation2
       generation3
+      generation4
+      generation5
       generation_meter_list
     ]
   end
 
-  def self.mpan_maps(mpan_map)
+  # Extract just the meter mappings from a solar_pv_mpan_meter_mapping
+  # meter attribute configuration
+  def self.meter_mappings(mpan_map)
     mpan_map.select { |k, _v| MPAN_KEY_MAPPINGS.key?(k) }
   end
 
-  def self.attribute_map_meter_type(mpan_meter_type)
-    MPAN_KEY_MAPPINGS[mpan_meter_type]
+  # Turn meter attribute key into solar meter type
+  def self.meter_type(meter_attribute_key)
+    MPAN_KEY_MAPPINGS[meter_attribute_key]
   end
 
-  def self.meter_type_attribute_map(meter_type)
+  # Look up meter attribute key for a given solar meter type
+  def self.meter_attribute_key(meter_type)
     MPAN_KEY_MAPPINGS.key(meter_type)
   end
 
+  # Default name for solar meters of a specific type
   def self.meter_type_to_name_map
     {
       export: SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
@@ -73,6 +86,7 @@ class PVMap < RestrictedKeyHash
     count { |k, v| self.class.generation_meters.include?(k) && !v.nil? }
   end
 
+  # TODO rename / replace with more meaningful
   def set_nil_value(list_of_keys)
     list_of_keys.each do |k|
       self[k] = nil
