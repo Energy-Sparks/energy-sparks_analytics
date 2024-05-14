@@ -8,7 +8,7 @@ module Logging
 end
 
 charts = {
-  adhoc: %i[ solar_pv_last_7_days_by_submeter solar_pv_group_by_month]
+  adhoc: %i[solar_pv_group_by_month]
 }
 
 no_charts = RunCharts.standard_charts_for_school

@@ -184,10 +184,16 @@ class AggregateDataService
     aggregate_sub_meters_by_type(aggregate_meter, @meter_collection.electricity_meters)
   end
 
-  # Creates a new aggregate meter that combines together all of the mains consumption (and other subtypes)
-  # sub meters associated with the list of meters.
+  # Updated the +combined_meter+ so that it has the same types of sub_meters as the meters in
+  # the provided list.
   #
-  # This is only called for schools that have multiple solar meters.
+  # The sub_meters for +combined_meter will each be a new AggregateMeter which aggregate the
+  # sub_meters across +meters+. The original meters are retained as a +consistuent_meter+.
+  #
+  # This basically ensures that the +combined_meter+ combines together data from multiple solar panels and
+  # storage heater meters, so it can accurately reflect the overall export, self consumption, mains consumption, etc
+  #
+  # This is only called for schools that have solar and multiple electricity meters.
   def aggregate_sub_meters_by_type(combined_meter, meters)
     log "Aggregating sub meters for combined meter #{combined_meter} and main electricity meters #{meters.map(&:to_s).join(' ')}"
     sub_meter_types = meters.map { |m| m.sub_meters.keys }.flatten.compact.uniq
