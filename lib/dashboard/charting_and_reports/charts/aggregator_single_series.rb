@@ -19,6 +19,10 @@ class AggregatorSingleSeries < AggregatorBase
 
   private
 
+  def date_filter
+    @date_filter ||= Charts::Filters::DateFilter.new(school, chart_config, results)
+  end
+
   def aggregate
     # loop through date groups on the x-axis; calculate aggregate data for each series in date range
     case chart_config[:x_axis]
@@ -85,7 +89,7 @@ class AggregatorSingleSeries < AggregatorBase
       results.xbucketor.x_axis_bucket_date_ranges.each do |date_range|
         x_index = results.xbucketor.index(date_range[0], nil)
         (date_range[0]..date_range[1]).each do |date|
-          next unless filter.match_filter_by_day(date)
+          next unless date_filter.match_filter_by_day(date)
           multi_day_breakdown = results.series_manager.get_data([:daterange, [date, date]])
           multi_day_breakdown.each do |key, value|
             add_to_bucket(key, x_index, value)
@@ -122,7 +126,7 @@ class AggregatorSingleSeries < AggregatorBase
       aggregate_by_halfhour_simple_fast(start_date, end_date)
     else
       (start_date..end_date).each do |date|
-        next if !filter.match_filter_by_day(date)
+        next if !date_filter.match_filter_by_day(date)
         (0..47).each do |halfhour_index|
           x_index = results.xbucketor.index(nil, halfhour_index)
           multi_day_breakdown = results.series_manager.get_data([:halfhour, date, halfhour_index])
@@ -138,7 +142,7 @@ class AggregatorSingleSeries < AggregatorBase
     total = Array.new(48, 0)
     count = 0
     (start_date..end_date).each do |date|
-      next unless filter.match_filter_by_day(date)
+      next unless date_filter.match_filter_by_day(date)
       data = results.series_manager.get_one_days_data_x48(date, results.series_manager.kwh_cost_or_co2)
       total = AMRData.fast_add_x48_x_x48(total, data)
       count += 1
@@ -149,7 +153,7 @@ class AggregatorSingleSeries < AggregatorBase
 
   def aggregate_by_datetime(start_date, end_date)
     (start_date..end_date).each do |date|
-      next if !filter.match_filter_by_day(date)
+      next if !date_filter.match_filter_by_day(date)
       (0..47).each do |halfhour_index|
         x_index = results.xbucketor.index(date, halfhour_index)
         multi_day_breakdown = results.series_manager.get_data([:datetime, date, halfhour_index])

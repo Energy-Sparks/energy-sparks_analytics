@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AggregatorFilter do
+describe Charts::Filters::SeriesFilter do
   subject(:filter) do
     described_class.new(meter_collection, chart_config, aggregator_results)
   end
@@ -20,6 +20,8 @@ describe AggregatorFilter do
   end
 
   describe '#filter_series' do
+    let(:aggregator_results) { AggregatorResults.new(bucketed_data: bucketed_data) }
+
     let(:bucketed_data) do
       {
         SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME => [],
@@ -27,12 +29,6 @@ describe AggregatorFilter do
         SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME => [],
         SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME => []
       }
-    end
-
-    let(:aggregator_results) do
-      results = AggregatorResults.new
-      results.bucketed_data = bucketed_data
-      results
     end
 
     context 'with no filter' do
@@ -43,7 +39,26 @@ describe AggregatorFilter do
     end
 
     context 'with a submeter filter' do
+      let(:series_manager) { instance_double(Series::ManagerBase) }
+      let(:aggregator_results) { AggregatorResults.new(series_manager: series_manager, bucketed_data: bucketed_data) }
+
+      before do
+        meter = instance_double(Dashboard::Meter)
+        allow(series_manager).to receive(:meter).and_return(meter)
+        allow(meter).to receive(:sub_meters).and_return(:sub_meters)
+      end
+
       context 'when filtering solar submeters' do
+        let(:sub_meters) do
+          {
+            export: SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
+            generation: SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
+            self_consume: SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME,
+            mains_consume: SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
+            mains_plus_self_consume: SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+          }
+        end
+
         let(:chart_config) do
           {
             name: 'Testing',
@@ -61,7 +76,7 @@ describe AggregatorFilter do
           }
         end
 
-        it 'filters the submeter series and retains the y2 axis series' do
+        it 'filters to the submeters' do
           filter.filter_series
           # should drop just the Solar PV production (:generation) meter
           expect(aggregator_results.bucketed_data.keys).to match_array(
@@ -102,7 +117,7 @@ describe AggregatorFilter do
             }
           end
 
-          it 'keeps that series as its not a submeter' do
+          it 'keeps the y2 axis as well' do
             filter.filter_series
             # should drop just the Solar PV production (:generation) meters
             expect(aggregator_results.bucketed_data.keys).to match_array(

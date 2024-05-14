@@ -37,6 +37,10 @@ class AggregatorPostProcess < AggregatorBase
 
   private
 
+  def filter
+    @filter ||= Charts::Filters::SeriesFilter.new(school, chart_config, results)
+  end
+
   def inject_benchmarks
     bm = AggregatorBenchmarks.new(school, chart_config, results)
     bm.inject_benchmarks
