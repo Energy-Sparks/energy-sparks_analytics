@@ -767,9 +767,9 @@ class ChartManager
       inherits_from:      :solar_pv_group_by_week_by_submeter,
       filter:                   {
         submeter: [
-          SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-          SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-          SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+          :mains_consume,
+          :export,
+          :self_consume
         ]
       },
       x_axis:           :month,
@@ -796,9 +796,9 @@ class ChartManager
       series_breakdown:   :submeter,
       filter:                   {
         submeter: [
-          SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-          SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-          SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+          :mains_consume,
+          :export,
+          :self_consume
         ]
       },
     },

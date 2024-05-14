@@ -31,14 +31,21 @@ module Charts
 
       private
 
+      # With a submeter series breakdown the series are named using the meter name
+      #
+      # This method filters out sub meters based on their type. If there's no filter we
+      # just keep all the series, otherwise we only keep those series whose meter is of a specific
+      # sub_meter type (e.g. mains_consume, export, self_consume, etc)
       def submeter_filter(to_keep)
         return to_keep unless @chart_config.series_breakdown == :submeter
 
+        # this is the meter whose sub meters are being displayed
+        parent_meter = @results.series_manager.meter
+
         to_keep += if @chart_config.submeter_filter?
-                     # TODO
-                     # the filter becomes, e.g. :mains_consume, :self_consume, etc
-                     # only keep those series whose name matches the desired keys
-                     pattern_match_list_with_list(@results.bucketed_data.keys, @chart_config.submeter_filter)
+                     @chart_config.submeter_filter.each do |sub_meter_type|
+                       to_keep << parent_meter.sub_meters[sub_meter_type].name if parent_meter.sub_meters.key?(sub_meter_type)
+                     end
                    else
                      @results.bucketed_data.keys
                    end

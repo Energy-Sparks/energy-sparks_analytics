@@ -24,7 +24,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['l*'],
+  schools:  ['sh*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }

@@ -45,17 +45,17 @@ describe Charts::Filters::SeriesFilter do
       before do
         meter = instance_double(Dashboard::Meter)
         allow(series_manager).to receive(:meter).and_return(meter)
-        allow(meter).to receive(:sub_meters).and_return(:sub_meters)
+        allow(meter).to receive(:sub_meters).and_return(sub_meters)
       end
 
       context 'when filtering solar submeters' do
         let(:sub_meters) do
           {
-            export: SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-            generation: SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
-            self_consume: SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME,
-            mains_consume: SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-            mains_plus_self_consume: SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+            export: build(:meter, name: SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME),
+            generation: build(:meter, name: SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME),
+            self_consume: build(:meter, name: SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME),
+            mains_consume: build(:meter, name: SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME),
+            mains_plus_self_consume: build(:meter, name: SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV)
           }
         end
 
@@ -67,10 +67,10 @@ describe Charts::Filters::SeriesFilter do
             x_axis: :month,
             timescale: :up_to_a_year,
             filter: {
-              submeter: [
-                SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-                SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-                SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+              submeter: %i[
+                mains_consume
+                export
+                self_consume
               ]
             }
           }
@@ -97,10 +97,10 @@ describe Charts::Filters::SeriesFilter do
               x_axis: :month,
               timescale: :up_to_a_year,
               filter: {
-                submeter: [
-                  SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-                  SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-                  SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+                submeter: %i[
+                  mains_consume
+                  export
+                  self_consume
                 ]
               },
               y2_axis: :irradiance
