@@ -40,6 +40,27 @@ describe AggregateDataServiceStorageHeaters do
     end
   end
 
+  shared_examples 'a successfully totalled storage heater setup' do
+    let(:meters_total) { to_total.map(&:amr_data).map(&:total).sum }
+
+    it 'has calculated the storage_heater usage' do
+      expect(meter_collection.storage_heater_meter.amr_data.total).not_to eq(0.0)
+    end
+
+    it 'has totalled the data across the aggregate and storage heater meter' do
+      aggregated_electricity_meter = meter_collection.aggregated_electricity_meters
+      total_aggregate = aggregated_electricity_meter.amr_data.total
+      total_storage = meter_collection.storage_heater_meter.amr_data.total
+      expect(total_aggregate + total_storage).to eq(meters_total)
+    end
+
+    it 'has totaled the mains consumption' do
+      aggregated_electricity_meter = meter_collection.aggregated_electricity_meters
+      total_mains_consume = aggregated_electricity_meter.sub_meters[:mains_consume].amr_data.total
+      expect(total_mains_consume).to eq(meters_total)
+    end
+  end
+
   describe '#disaggregate' do
     context 'with single electricity meter' do
       before do
@@ -55,11 +76,8 @@ describe AggregateDataServiceStorageHeaters do
           expect(meter_collection.electricity_meters.first.sub_meters[:mains_consume]).to eq(electricity_meter)
         end
 
-        it 'recalculates the amr data' do
-          total_storage = meter_collection.storage_heater_meter.amr_data.total
-          expect(total_storage).not_to eq(0.0)
-          total_aggregate = meter_collection.aggregated_electricity_meters.amr_data.total
-          expect(total_aggregate + total_storage).to eq(electricity_meter.amr_data.total)
+        it_behaves_like 'a successfully totalled storage heater setup' do
+          let(:to_total) { [electricity_meter] }
         end
       end
 
@@ -92,17 +110,12 @@ describe AggregateDataServiceStorageHeaters do
       context 'when there is a single storage heater' do
         it_behaves_like 'a successfully aggregated storage heater setup'
 
-        it 'adds up the mains consumption'
-
-        it 'recalculates the amr data' do
-          total_storage = meter_collection.storage_heater_meter.amr_data.total
-          expect(total_storage).not_to eq(0.0)
-          total_aggregate = meter_collection.aggregated_electricity_meters.amr_data.total
-          expect(total_aggregate + total_storage).to eq(electricity_meter.amr_data.total + second_meter.amr_data.total)
+        it_behaves_like 'a successfully totalled storage heater setup' do
+          let(:to_total) { [electricity_meter, second_meter] }
         end
       end
 
-      context 'when there are storage heaters on different meters' do
+      context 'when there are two storage heaters on different meters' do
         let(:meter_attributes) do
           meter_attributes = {}
           meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
@@ -112,11 +125,8 @@ describe AggregateDataServiceStorageHeaters do
 
         it_behaves_like 'a successfully aggregated storage heater setup'
 
-        it 'recalculates the amr data' do
-          total_storage = meter_collection.storage_heater_meter.amr_data.total
-          expect(total_storage).not_to eq(0.0)
-          total_aggregate = meter_collection.aggregated_electricity_meters.amr_data.total
-          expect(total_aggregate + total_storage).to eq(electricity_meter.amr_data.total + second_meter.amr_data.total)
+        it_behaves_like 'a successfully totalled storage heater setup' do
+          let(:to_total) { [electricity_meter, second_meter] }
         end
       end
 
