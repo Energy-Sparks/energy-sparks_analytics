@@ -80,10 +80,38 @@ describe AggregateDataServiceStorageHeaters do
           let(:to_total) { [electricity_meter] }
         end
       end
+    end
 
-      context 'with solar panels' do
-        it 'retains submeters'
+    context 'with single meter and solar panels' do
+      before do
+        electricity_meter.sub_meters[:generation] = build(:meter, type: :solar_pv)
+        electricity_meter.sub_meters[:export] = build(:meter, type: :exported_solar_pv)
+        electricity_meter.sub_meters[:self_consume] = build(:meter, type: :electricity)
+        # electricity_meter.sub_meters[:mains_consume] = build(:meter, type: :electricity)
+
+        service.disaggregate
       end
+
+      it_behaves_like 'a successfully aggregated storage heater setup'
+
+      it 'replaces the original meter with a new synthetic meter, linking the two together' do
+        expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
+        expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
+        expect(meter_collection.electricity_meters.first.sub_meters[:mains_consume]).to eq(electricity_meter)
+      end
+
+      it_behaves_like 'a successfully totalled storage heater setup' do
+        let(:to_total) { [electricity_meter] }
+      end
+
+      it 'copies solar sub_meters to new synthetic meter' do
+        sub_meters = meter_collection.electricity_meters.first.sub_meters
+        expect(sub_meters[:generation]).to eq(electricity_meter.sub_meters[:generation])
+        expect(sub_meters[:export]).to eq(electricity_meter.sub_meters[:export])
+        expect(sub_meters[:self_consume]).to eq(electricity_meter.sub_meters[:self_consume])
+      end
+
+      it 'correctly assigns the mains_consume meter'
     end
 
     context 'with multiple electricity meters' do
@@ -128,10 +156,6 @@ describe AggregateDataServiceStorageHeaters do
         it_behaves_like 'a successfully totalled storage heater setup' do
           let(:to_total) { [electricity_meter, second_meter] }
         end
-      end
-
-      context 'with solar panels' do
-        it 'retains submeters'
       end
     end
   end
