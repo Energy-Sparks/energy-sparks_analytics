@@ -9,7 +9,7 @@
 # where there are multiple electricity meters, the sh meter, the appliance meter and the original meter
 # are then aggregated seperately, so there are aggregate versions of each
 #
-class SHMap < RestrictedKeyHash
+class StorageHeaterMap < RestrictedKeyHash
   def self.unique_keys
     %i[original storage_heater ex_storage_heater]
   end
@@ -18,6 +18,8 @@ end
 class AggregateDataServiceStorageHeaters
   include Logging
   include AggregationMixin
+
+  attr_reader :meter_collection
 
   def initialize(meter_collection)
     @meter_collection   = meter_collection
@@ -35,7 +37,7 @@ class AggregateDataServiceStorageHeaters
 
     bm = Benchmark.realtime do
       # Separate out the storage heater consumption from other usage across all electricity meters
-      # Returns an array of SHMap instances that refer to all the original and new meters.
+      # Returns an array of StorageHeaterMap instances that refer to all the original and new meters.
       #
       # As a side-effect the @electricity_meters array has been updated to replace any meter with
       # storage heaters with a newly created meter that has the non storage heater usage
@@ -68,7 +70,7 @@ class AggregateDataServiceStorageHeaters
   # Extract the storage heater usage from the other electricity usage for all of the
   # electricity meters
   #
-  # Returns an array of SHMap instances, one per electricity meter.
+  # Returns an array of StorageHeaterMap instances, one per electricity meter.
   def disaggregate_meters
     @electricity_meters.map.with_index do |electricity_meter, i|
       if electricity_meter.storage_heater?
@@ -79,7 +81,7 @@ class AggregateDataServiceStorageHeaters
         @electricity_meters[i] = reassign_meters(map)
       else
         # leaves the original meter unchanged, create a default map
-        map = SHMap.new
+        map = StorageHeaterMap.new
         map[:original]          = electricity_meter
         map[:ex_storage_heater] = electricity_meter
       end
@@ -102,9 +104,9 @@ class AggregateDataServiceStorageHeaters
   # they are the storage heater ("... Storage heater disaggregated storage heter") or electricity usage
   # ("...Storage heater disaggregated electricity").
   #
-  # Returns an SHMap has has the :original, :storage_heater and :ex_storage_heater meters.
+  # Returns an StorageHeaterMap has has the :original, :storage_heater and :ex_storage_heater meters.
   def disaggregate_storage_heat_meter(meter)
-    map = SHMap.new
+    map = StorageHeaterMap.new
     map[:original] = meter
 
     # Create new AMRData instances one for the storage heater use and one for the rest of the consumption
@@ -136,7 +138,7 @@ class AggregateDataServiceStorageHeaters
     end
   end
 
-  # Reworks the meter associations in the provided SHMap
+  # Reworks the meter associations in the provided StorageHeaterMap
   #
   # The sub_meters from the :original meter are added to the new :ex_storage_heater
   # meter. So this has the relationships to the solar meters, if any
@@ -150,14 +152,14 @@ class AggregateDataServiceStorageHeaters
     map[:ex_storage_heater]
   end
 
-  # Takes an array of SHMaps and returns a new SHMap which provides references to a
+  # Takes an array of StorageHeaterMaps and returns a new StorageHeaterMap which provides references to a
   # newly created aggregate meter.
   #
   #
   def aggregate_meters(meter_maps)
     # Rework the provided array of maps, so we have a single map
     # having an array of meters
-    aggregate_map = SHMap.new
+    aggregate_map = StorageHeaterMap.new
     meter_maps.each do |meter_map|
       meter_map.each do |type, meter|
         next if meter.nil?
@@ -174,7 +176,7 @@ class AggregateDataServiceStorageHeaters
     end
 
     # New map for the aggregated meter
-    aggregated_meter_map = SHMap.new
+    aggregated_meter_map = StorageHeaterMap.new
     type_map = {
       storage_heater: :storage_heater_disaggregated_storage_heater,
       ex_storage_heater: :storage_heater_disaggregated_electricity,
