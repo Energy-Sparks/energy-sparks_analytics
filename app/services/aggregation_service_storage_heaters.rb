@@ -19,8 +19,6 @@ class AggregateDataServiceStorageHeaters
   include Logging
   include AggregationMixin
 
-  attr_reader :meter_collection
-
   def initialize(meter_collection)
     @meter_collection   = meter_collection
     @electricity_meters = @meter_collection.electricity_meters
