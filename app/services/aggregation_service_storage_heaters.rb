@@ -24,7 +24,6 @@ class AggregateDataServiceStorageHeaters
   def initialize(meter_collection)
     @meter_collection   = meter_collection
     @electricity_meters = @meter_collection.electricity_meters
-    @debug = false
   end
 
   # Disaggregate any storage heater use from other electricity consumption, creating new meters to reflect each type
@@ -33,8 +32,8 @@ class AggregateDataServiceStorageHeaters
   # Will end up reassigning the aggregate electricity meter to a new meter, as well as setting the aggregate storage
   # heater meter
   def disaggregate
-    log('=' * 100)
-    log("Disaggregating storage heater meters for #{@meter_collection.name}: #{@electricity_meters.length} electricity meters")
+    logger.debug { '=' * 100 }
+    logger.debug { "Disaggregating storage heater meters for #{@meter_collection.name}: #{@electricity_meters.length} electricity meters" }
 
     bm = Benchmark.realtime do
       # Separate out the storage heater consumption from other usage across all electricity meters
@@ -49,8 +48,6 @@ class AggregateDataServiceStorageHeaters
       # stage of aggregation. Possibly optimisation?
       calculate_meters_carbon_emissions_and_costs(reworked_meter_maps)
 
-      summarise_maps(reworked_meter_maps) if @debug
-
       aggregate = if @electricity_meters.length > 1
                     aggregate_meters(reworked_meter_maps)
                   else
@@ -61,12 +58,11 @@ class AggregateDataServiceStorageHeaters
       assign_aggregate(aggregate)
     end
 
-    # Always called. TODO: only log this if required, involves adding up all meter data
     summarise_aggregated_meter
     summarise_component_meters
 
-    log("Disaggregation of storage heater meters for #{@meter_collection.name} complete in #{bm.round(3)} seconds")
-    log('=' * 100)
+    logger.debug { "Disaggregation of storage heater meters for #{@meter_collection.name} complete in #{bm.round(3)} seconds" }
+    logger.debug { '=' * 100 }
   end
 
   private
@@ -122,23 +118,23 @@ class AggregateDataServiceStorageHeaters
   end
 
   def summarise_aggregated_meter
-    log('Aggregated Meter Setup')
-    log("    appliance: #{aggregate_meter_desciption(@meter_collection.aggregated_electricity_meters)}")
-    log("    storage:   #{aggregate_meter_desciption(@meter_collection.storage_heater_meter)}")
-    log("    original:  #{aggregate_meter_desciption(@meter_collection.aggregated_electricity_meters.sub_meters[:mains_consume])}")
+    logger.debug { 'Aggregated Meter Setup' }
+    logger.debug { "    appliance: #{aggregate_meter_description(@meter_collection.aggregated_electricity_meters)}" }
+    logger.debug { "    storage:   #{aggregate_meter_description(@meter_collection.storage_heater_meter)}" }
+    logger.debug { "    original:  #{aggregate_meter_description(@meter_collection.aggregated_electricity_meters.sub_meters[:mains_consume])}" }
   end
 
-  def aggregate_meter_desciption(meter)
+  def aggregate_meter_description(meter)
     format('%60.60s: %9.0f kWh', meter.to_s, meter.amr_data.total)
   end
 
   def summarise_component_meters
-    log('Component Meter Setup')
+    logger.debug('Component Meter Setup')
     @meter_collection.electricity_meters.each.with_index do |meter, i|
-      log("    Meter #{i}")
-      log(format('        %-18.18s %s', 'ex storage heater', meter_description(meter)))
-      log(format('        %-18.18s %s', 'original',          meter_description(meter.sub_meters[:mains_consume])))
-      log(format('        %-18.18s %s', 'storage heaters',   meter_description(meter.sub_meters[:storage_heaters])))
+      logger.debug { "    Meter #{i}" }
+      logger.debug { format('        %-18.18s %s', 'ex storage heater', meter_description(meter)) }
+      logger.debug { format('        %-18.18s %s', 'original',          meter_description(meter.sub_meters[:mains_consume])) }
+      logger.debug { format('        %-18.18s %s', 'storage heaters',   meter_description(meter.sub_meters[:storage_heaters])) }
     end
   end
 
@@ -196,26 +192,7 @@ class AggregateDataServiceStorageHeaters
     # Set costs/co2 schedule for each of the new meters
     calculate_carbon_emissions_and_costs(aggregated_meter_map)
 
-    if @debug
-      log('Aggregated meters breakdown:')
-      summarise_map(aggregated_meter_map)
-    end
     aggregated_meter_map
-  end
-
-  # DEBUG
-  def summarise_maps(maps)
-    maps.each do |map|
-      log("Storage heater breakdown for #{map[:original]}")
-      summarise_map(map)
-    end
-  end
-
-  # DEBUG
-  def summarise_map(map)
-    map.each do |type, meter|
-      log(format('    %-18.18s %s', type.to_s, meter_description(meter)))
-    end
   end
 
   def meter_description(meter)
@@ -257,11 +234,5 @@ class AggregateDataServiceStorageHeaters
 
       calculate_meter_carbon_emissions_and_costs(meter, :electricity)
     end
-  end
-
-  def log(str)
-    logger.info str
-
-    puts str if @debug
   end
 end
