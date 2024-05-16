@@ -107,11 +107,9 @@ class AggregateDataService
     # Preprocessing step that creates new meters and reorganises existing
     # collection
     process_solar_meters
-
     aggregate_electricity_meters
-
-    process_storage_heaters # TODO(PH, 2May2021) - work out why this needs to be after aggregation, or needs any aggregation
-
+    # TODO(PH, 2May2021) - work out why this needs to be after aggregation, or needs any aggregation
+    process_storage_heaters
     combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
   end
 
@@ -211,10 +209,12 @@ class AggregateDataService
       log "    Combining type #{sub_meter_type} for #{sub_meters.map(&:to_s).join(' ')}"
       AggregateDataServiceSolar.new(@meter_collection).backfill_meters_with_zeros(sub_meters, combined_meter.amr_data.start_date)
       combined_sub_meter = aggregate_meters(nil, sub_meters, sub_meters[0].fuel_type)
-      combined_sub_meter.id   = sub_meters[0].id
-      combined_sub_meter.name = sub_meters[0].name
+      combined_sub_meter.name = if sub_meter_type == :mains_consume
+                                  SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
+                                else
+                                  sub_meters[0].name
+                                end
       combined_meter.sub_meters[sub_meter_type] = combined_sub_meter
-      combined_sub_meter.name = SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME if sub_meter_type == :mains_consume
     end
     log "Completed sub meter aggregation for: #{combined_meter}"
     combined_meter.sub_meters.each { |t, m| log "   #{t}: #{m}" }
