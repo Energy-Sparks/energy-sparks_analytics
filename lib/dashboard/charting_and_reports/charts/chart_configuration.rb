@@ -149,7 +149,7 @@ class ChartManager
       name:             'Benchmark Comparison (Annual Electricity Consumption)',
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
-      meter_definition: :all,
+      meter_definition: :allelectricity,
       x_axis:           :year,
       series_breakdown: :fuel,
       yaxis_units:      :£,
