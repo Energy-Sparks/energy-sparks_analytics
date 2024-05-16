@@ -175,8 +175,8 @@ describe AggregateDataServiceStorageHeaters do
       context 'when there are solar panels' do
         before do
           # NOTE: we're testing this class independently of the solar aggregation, so this
-          # setup of submeters mimics the output of that. Should be additional integration tests
-          # across the two services
+          # setup of submeters mimics the output of that. There's tests for this around that
+          # class
           electricity_meter.sub_meters[:generation] = build(:meter, type: :solar_pv)
           electricity_meter.sub_meters[:export] = build(:meter, type: :exported_solar_pv)
           electricity_meter.sub_meters[:self_consume] = build(:meter, type: :electricity)
