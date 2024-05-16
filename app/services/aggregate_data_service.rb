@@ -107,11 +107,9 @@ class AggregateDataService
     # Preprocessing step that creates new meters and reorganises existing
     # collection
     process_solar_meters
-
     aggregate_electricity_meters
-
-    process_storage_heaters # TODO(PH, 2May2021) - work out why this needs to be after aggregation, or needs any aggregation
-
+    # TODO(PH, 2May2021) - work out why this needs to be after aggregation, or needs any aggregation
+    process_storage_heaters
     combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
   end
 
@@ -184,10 +182,16 @@ class AggregateDataService
     aggregate_sub_meters_by_type(aggregate_meter, @meter_collection.electricity_meters)
   end
 
-  # Creates a new aggregate meter that combines together all of the mains consumption (and other subtypes)
-  # sub meters associated with the list of meters.
+  # Updates the +combined_meter+ so that it has the same types of sub_meters as the meters in
+  # the provided list.
   #
-  # This is only called for schools that have multiple solar meters.
+  # The sub_meters for +combined_meter will each be a new AggregateMeter which aggregate the
+  # sub_meters across +meters+. The original meters are retained as a +consistuent_meter+.
+  #
+  # This basically ensures that the +combined_meter+ combines together data from multiple solar panels and
+  # storage heater meters, so it can accurately reflect the overall export, self consumption, mains consumption, etc
+  #
+  # This is only called for schools that have solar and multiple electricity meters.
   def aggregate_sub_meters_by_type(combined_meter, meters)
     log "Aggregating sub meters for combined meter #{combined_meter} and main electricity meters #{meters.map(&:to_s).join(' ')}"
     sub_meter_types = meters.map { |m| m.sub_meters.keys }.flatten.compact.uniq
@@ -205,10 +209,12 @@ class AggregateDataService
       log "    Combining type #{sub_meter_type} for #{sub_meters.map(&:to_s).join(' ')}"
       AggregateDataServiceSolar.new(@meter_collection).backfill_meters_with_zeros(sub_meters, combined_meter.amr_data.start_date)
       combined_sub_meter = aggregate_meters(nil, sub_meters, sub_meters[0].fuel_type)
-      combined_sub_meter.id   = sub_meters[0].id
-      combined_sub_meter.name = sub_meters[0].name
+      combined_sub_meter.name = if sub_meter_type == :mains_consume
+                                  SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
+                                else
+                                  sub_meters[0].name
+                                end
       combined_meter.sub_meters[sub_meter_type] = combined_sub_meter
-      combined_sub_meter.name = SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME if sub_meter_type == :mains_consume
     end
     log "Completed sub meter aggregation for: #{combined_meter}"
     combined_meter.sub_meters.each { |t, m| log "   #{t}: #{m}" }
