@@ -146,8 +146,20 @@ class AggregateDataServiceStorageHeaters
   # The :original and :storage_heater meter are added as additional sub_meters. The
   # original being the :mains_consume.
   def reassign_meters(map)
-    map[:ex_storage_heater].sub_meters.merge!(map[:original].sub_meters) # merge in solar meters
-    map[:ex_storage_heater].sub_meters[:mains_consume]   = map[:original]
+    # Copy the solar sub meters from the original electricity meters to be sub meters
+    # of the new version that doesn't include storage heater usage
+    map[:ex_storage_heater].sub_meters.merge!(map[:original].sub_meters)
+
+    # By default the mains consumption meter for the new electricity meter should be
+    # the original meter. However if the original meter was created during the solar
+    # aggregation, then its AMR data will correspond to main_consume + self_consume.
+    # In this case we should use its original mains consumption meter and not the
+    # meter created in the solar aggregation step
+    map[:ex_storage_heater].sub_meters[:mains_consume] = if map[:original].sub_meters.key?(:self_consume) && map[:original].sub_meters.key?(:mains_consume)
+                                                           map[:original].sub_meters[:mains_consume]
+                                                         else
+                                                           map[:original]
+                                                         end
     map[:ex_storage_heater].sub_meters[:storage_heaters] = map[:storage_heater]
     map[:ex_storage_heater]
   end

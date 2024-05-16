@@ -38,16 +38,16 @@ describe AggregateDataServiceStorageHeaters do
       expect(meter_collection.aggregated_electricity_meters.sub_meters[:mains_consume]).not_to be_nil
       expect(meter_collection.aggregated_electricity_meters.sub_meters[:storage_heaters]).not_to be_nil
     end
+
+    it 'has calculated the storage_heater usage' do
+      expect(meter_collection.storage_heater_meter.amr_data.total).not_to eq(0.0)
+    end
   end
 
   shared_examples 'a successfully totalled storage heater setup' do
     let(:meters_total) { to_total.map(&:amr_data).map(&:total).sum }
 
-    it 'has calculated the storage_heater usage' do
-      expect(meter_collection.storage_heater_meter.amr_data.total).not_to eq(0.0)
-    end
-
-    it 'has totalled the data across the aggregate and storage heater meter' do
+    it 'has allocated the electricity consumption across the aggregate and storage heater meters' do
       aggregated_electricity_meter = meter_collection.aggregated_electricity_meters
       total_aggregate = aggregated_electricity_meter.amr_data.total
       total_storage = meter_collection.storage_heater_meter.amr_data.total
@@ -63,55 +63,52 @@ describe AggregateDataServiceStorageHeaters do
 
   describe '#disaggregate' do
     context 'with single electricity meter' do
-      before do
-        service.disaggregate
-      end
+      context 'when there are no solar panels' do
+        before do
+          service.disaggregate
+        end
 
-      context 'with single storage heater' do
         it_behaves_like 'a successfully aggregated storage heater setup'
 
-        it 'replaces the original meter with a new synthetic meter, linking the two together' do
+        it 'replaces the meter with storage heaters attached with a new synthetic meter' do
           expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
           expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
+        end
+
+        it 'assigns the original electricity meter as the mains_consume sub_meter' do
           expect(meter_collection.electricity_meters.first.sub_meters[:mains_consume]).to eq(electricity_meter)
         end
+      end
 
-        it_behaves_like 'a successfully totalled storage heater setup' do
-          let(:to_total) { [electricity_meter] }
+      context 'when there are solar panels' do
+        before do
+          electricity_meter.sub_meters[:generation] = build(:meter, type: :solar_pv)
+          electricity_meter.sub_meters[:export] = build(:meter, type: :exported_solar_pv)
+          electricity_meter.sub_meters[:self_consume] = build(:meter, type: :electricity)
+          electricity_meter.sub_meters[:mains_consume] = build(:meter, type: :electricity)
+
+          service.disaggregate
+        end
+
+        it_behaves_like 'a successfully aggregated storage heater setup'
+
+        it 'replaces the meter with storage heaters attached with a new synthetic meter' do
+          expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
+          expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
+        end
+
+        it 'copies the solar sub meters to the new synthetic meter' do
+          sub_meters = meter_collection.electricity_meters.first.sub_meters
+          expect(sub_meters[:generation]).to eq(electricity_meter.sub_meters[:generation])
+          expect(sub_meters[:export]).to eq(electricity_meter.sub_meters[:export])
+          expect(sub_meters[:self_consume]).to eq(electricity_meter.sub_meters[:self_consume])
+        end
+
+        it 'assigns the original mains consumption as a sub_meter of the new synthetic meter' do
+          sub_meters = meter_collection.electricity_meters.first.sub_meters
+          expect(sub_meters[:mains_consume]).to eq(electricity_meter.sub_meters[:mains_consume])
         end
       end
-    end
-
-    context 'with single meter and solar panels' do
-      before do
-        electricity_meter.sub_meters[:generation] = build(:meter, type: :solar_pv)
-        electricity_meter.sub_meters[:export] = build(:meter, type: :exported_solar_pv)
-        electricity_meter.sub_meters[:self_consume] = build(:meter, type: :electricity)
-        # electricity_meter.sub_meters[:mains_consume] = build(:meter, type: :electricity)
-
-        service.disaggregate
-      end
-
-      it_behaves_like 'a successfully aggregated storage heater setup'
-
-      it 'replaces the original meter with a new synthetic meter, linking the two together' do
-        expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
-        expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
-        expect(meter_collection.electricity_meters.first.sub_meters[:mains_consume]).to eq(electricity_meter)
-      end
-
-      it_behaves_like 'a successfully totalled storage heater setup' do
-        let(:to_total) { [electricity_meter] }
-      end
-
-      it 'copies solar sub_meters to new synthetic meter' do
-        sub_meters = meter_collection.electricity_meters.first.sub_meters
-        expect(sub_meters[:generation]).to eq(electricity_meter.sub_meters[:generation])
-        expect(sub_meters[:export]).to eq(electricity_meter.sub_meters[:export])
-        expect(sub_meters[:self_consume]).to eq(electricity_meter.sub_meters[:self_consume])
-      end
-
-      it 'correctly assigns the mains_consume meter'
     end
 
     context 'with multiple electricity meters' do
@@ -131,30 +128,119 @@ describe AggregateDataServiceStorageHeaters do
         meter
       end
 
-      before do
-        service.disaggregate
+      context 'when there are no solar panels' do
+        before do
+          service.disaggregate
+        end
+
+        context 'when there is a single storage heater' do
+          it_behaves_like 'a successfully aggregated storage heater setup'
+
+          it 'replaces the meter with storage heaters attached with a new synthetic meter' do
+            expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
+            expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
+            # unchanged as no storage heaters on this one
+            expect(meter_collection.electricity_meters.last).to eq(second_meter)
+          end
+
+          it_behaves_like 'a successfully totalled storage heater setup' do
+            let(:to_total) { [electricity_meter, second_meter] }
+          end
+        end
+
+        context 'when there are two storage heaters on different meters' do
+          let(:meter_attributes) do
+            meter_attributes = {}
+            meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
+                                                    charge_end_time: TimeOfDay.parse('06:00') }]
+            meter_attributes
+          end
+
+          it_behaves_like 'a successfully aggregated storage heater setup'
+
+          it 'replaces the meters with storage heaters attached with new synthetic meters' do
+            expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
+            expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
+
+            expect(meter_collection.electricity_meters.last).not_to eq(second_meter)
+            expect(meter_collection.electricity_meters.last.synthetic_mpan_mprn?).to be true
+          end
+
+          it_behaves_like 'a successfully totalled storage heater setup' do
+            let(:to_total) { [electricity_meter, second_meter] }
+          end
+        end
       end
 
-      context 'when there is a single storage heater' do
+      context 'when there are solar panels' do
+        before do
+          # NOTE: we're testing this class independently of the solar aggregation, so this
+          # setup of submeters mimics the output of that. Should be additional integration tests
+          # across the two services
+          electricity_meter.sub_meters[:generation] = build(:meter, type: :solar_pv)
+          electricity_meter.sub_meters[:export] = build(:meter, type: :exported_solar_pv)
+          electricity_meter.sub_meters[:self_consume] = build(:meter, type: :electricity)
+          electricity_meter.sub_meters[:mains_consume] = build(:meter, type: :electricity)
+          # solar step always assigns a meter without panels as being its own mains_consume sub_meter
+          second_meter.sub_meters[:mains_consume] = second_meter
+
+          service.disaggregate
+        end
+
         it_behaves_like 'a successfully aggregated storage heater setup'
+
+        it 'replaces the meter with storage heaters attached with a new synthetic meter' do
+          expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
+          expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
+          # unchanged as no storage heaters on this one
+          expect(meter_collection.electricity_meters.last).to eq(second_meter)
+        end
+
+        it 'correctly assigns the original mains consumption meters' do
+          # for meter with solar panels, the mains_consume should refer to the original (pre-solar) mains_consume
+          sub_meters = meter_collection.electricity_meters.first.sub_meters
+          expect(sub_meters[:mains_consume]).to eq(electricity_meter.sub_meters[:mains_consume])
+
+          sub_meters = meter_collection.electricity_meters.last.sub_meters
+          expect(sub_meters[:mains_consume]).to eq(second_meter)
+        end
 
         it_behaves_like 'a successfully totalled storage heater setup' do
           let(:to_total) { [electricity_meter, second_meter] }
         end
-      end
 
-      context 'when there are two storage heaters on different meters' do
-        let(:meter_attributes) do
-          meter_attributes = {}
-          meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
-                                                  charge_end_time: TimeOfDay.parse('06:00') }]
-          meter_attributes
-        end
+        context 'when there are two storage heaters on different meters' do
+          let(:meter_attributes) do
+            meter_attributes = {}
+            meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
+                                                    charge_end_time: TimeOfDay.parse('06:00') }]
+            meter_attributes
+          end
 
-        it_behaves_like 'a successfully aggregated storage heater setup'
+          it_behaves_like 'a successfully aggregated storage heater setup'
 
-        it_behaves_like 'a successfully totalled storage heater setup' do
-          let(:to_total) { [electricity_meter, second_meter] }
+          it 'replaces the meters with storage heaters attached with new synthetic meters' do
+            expect(meter_collection.electricity_meters.first).not_to eq(electricity_meter)
+            expect(meter_collection.electricity_meters.first.synthetic_mpan_mprn?).to be true
+
+            expect(meter_collection.electricity_meters.last).not_to eq(second_meter)
+            expect(meter_collection.electricity_meters.last.synthetic_mpan_mprn?).to be true
+          end
+
+          it_behaves_like 'a successfully totalled storage heater setup' do
+            let(:to_total) { [electricity_meter, second_meter] }
+          end
+
+          it 'correctly assigns the original mains consumption meters' do
+            # for meter with solar panels, the mains_consume should refer to the original (pre-solar) mains_consume
+            sub_meters = meter_collection.electricity_meters.first.sub_meters
+            expect(sub_meters[:mains_consume]).to eq(electricity_meter.sub_meters[:mains_consume])
+
+            # no panels on the second meter, so the new synthetic meter should refer to the
+            # original
+            sub_meters = meter_collection.electricity_meters.last.sub_meters
+            expect(sub_meters[:mains_consume]).to eq(second_meter)
+          end
         end
       end
     end
