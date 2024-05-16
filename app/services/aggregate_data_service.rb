@@ -182,7 +182,7 @@ class AggregateDataService
     aggregate_sub_meters_by_type(aggregate_meter, @meter_collection.electricity_meters)
   end
 
-  # Updated the +combined_meter+ so that it has the same types of sub_meters as the meters in
+  # Updates the +combined_meter+ so that it has the same types of sub_meters as the meters in
   # the provided list.
   #
   # The sub_meters for +combined_meter will each be a new AggregateMeter which aggregate the

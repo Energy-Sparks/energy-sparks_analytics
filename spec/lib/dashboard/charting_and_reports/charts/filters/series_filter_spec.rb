@@ -76,8 +76,11 @@ describe Charts::Filters::SeriesFilter do
           }
         end
 
-        it 'filters to the submeters' do
+        before do
           filter.filter
+        end
+
+        it 'filters to the submeters' do
           # should drop just the Solar PV production (:generation) meter
           expect(aggregator_results.bucketed_data.keys).to match_array(
             [
@@ -118,7 +121,6 @@ describe Charts::Filters::SeriesFilter do
           end
 
           it 'keeps the y2 axis as well' do
-            filter.filter
             # should drop just the Solar PV production (:generation) meters
             expect(aggregator_results.bucketed_data.keys).to match_array(
               [

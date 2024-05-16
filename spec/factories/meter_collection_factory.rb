@@ -31,28 +31,6 @@ FactoryBot.define do
       end
     end
 
-    # Unvalidated/unaggregated meter collection with a single electricity meter configured to
-    # have storage heaters
-    trait :with_storage_heater_meter do
-      after(:build) do |meter_collection, evaluator|
-        kwh_data_x48 = Array.new(48, 1)
-        meter_attributes = {}
-        meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
-                                                charge_end_time: TimeOfDay.parse('06:00') }]
-        # match charge times, increases usage just enough for model to consider heating on
-        kwh_data_x48[4, 10] = [4] * 10
-
-        meter = build(:meter, meter_collection: meter_collection,
-                              type: :electricity,
-                              meter_attributes: meter_attributes,
-                              amr_data: build(:amr_data, :with_date_range, type: :electricity,
-                                                                           start_date: evaluator.start_date,
-                                                                           end_date: evaluator.end_date,
-                                                                           kwh_data_x48: kwh_data_x48))
-        meter_collection.add_electricity_meter(meter)
-      end
-    end
-
     # Unvalidated/unaggregated meter collection with a single gas meter
     trait :with_gas_meter do
       after(:build) do |meter_collection, evaluator|

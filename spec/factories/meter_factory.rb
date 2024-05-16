@@ -79,5 +79,38 @@ FactoryBot.define do
         meter.set_tariffs
       end
     end
+
+    trait :with_storage_heater do
+      transient do
+        start_date   { Date.yesterday - 7 }
+        end_date     { Date.yesterday }
+        kwh_data_x48 { Array.new(48, 1.0) }
+        charge_start_time { TimeOfDay.parse('02:00') }
+        charge_end_time { TimeOfDay.parse('06:00') }
+      end
+
+      initialize_with do
+        meter_attributes = {}
+        meter_attributes[:storage_heaters] = [
+          { charge_start_time: charge_start_time,
+            charge_end_time: charge_end_time }
+        ]
+
+        charge_period = charge_end_time.to_halfhour_index - charge_start_time.to_halfhour_index + 1
+        # match charge times, increases usage just enough for model to consider heating on
+        kwh_data_x48[charge_start_time.to_halfhour_index..
+                     charge_end_time.to_halfhour_index] = [4.0] * charge_period
+        amr_data = build(:amr_data,
+                         :with_date_range,
+                         type: :electricity,
+                         start_date: start_date,
+                         end_date: end_date,
+                         kwh_data_x48: kwh_data_x48)
+        meter = build(:meter,
+                      meter_collection: meter_collection,
+                      type: :electricity, meter_attributes: meter_attributes,
+                      amr_data: amr_data)
+      end
+    end
   end
 end
