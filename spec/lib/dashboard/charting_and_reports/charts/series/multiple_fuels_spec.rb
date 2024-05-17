@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Series::MultipleFuels do
   subject(:series_manager) do
-    Series::MultipleFuels.new(meter_collection, chart_config)
+    described_class.new(meter_collection, chart_config)
   end
 
   let(:electricity) do
@@ -40,7 +40,7 @@ describe Series::MultipleFuels do
     AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
   end
 
-  describe '#get_data' do
+  describe '#day_breakdown' do
     context 'when retrieving data for a date covered by both meters' do
       it 'returns data' do
         breakdown = series_manager.day_breakdown(Date.new(2022, 1, 1), Date.new(2022, 1, 1))
