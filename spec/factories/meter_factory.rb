@@ -106,10 +106,10 @@ FactoryBot.define do
                          start_date: start_date,
                          end_date: end_date,
                          kwh_data_x48: kwh_data_x48)
-        meter = build(:meter,
-                      meter_collection: meter_collection,
-                      type: :electricity, meter_attributes: meter_attributes,
-                      amr_data: amr_data)
+        build(:meter,
+              meter_collection: meter_collection,
+              type: :electricity, meter_attributes: meter_attributes,
+              amr_data: amr_data)
       end
     end
   end
