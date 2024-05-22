@@ -1,50 +1,46 @@
-require_relative '../../../../app/services/usage/annual_usage_benchmarks_service.rb'
+require_relative '../../../../app/services/usage/annual_usage_benchmarks_service'
 
-# adds benchmarking data as extra x axis onto benchmark charts
+# For charts configured with:
+#
+# ```
+# inject: :benchmark
+# ```
+#
+# This class will inject additional series based on calculating the usage
+# for an Exemplar of Benchmark ('Well Managed') school with similar characteristics
 class AggregatorBenchmarks < AggregatorBase
-  SCALESPLITCHAR = ':'
-  def self.exemplar_school_name
-    'Exemplar School'
-  end
-
-  def self.benchmark_school_name
-    'Benchmark (Good) School'
-  end
+  EXEMPLAR_SCHOOL_NAME = 'Exemplar School'.freeze
+  BENCHMARK_SCHOOL_NAME = 'Benchmark (Good) School'.freeze
 
   def inject_benchmarks
-    inject_benchmarks_private
-  end
-
-  private
-
-  def inject_benchmarks_private
-    # reverse X axis on benchmarks only following PM/CT request 18Jan2020
     results.reverse_x_axis
 
-    logger.info "Injecting national, regional and exemplar benchmark data: for #{results.bucketed_data.keys}"
+    logger.debug { "Injecting exemplar and well manage schooled benchmark data: for #{results.bucketed_data.keys}" }
 
-    results.x_axis.push(AggregatorBenchmarks.exemplar_school_name)
-    results.x_axis.push(AggregatorBenchmarks.benchmark_school_name)
+    results.x_axis.push(EXEMPLAR_SCHOOL_NAME)
+    results.x_axis.push(BENCHMARK_SCHOOL_NAME)
 
-    most_recent_date_range = results.x_axis_bucket_date_ranges.sort{ |dr1, dr2| dr1.first <=> dr2.first }.last
+    most_recent_date_range = results.x_axis_bucket_date_ranges.sort_by(&:first).last
     asof_date = most_recent_date_range.last
     datatype = @chart_config[:yaxis_units]
 
-    ['electricity', 'gas', Series::MultipleFuels::STORAGEHEATERS].each do |fuel_type_str|
-      if benchmark_required?(fuel_type_str)
-        fuel = fuel_type_str == Series::MultipleFuels::STORAGEHEATERS ? :storage_heaters : fuel_type_str.to_sym
-        set_benchmark_buckets(
-          results.bucketed_data[fuel_type_str],
-          benchmark_data(asof_date, fuel, :exemplar_school,  datatype),
-          benchmark_data(asof_date, fuel, :benchmark_school, datatype),
-        )
-      end
+    [Series::MultipleFuels::ELECTRICITY, Series::MultipleFuels::GAS, Series::MultipleFuels::STORAGEHEATERS].each do |fuel_type_str|
+      next unless benchmark_required?(fuel_type_str)
+
+      fuel = fuel_type_str == Series::MultipleFuels::STORAGEHEATERS ? :storage_heaters : fuel_type_str.to_sym
+      set_benchmark_buckets(
+        results.bucketed_data[fuel_type_str],
+        benchmark_data(asof_date, fuel, :exemplar_school,  datatype),
+        benchmark_data(asof_date, fuel, :benchmark_school, datatype)
+      )
     end
 
-    if benchmark_required?(Series::MultipleFuels::SOLARPV)
-      set_benchmark_buckets(results.bucketed_data[Series::MultipleFuels::SOLARPV], 0.0, 0.0, 0.0)
-    end
+    return unless benchmark_required?(Series::MultipleFuels::SOLARPV)
+
+    set_benchmark_buckets(results.bucketed_data[Series::MultipleFuels::SOLARPV], 0.0, 0.0, 0.0)
   end
+
+  private
 
   def benchmark_required?(fuel_type)
     results.bucketed_data.key?(fuel_type) && results.bucketed_data[fuel_type].is_a?(Array) && results.bucketed_data[fuel_type].sum > 0.0
