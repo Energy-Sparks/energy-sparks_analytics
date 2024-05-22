@@ -86,5 +86,38 @@ describe AggregatorBenchmarks do
         it_behaves_like 'the benchmark series have been injected', fuels: ['storage heaters']
       end
     end
+
+    context 'with two series' do
+      let(:bucketed_data) do
+        {
+          'electricity' => [1000.0, 12_000.0],
+          'gas' => [1000.0, 12_000.0]
+        }
+      end
+
+      let(:aggregator_results) do
+        one_year_ago = Date.today - 365
+        AggregatorResults.new(
+          x_axis: %w[this_year last_year],
+          bucketed_data: bucketed_data,
+          x_axis_bucket_date_ranges: [[one_year_ago, Date.today], [one_year_ago - 365, one_year_ago]],
+          bucketed_data_count: bucketed_data
+        )
+      end
+
+      context 'with a gas and electricity series' do
+        let(:meter_collection) do
+          build(:meter_collection, :with_electricity_and_gas_meters,
+                start_date: Date.new(2023, 1, 1), end_date: Date.new(2023, 12, 31))
+        end
+
+        before do
+          AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
+          aggregator.inject_benchmarks
+        end
+
+        it_behaves_like 'the benchmark series have been injected', fuels: %w[electricity gas]
+      end
+    end
   end
 end
