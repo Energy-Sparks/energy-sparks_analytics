@@ -1,3 +1,5 @@
+require_relative '../../../../app/services/usage/annual_usage_benchmarks_service.rb'
+
 # adds benchmarking data as extra x axis onto benchmark charts
 class AggregatorBenchmarks < AggregatorBase
   SCALESPLITCHAR = ':'
@@ -30,17 +32,17 @@ class AggregatorBenchmarks < AggregatorBase
 
     ['electricity', 'gas', Series::MultipleFuels::STORAGEHEATERS].each do |fuel_type_str|
       if benchmark_required?(fuel_type_str)
+        fuel = fuel_type_str == Series::MultipleFuels::STORAGEHEATERS ? :storage_heaters : fuel_type_str.to_sym
         set_benchmark_buckets(
           results.bucketed_data[fuel_type_str],
-          benchmark_data(asof_date, fuel_type_str.to_sym, :exemplar,  datatype),
-          benchmark_data(asof_date, fuel_type_str.to_sym, :benchmark, datatype),
+          benchmark_data(asof_date, fuel, :exemplar_school,  datatype),
+          benchmark_data(asof_date, fuel, :benchmark_school, datatype),
         )
       end
     end
 
-    # TODO (PH, 15Dec2022) - this code mix of pv and sh looks wrong? INvestigate?
     if benchmark_required?(Series::MultipleFuels::SOLARPV)
-      set_benchmark_buckets(results.bucketed_data[Series::MultipleFuels::STORAGEHEATERS], 0.0, 0.0, 0.0)
+      set_benchmark_buckets(results.bucketed_data[Series::MultipleFuels::SOLARPV], 0.0, 0.0, 0.0)
     end
   end
 
@@ -54,8 +56,8 @@ class AggregatorBenchmarks < AggregatorBase
   end
 
   def benchmark_data(asof_date, fuel_type, benchmark_type, datatype)
-    @alerts ||= {}
-    @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, asof_date)
-    @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
+    service = Usage::AnnualUsageBenchmarksService.new(school, fuel_type, asof_date)
+    benchmarked_usage = service.annual_usage(compare: benchmark_type)
+    benchmarked_usage.send(datatype.to_sym)
   end
 end
