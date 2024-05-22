@@ -94,11 +94,8 @@ class AggregateDataService
       # has been completed and caching can be enabled
       @meter_collection.notify_aggregation_complete!
     end
-    calc_text = "Calculated meter aggregation for |#{format('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds"
 
-    puts calc_text unless Object.const_defined?('Rails')
-
-    log calc_text
+    logger.debug { "Calculated meter aggregation for |#{format('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds" }
   end
 
   private
