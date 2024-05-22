@@ -64,6 +64,7 @@ class Aggregator
 
   def unpack_results2(res)
     @bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis, @series_manager, @series_names, @xbucketor, @data_labels, @x_axis_label, @chart_config[:y_axis_label], @last_meter_date = res.unpack2
+    @first_meter_date = multi_school_period_aggregator.min_combined_school_date
     @last_meter_date = multi_school_period_aggregator.max_combined_school_date
   end
 
