@@ -22,8 +22,8 @@ describe AggregatorBenchmarks do
 
   shared_examples 'the benchmark series have been injected' do |fuels:|
     it 'adds series to x_axis' do
-      expect(aggregator_results.x_axis).to include(AggregatorBenchmarks.BENCHMARK_SCHOOL_NAME)
-      expect(aggregator_results.x_axis).to include(AggregatorBenchmarks.EXEMPLAR_SCHOOL_NAME)
+      expect(aggregator_results.x_axis).to include(AggregatorBenchmarks::BENCHMARK_SCHOOL_NAME)
+      expect(aggregator_results.x_axis).to include(AggregatorBenchmarks::EXEMPLAR_SCHOOL_NAME)
     end
 
     it 'adds calculated usage' do
