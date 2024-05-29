@@ -18,7 +18,7 @@ module Charts
         to_keep = heating_filter(to_keep)
         to_keep = model_type_filter(to_keep)
         to_keep = simple_filters(to_keep)
-        to_keep = y2_axis_filter(to_keep)
+        to_keep = y2_axes(to_keep)
 
         remove_list = @results.bucketed_data.keys - to_keep
 
@@ -82,9 +82,13 @@ module Charts
         to_keep
       end
 
-      def y2_axis_filter(to_keep)
-        return to_keep unless @chart_config.y2_axis?
-
+      # This is not a filter. It ensures that any Y2 axes series names are retained in the results
+      #
+      # Some charts do not have a y2 axes, but include series that might also be used on a y2 axis
+      # E.g. thermostatic_regression.
+      #
+      # So this is applied to all charts, not just those with a y2 axis.
+      def y2_axes(to_keep)
         Series::ManagerBase.y2_series_types.each_value do |y2_series_name|
           base_name_length = y2_series_name.length
           to_keep += @results.bucketed_data.keys.select { |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
