@@ -60,7 +60,7 @@ describe Aggregator do
   end
 
   describe '#aggregate' do
-    describe 'with a series breakdown' do
+    describe 'with a series breakdown by fuel' do
       let(:chart_config) do
         {
           name: 'Test benchmark chart',
@@ -180,6 +180,34 @@ describe Aggregator do
       end
 
       it_behaves_like 'a chart with the right timescale', series: 6 # 4 years, plus 2 for benchmarks
+    end
+
+    describe 'with a thermostatic regression' do
+      let(:chart_config) do
+        {
+          name: 'Test thermostatic chart',
+          chart1_type: :scatter,
+          meter_definition: :allheat,
+          timescale: :up_to_a_year,
+          series_breakdown: %i[model_type temperature],
+          x_axis: :day,
+          yaxis_units: :kwh,
+          yaxis_scaling: :none
+        }
+      end
+
+      # TEMPORARY use anonymised data until we've implemented approach for creating synthetic
+      # AMR / Temperature / Holiday data to allow heating models to work
+      let(:meter_collection) do
+        load_unvalidated_meter_collection(school: 'acme-academy', validate_and_aggregate: true)
+      end
+
+      before { aggregator.aggregate }
+
+      it_behaves_like 'a successful calculation' do
+        let(:expected_start_date) { Date.new(2018, 9, 1) }
+        let(:expected_end_date) { Date.new(2023, 10, 10) }
+      end
     end
   end
 end
