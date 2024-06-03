@@ -29,8 +29,7 @@ class StorageHeater
         electricity_only_amr_data.add(date, amr_data.clone_one_days_data(date))
       end
     end
-    logger.info "Disaggregated storage heater #{amr_data.total.round(0)} kWh => sh #{storage_heater_amr_data.total.round(0)} e-sh #{electricity_only_amr_data.total.round(0)}"
-    puts "Disaggregated storage heater #{amr_data.total.round(0)} kWh => sh #{storage_heater_amr_data.total.round(0)} e-sh #{electricity_only_amr_data.total.round(0)}"
+    logger.debug { "Disaggregated storage heater #{amr_data.total.round(0)} kWh => sh #{storage_heater_amr_data.total.round(0)} e-sh #{electricity_only_amr_data.total.round(0)}" }
 
     [electricity_only_amr_data, storage_heater_amr_data]
   end

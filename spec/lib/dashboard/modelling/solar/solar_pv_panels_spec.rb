@@ -27,7 +27,7 @@ describe SolarPVPanels, type: :service do
           data_x48: solar_yield)
   end
 
-  let(:pv_meter_map)       { PVMap.new }
+  let(:pv_meter_map)       { SolarMeterMap.new }
 
   let(:is_holiday)         { false }
   let(:holidays)           { double('holidays') }

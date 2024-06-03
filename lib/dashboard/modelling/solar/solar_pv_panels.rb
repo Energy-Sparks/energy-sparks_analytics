@@ -37,12 +37,12 @@ class SolarPVPanels
   # Main entry point into the service, called as part of the aggregation process.
   # Creates new meters and synthetic data as required.
   #
-  # The provided PVMap might be empty (other than the mains consumption meter) or
+  # The provided SolarMeterMap might be empty (other than the mains consumption meter) or
   # may contain entries from the `solar_pv_mpan_meter_mapping` meter attribute if
   # there is actual metered solar data. In this case we might end up overriding that
   # specific date ranges within that data if configured to do so.
   #
-  # @param [PVMap] pv_meter_map list of meters used for solar calculations
+  # @param [SolarMeterMap] pv_meter_map list of meters used for solar calculations
   # @param [MeterCollection] meter_collection the school whose solar data is being processed
   def process(pv_meter_map, meter_collection)
     #Print debug output. Unused unless @debug_date_range is set
@@ -89,7 +89,7 @@ class SolarPVPanels
   #For an existing meter, may just end up overridding specific days if
   #meter attributes are configured to do so
   #
-  # @param [PVMap] pv_meter_map the solar meters
+  # @param [SolarMeterMap] pv_meter_map the solar meters
   # @param [boolean] create_zero_if_no_config THIS IS ALWAYS FALSE
   def create_generation_data(pv_meter_map, create_zero_if_no_config)
     pv_meter_map[:generation] = create_generation_meter_from_map(pv_meter_map) if pv_meter_map[:generation].nil?
@@ -106,7 +106,7 @@ class SolarPVPanels
     pv_meter_map[:export] = create_export_meter_from_map(pv_meter_map) if pv_meter_map[:export].nil?
   end
 
-  # Calculate or override the solar export data for the export meter in the PVMap
+  # Calculate or override the solar export data for the export meter in the SolarMeterMap
   def create_or_override_export_data(pv_meter_map, meter_collection)
     override_export_data_detail(
       pv_meter_map[:mains_consume].amr_data,
@@ -121,7 +121,7 @@ class SolarPVPanels
     pv_meter_map[:self_consume] = create_self_consumption_meter_from_map(pv_meter_map) if pv_meter_map[:self_consume].nil?
   end
 
-  # Calculate or override the solar self consumption data for the self consumption meter in the PVMap
+  # Calculate or override the solar self consumption data for the self consumption meter in the SolarMeterMap
   def create_self_consumption_data(pv_meter_map, meter_collection)
     calculate_self_consumption_data(
       pv_meter_map[:mains_consume].amr_data,
