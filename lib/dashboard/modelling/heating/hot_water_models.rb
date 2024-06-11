@@ -5,7 +5,6 @@ module AnalyseHeatingAndHotWater
   #
   # looks at DATE_MARGIN around the last summer holiday and calculate averages for weekends, holidays and school days
   # which is then used to extrapolated for the whole year
-
   class HotwaterModel
     include Logging
 
@@ -102,8 +101,6 @@ module AnalyseHeatingAndHotWater
 
       results
     end
-
-    # hot water model
 
     # the analysis relies on having hot water running exclusively before and during the holidays
     # this analysis won't work if these basic conditions aren't met
@@ -218,7 +215,6 @@ module AnalyseHeatingAndHotWater
     end
 
     def set_annual_estimates
-      # whole year
       weeks_holiday = 13
       school_weeks = 52 - weeks_holiday
       @annual_holiday_kwh = avg_holiday_day_gas_consumption * weeks_holiday * 7
