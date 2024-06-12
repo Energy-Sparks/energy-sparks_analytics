@@ -33,7 +33,7 @@ RSpec.shared_examples 'a holiday and term comparison' do
       expect(alert.previous_period_start_date).to eq(expected_previous_period_start)
       expect(alert.previous_period_end_date).to eq(expected_previous_period_end)
 
-      expect(alert.truncated_current_period).to eq(false)
+      expect(alert.truncated_current_period).to be(false)
     end
 
     it 'calculates the expected consumption' do
@@ -83,7 +83,7 @@ RSpec.shared_examples 'a holiday and term comparison' do
         # Summer holiday, truncated to available data
         expect(alert.current_period_start_date).to eq(Date.new(2023, 7, 22))
         expect(alert.current_period_end_date).to eq(analysis_date)
-        expect(alert.truncated_current_period).to eq(true)
+        expect(alert.truncated_current_period).to be(true)
 
         # Sunday 16th to Friday 21st
         expect(alert.previous_period_start_date).to eq(expected_previous_period_start)
