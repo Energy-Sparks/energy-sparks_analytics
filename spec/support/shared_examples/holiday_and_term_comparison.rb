@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
+# These examples assume context has been setup such that the meter for the specified fuel type
+# has holidays covering 2023 as defined in holidays factory, with meter data covering same period
 RSpec.shared_examples 'a holiday and term comparison' do
   let(:fuel_type) { :electricity }
   # we double the previous period consumption in before block below
-  let(:expected_previous_period_average_kwh) { 96.0 }
   let(:current_period_average_kwh) { 48.0 }
+  let(:expected_previous_period_multiplier) { 2.0 }
+  let(:expected_previous_period_average_kwh) { current_period_average_kwh * expected_previous_period_multiplier }
 
   context 'when running after a holiday has ended' do
     let(:analysis_date) { Date.new(2023, 9, 1) } # first day after summer holiday
@@ -12,7 +15,7 @@ RSpec.shared_examples 'a holiday and term comparison' do
     before do
       # double consumption data in previous period
       meter_collection.aggregate_meter(fuel_type).amr_data.scale_kwh(
-        2.0,
+        expected_previous_period_multiplier,
         date1: expected_previous_period_start,
         date2: expected_previous_period_end
       )
@@ -67,7 +70,7 @@ RSpec.shared_examples 'a holiday and term comparison' do
 
         # double consumption data in previous period
         meter_collection.aggregate_meter(fuel_type).amr_data.scale_kwh(
-          2.0,
+          expected_previous_period_multiplier,
           date1: expected_previous_period_start,
           date2: expected_previous_period_end
         )
@@ -88,7 +91,6 @@ RSpec.shared_examples 'a holiday and term comparison' do
       end
 
       it 'calculates the expected consumption' do
-        # double consumption data in previous period
         expect(alert.previous_period_average_kwh).to be_within(0.00001).of(expected_previous_period_average_kwh)
         expect(alert.current_period_average_kwh).to be_within(0.00001).of(current_period_average_kwh)
         expect(alert.abs_difference_percent).to be_within(0.00001).of(0.5)
