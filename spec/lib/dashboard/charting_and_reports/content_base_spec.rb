@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 require 'dashboard'
+
 class CustomAlert < ContentBase
   # Test access to instance variables
-  attr_reader :a_number, :a_cost, :a_priority
+  attr_reader :a_number, :a_cost, :a_priority, :a_boolean, :a_range
 
   TEMPLATE_VARIABLES = {
     a_number: {
@@ -23,7 +24,7 @@ class CustomAlert < ContentBase
       description: 'A GBP range',
       units: :£_range
     },
-    stripped: {
+    a_boolean: {
       description: 'stripped',
       units: TrueClass
     },
@@ -48,10 +49,10 @@ class CustomAlert < ContentBase
     }
   }.freeze
 
-  def initialize(number: 100, cost: 50)
-    @a_number = number
-    @a_cost = cost
-    @a_priority = number * 2
+  def initialize(vars)
+    vars.each do |name, value|
+      instance_variable_set("@#{name}", value)
+    end
   end
 
   # Test calling methods dynamically
@@ -66,98 +67,102 @@ class CustomAlert < ContentBase
 end
 
 describe ContentBase do
+  subject(:alert) { CustomAlert.new(vars) }
+
+  let(:vars) do
+    {
+      a_number: 100,
+      a_cost: 50,
+      a_priority: 200
+    }
+  end
+
   describe '#i18n_prefix' do
     it 'returns correct prefix' do
-      expect(CustomAlert.new.i18n_prefix).to eq 'analytics.custom_alert'
+      expect(alert.i18n_prefix).to eq 'analytics.custom_alert'
     end
   end
 
   context 'when listing variables' do
     describe '#front_end_template_variables' do
-      before do
-        @variables = CustomAlert.front_end_template_variables
-      end
+      let(:variables) { CustomAlert.front_end_template_variables }
 
       it 'produces basic variables' do
-        expect(@variables).to match({
-                                      'Custom Alert' => a_hash_including(
-                                        a_cost: {
-                                          description: 'A GBP value',
-                                          units: :£
-                                        }
-                                      )
-                                    })
+        expect(variables).to match({
+                                     'Custom Alert' => a_hash_including(
+                                       a_cost: {
+                                         description: 'A GBP value',
+                                         units: :£
+                                       }
+                                     )
+                                   })
       end
 
       it 'converts some units' do
-        expect(@variables).to match({
-                                      'Custom Alert' => a_hash_including(
-                                        a_number: {
-                                          description: 'A number',
-                                          units: :integer
-                                        },
-                                        a_priority: {
-                                          description: 'priority',
-                                          priority_code: 'XYZ',
-                                          units: :integer
-                                        },
-                                        some_string: {
-                                          description: 'A string',
-                                          units: :string
-                                        },
-                                        date: {
-                                          description: 'mapped to native type',
-                                          units: :date
-                                        }
-                                      )
-                                    })
+        expect(variables).to match({
+                                     'Custom Alert' => a_hash_including(
+                                       a_number: {
+                                         description: 'A number',
+                                         units: :integer
+                                       },
+                                       a_priority: {
+                                         description: 'priority',
+                                         priority_code: 'XYZ',
+                                         units: :integer
+                                       },
+                                       some_string: {
+                                         description: 'A string',
+                                         units: :string
+                                       },
+                                       date: {
+                                         description: 'mapped to native type',
+                                         units: :date
+                                       }
+                                     )
+                                   })
       end
 
       it 'adds variables for ranges' do
-        expect(@variables).to match({
-                                      'Custom Alert' => a_hash_including(
-                                        a_range_low: {
-                                          description: 'A GBP range low',
-                                          units: :£
-                                        },
-                                        a_range_high: {
-                                          description: 'A GBP range high',
-                                          units: :£
-                                        }
-                                      )
-                                    })
+        expect(variables).to match({
+                                     'Custom Alert' => a_hash_including(
+                                       a_range_low: {
+                                         description: 'A GBP range low',
+                                         units: :£
+                                       },
+                                       a_range_high: {
+                                         description: 'A GBP range high',
+                                         units: :£
+                                       }
+                                     )
+                                   })
       end
 
       it 'strips other variables' do
-        expect(@variables['Custom Alert']).not_to have_key(:a_chart)
-        expect(@variables['Custom Alert']).not_to have_key(:a_table)
-        expect(@variables['Custom Alert']).not_to have_key(:stripped)
+        expect(variables['Custom Alert']).not_to have_key(:a_chart)
+        expect(variables['Custom Alert']).not_to have_key(:a_table)
+        expect(variables['Custom Alert']).not_to have_key(:stripped)
       end
     end
 
     describe '#priority_template_variables' do
-      before do
-        @variables = CustomAlert.priority_template_variables
-      end
+      let(:variables) { CustomAlert.priority_template_variables }
 
       it 'returns only the priority variables' do
-        expect(@variables).to eq({
-                                   a_priority: {
-                                     description: 'priority',
-                                     units: :integer,
-                                     priority_code: 'XYZ'
-                                   }
-                                 })
+        expect(variables).to eq({
+                                  a_priority: {
+                                    description: 'priority',
+                                    units: :integer,
+                                    priority_code: 'XYZ'
+                                  }
+                                })
       end
     end
 
     describe '#front_end_template_charts' do
-      before do
-        @charts = CustomAlert.front_end_template_charts
-      end
+      let(:charts) { CustomAlert.front_end_template_charts }
 
       it 'returns only charts' do
-        expect(@charts).to eq(
+        expect(charts).to eq(
           a_chart: {
             description: 'a chart',
             units: :chart
@@ -167,12 +172,10 @@ describe ContentBase do
     end
 
     describe '#front_end_template_tables' do
-      before do
-        @tables = CustomAlert.front_end_template_tables
-      end
+      let(:tables) { CustomAlert.front_end_template_tables }
 
       it 'returns only tables' do
-        expect(@tables).to eq(
+        expect(tables).to eq(
           a_table: {
             description: 'a table',
             units: :table,
@@ -186,29 +189,64 @@ describe ContentBase do
 
   context 'when returning data' do
     describe '#front_end_template_data' do
-      before do
-        @template_data = CustomAlert.new.front_end_template_data
-      end
+      let(:variables) { alert.front_end_template_data }
 
       it 'returns the expected values' do
-        expect(@template_data).to eq({
-                                       a_cost: '£50',
-                                       a_number: '100',
-                                       a_priority: '200',
-                                       some_string: 'Returned via method'
-                                     })
+        expect(variables).to eq({
+                                  a_cost: '£50',
+                                  a_number: '100',
+                                  a_priority: '200',
+                                  some_string: 'Returned via method',
+                                  a_range: '',
+                                  a_range_high: nil,
+                                  a_range_low: nil
+                                })
       end
     end
 
     describe '#priority_template_data' do
-      before do
-        @template_data = CustomAlert.new.priority_template_data
-      end
+      let(:variables) { alert.priority_template_data }
 
       it 'returns the expected values' do
-        expect(@template_data).to eq({
-                                       a_priority: 200
-                                     })
+        expect(variables).to eq({ a_priority: 200 })
+      end
+    end
+
+    describe '#variables_for_reporting' do
+      let(:variables) { alert.variables_for_reporting }
+
+      it 'returns the expected values' do
+        expect(variables).to eq({
+                                  a_cost: 50,
+                                  a_number: 100,
+                                  a_priority: 200,
+                                  some_string: 'Returned via method',
+                                  a_boolean: nil,
+                                  a_range: nil
+                                })
+      end
+
+      context 'with a range provided' do
+        let(:vars) do
+          {
+            a_number: 100,
+            a_cost: 50,
+            a_priority: 200,
+            a_range: 100..200
+          }
+        end
+
+        it 'returns the expected values' do
+          expect(variables).to eq({
+                                    a_cost: 50,
+                                    a_number: 100,
+                                    a_priority: 200,
+                                    some_string: 'Returned via method',
+                                    a_boolean: nil,
+                                    a_range_low: 100,
+                                    a_range_high: 200
+                                  })
+        end
       end
     end
   end

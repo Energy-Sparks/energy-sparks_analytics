@@ -10,6 +10,7 @@ module Costs
     def calculate_economic_tariff_changed
       return nil if meter.nil?
       return nil if changed_dates.empty?
+      return nil if last_change_date >= end_date
 
       OpenStruct.new(
         last_change_date: last_change_date,

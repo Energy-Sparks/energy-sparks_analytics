@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe PowerConsumptionService do
-  let(:school)                  { build(:school) }
+  let(:school)                  { build(:analytics_school) }
   let(:meter_collection)        { build(:meter_collection) }
   let(:meter)                   { build(:meter, type: :electricity) }
 

@@ -107,7 +107,7 @@ describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSc
           Notes:
           <ul>
             <li>
-              (*1) the comparison has been adjusted because the number of pupils have changed between the two school weeks for Acme Primary School 1 and Acme Primary School 2.
+              (*1) the comparison has been adjusted because the number of pupils have changed between the two school weeks.
             </li>
             <li>
               (*2) schools where percentage change is +Infinity is caused by the electricity consumption in the previous school week being more than zero but in the current school week zero

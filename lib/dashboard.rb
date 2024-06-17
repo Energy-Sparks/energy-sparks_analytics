@@ -45,8 +45,10 @@ require 'html-table'
 
 require 'active_support'
 require 'active_support/core_ext/date/calculations'
+require 'active_support/core_ext/integer/time'
 require 'active_support/core_ext/numeric/conversions'
-require 'active_support/core_ext/object'
+require 'active_support/core_ext/object
+require 'active_support/core_ext/time/calculations'
 
 # downloadregionalsolardatafromsheffieldluniversity
 # downloadSolarAndTemperatureData

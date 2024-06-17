@@ -3,12 +3,12 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 module Logging
-  @logger = Logger.new(File.join('log', 'test charts.log'))
+  @logger = Logger.new(File.join('log', 'test_charts.log'))
   logger.level = :debug
 end
 
 charts = {
-  adhoc: %i[ pupil_dashboard_group_by_week_electricity_kwh ]
+  adhoc: %i[benchmark]
 }
 
 no_charts = RunCharts.standard_charts_for_school
@@ -24,7 +24,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['s*'],
+  schools:  ['acc*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }

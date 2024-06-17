@@ -2,7 +2,7 @@
 require_relative '../alert_electricity_only_base.rb'
 
 class AlertIntraweekBaseloadVariation < AlertBaseloadBase
-  attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation
+  attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation, :max_day, :min_day
   attr_reader :annual_cost_kwh, :annual_cost_£,  :annual_cost_£current, :annual_co2
 
   def initialize(school, report_type = :intraweekbaseload, meter = school.aggregated_electricity_meters)
@@ -16,9 +16,13 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       benchmark_code: 'mxbk'
     },
     max_day_str: {
-      description: 'Day of week name with max average baseload',
+      description: 'Day of the week name with max average baseload',
       units:  String,
       benchmark_code: 'mxbd'
+    },
+    max_day: {
+      description: 'Day of the week number with max average baseload',
+      units:  Integer,
     },
     min_day_kw: {
       description: 'min average day baseload kw',
@@ -26,9 +30,13 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       benchmark_code: 'mnbk'
     },
     min_day_str: {
-      description: 'Day of week name with min average baseload',
+      description: 'Day of the week name with min average baseload',
       units:  String,
       benchmark_code: 'mnbd'
+    },
+    min_day: {
+      description: 'Day of the week number with min average baseload',
+      units:  Integer
     },
     percent_intraday_variation: {
       description: 'seasonal baseload variation percent (relative)',

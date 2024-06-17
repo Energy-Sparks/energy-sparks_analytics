@@ -924,6 +924,10 @@ module Series
         breakdown.keys.each do |fuel_type_str|
           next if aggregate_meters[fuel_type_str].nil?
 
+          # skip if we don't have any data for this day. fixes issue if the date ranges for the
+          # fuel types don't align, e.g. if we only have storage heater data for a historical period
+          next unless aggregate_meters[fuel_type_str].amr_data.date_exists_by_type?(date, :kwh)
+
           breakdown[fuel_type_str] += amr_data_one_day(aggregate_meters[fuel_type_str], date, kwh_cost_or_co2)
         end
       end

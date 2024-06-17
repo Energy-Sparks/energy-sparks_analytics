@@ -149,7 +149,7 @@ class ChartManager
       name:             'Benchmark Comparison (Annual Electricity Consumption)',
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
-      meter_definition: :all,
+      meter_definition: :allelectricity,
       x_axis:           :year,
       series_breakdown: :fuel,
       yaxis_units:      :£,
@@ -767,9 +767,9 @@ class ChartManager
       inherits_from:      :solar_pv_group_by_week_by_submeter,
       filter:                   {
         submeter: [
-          SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-          SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-          SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+          :mains_consume,
+          :export,
+          :self_consume
         ]
       },
       x_axis:           :month,
@@ -796,9 +796,9 @@ class ChartManager
       series_breakdown:   :submeter,
       filter:                   {
         submeter: [
-          SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-          SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-          SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+          :mains_consume,
+          :export,
+          :self_consume
         ]
       },
     },
@@ -1067,8 +1067,8 @@ class ChartManager
       chart1_type:      :column,
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
-      x_axis:           :month_excluding_year,
-      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      x_axis:           :month,
+      timescale:        [{ twelve_months: 0 }, { twelve_months: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
