@@ -21,5 +21,22 @@ FactoryBot.define do
         end
       end
     end
+
+    trait :with_summer_and_winter do
+      transient do
+        start_date { Date.yesterday - 7 }
+        end_date { Date.yesterday }
+        summer_months { [6, 7, 8] }
+        summer_temp { Array.new(48) { 20.0 } }
+        winter_temp { Array.new(48) { 1.0 } }
+      end
+
+      after(:build) do |temperatures, evaluator|
+        (evaluator.start_date..evaluator.end_date).each do |date|
+          temps = evaluator.summer_months.include?(date.month) ? evaluator.summer_temp : evaluator.winter_temp
+          temperatures.add(date, temps)
+        end
+      end
+    end
   end
 end
