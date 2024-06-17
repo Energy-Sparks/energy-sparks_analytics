@@ -27,6 +27,7 @@ group :development do
   gem 'rubocop'
   gem 'rubocop-performance'
   gem 'rubocop-rspec'
+  gem 'rubocop-factory_bot'
   gem 'ruby-prof'
   gem 'overcommit'
 end
