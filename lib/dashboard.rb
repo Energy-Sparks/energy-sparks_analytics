@@ -47,6 +47,7 @@ require 'active_support'
 require 'active_support/core_ext/date/calculations'
 require 'active_support/core_ext/numeric/conversions'
 require 'active_support/core_ext/object/deep_dup'
+require 'active_support/core_ext/string'
 
 # downloadregionalsolardatafromsheffieldluniversity
 # downloadSolarAndTemperatureData
