@@ -94,7 +94,7 @@ class GenericTariffManager
   def tariff_change_dates_in_period(start_date = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
     list_of_tariffs = find_tariffs_between_dates(start_date, end_date)
     list_of_tariffs = list_of_tariffs.reject { |t| t.end_date == GenericAccountingTariff::MAX_DEFAULT_END_DATE }
-    list_of_tariffs.map { |t| t.end_date + 1 }
+    list_of_tariffs.map { |t| t.end_date + 1 }.reverse
   end
 
   # Costs::EconomicTariffsChangeCaveatsService
