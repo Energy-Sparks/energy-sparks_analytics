@@ -35,6 +35,11 @@ describe Costs::EconomicTariffsChangeCaveatsService do
           tariffs = [
             create_accounting_tariff_generic(
               start_date: start_date,
+              end_date: start_date + 6,
+              rates: create_flat_rate(rate: 0.5)
+            ),
+            create_accounting_tariff_generic(
+              start_date: start_date + 7,
               end_date: newest_tariff_start - 1,
               rates: create_flat_rate(rate: 1.0)
             ),
@@ -54,7 +59,7 @@ describe Costs::EconomicTariffsChangeCaveatsService do
         expect(caveats.last_change_date).to eq(newest_tariff_start)
         expect(caveats.rate_after_£_per_kwh).to be_within(0.1).of(2.0)
         expect(caveats.rate_before_£_per_kwh).to be_within(0.1).of(1.0)
-        expect(caveats.percent_change).to be_within(0.1).of(0.9)
+        expect(caveats.percent_change).to be_within(0.1).of(1.0)
       end
     end
   end

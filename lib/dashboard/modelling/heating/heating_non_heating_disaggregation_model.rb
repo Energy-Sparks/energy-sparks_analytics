@@ -210,15 +210,9 @@ module AnalyseHeatingAndHotWater
     end
 
     def log_data(results, days, message)
-      kwhs      = days.map { |date| @amr_data.one_day_kwh(date) }.join(', ')
-      avg_temps = days.map { |date| temperatures.average_temperature(date) }.join(', ')
-      logger.info message
-      logger.info "kwh: #{kwhs}"
-      logger.info "temps: #{avg_temps}"
-
-      puts message
-      puts "kwh: #{kwhs}"
-      puts "temps: #{avg_temps}"
+      logger.info { message }
+      logger.info { "kwh: #{days.map { |date| @amr_data.one_day_kwh(date) }.join(', ')}" }
+      logger.info { "temps: #{days.map { |date| temperatures.average_temperature(date) }.join(', ')}" }
     end
 
     # no summer usage so synthesize a model
