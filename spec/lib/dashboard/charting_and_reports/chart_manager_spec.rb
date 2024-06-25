@@ -22,8 +22,10 @@ describe ChartManager do
 
     it 'checks every configuration translation key has a title and value' do
       expect(I18n.t('chart_configuration').values).not_to include(nil)
-      expect(I18n.t('chart_configuration').values.map(&:keys).flatten.uniq).to eq(%i[title co2 days kw kwh
-                                                                                     percent percent_0dp r2 relative_percent relative_percent_0dp timeofday w £ £_0dp])
+      expect(I18n.t('chart_configuration').values.map(&:keys).flatten.uniq).to eq(
+        %i[title co2 days kw kwh percent percent_0dp r2 relative_percent relative_percent_0dp timeofday values w £
+           £_0dp]
+      )
       expect(I18n.t('chart_configuration').values.map(&:values).flatten.uniq).not_to include(nil)
       expect(I18n.t('chart_configuration').values.map(&:values).flatten.uniq).not_to include([])
     end
