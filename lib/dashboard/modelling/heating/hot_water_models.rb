@@ -3,6 +3,8 @@ module AnalyseHeatingAndHotWater
   #====================================================================================================================
   # HOT WATER ANALYSIS
   #
+  # looks at DATE_MARGIN around the last summer holiday and calculate averages for weekends, holidays and school days
+  # which is then used to extrapolated for the whole year
   class HotwaterModel
     include Logging
 
