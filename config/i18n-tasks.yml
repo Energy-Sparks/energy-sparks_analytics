@@ -121,6 +121,7 @@ ignore_unused:
   - 'analytics.common.*'
   - 'analytics.school_types.*'
   - 'analytics.series_data_manager.*'
+  - 'chart_configuration.y_axis_label_name.*' # also used directly in the app
 # - 'activerecord.attributes.*'
 # - '{devise,kaminari,will_paginate}.*'
 # - 'simple_form.{yes,no}'
