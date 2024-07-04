@@ -965,7 +965,8 @@ class ChartManager
       x_axis:           :year,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      y2_axis:          :degreedays
+      y2_axis:          :degreedays,
+      reverse_xaxis:    true
     },
     group_by_year_electricity_meter_breakdown: {
       name:             'By Year: Electricity (Meter Breakdown)',
@@ -975,29 +976,8 @@ class ChartManager
       series_breakdown: :meter,
       x_axis:           :year,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :none
-    },
-    group_by_month_gas_meter_breakdown_unlimited: {
-      name:             'By Week: Gas (multi-year)',
-      chart1_type:      :column,
-      chart1_subtype:   :stacked,
-      zoomable:         true,
-      meter_definition: :allheat,
-      x_axis:           :month,
-      series_breakdown: :none,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none
-    },
-    group_by_month_electricity_meter_breakdown_unlimited: {
-      name:             'By Week: Electricity (multi-year)',
-      chart1_type:      :column,
-      chart1_subtype:   :stacked,
-      zoomable:         true,
-      meter_definition: :allelectricity,
-      x_axis:           :month,
-      series_breakdown: :none,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none
+      yaxis_scaling:    :none,
+      reverse_xaxis:    true
     },
     group_by_year_gas_unlimited_meter_breakdown_heating_model_fitter: {
       name:             'Gas meter breakdown by year',
