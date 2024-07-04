@@ -33,7 +33,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
           expect(format_unit(:relative_percent, percent)).to eq '+0.21&percnt;'
           old_building = usage_breakdown.usage(1_591_058_886_735)
           expect(format_unit(:kwh, old_building.kwh)).to eq '99,000'
-          # expect(old_building.kwh).to round_to_two_digits(98392.4)
+          expect(format_unit(:co2, old_building.co2)).to eq '17,000'
           expect(format_unit(:£, old_building.£)).to eq '&pound;15,000'
           expect(format_unit(:percent, old_building.percent)).to eq '24&percnt;'
 
@@ -43,6 +43,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
           expect(format_unit(:relative_percent, percent)).to eq '-14&percnt;'
           new_building = usage_breakdown.usage(1_580_001_320_420)
           expect(format_unit(:kwh, new_building.kwh)).to eq '310,000'
+          expect(format_unit(:co2, new_building.co2)).to eq '52,000'
           expect(format_unit(:£, new_building.£)).to eq '&pound;47,000'
           expect(format_unit(:percent, new_building.percent)).to eq '76&percnt;'
 
@@ -51,6 +52,7 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
           expect(format_unit(:relative_percent, percent)).to eq '-11&percnt;'
           usage_breakdown.total_usage
           expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq '410,000'
+          expect(format_unit(:co2, usage_breakdown.total_usage.co2)).to eq '68,000'
           expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq '&pound;61,000'
           expect(format_unit(:percent, usage_breakdown.total_usage.percent)).to eq '100&percnt;'
         end

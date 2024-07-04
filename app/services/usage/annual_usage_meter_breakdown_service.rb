@@ -73,7 +73,8 @@ module Usage
         name: meter.analytics_name,
         usage: CombinedUsageMetric.new(
           kwh: this_year_kwh,
-          £: meter.amr_data.kwh_date_range(start_date, end_date, :£)
+          £: meter.amr_data.kwh_date_range(start_date, end_date, :£),
+          co2: meter.amr_data.kwh_date_range(start_date, end_date, :co2)
         ),
         annual_change: annual_percent_kwh_change(meter, this_year_kwh)
       }

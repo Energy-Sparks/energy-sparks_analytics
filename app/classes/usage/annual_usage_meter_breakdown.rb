@@ -27,6 +27,7 @@ module Usage
       @total_usage ||= CombinedUsageMetric.new(
         kwh: total_kwh,
         £: total_£,
+        co2: total_co2,
         percent: 1.0
       )
     end
@@ -43,6 +44,10 @@ module Usage
 
     def total_£
       @meter_breakdown.map { |_meter, usage| usage[:usage].£ || 0.0 }.sum
+    end
+
+    def total_co2
+      @meter_breakdown.map { |_meter, usage| usage[:usage].co2 || 0.0 }.sum
     end
   end
 end
