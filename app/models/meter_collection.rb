@@ -434,6 +434,47 @@ class MeterCollection
     end
   end
 
+  # Prints a description of the current metering setup for the meter collection.
+  #
+  # Dumps the list of aggregate meters for the whole school along with their sub meters,
+  # then the list of individual electricity and gas meters with their sub meters.
+  #
+  # If a category of meter or submeter isn't in the collection, then its skipped.
+  #
+  # Uses +Meter.inspect+ to print meters to help clarify both the meter/submeter configuration
+  # and the object ids as meters can effectively be cloned during aggregation (same type, date ranges
+  # mpan, etc)
+  #
+  # Intended to help with debugging any aggregation issues or just reviewing state of the
+  # collection.
+  def print_meter_setup
+    puts "Aggregated Data"
+    puts '-' * 35
+    [:aggregated_electricity_meters, :aggregated_heat_meters, :storage_heater_meter].each do |method|
+      meter = send(method)
+      if meter.present?
+        puts "#{format('%-35s', method)} #{meter.inspect}"
+        meter.sub_meters.each do |key, sub_meter|
+          puts "  - #{format('%-31s', key)} #{sub_meter.inspect}"
+        end
+      end
+    end
+    [:electricity, :heat, :storage_heater].each do |method|
+      meters = send("#{method}_meters")
+      if meters.any?
+        puts "\n#{method.to_s.humanize } Meters"
+        puts '-' * 35
+        meters.each.with_index(1) do |meter, index|
+          puts "  #{format('%-33s', index)} #{meter.inspect}"
+          meter.sub_meters.each do |key, sub_meter|
+            puts "    - #{format('%-29s', key)} #{sub_meter.inspect}"
+          end
+        end
+      end
+    end
+    puts '-' * 35
+  end
+
   #Clip the schedule data to the earliest date that we need for charting or
   #subsequent analysis.
   private def clean_up_schedule_data!
