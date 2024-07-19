@@ -116,7 +116,7 @@ module Series
     end
 
     def determine_meter
-      ChartToMeterMap.instance.meter(school, chart_config[:meter_definition])
+      ChartToMeterMap.instance.meter(school, chart_config[:meter_definition], chart_config[:sub_meter_definition])
     end
 
     def series_names
