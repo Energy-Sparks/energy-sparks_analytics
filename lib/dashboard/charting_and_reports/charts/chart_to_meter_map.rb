@@ -7,43 +7,37 @@ class ChartToMeterMap
 
   include Singleton
 
-  def meter(school, chart_meter_definition)
-    meter = logical_meter_names(school, chart_meter_definition)
+  def meter(meter_collection, meter_definition)
+    meter = logical_meter_names(meter_collection, meter_definition)
     return meter unless meter == :not_mapped
-
-    if chart_meter_definition == :all
-      # TODO: not storage heaters?
-      [school.aggregated_electricity_meters, school.aggregated_heat_meters]
-    elsif mpxn?(chart_meter_definition)
-      school.meter?(chart_meter_definition, true)
-    else
-      raise UnknownChartMeterDefinition, "Unknown chart meter definition type #{chart_meter_definition}"
-    end
+    return meter_collection.meter?(meter_definition, true) if mpxn?(meter_definition)
+    raise UnknownChartMeterDefinition, "Unknown chart meter definition type #{meter_definition}"
   end
 
   private
 
-  def mpxn?(chart_meter_definition)
-    chart_meter_definition.is_a?(String) || chart_meter_definition.is_a?(Integer)
+  def mpxn?(meter_definition)
+    meter_definition.is_a?(String) || meter_definition.is_a?(Integer)
   end
 
   # rubocop:disable Metrics/CyclomaticComplexity
-  def logical_meter_names(school, chart_meter_definition)
-    case chart_meter_definition
-    when :allheat then                                    school.aggregated_heat_meters
-    when :allelectricity then                             school.aggregated_electricity_meters
-    when :allelectricity_unmodified then                  school.aggregated_electricity_meters&.original_meter
-    when :allelectricity_without_community_use then       school.aggregated_electricity_meter_without_community_usage
-    when :allheat_without_community_use then              school.aggregated_heat_meters_without_community_usage
-    when :storage_heaters_without_community_use then      school.storage_heater_meter_without_community_usage
-    when :storage_heater_meter then                       school.storage_heater_meter
-    when :solar_pv_meter, :solar_pv then                  school.aggregated_electricity_meters.sub_meters[:generation]
-    when :unscaled_aggregate_target_electricity then      school.unscaled_target_meters[:electricity]
-    when :unscaled_aggregate_target_gas then              school.unscaled_target_meters[:gas]
-    when :unscaled_aggregate_target_storage_heater then   school.unscaled_target_meters[:storage_heater]
-    when :synthetic_aggregate_target_electricity then     school.synthetic_target_meters[:electricity]
-    when :synthetic_aggregate_target_gas then             school.synthetic_target_meters[:gas]
-    when :synthetic_aggregate_target_storage_heater then  school.synthetic_target_meters[:storage_heater]
+  def logical_meter_names(meter_collection, meter_definition)
+    case meter_definition
+    when :all then                                        [meter_collection.aggregated_electricity_meters, meter_collection.aggregated_heat_meters]
+    when :allheat then                                    meter_collection.aggregated_heat_meters
+    when :allelectricity then                             meter_collection.aggregated_electricity_meters
+    when :allelectricity_unmodified then                  meter_collection.aggregated_electricity_meters&.original_meter
+    when :allelectricity_without_community_use then       meter_collection.aggregated_electricity_meter_without_community_usage
+    when :allheat_without_community_use then              meter_collection.aggregated_heat_meters_without_community_usage
+    when :storage_heaters_without_community_use then      meter_collection.storage_heater_meter_without_community_usage
+    when :storage_heater_meter then                       meter_collection.storage_heater_meter
+    when :solar_pv_meter, :solar_pv then                  meter_collection.aggregated_electricity_meters.sub_meters[:generation]
+    when :unscaled_aggregate_target_electricity then      meter_collection.unscaled_target_meters[:electricity]
+    when :unscaled_aggregate_target_gas then              meter_collection.unscaled_target_meters[:gas]
+    when :unscaled_aggregate_target_storage_heater then   meter_collection.unscaled_target_meters[:storage_heater]
+    when :synthetic_aggregate_target_electricity then     meter_collection.synthetic_target_meters[:electricity]
+    when :synthetic_aggregate_target_gas then             meter_collection.synthetic_target_meters[:gas]
+    when :synthetic_aggregate_target_storage_heater then  meter_collection.synthetic_target_meters[:storage_heater]
     else
       :not_mapped
     end
