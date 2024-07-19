@@ -106,5 +106,28 @@ describe ChartToMeterMap do
         expect(map.meter(meter_collection, '99999')).to be_nil
       end
     end
+
+    context 'with mpxn and sub meter definition' do
+      context 'when there are no sub meters' do
+        it 'returns nil' do
+          expect(map.meter(meter_collection, electricity_meter.mpan_mprn, :generation)).to be_nil
+        end
+      end
+
+      context 'when there are sub meters' do
+        it 'returns the correct solar sub meters' do
+          expect(map.meter(meter_collection, electricity_meter_with_solar.mpan_mprn, :mains_consume)).to eq(electricity_meter_with_solar)
+          expect(map.meter(meter_collection, electricity_meter_with_solar.mpan_mprn, :generation)).to eq(solar_pv_meter)
+          expect(map.meter(meter_collection, electricity_meter_with_solar.mpan_mprn, :export).fuel_type).to eq(:exported_solar_pv)
+          expect(map.meter(meter_collection, electricity_meter_with_solar.mpan_mprn, :self_consume).fuel_type).to eq(:solar_pv)
+        end
+
+        it 'returns the correct storage heater submeters' do
+          synthetic_mpan = Dashboard::Meter.synthetic_mpan_mprn(electricity_meter_with_storage_heaters.mpan_mprn, :storage_heater_disaggregated_electricity)
+          expect(map.meter(meter_collection, synthetic_mpan, :mains_consume)).to eq(electricity_meter_with_storage_heaters)
+          expect(map.meter(meter_collection, synthetic_mpan, :storage_heaters).fuel_type).to eq(:storage_heater)
+        end
+      end
+    end
   end
 end

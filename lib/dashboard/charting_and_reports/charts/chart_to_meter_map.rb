@@ -7,10 +7,15 @@ class ChartToMeterMap
 
   include Singleton
 
-  def meter(meter_collection, meter_definition)
+  def meter(meter_collection, meter_definition, sub_meter_definition = nil)
     meter = logical_meter_names(meter_collection, meter_definition)
     return meter unless meter == :not_mapped
-    return meter_collection.meter?(meter_definition, true) if mpxn?(meter_definition)
+    if mpxn?(meter_definition)
+      meter = meter_collection.meter?(meter_definition, true)
+      return meter if (meter.nil? || sub_meter_definition.nil?)
+      return meter.sub_meters[sub_meter_definition]
+    end
+
     raise UnknownChartMeterDefinition, "Unknown chart meter definition type #{meter_definition}"
   end
 
