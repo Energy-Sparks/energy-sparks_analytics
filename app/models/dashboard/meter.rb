@@ -305,7 +305,7 @@ module Dashboard
 
     # Matches ES AR version
     def display_name
-      name.present? ? "#{mpan_mprn} (#{name})" : mpan_mprn.to_s
+      name.present? ? "#{mpan_mprn} - #{name}" : mpan_mprn.to_s
     end
 
     #Default series name for this meter when displayed on a chart
