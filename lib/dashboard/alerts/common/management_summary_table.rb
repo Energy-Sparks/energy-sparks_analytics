@@ -276,8 +276,11 @@ class ManagementSummaryTable < ContentBase
   def compare_two_periods(fuel_type, period1, period2, max_days_out_of_date)
     current_period_kwh  = checked_get_aggregate(period1, fuel_type, :kwh)
     previous_period_kwh = checked_get_aggregate(period2, fuel_type, :kwh)
-    current_period_co2  = checked_get_aggregate(period1, fuel_type, :co2)
-    current_period_co2  = electricity_co2_with_solar_offset(period1) if @school.solar_pv_panels? && fuel_type == :electricity
+    current_period_co2 = if @school.solar_pv_panels? && fuel_type == :electricity
+      electricity_co2_with_solar_offset(period1)
+    else
+      checked_get_aggregate(period1, fuel_type, :co2)
+    end
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
@@ -316,8 +319,18 @@ class ManagementSummaryTable < ContentBase
   def electricity_co2_with_solar_offset(period = { year: 0})
     scalar = CalculateAggregateValues.new(@school)
     consumption   = checked_get_aggregate(period, :electricity, :co2)
-    pv_production = checked_get_aggregate(period, :solar_pv,    :co2)
-    # NB solar pv panel putput CO2 is -tve, sign reversed in AMRData
+    #
+    # Note: we might end up with nil values for pv_production here if there's less than a years worth of generation
+    # data. Can happen if the meter with the solar panels is lagging, but there is an "ignore end date" attribute set
+    # such that the aggregate meter has a wider date range. In this case we have more limited generation data
+    # than we do for consumption data.
+    #
+    # Really this code needs a rework so that it uses a similar approach to the solar pv/profit loss. But for now
+    # if we're calculating the annual value, use :up_to_a_year as its more forgiving of limited data, but will use
+    # full year if available
+    period = { up_to_a_year: 0 } if period == { year: 0 }
+    pv_production = checked_get_aggregate(period, :solar_pv, :co2)
+    # NB solar pv panel putput CO2 is -tve, sign reversed in AMRData, so we add the values
     net_co2 = consumption.nil? || pv_production.nil? ? nil : (consumption + pv_production)
   end
 
