@@ -209,6 +209,7 @@ class MeterCollection
       @heat_meters,
       @electricity_meters,
       @storage_heater_meters,
+      @storage_heater_meter,
       @aggregated_heat_meters,
       @aggregated_electricity_meters
     ].compact.flatten
@@ -430,6 +431,7 @@ class MeterCollection
     # aggregation, reducing memory footprint in front end cache prior to this
     # while maintaining charting performance once out of cache
     all_meters.each do |meter|
+      meter.amr_data.open_close_breakdown = CommunityUseBreakdown.new(meter, @open_close_times)
       meter.amr_data.set_post_aggregation_state
     end
   end
