@@ -189,12 +189,12 @@ module Dashboard
     end
 
     def inspect
-      "#{self.class.name} (mpan: #{@mpan_mprn.to_s}, fuel_type: #{@fuel_type.to_s}, object_id: #{"0x00%x" % (object_id << 1)})"
+      "object_id: #{"0x00%x" % (object_id << 1)}, #{self.class.name}, mpan: #{@mpan_mprn.to_s}, fuel_type: #{@fuel_type.to_s}"
     end
 
     def to_s
-      dates = amr_data.nil? ? ':no amr data' : ":#{amr_data.start_date} to #{amr_data.end_date}"
-      @mpan_mprn.to_s + ':' + @fuel_type.to_s + 'x' + (@amr_data.nil? ? '0' : @amr_data.length.to_s) + dates
+      dates = amr_data.nil? ? '|no amr data' : "|#{amr_data.start_date} to #{amr_data.end_date}"
+      @mpan_mprn.to_s + '|' + @fuel_type.to_s + '|x' + (@amr_data.nil? ? '0' : @amr_data.length.to_s) + dates
     end
 
     def attributes(type)
@@ -305,7 +305,7 @@ module Dashboard
 
     # Matches ES AR version
     def display_name
-      name.present? ? "#{mpan_mprn} (#{name})" : mpan_mprn.to_s
+      name.present? ? "#{mpan_mprn} - #{name}" : mpan_mprn.to_s
     end
 
     #Default series name for this meter when displayed on a chart
