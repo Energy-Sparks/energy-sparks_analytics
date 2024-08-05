@@ -277,10 +277,10 @@ class ManagementSummaryTable < ContentBase
     current_period_kwh  = checked_get_aggregate(period1, fuel_type, :kwh)
     previous_period_kwh = checked_get_aggregate(period2, fuel_type, :kwh)
     current_period_co2 = if @school.solar_pv_panels? && fuel_type == :electricity
-      electricity_co2_with_solar_offset(period1)
-    else
-      checked_get_aggregate(period1, fuel_type, :co2)
-    end
+                          electricity_co2_with_solar_offset(period1)
+                         else
+                          checked_get_aggregate(period1, fuel_type, :co2)
+                         end
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
