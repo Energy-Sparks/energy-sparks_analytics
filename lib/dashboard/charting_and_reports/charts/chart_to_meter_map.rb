@@ -25,8 +25,7 @@ class ChartToMeterMap
     meter_definition.is_a?(String) || meter_definition.is_a?(Integer)
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity
-  def logical_meter_names(meter_collection, meter_definition)
+  def logical_meter_names(meter_collection, meter_definition) # rubocop:disable Metrics/CyclomaticComplexity
     case meter_definition
     when :all then                                        [meter_collection.aggregated_electricity_meters, meter_collection.aggregated_heat_meters]
     when :allheat then                                    meter_collection.aggregated_heat_meters
@@ -47,5 +46,4 @@ class ChartToMeterMap
       :not_mapped
     end
   end
-  # rubocop:enable Metrics/CyclomaticComplexity
 end
