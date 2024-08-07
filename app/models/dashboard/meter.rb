@@ -308,6 +308,10 @@ module Dashboard
       name.present? ? "#{mpan_mprn} - #{name}" : mpan_mprn.to_s
     end
 
+    def name_or_mpan_mprn
+      name.present? ? name : mpan_mprn.to_s
+    end
+
     #Default series name for this meter when displayed on a chart
     def series_name
       name.present? ? name : mpan_mprn.to_s

@@ -46,4 +46,5 @@ class ChartToMeterMap
       :not_mapped
     end
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 end

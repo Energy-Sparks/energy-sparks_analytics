@@ -85,11 +85,8 @@ class AggregateDataService
       # pre-process, aggregate and post-process electricity meters
       process_electricity_meters
 
-      # process the community use opening times, configuring
-      # results for each aggregate meter
-      process_community_usage_open_close_times
-
       # notify meter collection that aggregation is complete
+      # processes community use opening times
       # carries out clean-up and sets flags on amr data to indicate aggregation process
       # has been completed and caching can be enabled
       @meter_collection.notify_aggregation_complete!
@@ -136,17 +133,6 @@ class AggregateDataService
 
     adssh = AggregateDataServiceStorageHeaters.new(@meter_collection)
     adssh.disaggregate
-  end
-
-  def process_community_usage_open_close_times
-    [
-      @meter_collection.aggregated_electricity_meters,
-      @meter_collection.aggregated_heat_meters,
-      @meter_collection.storage_heater_meter
-    ].compact.each do |meter|
-      oc_breakdown = CommunityUseBreakdown.new(meter, @meter_collection.open_close_times)
-      meter.amr_data.open_close_breakdown = oc_breakdown
-    end
   end
 
   # Returns true if the school has solar panels and multiple electricity meters
