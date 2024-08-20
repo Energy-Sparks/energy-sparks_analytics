@@ -18,7 +18,7 @@ describe Heating::HeatingStartTimeSavingsService, type: :service do
     end
   end
 
-  describe '#estimated_savings' do
+  describe '#estimated_savings', :aggregate_failures do
     it 'returns the expected data' do
       estimated_savings = service.estimated_savings
       expect(estimated_savings.kwh).to be_within(0.01).of(18_217.64)
