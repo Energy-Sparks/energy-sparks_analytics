@@ -16,7 +16,7 @@ module BenchmarkMetrics
   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL_SPECIAL_SCHOOL = 868.0
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 196.0
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL_SPECIAL_SCHOOL = 663.0
-  # Secondary electricity usage typically 1.3 times higher due extra hours and server ICT
+  # Secondary electricity usage typically higher due extra hours and server ICT
   RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE = 1.7
 
   BENCHMARK_ELECTRICITY_USAGE_PER_M2 = 50_000.0 / 1_200.0
