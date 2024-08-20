@@ -24,7 +24,7 @@ jobs:
       matrix:
         ruby-version: ['3.0', '3.2']
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby-version }}
@@ -43,7 +43,7 @@ jobs:
       matrix:
         ruby-version: ['3.0', '3.2']
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby-version }}
@@ -76,7 +76,7 @@ jobs:
     #   run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_charts.rb
 
     - name: Upload test artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: analytics-test-artifacts
         path: |
