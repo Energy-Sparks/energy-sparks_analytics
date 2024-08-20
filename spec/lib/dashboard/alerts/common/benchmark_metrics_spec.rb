@@ -181,7 +181,7 @@ describe BenchmarkMetrics do
       let(:degree_day_adjustment) { 1.0 }
       let(:list_of_fuels) { %i[electricity storage_heaters] }
 
-      let(:expected_electricity)     { 220.0 * 0.1 }
+      let(:expected_electricity)     { 219.0 * 0.1 } # BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL
       let(:expected_storage_heaters) { 430.0 * 0.1 } # BENCHMARK_GAS_USAGE_PER_PUPIL?
 
       it 'adds the values' do
