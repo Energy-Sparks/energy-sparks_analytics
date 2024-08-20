@@ -78,7 +78,7 @@ jobs:
     - name: Upload test artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: analytics-test-artifacts
+        name: analytics-test-artifacts-${{ matrix.ruby-version }}
         path: |
           test_output
           !./test_output/MeterCollections
