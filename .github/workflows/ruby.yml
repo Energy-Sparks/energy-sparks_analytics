@@ -82,4 +82,4 @@ jobs:
         path: |
           test_output
           !./test_output/MeterCollections
-          retention-days: 7
+        retention-days: 7
