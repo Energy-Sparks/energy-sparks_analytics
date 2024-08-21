@@ -9,8 +9,9 @@ module BenchmarkMetrics
   SOLAR_EXPORT_PRICE = 0.05
   GAS_PRICE = 0.03
 
+  #
   # updated with July 2024 figures - see the Analytics Benchmarking Values spreadsheet
-
+  #
   # Annual alectricity Usage per pupil benchmark figures
   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL = 219.0
   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL_SPECIAL_SCHOOL = 868.0
