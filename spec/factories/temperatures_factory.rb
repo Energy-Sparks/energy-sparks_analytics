@@ -4,6 +4,7 @@ FactoryBot.define do
   factory :temperatures, class: 'Temperatures' do
     transient do
       type { 'temperatures' }
+      random_generator { nil }
     end
 
     initialize_with { new(type) }
@@ -12,7 +13,7 @@ FactoryBot.define do
       transient do
         start_date { Date.yesterday - 7 }
         end_date { Date.yesterday }
-        kwh_data_x48 { Array.new(48) { rand(0.0..1.0).round(2) } }
+        kwh_data_x48 { Array.new(48) { (random_generator || Random.new).rand.round(2) } }
       end
 
       after(:build) do |temperatures, evaluator|
