@@ -42,7 +42,7 @@ describe Heating::SeasonalControlAnalysisService do
       it 'produces expected seasonal control analysis' do
         expect(seasonal_analysis.estimated_savings.kwh).to be_within(0.01).of(15_340.36)
         expect(seasonal_analysis.estimated_savings.£).to be_within(0.01).of(460.21)
-        expect(seasonal_analysis.estimated_savings.co2).to be_within(0.01).of(3221.47)
+        expect(seasonal_analysis.estimated_savings.co2).to be_within(0.01).of(2800.08)
         expect(seasonal_analysis.heating_on_in_warm_weather_days).to be_within(0.01).of(18.0)
 
         # extracted expected value here by running the old advice

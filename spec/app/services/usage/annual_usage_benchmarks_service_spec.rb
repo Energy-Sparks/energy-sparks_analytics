@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Usage::AnnualUsageBenchmarksService, type: :service do
+describe Usage::AnnualUsageBenchmarksService, :aggregate_failures, type: :service do
   let(:fuel_type) { :electricity }
 
   # AMR data for the school
@@ -73,16 +73,16 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
     context 'with electricity' do
       it 'calculates the expected values for a benchmark school' do
         annual_usage = service.annual_usage(compare: :benchmark_school)
-        expect(annual_usage.kwh).to be_within(0.01).of(220_000.0)
-        expect(annual_usage.co2).to be_within(0.01).of(44_000.0) # 0.2 * kwh
-        expect(annual_usage.£).to be_within(0.01).of(22_000.0) # 0.1 * kwh
+        expect(annual_usage.kwh).to be_within(0.01).of(219_000.0)
+        expect(annual_usage.co2).to be_within(0.01).of(43_800.0) # 0.2 * kwh
+        expect(annual_usage.£).to be_within(0.01).of(21_900.0) # 0.1 * kwh
       end
 
       it 'calculates the expected values for an exemplar school' do
         annual_usage = service.annual_usage(compare: :exemplar_school)
-        expect(annual_usage.kwh).to be_within(0.01).of(190_000.0)
-        expect(annual_usage.co2).to be_within(0.01).of(38_000.0) # 0.2 * kwh
-        expect(annual_usage.£).to be_within(0.01).of(19_000.0) # 0.1 * kwh
+        expect(annual_usage.kwh).to be_within(0.01).of(196_000.0)
+        expect(annual_usage.co2).to be_within(0.01).of(39_200.0) # 0.2 * kwh
+        expect(annual_usage.£).to be_within(0.01).of(19_600.0) # 0.1 * kwh
       end
     end
 
@@ -92,16 +92,16 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
 
       it 'calculates the expected values for a benchmark school' do
         annual_usage = service.annual_usage(compare: :benchmark_school)
-        expect(annual_usage.kwh).to be_within(0.01).of(431_250.0)
-        expect(annual_usage.co2).to be_within(0.01).of(86_250.0) # 0.2 * kwh
-        expect(annual_usage.£).to be_within(0.01).of(43_125.0) # 0.1 * kwh
+        expect(annual_usage.kwh).to be_within(0.01).of(320_000.0)
+        expect(annual_usage.co2).to be_within(0.01).of(64_000.0) # 0.2 * kwh
+        expect(annual_usage.£).to be_within(0.01).of(32_000.0) # 0.1 * kwh
       end
 
       it 'calculates the expected values for an exemplar school' do
         annual_usage = service.annual_usage(compare: :exemplar_school)
-        expect(annual_usage.kwh).to be_within(0.01).of(400_000.0)
-        expect(annual_usage.co2).to be_within(0.01).of(80_000.0) # 0.2 * kwh
-        expect(annual_usage.£).to be_within(0.01).of(40_000.0) # 0.1 * kwh
+        expect(annual_usage.kwh).to be_within(0.01).of(275_000.0)
+        expect(annual_usage.co2).to be_within(0.01).of(55_000.0) # 0.2 * kwh
+        expect(annual_usage.£).to be_within(0.01).of(27_500.0) # 0.1 * kwh
       end
     end
   end
@@ -110,18 +110,18 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
     context 'with electricity' do
       it 'calculates the expected values for a benchmark school' do
         savings = service.estimated_savings(versus: :benchmark_school)
-        expect(savings.kwh).to be_within(0.01).of(45_280.0)
-        expect(savings.£).to be_within(0.01).of(4528.0)
-        expect(savings.co2).to be_within(0.01).of(9056.0)
+        expect(savings.kwh).to be_within(0.01).of(44_280.0)
+        expect(savings.£).to be_within(0.01).of(4428.0)
+        expect(savings.co2).to be_within(0.01).of(8856.0)
         expect(savings.percent).to be_within(0.01).of(-0.20)
       end
 
       it 'calculates the expected values for an exemplar school' do
         savings = service.estimated_savings(versus: :exemplar_school)
-        expect(savings.kwh).to be_within(0.01).of(15_280.0)
-        expect(savings.£).to be_within(0.01).of(1528.0)
-        expect(savings.co2).to be_within(0.01).of(3056.0)
-        expect(savings.percent).to be_within(0.01).of(-0.08)
+        expect(savings.kwh).to be_within(0.01).of(21_280.0)
+        expect(savings.£).to be_within(0.01).of(2128.0)
+        expect(savings.co2).to be_within(0.01).of(4256.0)
+        expect(savings.percent).to be_within(0.01).of(-0.11)
       end
     end
 
@@ -130,18 +130,18 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
 
       it 'calculates the expected values for a benchmark school' do
         savings = service.estimated_savings(versus: :benchmark_school)
-        expect(savings.kwh).to be_within(0.01).of(256_530.0)
-        expect(savings.£).to be_within(0.01).of(25_653.0)
-        expect(savings.co2).to be_within(0.01).of(51_306.0)
-        expect(savings.percent).to be_within(0.01).of(-0.59)
+        expect(savings.kwh).to be_within(0.01).of(145_280.0)
+        expect(savings.£).to be_within(0.01).of(14_528.0)
+        expect(savings.co2).to be_within(0.01).of(29_056.0)
+        expect(savings.percent).to be_within(0.01).of(-0.45)
       end
 
       it 'calculates the expected values for an exemplar school' do
         savings = service.estimated_savings(versus: :exemplar_school)
-        expect(savings.kwh).to be_within(0.01).of(225_280.0)
-        expect(savings.£).to be_within(0.01).of(22_528.0)
-        expect(savings.co2).to be_within(0.01).of(45_056.0)
-        expect(savings.percent).to be_within(0.01).of(-0.56)
+        expect(savings.kwh).to be_within(0.01).of(100_280.0)
+        expect(savings.£).to be_within(0.01).of(10_028.0)
+        expect(savings.co2).to be_within(0.01).of(20_056.0)
+        expect(savings.percent).to be_within(0.01).of(-0.36)
       end
     end
   end

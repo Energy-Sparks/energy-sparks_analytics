@@ -57,14 +57,14 @@ describe Usage::AnnualUsageCalculationService, type: :service do
         annual_usage = service.annual_usage
         expect(annual_usage.kwh).to be_within(0.01).of(632_332.89)
         expect(annual_usage.£).to be_within(0.01).of(18_969.99)
-        expect(annual_usage.co2).to be_within(0.01).of(132_789.91)
+        expect(annual_usage.co2).to be_within(0.01).of(115_419.72)
       end
 
       it 'calculates the expected values for last year' do
         annual_usage = service.annual_usage(period: :last_year)
         expect(annual_usage.kwh).to be_within(0.01).of(650_831.23)
         expect(annual_usage.£).to be_within(0.01).of(19_524.93)
-        expect(annual_usage.co2).to be_within(0.01).of(136_674.55)
+        expect(annual_usage.co2).to be_within(0.01).of(118_796.23)
       end
     end
   end
@@ -97,7 +97,7 @@ describe Usage::AnnualUsageCalculationService, type: :service do
         # values checked against gas long term trend alert
         expect(usage_change.kwh).to be_within(0.01).of(-18_498.348)
         expect(usage_change.£).to be_within(0.01).of(-554.95)
-        expect(usage_change.co2).to be_within(0.01).of(-3884.65)
+        expect(usage_change.co2).to be_within(0.01).of(-3376.50)
         expect(usage_change.percent).to be_within(0.01).of(-0.02)
       end
 
