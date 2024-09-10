@@ -14,7 +14,7 @@ describe BenchmarkMetrics do
       let(:school_type) { :primary }
 
       it 'returns the expected value' do
-        expect(annual_usage_kwh).to eq 2200
+        expect(annual_usage_kwh).to eq pupils * 219
       end
     end
 
@@ -22,7 +22,7 @@ describe BenchmarkMetrics do
       let(:school_type) { :secondary }
 
       it 'returns the expected value' do
-        expect(annual_usage_kwh).to eq 3828
+        expect(annual_usage_kwh).to eq pupils * 219.0 * 1.7
       end
     end
 
@@ -30,7 +30,7 @@ describe BenchmarkMetrics do
       let(:school_type) { :special }
 
       it 'returns the expected value' do
-        expect(annual_usage_kwh).to eq 8950
+        expect(annual_usage_kwh).to eq pupils * 868
       end
     end
 
@@ -53,7 +53,7 @@ describe BenchmarkMetrics do
       let(:school_type) { :primary }
 
       it 'returns the expected value' do
-        expect(annual_usage_kwh).to eq 1900
+        expect(annual_usage_kwh).to eq pupils * 196
       end
     end
 
@@ -61,7 +61,7 @@ describe BenchmarkMetrics do
       let(:school_type) { :secondary }
 
       it 'returns the expected value' do
-        expect(annual_usage_kwh).to eq 3306
+        expect(annual_usage_kwh).to eq pupils * 196 * 1.7
       end
     end
 
@@ -69,7 +69,7 @@ describe BenchmarkMetrics do
       let(:school_type) { :special }
 
       it 'returns the expected value' do
-        expect(annual_usage_kwh).to eq 2750
+        expect(annual_usage_kwh).to eq pupils * 663
       end
     end
 
@@ -107,7 +107,7 @@ describe BenchmarkMetrics do
 
       it 'returns the benchmark value' do
         # BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * the flat rate above
-        expect(energy_usage_£_per_pupil).to be_within(0.1).of(220.0 * 0.1)
+        expect(energy_usage_£_per_pupil).to be_within(0.1).of(219.0 * 0.1)
       end
 
       context 'with :exemplar benchmark' do
@@ -115,7 +115,7 @@ describe BenchmarkMetrics do
 
         it 'returns the exemplar benchmark value' do
           # EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * the flat rate above
-          expect(energy_usage_£_per_pupil).to be_within(0.1).of(190.0 * 0.1)
+          expect(energy_usage_£_per_pupil).to be_within(0.1).of(196.0 * 0.1)
         end
       end
     end
@@ -131,7 +131,7 @@ describe BenchmarkMetrics do
 
       it 'returns the benchmark value' do
         # BENCHMARK_GAS_USAGE_PER_PUPIL / degree_day_adjustment * the flat rate above
-        expect(energy_usage_£_per_pupil).to be_within(0.1).of(517.5 * 0.1)
+        expect(energy_usage_£_per_pupil).to be_within(0.1).of(430 * 0.1)
       end
 
       context 'with :exemplar benchmark' do
@@ -140,7 +140,7 @@ describe BenchmarkMetrics do
         it 'returns the exemplar benchmark value' do
           # TODO: not sure this is the right variable it should be using
           # EXEMPLAR_GAS_USAGE_PER_M2  / degree_day_adjustment * the flat rate above
-          expect(energy_usage_£_per_pupil).to be_within(0.1).of(80.0 * 0.1)
+          expect(energy_usage_£_per_pupil).to be_within(0.1).of(55.0 * 0.1)
         end
       end
     end
@@ -157,7 +157,7 @@ describe BenchmarkMetrics do
 
       it 'returns the benchmark value' do
         # BENCHMARK_GAS_USAGE_PER_PUPIL / degree_day_adjustment * the flat rate above
-        expect(energy_usage_£_per_pupil).to be_within(0.1).of(517.5 * 0.1)
+        expect(energy_usage_£_per_pupil).to be_within(0.1).of(430.0 * 0.1)
       end
 
       context 'with :exemplar benchmark' do
@@ -166,7 +166,7 @@ describe BenchmarkMetrics do
         it 'returns the exemplar benchmark value' do
           # TODO: not sure this is the right variable it should be using
           # EXEMPLAR_GAS_USAGE_PER_M2  / degree_day_adjustment * the flat rate above
-          expect(energy_usage_£_per_pupil).to be_within(0.1).of(80.0 * 0.1)
+          expect(energy_usage_£_per_pupil).to be_within(0.1).of(55.0 * 0.1)
         end
       end
     end
@@ -181,8 +181,8 @@ describe BenchmarkMetrics do
       let(:degree_day_adjustment) { 1.0 }
       let(:list_of_fuels) { %i[electricity storage_heaters] }
 
-      let(:expected_electricity)     { 220.0 * 0.1 }
-      let(:expected_storage_heaters) { 517.5 * 0.1 }
+      let(:expected_electricity)     { 219.0 * 0.1 } # BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL
+      let(:expected_storage_heaters) { 430.0 * 0.1 } # BENCHMARK_GAS_USAGE_PER_PUPIL?
 
       it 'adds the values' do
         expect(energy_usage_£_per_pupil).to be_within(0.1).of(expected_electricity + expected_storage_heaters)

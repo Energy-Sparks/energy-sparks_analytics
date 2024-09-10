@@ -38,7 +38,7 @@ describe Heating::HeatingStartTimeService, type: :service do
       expect(first_day.temperature).to eq 10.3
       expect(first_day.saving.kwh).to be_within(0.01).of(504.08)
       expect(first_day.saving.£).to be_within(0.01).of(15.12)
-      expect(first_day.saving.co2).to be_within(0.01).of(105.85)
+      expect(first_day.saving.co2).to be_within(0.01).of(92.01)
     end
   end
 
