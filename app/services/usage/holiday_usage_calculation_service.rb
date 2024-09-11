@@ -86,6 +86,7 @@ module Usage
     # @return [Hash] of school_period => OpenStruct
     def school_holiday_calendar_comparison
       academic_year = academic_year_for_comparison
+
       holidays_for_academic_year = @holidays.holidays.select { |h| h.academic_year == academic_year }
       comparison_periods = holidays_for_academic_year.map do |holiday|
         # use last year holiday if the holiday hasn't started yet
@@ -95,10 +96,21 @@ module Usage
           holiday
         end
       end
-      holidays_usage_comparison(school_periods: comparison_periods)
+      holidays_usage_comparison(school_periods: adding_missing_holidays(comparison_periods))
     end
 
     private
+
+    # If a school calendar does not have a full set of holidays for the current academic year then there will be
+    # missing holidays from the comparison periods generated in +school_holiday_calendar_comparison+ above.
+    #
+    # Find any missing holiday types and add those to the list of comparison periods using the holidays defined
+    # for the previous academic year
+    def adding_missing_holidays(comparison_periods)
+      year = previous_academic_year
+      missing = Holidays::MAIN_HOLIDAY_TYPES.sort - comparison_periods.map(&:type).sort
+      comparison_periods.concat(@holidays.holidays.select { |h| h.academic_year == year && missing.include?(h.type) })
+    end
 
     def has_data_for_period?(school_period)
       @meter.amr_data.start_date < school_period.start_date && @meter.amr_data.end_date > end_date(school_period)
@@ -121,6 +133,14 @@ module Usage
         @asof_date.year..(@asof_date.year + 1)
       else
         (@asof_date.year - 1)..@asof_date.year
+      end
+    end
+
+    def previous_academic_year
+      if @asof_date.month > 8
+        (@asof_date.year - 1)..@asof_date.year
+      else
+        (@asof_date.year - 2)..(@asof_date.year - 1)
       end
     end
 
