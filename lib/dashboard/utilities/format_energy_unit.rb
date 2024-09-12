@@ -21,17 +21,20 @@ class FormatEnergyUnit
   end
 
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
-    if unit.is_a?(Hash) && unit.key?(:substitute_nil)
-      if value.nil? || value == unit[:substitute_nil]
-        return unit[:substitute_nil]
-      else
+    unit_options = {}
+    if unit.is_a?(Hash)
+      if unit.key?(:substitute_nil)
+        return unit[:substitute_nil] if value.nil? || value == unit[:substitute_nil]
+        unit = unit[:units]
+      elsif unit.key?(:options)
+        unit_options = unit[:options]
         unit = unit[:units]
       end
     end
-    format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
+    format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level, unit_options)
   end
 
-  private_class_method def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
+  private_class_method def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level, unit_options)
     return value if medium == :raw || no_recent_or_not_enough_data?(value)
     return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
@@ -55,7 +58,7 @@ class FormatEnergyUnit
     elsif unit == :school_name
       value
     elsif %i[percent percent_0dp relative_percent relative_percent_0dp].include?(unit)
-      format_percent(value, unit, user_numeric_comprehension_level, medium)
+      format_percent(value, unit, user_numeric_comprehension_level, medium, unit_options)
     elsif unit == :comparison_percent
       format_comparison_percent(value, medium)
     elsif unit == :years_range
@@ -97,7 +100,7 @@ class FormatEnergyUnit
     I18n.l(date, format: format)
   end
 
-  private_class_method def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
+  private_class_method def self.format_percent(value, unit, user_numeric_comprehension_level, medium, unit_options)
     user_numeric_comprehension_level = :no_decimals if %i[percent_0dp relative_percent_0dp].include?(unit)
 
     formatted_val = scale_num(value * 100.0, false, user_numeric_comprehension_level)
