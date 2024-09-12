@@ -103,7 +103,8 @@ class FormatEnergyUnit
   private_class_method def self.format_percent(value, unit, user_numeric_comprehension_level, medium, unit_options)
     user_numeric_comprehension_level = :no_decimals if %i[percent_0dp relative_percent_0dp].include?(unit)
 
-    formatted_val = scale_num(value * 100.0, false, user_numeric_comprehension_level)
+    value = value * 100.0 if unit_options.fetch(:scale, true)
+    formatted_val = scale_num(value, false, user_numeric_comprehension_level)
 
     if %i[relative_percent relative_percent_0dp].include?(unit) && value > 0.0
       I18n.t(key_for_unit(unit, medium), sign: '+', value: formatted_val)
