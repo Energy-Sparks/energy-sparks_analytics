@@ -2110,6 +2110,23 @@ class ChartManager
       calendar_picker_allow_up_to_1_week_past_last_meter_date: true,
       inherits_from:    :calendar_picker_electricity_week_chart
     },
+    public_displays_electricity_weekly_comparison: {
+      name:             'Public displays weekly electricity comparison',
+      chart1_type:      :column,
+      chart1_subtype:   nil,
+      meter_definition: :allelectricity,
+      series_breakdown: :none,
+      timescale:        [{ workweek: 0  }, { workweek: -1 }],
+      x_axis:           :day,
+      x_axis_reformat:  { date: '%A' },
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    public_displays_gas_weekly_comparison: {
+      name:             'Public displays weekly electricity comparison',
+      inherits_from:    :public_displays_electricity_weekly_comparison,
+      meter_definition: :allheat
+    },
     calendar_picker_electricity_day_example_comparison_chart: {
       name:             'Calendar picker electricity example day comparison chart',
       timescale:        [
