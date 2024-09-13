@@ -18,6 +18,7 @@ class AverageSchoolCalculator
     if Holidays::MAIN_HOLIDAY_TYPES.include?(holiday_type)
       holiday_type
     else
+      # similar to Holidays.holiday_type but only returns MAIN_HOLIDAY_TYPES
       case date.month
       when 1, 12
         :xmas
