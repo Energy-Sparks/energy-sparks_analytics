@@ -108,7 +108,7 @@ module Usage
     # for the previous academic year
     def adding_missing_holidays(comparison_periods)
       year = previous_academic_year
-      missing = Holidays::MAIN_HOLIDAY_TYPES.sort - comparison_periods.map(&:type).sort
+      missing = Holidays::MAIN_HOLIDAY_TYPES.sort - comparison_periods.map(&:type).compact.sort
       comparison_periods.concat(@holidays.holidays.select { |h| h.academic_year == year && missing.include?(h.type) })
     end
 
