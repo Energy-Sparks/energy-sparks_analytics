@@ -14,19 +14,28 @@ class AverageSchoolCalculator
   end
 
   def self.remap_low_sample_holiday(holiday_type, date)
-    if ![:autumn_half_term, :xmas, :spring_half_term, :easter, :summer_half_term, :summer].include?(holiday_type)
-      # remap to nearest half term on the theory they are more indicative of short holidays
-      case date.month
-      when 10..12
-        :autumn_half_term
-      when 1..5
-        :spring_half_term
-      when 6..9
-        :summer_half_term
-      end
-    else
-      holiday_type = :easter if holiday_type == :mayday
+    holiday_type = :easter if holiday_type == :mayday
+    if Holidays::MAIN_HOLIDAY_TYPES.include?(holiday_type)
       holiday_type
+    else
+      case date.month
+      when 1, 12
+        :xmas
+      when 2
+        :spring_half_term
+      when 3, 4
+        :easter
+      when 5
+        :summer_half_term
+      when 6
+        date.day > 24 ? :summer : :summer_half_term
+      when 7, 8
+        :summer
+      when 9
+        date.day < 15 ? :summer : :autumn_half_term
+      when 10, 11
+        :autumn_half_term
+      end
     end
   end
 
