@@ -13,13 +13,21 @@ class AverageSchoolCalculator
     calculate_school_amr_data(meter: @school.aggregate_meter(fuel_type), benchmark_type: benchmark_type, pupils: 1, floor_area: 1, degreeday_adjustment: degreeday_adjustment)
   end
 
-  def self.remap_low_sample_holiday(holiday_type)
-    holiday_type == :mayday ? :easter : holiday_type
-  end
-
-  def self.remap_low_sample_holiday2(date)
-    # e.g. Llanmart had single day 19-Sep-2022 holiday
-    date.month == 9 ? :summer : nil
+  def self.remap_low_sample_holiday(holiday_type, date)
+    if ![:autumn_half_term, :xmas, :spring_half_term, :easter, :summer_half_term, :summer].include?(holiday_type)
+      # remap to nearest half term on the theory they are more indicative of short holidays
+      case date.month
+      when 10..12
+        :autumn_half_term
+      when 1..5
+        :spring_half_term
+      when 6..9
+        :summer_half_term
+      end
+    else
+      holiday_type = :easter if holiday_type == :mayday
+      holiday_type
+    end
   end
 
   private
@@ -74,19 +82,16 @@ class AverageSchoolCalculator
   end
 
   def school_type_profiles_to_average_x48(date, benchmark_type, interpolators, fuel_type)
-    daytype = @school.holidays.day_type(date)
-
-    if daytype == :holiday
-      holiday_type = Holidays.holiday_type(date)
-      holiday_type = self.class.remap_low_sample_holiday(holiday_type)
-      holiday_type = self.class.remap_low_sample_holiday2(date) if holiday_type.nil?
-
+    day_type = @school.holidays.day_type(date)
+    if day_type == :holiday
+      holiday_type = @school.holidays.holiday(date).type
+      holiday_type = self.class.remap_low_sample_holiday(holiday_type, date)
       averaged_school_type_map(@school.school_type).map do |school_type|
         AverageSchoolData.new.raw_data[fuel_type][benchmark_type][school_type.to_sym][:holiday][holiday_type]
       end
     else
       avg_kwh_x48_by_school_type = interpolators.map do |interpolator|
-        days_readings_x48(date.yday, interpolator[daytype])
+        days_readings_x48(date.yday, interpolator[day_type])
       end
     end
   end

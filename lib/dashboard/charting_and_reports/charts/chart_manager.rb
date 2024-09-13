@@ -128,8 +128,9 @@ class ChartManager
         nil
       end
     rescue StandardError => e
-      logger.warn "Unable to create chart"
+      logger.warn "Unable to create chart: #{e}"
       if reraise_exception
+        puts e.backtrace.join("\n") # believe rails is hiding most of the backtrace as in a separate gem
         raise
       else
 #LD(2021-04-29) These calls are causing the Rails app to hang. Any call to
