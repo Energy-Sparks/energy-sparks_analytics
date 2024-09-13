@@ -2116,7 +2116,7 @@ class ChartManager
       chart1_subtype:   nil,
       meter_definition: :allelectricity,
       series_breakdown: :none,
-      timescale:        [{ workweek: 0  }, { workweek: -1 }],
+      timescale:        [{ week: 0  }, { week: -1 }],
       x_axis:           :day,
       x_axis_reformat:  { date: '%A' },
       yaxis_units:      :kwh,
