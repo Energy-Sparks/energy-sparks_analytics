@@ -104,6 +104,12 @@ describe FormatEnergyUnit do
       end
     end
 
+    context 'with :relative_percent no scale' do
+      it 'formats correctly' do
+        expect(FormatUnit.format({ units: :relative_percent, options: { scale: false } }, -11.8891179217)).to eq('-12%')
+      end
+    end
+
     context 'with :comparison_percent' do
       it 'formats correctly' do
         expect(FormatUnit.format(:comparison_percent, 0.005)).to eq('+0.5%')
