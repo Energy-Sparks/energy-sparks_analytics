@@ -184,8 +184,38 @@ describe Usage::HolidayUsageCalculationService, type: :service do
           end
         end
 
-        it 'has Summer as latest' do
+        it 'has summer' do
           latest_holiday = holiday_comparison.keys.max { |a, b| b.start_date <=> a.start_date }
+          expect(latest_holiday.type).to eq :summer
+        end
+      end
+
+      context 'with missing future holiday' do
+        # last meter date
+        let(:asof_date) { Date.new(2023, 9, 1) }
+        let(:service) do
+          holidays = meter_collection.holidays
+          # remove summer holiday for 2024, to simulate school calendar not being
+          # kept up to date
+          holidays.holidays.delete_if { |h| h.type == :summer && h.academic_year == (2023..2024) }
+          described_class.new(meter, holidays, asof_date)
+        end
+        let(:holiday_comparison) { service.school_holiday_calendar_comparison }
+
+        it 'finds all the holidays' do
+          holiday_types = holiday_comparison.keys.map(&:type)
+          expect(holiday_types).to match_array(%i[autumn_half_term xmas spring_half_term easter
+                                                  summer_half_term summer])
+        end
+
+        it 'calculates usage for all holidays' do
+          holiday_comparison.each_value do |usage|
+            expect(usage.usage).not_to be_nil
+          end
+        end
+
+        it 'has summer' do
+          latest_holiday = holiday_comparison.keys.max_by(&:start_date)
           expect(latest_holiday.type).to eq :summer
         end
       end

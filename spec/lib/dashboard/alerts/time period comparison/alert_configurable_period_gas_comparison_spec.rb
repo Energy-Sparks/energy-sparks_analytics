@@ -6,7 +6,7 @@ describe AlertConfigurablePeriodGasComparison, :aggregate_failures do
   subject(:alert) do
     meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters,
                              start_date: Date.new(2022, 11, 1), end_date: Date.new(2023, 11, 30),
-                             fuel_type: :gas)
+                             fuel_type: :gas, random_generator: Random.new(22))
     configuration = {
       name: 'Layer up power down day 24 November 2023',
       max_days_out_of_date: 365,

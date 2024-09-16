@@ -2110,6 +2110,23 @@ class ChartManager
       calendar_picker_allow_up_to_1_week_past_last_meter_date: true,
       inherits_from:    :calendar_picker_electricity_week_chart
     },
+    public_displays_electricity_weekly_comparison: {
+      name:             'Public displays weekly electricity comparison',
+      chart1_type:      :column,
+      chart1_subtype:   nil,
+      meter_definition: :allelectricity,
+      series_breakdown: :none,
+      timescale:        [{ week: 0  }, { week: -1 }],
+      x_axis:           :day,
+      x_axis_reformat:  { date: '%A' },
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    public_displays_gas_weekly_comparison: {
+      name:             'Public displays weekly electricity comparison',
+      inherits_from:    :public_displays_electricity_weekly_comparison,
+      meter_definition: :allheat
+    },
     calendar_picker_electricity_day_example_comparison_chart: {
       name:             'Calendar picker electricity example day comparison chart',
       timescale:        [
@@ -2183,7 +2200,6 @@ class ChartManager
       name:             'When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time.',
       timescale:        :year,
       inherits_from:     :daytype_breakdown_electricity,
-      yaxis_units:      :£,
       minimum_days_data_override: 180
     },
     pupil_dashboard_baseload_lastyear: {
