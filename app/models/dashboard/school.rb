@@ -10,8 +10,8 @@ module Dashboard
     # Activation date is when the school was activated by an administrator in the Energy Sparks front end - it is a date
     # Created at is when the school was created during the onboarding process - it is a timestamp
     ATTRIBUTES = %i[name id address floor_area number_of_pupils school_type area_name postcode country
-                    funding_status activation_date created_at school_times community_use_times location
-                    data_enabled has_swimming_pool].freeze
+                    funding_status created_at school_times community_use_times location data_enabled has_swimming_pool]
+                 .freeze
 
     attr_reader ATTRIBUTES
     attr_accessor :urn
@@ -19,13 +19,14 @@ module Dashboard
     def initialize(data)
       data = { area_name: 'Bath', school_times: [], community_use_times: [], location: [], data_enabled: true }
              .merge(data)
-      (ATTRIBUTES + [:urn]).each do |key|
+      (ATTRIBUTES + %i[urn activation_date]).each do |key|
         instance_variable_set("@#{key}", data[value])
       end
     end
 
     def latitude
       return nil if @location.nil?
+
       @location[0].to_f
     end
 
