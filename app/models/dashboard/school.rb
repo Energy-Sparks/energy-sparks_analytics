@@ -12,8 +12,7 @@ module Dashboard
     ATTRIBUTES = %i[name id address floor_area number_of_pupils school_type area_name postcode country
                     funding_status created_at school_times community_use_times location data_enabled has_swimming_pool]
                  .freeze
-
-    attr_reader ATTRIBUTES
+    attr_reader(*ATTRIBUTES)
     attr_accessor :urn
 
     def initialize(data)
