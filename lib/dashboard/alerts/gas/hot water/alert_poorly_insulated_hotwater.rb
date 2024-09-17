@@ -10,7 +10,9 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
 
   def initialize(school)
     super(school, :hotwaterinsulation)
-    @relevance = :never_relevant if @relevance != :never_relevant && heating_only # set before calculation
+    if @relevance != :never_relevant && (heating_only || school.school.has_swimming_pool)
+      @relevance = :never_relevant
+    end
   end
 
   TEMPLATE_VARIABLES = {

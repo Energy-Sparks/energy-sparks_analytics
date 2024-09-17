@@ -14,34 +14,13 @@ class MeterCollectionFactory
   end
 
   def build(school_data:, amr_data: { electricity_meters: [], heat_meters: [] }, pseudo_meter_attributes: {}, meter_attributes_overrides: {})
-    school = Dashboard::School.new(
-      name: school_data[:name],
-      id: school_data[:id],
-      address: school_data[:address],
-      floor_area: school_data[:floor_area],
-      number_of_pupils: school_data[:number_of_pupils],
-      school_type: school_data[:school_type],
-      area_name: school_data[:area_name],
-      urn: school_data[:urn],
-      funding_status: school_data[:funding_status],
-      postcode: school_data[:postcode],
-      country: school_data[:country],
-      activation_date: school_data[:activation_date],
-      created_at: school_data[:created_at],
-      school_times: school_data[:school_times],
-      community_use_times: school_data[:community_use_times],
-      location: school_data[:location],
-      data_enabled: school_data[:data_enabled]
-    )
-
-    meter_collection = MeterCollection.new(school,
+    meter_collection = MeterCollection.new(Dashboard::School.new(school_data),
                                            temperatures: @temperatures,
                                            solar_pv: @solar_pv,
                                            solar_irradiation: @solar_irradiation,
                                            grid_carbon_intensity: @grid_carbon_intensity,
                                            holidays: @holidays,
                                            pseudo_meter_attributes: pseudo_meter_attributes)
-
     add_meters_and_amr_data(meter_collection, amr_data, meter_attributes_overrides)
     meter_collection
   end
