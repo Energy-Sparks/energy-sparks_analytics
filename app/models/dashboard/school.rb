@@ -19,7 +19,7 @@ module Dashboard
       data = { area_name: 'Bath', school_times: [], community_use_times: [], location: [], data_enabled: true }
              .merge(data)
       (ATTRIBUTES + %i[urn activation_date]).each do |key|
-        instance_variable_set("@#{key}", data[value])
+        instance_variable_set("@#{key}", data[key])
       end
     end
 
