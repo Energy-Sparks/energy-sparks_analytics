@@ -97,7 +97,7 @@ class AverageSchoolCalculator
       holiday_type = @school.holidays.holiday(date).type
       holiday_type = self.class.remap_low_sample_holiday(holiday_type, date)
       averaged_school_type_map(@school.school_type).map do |school_type|
-        AverageSchoolData.new.raw_data[fuel_type][benchmark_type][school_type.to_sym][:holiday][holiday_type]
+        Schools::AverageSchoolData.raw_data[fuel_type][benchmark_type][school_type.to_sym][:holiday][holiday_type]
       end
     else
       avg_kwh_x48_by_school_type = interpolators.map do |interpolator|
@@ -110,7 +110,7 @@ class AverageSchoolCalculator
     school_types = averaged_school_type_map(@school.school_type)
     interpolators = school_types.map do |school_type|
       # interpolators take ~3 ms to setup, so fast enough
-      raw_data = AverageSchoolData.new.raw_data[fuel_type][benchmark_type][school_type.to_sym]
+      raw_data = Schools::AverageSchoolData.raw_data[fuel_type][benchmark_type][school_type.to_sym]
       create_14_months_of_interpolations(raw_data)
     end
   end
