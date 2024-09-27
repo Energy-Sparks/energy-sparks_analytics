@@ -204,7 +204,7 @@ class MeterCollection
     nil
   end
 
-  def all_meters(ensure_unique = true, include_sub_meters = true)
+  def all_meters(ensure_unique: true, include_sub_meters: true)
     meter_list = [
       @heat_meters,
       @electricity_meters,
@@ -430,7 +430,7 @@ class MeterCollection
     # allows parameterised carbon/cost objects to cache data post
     # aggregation, reducing memory footprint in front end cache prior to this
     # while maintaining charting performance once out of cache
-    all_meters.each do |meter|
+    all_meters(ensure_unique: false).each do |meter|
       meter.amr_data.open_close_breakdown = CommunityUseBreakdown.new(meter, @open_close_times)
       meter.amr_data.set_post_aggregation_state
     end
