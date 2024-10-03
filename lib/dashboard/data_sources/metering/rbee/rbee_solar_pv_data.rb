@@ -88,11 +88,11 @@ class RbeeSolarPV
   # all the raw data returned by Rbee is in UTC(+0)
   # gets data in 6 day + 1 hour chunks, as opposed to API limit of 7 days,
   # as margin of 1 hour required for UTC to BST/GMT conversion
-  def smart_meter_data(meter_id, start_date, end_date, datetime = Time.now.utc)
+  def smart_meter_data(meter_id, start_date, end_date)
     data = {}
     raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
     (start_date..end_date).each_slice(6) do |six_days|
-      data = data.deep_merge(smart_meter_data_6_days(meter_id, six_days.first, six_days.last, datetime))
+      data = data.deep_merge(smart_meter_data_6_days(meter_id, six_days.first, six_days.last, Time.now.utc))
     end
     data
   end
@@ -101,12 +101,12 @@ class RbeeSolarPV
   # in order to understand meter setup for Newport schools where
   # the inventory/full information call doesn't provide information about the underlying
   # metering
-  def smart_meter_data_analysis(meter_id, start_date, end_date, datetime = Time.now.utc)
+  def smart_meter_data_analysis(meter_id, start_date, end_date)
     totals = {}
     start_date = first_connection_date(meter_id) if start_date.nil?
     raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
     (start_date..end_date).each_slice(6) do |six_days|
-      data = smart_meter_data_6_days_debug(meter_id, six_days.first, six_days.last, datetime)
+      data = smart_meter_data_6_days_debug(meter_id, six_days.first, six_days.last, Time.now.utc)
       data.each do |type, value|
         totals[type] ||= 0.0
         totals[type] += value.to_f
@@ -115,12 +115,12 @@ class RbeeSolarPV
     totals
   end
 
-  def smart_meter_data_by_component(meter_id, start_date, end_date, component = nil, datetime = Time.now.utc)
+  def smart_meter_data_by_component(meter_id, start_date, end_date, component = nil)
     raise InvalidComponent, "Component = #{component}" unless COMPONENTS.include?(component)
     data = {}
     raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
     (start_date..end_date).each_slice(6) do |six_days|
-      data = data.deep_merge(smart_meter_data_6_days_by_component(meter_id, component, six_days.first, six_days.last, datetime))
+      data = data.deep_merge(smart_meter_data_6_days_by_component(meter_id, component, six_days.first, six_days.last, Time.now.utc))
     end
     data
   end
