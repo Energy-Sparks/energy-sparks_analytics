@@ -119,6 +119,50 @@ describe ManagementSummaryTable do
         expect(variables.dig(:summary_data, :electricity)).to be_nil
         expect(variables.dig(:summary_data, :storage_heaters)).to be_nil
       end
+
+      context 'with no recorded usage' do
+        let(:meter_collection) do
+          meter_collection = build(:meter_collection, start_date: start_date, end_date: today)
+          electricity_meter = build(:meter,
+                                    :with_flat_rate_tariffs,
+                                    tariff_start_date: start_date,
+                                    tariff_end_date: today,
+                                    meter_collection: meter_collection,
+                                    type: :gas,
+                                    amr_data: build(:amr_data, :with_date_range,
+                                                    type: :electricity,
+                                                    start_date: start_date,
+                                                    end_date: today,
+                                                    kwh_data_x48: Array.new(48, 0.0)))
+          meter_collection.add_heat_meter(electricity_meter)
+          meter_collection
+        end
+
+        before do
+          AggregateDataService.new(meter_collection).aggregate_heat_and_electricity_meters
+        end
+
+        it 'runs the calculation and produces expected variables' do
+          expect(result).to be true
+          expect(variables.dig(:summary_data, :gas)).not_to be_nil
+          gas_data = variables.dig(:summary_data, :gas)
+          expect(gas_data[:start_date]).to eq(start_date.iso8601)
+          expect(gas_data[:end_date]).to eq(today.iso8601)
+
+          expect(gas_data.dig(:year, :recent)).to be true
+          expect(gas_data.dig(:workweek, :recent)).to be true
+
+          %i[workweek year].each do |period|
+            %i[kwh £ co2].each do |metric|
+              expect(gas_data.dig(period, metric)).to eq(0.0)
+            end
+
+            %i[savings_£ percent_change].each do |metric|
+              expect(gas_data.dig(period, metric)).to eq('n/a')
+            end
+          end
+        end
+      end
     end
 
     context 'when school has storage heaters' do
