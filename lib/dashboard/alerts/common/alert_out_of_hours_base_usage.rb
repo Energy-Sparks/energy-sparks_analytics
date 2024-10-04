@@ -194,7 +194,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
     @rating = calculate_rating_from_range(good_out_of_hours_use_percent, bad_out_of_hours_use_percent, out_of_hours_percent)
 
-    @significant_out_of_hours_use = @rating < 7.0
+    @significant_out_of_hours_use = @rating.to_f < 7.0
 
     @status = @significant_out_of_hours_use ? :bad : :good
 

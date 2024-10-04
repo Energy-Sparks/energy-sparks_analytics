@@ -219,7 +219,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
 
     @rating = calculate_rating_from_range(-0.05, 0.15, @predicted_percent_increase_in_usage)
 
-    @significant_increase_in_baseload = @rating < 7.0
+    @significant_increase_in_baseload = @rating.to_f < 7.0
 
     @status = @significant_increase_in_baseload ? :bad : :good
 
