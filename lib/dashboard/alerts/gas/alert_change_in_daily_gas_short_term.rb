@@ -207,7 +207,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
     @rating = calculate_rating_from_range(0.2, -0.2, -1 * @difference_in_actual_versus_predicted_change_percent)
 
-    @significant_increase_in_gas_consumption = @rating < 7.0
+    @significant_increase_in_gas_consumption = @rating.to_f < 7.0
 
     @status = @signficant_increase_in_gas_consumption ? :bad : :good
 

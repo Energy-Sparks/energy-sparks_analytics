@@ -105,7 +105,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
 
     @rating = calculate_rating_from_range(1.0, 0.0, rating_7_day)
 
-    @status = @rating < 7.0 ? :bad : :good
+    @status = @rating.to_f < 7.0 ? :bad : :good
 
     @term = :shortterm
     @bookmark_url = add_book_mark_to_base_url('HeatingComingOnTooEarly')

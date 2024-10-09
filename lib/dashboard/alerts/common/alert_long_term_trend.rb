@@ -183,9 +183,9 @@ class AlertLongTermTrend < AlertAnalysisBase
     #BACKWARDS COMPATIBILITY: previously may have failed here if variable was not set
     raise_calculation_error_if_missing(year_change_£_temp_adj: year_change_£_temp_adj)
 
-    @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_kwh_temp_adj)
-
     assign_commmon_saving_variables(one_year_saving_kwh: year_change_kwh, one_year_saving_£: year_change_£, one_year_saving_co2: @year_change_co2)
+
+    @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_kwh_temp_adj)
   end
   alias_method :analyse_private, :calculate
 

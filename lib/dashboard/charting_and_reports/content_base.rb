@@ -416,6 +416,8 @@ class ContentBase
   end
 
   protected def calculate_rating_from_range(good_value, bad_value, actual_value)
+    return nil if @one_year_saving && @one_year_saving_£.last < 10.0 # ignore when saving less than £10
+
     [10.0 * [(actual_value - bad_value) / (good_value - bad_value), 0.0].max, 10.0].min.round(1)
   end
 
