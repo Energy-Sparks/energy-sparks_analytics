@@ -22,5 +22,10 @@ module Utilities
       nighttime_hh
     end
 
+    def self.zero_night_hours(date, meter_collection, reading)
+      Utilities::SunTimes.nighttime_half_hours(date, meter_collection).each.with_index do |night, hh_i|
+        reading[hh_i] = 0.0 if night
+      end
+    end
   end
 end
