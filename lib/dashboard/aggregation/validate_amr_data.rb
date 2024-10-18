@@ -1262,7 +1262,6 @@ class ValidateAMRData
   def override_night_to_zero(rule)
     start_date = default_start_date(rule[:start_date])
     end_date = default_end_date(rule[:end_date], false)
-    debugger
     (start_date..end_date).each do |date|
       data = @amr_data.one_days_data_x48(date)
       Utilities::SunTimes.zero_night_hours(date, @meter.meter_collection, data)
