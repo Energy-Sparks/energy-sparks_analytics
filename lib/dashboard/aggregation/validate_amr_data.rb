@@ -117,7 +117,7 @@ class ValidateAMRData
     #substituted with a fixed value of '0.0123456' for each HH reading and
     #a flag of 'PROB'
     #Why not zero?
-    final_missing_data_set_to_small_negative
+    Corrections::FinalMissing.correct(@meter)
   end
 
   def debug?; false && [2380001730739].include?(@meter.mpxn.to_i) end
@@ -729,28 +729,6 @@ class ValidateAMRData
     end
   end
 
-  # Finds any days with missing data, then replaces them with a fixed reading
-  # values of 0.0123456 and a 'PROB' status code.
-  #
-  # Currently called at the end of validation to fill in any dates that haven't
-  # been substituted by other methods. Would be dangerous to call at other stages
-  #
-  # Assume these are meant to be followed up, rather than treated as real
-  # substituted data
-  def final_missing_data_set_to_small_negative
-    missing_dates = []
-    (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if @amr_data.date_missing?(date)
-        missing_dates.push(date)
-      end
-    end
-    missing_dates.each do |date|
-      no_data = Array.new(48, 0.0123456)
-      dummy_data = OneDayAMRReading.new(meter_id, date, 'PROB', nil, DateTime.now, no_data)
-      @amr_data.add(date, dummy_data)
-    end
-  end
-
   #Replace any missing weekend dates with zero data
   def replace_missing_weekend_data_with_zero
     (@amr_data.start_date..@amr_data.end_date).each do |date|
@@ -1125,7 +1103,7 @@ class ValidateAMRData
   #Returns true if more than 10% of the half hourly readings in the night are less than 20 watts
   def has_zero_readings_at_night?(date, margin_watts = 20)
     kw_margin = margin_watts / 1000.0
-    night_half_hours = nighttime_half_hours(date)
+    night_half_hours = Utilities::SunTimes.nighttime_half_hours(date, @meter.meter_collection)
 
     zero_night_readings = night_half_hours.map.with_index do |night, hh_i|
       @amr_data.date_exists?(date) &&
@@ -1138,27 +1116,6 @@ class ValidateAMRData
     percent_zero_night_readings = zero_night_readings_count.to_f / night_half_hours.length
 
     percent_zero_night_readings > 0.1 # more than 10% zero
-  end
-
-  # rather than querying sunrise and sunset for each half hour as used
-  # elsewhere in the code, do in 1 go for the whole day
-  def nighttime_half_hours(date, margin_hours = -1.5)
-    latitude  = @meter.meter_collection.latitude
-    longitude = @meter.meter_collection.longitude
-
-    sun_times = SunTimes.new
-
-    sunrise = sun_times.rise(date, latitude, longitude)
-    sr_criteria = sunrise + 60 * 60 * margin_hours
-    hh_sunrise = DateTimeHelper.half_hour_index(sr_criteria)
-
-    sunset = sun_times.set(date, latitude, longitude)
-    ss_criteria = sunset - 60 * 60 * margin_hours
-    hh_sunset = DateTimeHelper.half_hour_index(ss_criteria)
-
-    nighttime_hh = Array.new(hh_sunrise, true) + Array.new(hh_sunset - hh_sunrise, false)
-    nighttime_hh += Array.new(48 - nighttime_hh.length, true)
-    nighttime_hh
   end
 
   # [1, -1, 2, -2 etc.]

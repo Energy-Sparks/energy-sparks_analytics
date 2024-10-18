@@ -1,6 +1,6 @@
 require 'csv'
 
-# 'base' class used for holding hald hourly data typical to schools' energy analysis
+# 'base' class used for holding half hourly data typical to schools' energy analysis
 # generally data held in derived classes e.g. temperatures, solar insolence, AMR data
 # hash of date => 48 x float values
 class HalfHourlyData < Hash
