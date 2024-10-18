@@ -45,7 +45,7 @@ describe ValidateAMRData, type: :service do
 
   context 'with override_night_to_zero' do
     it 'replace night time readings with a rule' do
-      meter.meter_correction_rules << { override_night_to_zero: {} }
+      meter.meter_correction_rules << { override_night_to_zero: nil }
       validator.validate(debug_analysis: true)
       expect(arbitrary_night_readings(meter)).to eq(Array.new(8, 0.0))
     end

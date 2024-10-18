@@ -1260,6 +1260,7 @@ class ValidateAMRData
   end
 
   def override_night_to_zero(rule)
+    rule ||= {}
     start_date = default_start_date(rule[:start_date])
     end_date = default_end_date(rule[:end_date], false)
     (start_date..end_date).each do |date|
