@@ -138,6 +138,20 @@ class MeterAttributes
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:set_all_missing_to_zero, :correct_zero_partial_data])
   end
 
+  class OverrideNightToZero < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_override_night_to_zero
+    key :override_night_to_zero
+    aggregate_over :meter_corrections
+    name 'Meter correction > Set night time readings to zero'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date: MeterAttributeTypes::Date.define
+      }
+    )
+  end
+
   class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
     id :partial_meter_coverage
     key :partial_meter_coverage
