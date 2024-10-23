@@ -4,7 +4,6 @@ FactoryBot.define do
   factory :amr_data, class: 'AMRData' do
     transient do
       type { :electricity }
-      random_generator { nil }
     end
 
     initialize_with { new(type) }
@@ -19,7 +18,7 @@ FactoryBot.define do
       transient do
         start_date   { Date.yesterday - 7 }
         end_date     { Date.yesterday }
-        kwh_data_x48 { Array.new(48) { (random_generator || Random.new).rand.round(2) } }
+        kwh_data_x48 { nil }
       end
 
       after(:build) do |amr_data, evaluator|
@@ -29,7 +28,7 @@ FactoryBot.define do
                           type: 'ORIG',
                           substitute_date: nil,
                           upload_datetime: DateTime.now,
-                          kwh_data_x48: evaluator.kwh_data_x48.dup)
+                          kwh_data_x48: (evaluator.kwh_data_x48 || Array.new(48) { rand.round(2) }).dup)
           amr_data.add(date, reading)
         end
       end

@@ -308,7 +308,7 @@ class ValidateAMRData
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
     elsif rule.key?(:override_night_to_zero)
-      override_night_to_zero(rule[:override_night_to_zero])
+      Corrections::OverrideNightToZero.apply(rule[:override_night_to_zero], @meter)
     end
   end
 
@@ -1256,18 +1256,6 @@ class ValidateAMRData
 
     if @temperatures.start_date > @amr_data.start_date || @temperatures.end_date < @amr_data.end_date
       raise NotEnoughTemperaturedata, "Temperature data from #{@temperatures.start_date} to #{@temperatures.end_date} doesnt cover period of #{@meter.mpxn} #{@meter.fuel_type} meter data from #{@amr_data.start_date} to #{@amr_data.end_date}"
-    end
-  end
-
-  def override_night_to_zero(rule)
-    rule ||= {}
-    start_date = default_start_date(rule[:start_date])
-    end_date = default_end_date(rule[:end_date], false)
-    (start_date..end_date).each do |date|
-      data = @amr_data.one_days_data_x48(date)
-      Utilities::SunTimes.zero_night_hours(date, @meter.meter_collection, data)
-      reading = OneDayAMRReading.new(meter_id, date, 'SOLN', nil, DateTime.now, data)
-      @amr_data.add(date, reading)
     end
   end
 end
