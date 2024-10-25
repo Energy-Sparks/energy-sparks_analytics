@@ -7,6 +7,6 @@ RSpec.shared_context 'with today' do
   # an environment variable. So by default set it as if we're running
   # on the asof_date
   around do |example|
-    ClimateControl.modify ENERGYSPARKSTODAY: today { example.run }
+    ClimateControl.modify(ENERGYSPARKSTODAY: today) { example.run }
   end
 end
