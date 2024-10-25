@@ -307,6 +307,10 @@ class ValidateAMRData
       #substitutions done in +do_validations+
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
+    elsif rule.key?(:override_night_to_zero)
+      Corrections::OverrideNightToZero.apply(rule.dig(:override_night_to_zero, :start_date),
+                                             rule.dig(:override_night_to_zero, :end_date),
+                                             @meter)
     end
   end
 
