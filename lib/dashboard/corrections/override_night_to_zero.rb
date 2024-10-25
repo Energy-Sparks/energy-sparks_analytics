@@ -2,12 +2,9 @@
 
 module Corrections
   module OverrideNightToZero
-    def self.apply(rule, meter)
-      rule ||= {}
-      p rule
-      start_date = rule[:start_date] || meter.amr_data.start_date
-      end_date = rule[:end_date] || meter.amr_data.end_date
-      p [start_date, end_date]
+    def self.apply(start_date, end_date, meter)
+      start_date ||= meter.amr_data.start_date
+      end_date ||= meter.amr_data.end_date
       (start_date..end_date).each do |date|
         next if meter.amr_data.date_missing?(date)
 

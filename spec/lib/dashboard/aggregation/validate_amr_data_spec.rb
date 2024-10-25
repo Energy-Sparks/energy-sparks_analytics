@@ -55,7 +55,6 @@ describe ValidateAMRData, type: :service do
     it 'replace night time readings with a rule with dates' do
       meter.meter_correction_rules[-1] = { override_night_to_zero: { start_date: meter.amr_data.start_date + 1.day,
                                                                      end_date: meter.amr_data.start_date + 2.days } }
-      p meter.meter_correction_rules
       validator.validate(debug_analysis: true)
       expect(arbitrary_night_readings(meter)).to eq([0.44, 0.0, 0.0, 0.44, 0.44, 0.44, 0.44, 0.44])
     end
