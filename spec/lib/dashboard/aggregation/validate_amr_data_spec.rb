@@ -59,14 +59,14 @@ describe ValidateAMRData, type: :service do
       expect(arbitrary_night_readings(meter)).to eq([0.44, 0.0, 0.0, 0.44, 0.44, 0.44, 0.44, 0.44])
     end
 
-    it 'with missing data' do
+    it 'has with missing data' do
       missing_date = meter.amr_data.keys.sort[1]
       meter.amr_data.delete(missing_date)
       validator.validate(debug_analysis: true)
       expect(arbitrary_night_readings(meter)).to eq([0.0, 0.0123456, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     end
 
-    it 'already zero' do
+    it 'is already zero' do
       date = meter.amr_data.keys.sort[1]
       meter.amr_data[date].kwh_data_x48.fill(0.0)
       validator.validate(debug_analysis: true)
