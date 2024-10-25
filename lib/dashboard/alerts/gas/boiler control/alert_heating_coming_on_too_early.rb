@@ -16,6 +16,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
 
   def initialize(school)
     super(school, :heatingcomingontooearly)
+    @relevance = :never_relevant if holiday?(@today)
   end
 
   def self.template_variables
