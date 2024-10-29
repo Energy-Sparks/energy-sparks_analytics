@@ -99,7 +99,8 @@ class OneDayAMRReading
     'DCCP' => { name: 'Partial DCC data for interpolation' },
     'COVD' => { name: '3rd lockdown COVID adjustment T&T system' },
     'CAVG' => { name: 'calculated average school data' },
-    'SOLN' => { name: 'Override night data with zero' }
+    'SOLN' => { name: 'Override night data with zero' },
+    'SOLC' => { name: 'Zero negative solar self consumption data' }
   }.freeze
 
   # allow access until front end changes made

@@ -14,13 +14,12 @@ describe AggregateDataServiceSolar do
           meter_collection: meter_collection,
           type: :electricity, meter_attributes: meter_attributes)
   end
-
-  let(:meters) { [electricity_meter] }
+  let(:solar_production_meter) { nil }
+  let(:solar_export_meter) { nil }
+  let(:meters) { [electricity_meter, solar_production_meter, solar_export_meter].compact }
 
   before do
-    meters.each do |meter|
-      meter_collection.add_electricity_meter(meter)
-    end
+    meters.each { |meter| meter_collection.add_electricity_meter(meter) }
   end
 
   context 'when school does not have solar' do
@@ -70,11 +69,10 @@ describe AggregateDataServiceSolar do
     let(:solar_pv_mpan_meter_mapping) do
       {
         start_date: Date.new(2023, 1, 1),
-        production_mpan: solar_production_meter.mpan_mprn.to_s
-      }
+        production_mpan: solar_production_meter.mpan_mprn.to_s,
+        export_mpan: solar_export_meter&.mpan_mprn&.to_s
+      }.compact
     end
-
-    let(:meters) { [electricity_meter, solar_production_meter] }
 
     context 'with only production meter' do
       it 'returns a single new electricity meter' do
@@ -98,14 +96,6 @@ describe AggregateDataServiceSolar do
 
     context 'with production and export meters' do
       let(:solar_export_meter) { build(:meter, meter_collection: meter_collection, type: :exported_solar_pv) }
-      let(:solar_pv_mpan_meter_mapping) do
-        {
-          start_date: Date.new(2023, 1, 1),
-          export_mpan: solar_export_meter.mpan_mprn.to_s,
-          production_mpan: solar_production_meter.mpan_mprn.to_s
-        }
-      end
-      let(:meters) { [electricity_meter, solar_production_meter, solar_export_meter] }
 
       it 'returns a single new electricity meter' do
         expect(processed_meters.length).to eq(1)
@@ -123,6 +113,19 @@ describe AggregateDataServiceSolar do
       it 'creates a new self consumption meter' do
         sub_meters = processed_meters.first.sub_meters
         expect(sub_meters[:self_consume]).not_to be_nil
+      end
+
+      context 'with faulty zero production' do
+        let(:solar_production_meter) do
+          build(:meter, meter_collection: meter_collection, type: :solar_pv,
+                        amr_data: build(:amr_data, :with_days, day_count: 30, kwh_data_x48: Array.new(48, 0.0)))
+        end
+
+        it 'zeros negative data' do
+          reading = processed_meters.first.sub_meters[:self_consume].amr_data.values.first
+          expect(reading.kwh_data_x48).to eq(Array.new(48, 0.0))
+          expect(reading.type).to eq('SOLC')
+        end
       end
     end
 
