@@ -8,11 +8,12 @@ describe AggregateDataServiceSolar do
   let(:meter_collection) do
     build(:meter_collection)
   end
-
+  let(:solar_pv_mpan_meter_mapping) { nil }
+  let(:meter_attributes) do
+    { solar_pv_mpan_meter_mapping: ([solar_pv_mpan_meter_mapping] unless solar_pv_mpan_meter_mapping.nil?) }.compact
+  end
   let(:electricity_meter) do
-    build(:meter,
-          meter_collection: meter_collection,
-          type: :electricity, meter_attributes: meter_attributes)
+    build(:meter, meter_collection: meter_collection, type: :electricity, meter_attributes: meter_attributes)
   end
   let(:solar_production_meter) { nil }
   let(:solar_export_meter) { nil }
@@ -23,8 +24,6 @@ describe AggregateDataServiceSolar do
   end
 
   context 'when school does not have solar' do
-    let(:meter_attributes) { {} }
-
     it 'returns the existing electricity meter' do
       expect(processed_meters).to eq([electricity_meter])
       # adds itself as a mains consumption meter
@@ -34,9 +33,7 @@ describe AggregateDataServiceSolar do
 
   context 'when school does not have metered solar' do
     let(:meter_attributes) do
-      {
-        solar_pv: [{ start_date: Date.new(2023, 1, 1), kwp: 10.0 }]
-      }
+      { solar_pv: [{ start_date: Date.new(2023, 1, 1), kwp: 10.0 }] }
     end
 
     it 'returns a single new electricity meter' do
@@ -59,12 +56,6 @@ describe AggregateDataServiceSolar do
   end
 
   context 'when school has metered solar' do
-    let(:meter_attributes) do
-      {
-        solar_pv_mpan_meter_mapping: [solar_pv_mpan_meter_mapping]
-      }
-    end
-
     let(:solar_production_meter) { build(:meter, meter_collection: meter_collection, type: :solar_pv) }
     let(:solar_pv_mpan_meter_mapping) do
       {
@@ -167,7 +158,8 @@ describe AggregateDataServiceSolar do
         expect(solar_production_meters).not_to include(sub_meters[:generation])
 
         # uses mpan_mprn of first generation meter
-        expect(sub_meters[:generation].mpan_mprn).to eq(Dashboard::Meter.synthetic_aggregate_generation_meter(solar_production_meters.first.mpan_mprn))
+        expect(sub_meters[:generation].mpan_mprn).to \
+          eq(Dashboard::Meter.synthetic_aggregate_generation_meter(solar_production_meters.first.mpan_mprn))
       end
     end
   end
