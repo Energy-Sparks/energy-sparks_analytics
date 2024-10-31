@@ -23,11 +23,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :tariff_has_changed_during_period_text
 
   def initialize(school, fuel,
-                 alert_type, bookmark, meter_definition,
+                 alert_type, meter_definition,
                  good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
     super(school, alert_type)
     @fuel = fuel
-    @bookmark = bookmark
     @good_out_of_hours_use_percent = good_out_of_hours_use_percent
     @bad_out_of_hours_use_percent = bad_out_of_hours_use_percent
     @meter_definition = meter_definition
@@ -199,7 +198,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @status = @significant_out_of_hours_use ? :bad : :good
 
     @term = :longterm
-    @bookmark_url = add_book_mark_to_base_url(@bookmark)
   end
   alias_method :analyse_private, :calculate
 

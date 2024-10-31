@@ -13,7 +13,7 @@ class AlertAnalysisBase < ContentBase
 
   ALERT_HELP_URL = 'https://blog.energysparks.uk/alerts'.freeze
 
-  attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
+  attr_reader :status, :rating, :term, :default_summary, :default_content
   attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
   attr_reader :capital_cost, :one_year_saving_£, :ten_year_saving_£, :payback_years
@@ -122,10 +122,6 @@ class AlertAnalysisBase < ContentBase
     term: {
       description: 'long term or short term',
       units:  Symbol
-    },
-    bookmark_url: {
-      description: 'Link to help URL',
-      units:  String
     },
     max_asofdate: {
       description: 'The latest date on which an alert can be run given the available data',

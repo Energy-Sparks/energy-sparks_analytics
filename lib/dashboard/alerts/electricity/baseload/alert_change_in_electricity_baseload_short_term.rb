@@ -224,7 +224,6 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
     @status = @significant_increase_in_baseload ? :bad : :good
 
     @term = :shortterm
-    @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
   end
   alias_method :analyse_private, :calculate
 end

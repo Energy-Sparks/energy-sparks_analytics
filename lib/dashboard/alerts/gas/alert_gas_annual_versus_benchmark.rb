@@ -409,7 +409,6 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     @status = @rating < 6.0 ? :bad : :good
 
     @term = :longterm
-    @bookmark_url = add_book_mark_to_base_url('AnnualGas')
   end
   alias_method :analyse_private, :calculate
 

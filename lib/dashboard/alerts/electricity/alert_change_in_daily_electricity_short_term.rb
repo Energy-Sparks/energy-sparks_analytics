@@ -143,7 +143,6 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     @rating = calculate_rating_from_range(-0.05, 0.15, @percent_change_in_consumption)
     @status = @signifcant_increase_in_electricity_consumption ? :bad : :good
     @term = :shortterm
-    @bookmark_url = add_book_mark_to_base_url('ElectricityChange')
   end
   alias_method :analyse_private, :calculate
 

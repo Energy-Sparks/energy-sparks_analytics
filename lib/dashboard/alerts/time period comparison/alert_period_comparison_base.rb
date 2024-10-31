@@ -251,7 +251,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
-    @bookmark_url = add_book_mark_to_base_url(url_bookmark)
     @term = :shortterm
   end
   alias_method :analyse_private, :calculate
