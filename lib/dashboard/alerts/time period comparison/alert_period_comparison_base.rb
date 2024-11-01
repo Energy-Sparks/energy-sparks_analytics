@@ -49,7 +49,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :truncated_current_period
   attr_reader :difference_£current, :abs_difference_£current, :current_period_£current, :previous_period_£current
   attr_reader :current_period_weekly_£current, :previous_period_weekly_£current, :change_in_weekly_£current
-  attr_reader :tariff_has_changed_between_periods_text
   attr_reader :current_period_£_per_kwh, :previous_period_£_per_kwh, :tariff_has_changed
 
   def self.dynamic_template_variables(fuel_type)
@@ -89,17 +88,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
       previous_period_average_kwh: { description: 'Previous period average adjusted daily',    units:  { kwh: fuel_type } },
 
-      current_holiday_temperatures:     { description: 'Current period temperatures', units:  String  },
-      previous_holiday_temperatures:    { description: 'Previous period temperatures', units:  String  },
-
-      current_holiday_average_temperature:  { description: 'Current periods average temperature',  units:  :temperature },
-      previous_holiday_average_temperature: { description: 'Previous periods average temperature', units:  :temperature },
-
       truncated_current_period: { description: 'truncated period',                        units:  TrueClass, benchmark_code: 'cptr' },
-
-      previous_period_average_kwh_unadjusted: { description: 'Previous period average unadjusted kwh',  units:  { kwh: fuel_type } },
-      current_period_kwhs:                    { description: 'Current period kwh values', units:  String  },
-      previous_period_kwhs_unadjusted:        { description: 'Previous period unadjusted kwh values', units:  String  },
 
       current_period_weekly_kwh:      { description: 'Current period normalised average weekly kwh',   units:  { kwh: fuel_type } },
       current_period_weekly_£:        { description: 'Current period normalised average weekly £ (using historic tariffs)', units:  :£  },
@@ -117,7 +106,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       summary:  { description: 'Change in kwh spend, relative to previous period', units: String },
       prefix_1: { description: 'Change: up or down', units: String },
       prefix_2: { description: 'Change: increase or reduction', units: String },
-      tariff_has_changed_between_periods_text: { description: 'Caveat text if tariff has changed between periods, otherwise blank', units: String },
 
       current_period_floor_area:  { description: 'Weighted average floor area current period',          units: :m2,       benchmark_code: 'cpfa' },
       previous_period_floor_area: { description: 'Weighted average floor area previous period',         units: :m2,       benchmark_code: 'ppfa' },
@@ -169,8 +157,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)
 
-    @tariff_has_changed_between_periods_text = calculate_tariff_has_changed_between_periods_text(current_period, previous_period)
-
     calculate_floor_area_adjustments(current_period, previous_period)
     calculate_pupil_number_adjustments(current_period, previous_period)
 
@@ -215,17 +201,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     @previous_period_average_kwh  = @previous_period_kwh / @days_in_current_period
 
-    current_period_range = @current_period_start_date..@current_period_end_date
-    @current_holiday_temperatures,  @current_holiday_average_temperature = weeks_temperatures(current_period_range)
-
     previous_period_range = @previous_period_start_date..@previous_period_end_date
-    @previous_holiday_temperatures, @previous_holiday_average_temperature = weeks_temperatures(previous_period_range)
-
-    @current_period_kwhs, _avg, _current_period_kwh = formatted_kwh_period_unadjusted(current_period_range)
-
     (
-      @previous_period_kwhs_unadjusted,
-      @previous_period_average_kwh_unadjusted,
+      _previous_period_kwhs_unadjusted,
+      _previous_period_average_kwh_unadjusted,
       @previous_period_kwh_unadjusted
     ) = formatted_kwh_period_unadjusted(previous_period_range)
 
@@ -514,13 +493,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def enough_days_data(days)
     days >= MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD
-  end
-
-  # returns [ formatted string of 7 temperatures, average for week]
-  def weeks_temperatures(date_range)
-    temperatures = date_range.to_a.map { |date| @school.temperatures.average_temperature(date) }
-    formatted_temperatures = temperatures.map { |temp| FormatEnergyUnit.format(:temperature, temp) }.join(', ')
-    [formatted_temperatures, temperatures.sum / temperatures.length]
   end
 
   def calculate_floor_area_adjustments(current_period, previous_period)
