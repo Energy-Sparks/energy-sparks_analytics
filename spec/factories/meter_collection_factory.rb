@@ -76,7 +76,7 @@ FactoryBot.define do
       with_aggregate_meter
 
       after(:build) do |meter_collection, evaluator|
-        kwh_data_x48 = Array.new(48, 1)
+        kwh_data_x48 = Array.new(10, 1) + Array.new(20, 2) + Array.new(18, 2)
         meter_attributes = {}
         if evaluator.storage_heaters
           meter_attributes[:storage_heaters] = [{ charge_start_time: TimeOfDay.parse('02:00'),
