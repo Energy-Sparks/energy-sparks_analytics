@@ -18,7 +18,6 @@ describe AlertSolarPVBenefitEstimator do
       status: '',
       rating: '5',
       term: '',
-      bookmark_url: '',
       max_asofdate: '',
       pupils: '961',
       floor_area: '5,900 m2',

@@ -7,7 +7,6 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
     school,
     fuel = 'gas',
     type = :gasoutofhours,
-    bookmark = 'GasOutOfHours',
     meter_defn_not_used = :allheat,
     good_out_of_hours_use_percent = BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_GAS,
     bad_out_of_hours_use_percent = BenchmarkMetrics::BENCHMARK_OUT_OF_HOURS_USE_PERCENT_GAS
@@ -16,7 +15,6 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
       school,
       fuel,
       type,
-      bookmark,
       meter_defn_not_used,
       good_out_of_hours_use_percent,
       bad_out_of_hours_use_percent

@@ -71,7 +71,6 @@ class AlertOptimumStartAnalysis < AlertGasModelBase
     @rating = calculate_rating_from_range(6.0, 3.0, results[:average_start_time])
 
     @term = :longterm
-    @bookmark_url = add_book_mark_to_base_url('HeatingComingOnTooEarly')
   end
   alias_method :analyse_private, :calculate
 

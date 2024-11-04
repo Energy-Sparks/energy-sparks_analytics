@@ -247,7 +247,6 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @status = @rating < 5.0 ? :bad : :good
 
     @term = :shortterm
-    @bookmark_url = add_book_mark_to_base_url('WeekendGas')
   end
   alias_method :analyse_private, :calculate
 

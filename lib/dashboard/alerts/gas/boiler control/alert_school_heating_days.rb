@@ -143,7 +143,6 @@ class AlertHeatingOnSchoolDaysDeprecated < AlertHeatingDaysBase
     @status = @rating < 5.0 ? :bad : :good
 
     @term = :longterm
-    @bookmark_url = add_book_mark_to_base_url('HeatingOnSchoolDays')
   end
   alias_method :analyse_private, :calculate
 end

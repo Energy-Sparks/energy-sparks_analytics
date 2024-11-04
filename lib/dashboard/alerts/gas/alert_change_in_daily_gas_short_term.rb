@@ -212,7 +212,6 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @status = @signficant_increase_in_gas_consumption ? :bad : :good
 
     @term = :shortterm
-    @bookmark_url = add_book_mark_to_base_url('GasChange')
   end
   alias_method :analyse_private, :calculate
 
