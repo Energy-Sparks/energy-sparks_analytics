@@ -10,7 +10,6 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
       school,
       'electricity',
       :electricityoutofhours,
-      'ElectricityOutOfHours',
       :allelectricity,
       BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY,
       BenchmarkMetrics::BENCHMARK_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY

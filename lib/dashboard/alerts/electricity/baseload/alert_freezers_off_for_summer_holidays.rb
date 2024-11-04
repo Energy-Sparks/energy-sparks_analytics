@@ -111,7 +111,6 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
     @rating = [@turn_off_rating, @reduction_rating].min
 
     @term = :longterm
-    @bookmark_url = add_book_mark_to_base_url('HeatingComingOnTooEarly')
   end
   alias_method :analyse_private, :calculate
 

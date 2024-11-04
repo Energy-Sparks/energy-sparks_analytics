@@ -7,11 +7,15 @@ class AlertArbitraryPeriodComparisonBase < AlertHolidayComparisonBase
   end
 
   private   def period_type;        'arbitrary period'          end
-  protected def period_name(period); basic_configuration[:name] end
+  protected def period_name(period); comparison_configuration[:name] end
   private def calculate_time_of_year_relevance(asof_date)
     return 10.0 if asof_date >= @current_period.end_date
     return  5.0 if asof_date >= @current_period.start_date
     0.0
+  end
+
+  def timescale
+    "custom"
   end
 end
 

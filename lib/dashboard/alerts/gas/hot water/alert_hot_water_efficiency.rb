@@ -135,7 +135,6 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @rating = calculate_rating_from_range(0.6, 0.05, @existing_gas_efficiency)
 
       @term = :shortterm
-      @bookmark_url = add_book_mark_to_base_url('HotWaterEfficiency')
     end
   end
   alias_method :analyse_private, :calculate

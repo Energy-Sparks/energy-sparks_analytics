@@ -105,7 +105,6 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
       @status = !enough_data ? :fail : (rating > 3.0 ? :good : :bad)
     end
     @term = :longterm
-    @bookmark_url = nil
   end
   alias_method :analyse_private, :calculate
 end

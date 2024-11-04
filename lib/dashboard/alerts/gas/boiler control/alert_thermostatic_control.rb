@@ -110,7 +110,6 @@ class AlertThermostaticControl < AlertGasModelBase
     @status = @rating < 5.0 ? :bad : :good
 
     @term = :longterm
-    @bookmark_url = add_book_mark_to_base_url('ThermostaticControl')
   end
   alias_method :analyse_private, :calculate
 
