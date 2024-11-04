@@ -67,8 +67,8 @@ class AlertAnalysisBase < ContentBase
     @error_message = e.message
     @backtrace = e.backtrace
 
-    logger.warn e.message
-    logger.warn e.backtrace if backtrace
+    logger.warn e.message.truncate(120)
+    logger.warn e.backtrace[..5] if backtrace
   end
 
   private def exclude_backtrace?(message)
