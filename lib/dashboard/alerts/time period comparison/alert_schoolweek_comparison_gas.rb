@@ -42,12 +42,6 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
       current_week_kwhs:              { description: 'List of current school week kWh values', units:  String },
       previous_week_kwhs_unadjusted:  { description: 'List of previous school week kWh values (unadjusted)', units:  String  },
       previous_week_kwhs_adjusted:    { description: 'List of previous school week kWh values (adjusted)', units:  String  },
-      current_weeks_temperatures:     { description: 'Current week temperatures', units:  String  },
-      previous_weeks_temperatures:    { description: 'Previous week temperatures', units:  String  },
-
-      current_weeks_average_temperature:  { description: 'Current weeks average temperature',  units:  :temperature },
-      previous_weeks_average_temperature: { description: 'Previous weeks average temperature', units:  :temperature },
-
       current_week_kwh_total:             { description: 'Current week total kWh',                units:  :kwh  },
       previous_week_kwh_unadjusted_total: { description: 'Previous week total kWh (unadjusted)' , units:  :kwh, benchmark_code: 'najk'  },
       previous_week_kwh_total:            { description: 'Previous week total kWh (from chart, adjusted, maybe slightly different from previous_period_kwh which uses better underlying alert compensation )',    units:  :kwh, benchmark_code: 'ajkw'  },
@@ -92,9 +86,6 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
     @current_week_kwh_total             = unadjusted_data.values[1].sum
     @previous_week_kwh_unadjusted_total = unadjusted_data.values[0].sum
     @previous_week_kwh_total            = adjusted_data.values[0].sum
-
-    @current_weeks_temperatures,  @current_weeks_average_temperature  = weeks_temperatures(unadjusted_data.keys[1])
-    @previous_weeks_temperatures, @previous_weeks_average_temperature = weeks_temperatures(unadjusted_data.keys[0])
 
     @current_period  = SchoolDatePeriod.new(:schoolweek, 'Current school week',  unadjusted_data.keys[1].first, unadjusted_data.keys[1].last)
     @previous_period = SchoolDatePeriod.new(:schoolweek, 'Previous school week', unadjusted_data.keys[0].first, unadjusted_data.keys[0].last)
