@@ -21,6 +21,10 @@ describe AlertConfigurablePeriodElectricityComparison do
     }
   end
 
+  describe '#timescale' do
+    it { expect(alert.timescale).to eq('custom') }
+  end
+
   describe '#analyse' do
     it 'runs and sets variables' do
       expect(alert.valid_alert?).to be true
@@ -29,9 +33,11 @@ describe AlertConfigurablePeriodElectricityComparison do
       expect(alert.current_period_kwh).to be_within(0.01).of(48)
       expect(alert.current_period_start_date).to eq(Date.new(2023, 11, 24))
       expect(alert.current_period_end_date).to eq(Date.new(2023, 11, 24))
+      expect(alert.name_of_current_period).to eq(configuration[:name])
       expect(alert.previous_period_kwh).to be_within(0.01).of(48)
       expect(alert.previous_period_start_date).to eq(Date.new(2023, 11, 17))
       expect(alert.previous_period_end_date).to eq(Date.new(2023, 11, 17))
+      expect(alert.name_of_previous_period).to eq(configuration[:name])
     end
 
     it 'errors with not enough days of data' do

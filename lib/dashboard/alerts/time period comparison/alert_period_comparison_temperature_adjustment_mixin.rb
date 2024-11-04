@@ -21,10 +21,6 @@ module AlertPeriodComparisonTemperatureAdjustmentMixin
       total_previous_period_unadjusted_co2:{
         description: 'Total co2 in previous period, unadjusted for temperature or length of holiday',
         units:  :co2
-      },
-      previous_period_kwhs_adjusted: {
-        description: 'Previous period kwh values adjusted for temperature',
-        units:  String
       }
     }
   end
@@ -49,18 +45,7 @@ module AlertPeriodComparisonTemperatureAdjustmentMixin
 
     kwh = target_kwh(previous_date, data_type) * adjustment
 
-    saved_adjusted_kwhs_in_date_order(previous_date, kwh) if data_type == :kwh
-
     @previous_kwh_cache[previous_date][data_type] = kwh
-  end
-
-  def saved_adjusted_kwhs_in_date_order(previous_date, kwh)
-    @previous_period_kwhs_adjusted_data ||= {}
-    @previous_period_kwhs_adjusted_data[previous_date] = kwh
-    # a bit inefficient but as holidays then not too many elements
-    @previous_period_kwhs_adjusted_data = @previous_period_kwhs_adjusted_data.sort.to_h
-    component_kwhs = @previous_period_kwhs_adjusted_data.values.map { |kwh| kwh.round(0) }.join('+')
-    @previous_period_kwhs_adjusted = "#{@previous_period_kwhs_adjusted_data.values.sum.round(0)} = #{component_kwhs}"
   end
 
   private def target_kwh(date, data_type)
