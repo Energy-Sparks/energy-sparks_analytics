@@ -231,12 +231,9 @@ class AggregateDataServiceSolar
     onsite_consumpton_amr_data = aggregate_amr_data(
       [pv_meter_map[:generation], pv_meter_map[:export]],
       :electricity,
-      true
+      ignore_rules: true,
+      zero_negative: true
     )
-
-    # potential for export to exceed production if metering issue e.g. timing of different sources for meter
-    Corrections::ZeroNegative.apply(onsite_consumpton_amr_data)
-
     pv_meter_map[:self_consume] = create_modified_meter_copy(
       pv_meter_map[:mains_consume],
       onsite_consumpton_amr_data,
@@ -255,7 +252,7 @@ class AggregateDataServiceSolar
     consumpton_amr_data = aggregate_amr_data(
       [pv_meter_map[:self_consume], pv_meter_map[:mains_consume]],
       :electricity,
-      true
+      ignore_rules: true
     )
 
     pv_meter_map[:mains_plus_self_consume] = create_modified_meter_copy(

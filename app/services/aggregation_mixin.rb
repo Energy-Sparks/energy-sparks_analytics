@@ -12,13 +12,15 @@ module AggregationMixin
   # @param Date start_date
   # @param Date end_date
   # @param String mpan_mprn the meter identifier to be used when creating the new summed readings
+  # @param boolean zero_negative zero negatives values
   # @returns AmrData a new time series populated with the combined data
-  def aggregate_amr_data_between_dates(meters, type, start_date, end_date, mpan_mprn)
+  def aggregate_amr_data_between_dates(meters, type, start_date, end_date, mpan_mprn, zero_negative: false)
     combined_amr_data = AMRData.new(type)
     (start_date..end_date).each do |date|
       valid_meters_for_date = meters.select { |meter| meter.amr_data.date_exists?(date) }
       amr_data_for_date_x48_valid_meters = valid_meters_for_date.map { |meter| meter.amr_data.days_kwh_x48(date) }
       combined_amr_data_x48 = AMRData.fast_add_multiple_x48_x_x48(amr_data_for_date_x48_valid_meters)
+      combined_amr_data_x48.map! { |v| [v, 0.0].max } if zero_negative
       days_data = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, combined_amr_data_x48)
       combined_amr_data.add(date, days_data)
     end
@@ -149,7 +151,7 @@ module AggregationMixin
   # @param Symbol type the fuel type
   # @param boolean ignore_rules whether to ignore rules specifying how start/end dates of meters are handled
   # @returns AmrData a new AmrData instance that holds the aggregate series of meter readings
-  def aggregate_amr_data(meters, type, ignore_rules = false)
+  def aggregate_amr_data(meters, type, ignore_rules: false, zero_negative: false)
     if meters.length == 1
       logger.info 'Single meter, so aggregation is a reference to itself not an aggregate meter'
       return meters.first.amr_data # optimisaton if only 1 meter, then its its own aggregate
@@ -166,7 +168,7 @@ module AggregationMixin
 
     mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(meter_collection.urn, meters[0].fuel_type) unless meter_collection.urn.nil?
 
-    aggregate_amr_data_between_dates(meters, type, min_date, max_date, mpan_mprn)
+    aggregate_amr_data_between_dates(meters, type, min_date, max_date, mpan_mprn, zero_negative: zero_negative)
   end
 
   # Triggers the calculation and caching of co2 emissions for a meter

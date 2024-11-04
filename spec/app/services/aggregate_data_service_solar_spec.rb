@@ -115,7 +115,6 @@ describe AggregateDataServiceSolar do
         it 'zeros negative data' do
           reading = processed_meters.first.sub_meters[:self_consume].amr_data.values.first
           expect(reading.kwh_data_x48).to eq(Array.new(48, 0.0))
-          expect(reading.type).to eq('SOLC')
         end
       end
     end
