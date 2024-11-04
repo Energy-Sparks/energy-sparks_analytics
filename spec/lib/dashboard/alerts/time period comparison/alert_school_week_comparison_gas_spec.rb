@@ -31,9 +31,14 @@ describe AlertSchoolWeekComparisonGas do
 
   let(:analysis_date) { Date.new(2023, 10, 15) } # few weeks into autum term
 
+  around do |example|
+    travel_to analysis_date do
+      example.run
+    end
+  end
+
   describe '#analyse' do
     before do
-      travel_to analysis_date
       stub_const('Rails', true) # FIXME: required because of ChartManager code, which needs removing.
       alert.analyse(analysis_date)
     end
