@@ -8,7 +8,6 @@ class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
       school,
       'electricity',
       :storageheateroutofhours,
-      '',
       :allstorageheater,
       BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER,
       BenchmarkMetrics::BENCHMARK_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER
