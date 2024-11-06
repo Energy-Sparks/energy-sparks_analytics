@@ -114,14 +114,15 @@ search:
 ## Consider these keys used:
 ignore_unused:
   - 'analytics.alert_*'
-  - 'analytics.energy_units.*'
-  - 'date.*'
-  - 'analytics.units.*'
-  - 'analytics.holidays.*'
+  - 'analytics.benchmarking.*'
   - 'analytics.common.*'
+  - 'analytics.energy_units.*'
+  - 'analytics.holidays.*'
   - 'analytics.school_types.*'
   - 'analytics.series_data_manager.*'
+  - 'analytics.units.*'
   - 'chart_configuration.y_axis_label_name.*' # also used directly in the app
+  - 'date.*'
 # - 'activerecord.attributes.*'
 # - '{devise,kaminari,will_paginate}.*'
 # - 'simple_form.{yes,no}'
