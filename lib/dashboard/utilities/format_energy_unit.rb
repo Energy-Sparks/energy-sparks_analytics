@@ -119,6 +119,8 @@ class FormatEnergyUnit
 
     pct_str = if !percent.infinite?.nil?
                 plus_minus_infinity_value(percent)
+              elsif percent.round(1).zero?
+                '0.0'
               elsif percent.magnitude < 10.0 #true for negative, up to value 0.1
                 sprintf('%+.1f', percent)
               elsif percent.magnitude < 150.0 #true for up to value 1.5
