@@ -231,11 +231,9 @@ class AggregateDataServiceSolar
     onsite_consumpton_amr_data = aggregate_amr_data(
       [pv_meter_map[:generation], pv_meter_map[:export]],
       :electricity,
-      true
+      ignore_rules: true,
+      zero_negative: true
     )
-
-    make_all_amr_data_positive(onsite_consumpton_amr_data)
-
     pv_meter_map[:self_consume] = create_modified_meter_copy(
       pv_meter_map[:mains_consume],
       onsite_consumpton_amr_data,
@@ -254,7 +252,7 @@ class AggregateDataServiceSolar
     consumpton_amr_data = aggregate_amr_data(
       [pv_meter_map[:self_consume], pv_meter_map[:mains_consume]],
       :electricity,
-      true
+      ignore_rules: true
     )
 
     pv_meter_map[:mains_plus_self_consume] = create_modified_meter_copy(
@@ -344,11 +342,6 @@ class AggregateDataServiceSolar
         meter.name = SolarMeterMap.meter_type_to_name_map[meter_type]
       end
     end
-  end
-
-  def make_all_amr_data_positive(amr_data)
-    # TODO(PH, 20Nov2020) - potential for export to exceed production if metering issue
-    # e.g. timing of different sources for meter
   end
 
   def backfill_existing_meters_with_zeros(pv_meter_map)
