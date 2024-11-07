@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe FormatEnergyUnit do
+describe FormatEnergyUnit, :aggregate_failures do
   let!(:value) { 113.66216439927433 }
 
   context 'with ks2 formatting' do
@@ -119,6 +119,7 @@ describe FormatEnergyUnit do
         expect(FormatUnit.format(:comparison_percent, 4.125)).to eq('+410%')
         expect(FormatUnit.format(:comparison_percent, 0.005, :text)).to eq('+0.5%')
         expect(FormatUnit.format(:comparison_percent, 0.005, :html)).to eq('+0.5&percnt;')
+        expect(FormatUnit.format(:comparison_percent, 0.0004, :html)).to eq('0.0&percnt;')
       end
     end
   end
