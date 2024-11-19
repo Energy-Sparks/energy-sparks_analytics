@@ -1152,7 +1152,8 @@ module AnalyseHeatingAndHotWater
 
     # see Energy Sparks\Energy Sparks Project Team Documents\Analytics\Modelling\Reassessment of Seasonal Heating Control.gdoc
     # return as method as could eventually be dynamic, but hard code from CONSTANT for the moment
-    BALANCE_POINT_TEMPERATURE = 11.0 # used by alerts
+    # increased to 14 after reviewing seasonal control analysis
+    BALANCE_POINT_TEMPERATURE = 14.0 # used by alerts
 
     def balance_point_temperature(_date)
       BALANCE_POINT_TEMPERATURE
