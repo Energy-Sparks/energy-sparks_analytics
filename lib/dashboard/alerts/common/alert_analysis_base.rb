@@ -295,8 +295,6 @@ class AlertAnalysisBase < ContentBase
       @school.floor_area
     elsif @school.respond_to?(:school) && !@school.school.floor_area.nil? && @school.school.floor_area > 0.0
       @school.school.floor_area
-    else
-      raise EnergySparksBadDataException.new('Unable to find number of floor_area for alerts')
     end
   end
 
