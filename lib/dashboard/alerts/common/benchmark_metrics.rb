@@ -6,7 +6,7 @@ module BenchmarkMetrics
   # rubocop:enable Style/ClassVars
 
   ELECTRICITY_PRICE = 0.15
-  SOLAR_EXPORT_PRICE = 0.05
+  SOLAR_EXPORT_PRICE = 0.12
   GAS_PRICE = 0.03
 
   #
