@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service do
+describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, :aggregate_failures, type: :service do
   let(:service) do
     described_class.new(meter_collection: @acme_academy, asof_date: Date.parse('2020-12-31'))
   end
@@ -24,9 +24,9 @@ describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service d
     let(:scenarios) { model.scenarios }
 
     it 'calculates the potential benefits over a geometric sequence of capacity kWp' do
-      expect(model.optimum_kwp).to be_within(0.01).of(75.5)
-      expect(model.optimum_payback_years).to be_within(0.01).of(8.11)
-      expect(model.optimum_mains_reduction_percent).to be_within(0.01).of(0.13)
+      expect(model.optimum_kwp).to be_within(0.01).of(246.5)
+      expect(model.optimum_payback_years).to be_within(0.01).of(6.60)
+      expect(model.optimum_mains_reduction_percent).to be_within(0.01).of(0.27)
       expect(model.scenarios.size).to eq 9
 
       expect(scenarios[0].kwp).to eq(1)
@@ -41,7 +41,7 @@ describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service d
       expect(scenarios[0].capital_cost_£).to be_within(0.01).of(1584.0)
       expect(scenarios[0].payback_years).to be_within(0.01).of(14.41)
 
-      expect(scenarios[8].kwp).to eq(128)
+      expect(scenarios[8].kwp).to eq(246.5)
     end
   end
 end

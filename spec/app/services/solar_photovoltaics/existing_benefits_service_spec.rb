@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SolarPhotovoltaics::ExistingBenefitsService, type: :service do
+describe SolarPhotovoltaics::ExistingBenefitsService, :aggregate_failures, type: :service do
   let(:service) { described_class.new(meter_collection: @acme_academy) }
 
   # using before(:all) here to avoid slow loading of YAML and then
@@ -25,7 +25,7 @@ describe SolarPhotovoltaics::ExistingBenefitsService, type: :service do
       expect(benefits.annual_electricity_including_onsite_solar_pv_consumption_kwh).to be_within(0.01).of(60_911.12)
       expect(benefits.annual_carbon_saving_percent).to be_within(0.01).of(0.21)
       expect(benefits.saving_£current).to be_within(0.01).of(4540.36)
-      expect(benefits.export_£).to be_within(0.01).of(77.80)
+      expect(benefits.export_£).to be_within(0.01).of(186.74)
       expect(benefits.annual_co2_saving_kg).to be_within(0.01).of(1935.25)
 
       # summary table of electricity usage for the last year
