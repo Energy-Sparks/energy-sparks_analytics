@@ -448,24 +448,20 @@ class ContentBase
     list = {}
     tables = {}
     flatten_template_variables.each do |type, data|
-      begin
-        if [TrueClass, FalseClass].include?(data[:units])
-          list[type] = send(type) # don't reformat flags so can be bound in if tests
-        elsif data[:units] == :table
-          tables[type] = format_table(type, data, formatted, format)
-        else
-          if respond_to?(type, true)
-            if formatted && send(type).nil?
-              list[type] = ''
-            else
-              list[type] = formatted ? format(data[:units], send(type), format, false, user_numeric_comprehension_level) : send(type)
-            end
+      if [TrueClass, FalseClass].include?(data[:units])
+        list[type] = send(type) # don't reformat flags so can be bound in if tests
+      elsif data[:units] == :table
+        tables[type] = format_table(type, data, formatted, format)
+      else
+        if respond_to?(type, true)
+          if formatted && send(type).nil?
+            list[type] = ''
           else
-            log_missing_variable(type)
+            list[type] = formatted ? format(data[:units], send(type), format, false, user_numeric_comprehension_level) : send(type)
           end
+        else
+          log_missing_variable(type)
         end
-      rescue StandardError => e
-        list[type] = e.message
       end
     end
     missing_variable_summary
