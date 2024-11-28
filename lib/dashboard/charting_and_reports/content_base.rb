@@ -465,7 +465,7 @@ class ContentBase
           end
         end
       rescue StandardError => e
-        logger.error "Uncaught exception in variable_list for #{@school.name}: #{e.class} #{e.message}"
+        logger.error "Exception in variable_list for #{@school.name} for #{self.class} - #{e.class}: #{e.message}"
         list[type] = nil
       end
     end
