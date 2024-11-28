@@ -95,7 +95,7 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   def school_days_heating
-    @school_days_heating ||= @heating_model.number_of_heating_school_days
+    @school_days_heating ||= @heating_model&.number_of_heating_school_days
   end
 
   def school_days_heating_adjective
