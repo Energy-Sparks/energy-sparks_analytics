@@ -53,8 +53,6 @@ describe Periods::UpToTwelveMonths do
     end
 
     context 'with exactly one year of data' do
-      let(:amr_end_date) { Date.new(2023, 12, 31) }
-
       it 'returns single period' do
         expect(period_list.size).to eq(1)
         expect(period_list[0]).to have_attributes(start_date: amr_start_date, end_date: amr_end_date)
@@ -72,7 +70,6 @@ describe Periods::UpToTwelveMonths do
 
     context 'with several calendar years of data' do
       let(:amr_start_date)  { Date.new(2022, 1, 1) }
-      let(:amr_end_date)    { Date.new(2023, 12, 31) }
 
       it 'returns periods' do
         expect(period_list.size).to eq(2)

@@ -182,6 +182,10 @@ class ChartManager
       yaxis_units:      :co2,
       y2_axis:          :gascarbon
     },
+    gas_longterm_trend_academic_year: {
+      inherits_from:    :gas_longterm_trend,
+      x_axis:           :academicyear,
+    },
     electricity_longterm_trend: {
       name:             'Electricity: long term trends',
       chart1_type:      :column,
@@ -213,6 +217,10 @@ class ChartManager
     electricity_longterm_trend_carbon_unmodified: {
       inherits_from:    :electricity_longterm_trend_carbon,
       meter_definition: :allelectricity_unmodified
+    },
+    electricity_longterm_trend_academic_year: {
+      inherits_from:    :electricity_longterm_trend,
+      x_axis:           :academicyear,
     },
     daytype_breakdown_gas: {
       name:             'Breakdown by type of day/time: Gas',
@@ -1210,11 +1218,15 @@ class ChartManager
       meter_definition: :allelectricity_unmodified,
       inherits_from: :accounting_cost_daytype_breakdown_electricity
     },
-
-    gas_by_month_year_0_1:  {
+    gas_by_month_year_0_1: {
       inherits_from:    :electricity_by_month_year_0_1,
       name:             'Gas Use By Month (last 2 years)',
       meter_definition: :allheat
+    },
+    gas_by_month_academic_year_0_1: {
+      inherits_from:    :gas_by_month_year_0_1,
+      name:             'Gas Use By Month (last 2 academic years)',
+      timescale:        [{ academicyear: 0 }, { academicyear: -1 }],
     },
     electricity_cost_comparison_last_2_years: {
       x_axis:           :month,
