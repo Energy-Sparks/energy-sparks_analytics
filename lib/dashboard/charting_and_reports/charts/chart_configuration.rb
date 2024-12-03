@@ -1223,7 +1223,7 @@ class ChartManager
       name:             'Gas Use By Month (last 2 years)',
       meter_definition: :allheat
     },
-    gas_by_month_academic_year_0_1: {
+    gas_by_month_acyear_0_1: {
       inherits_from:    :gas_by_month_year_0_1,
       name:             'Gas Use By Month (last 2 academic years)',
       timescale:        [{ academicyear: 0 }, { academicyear: -1 }],
