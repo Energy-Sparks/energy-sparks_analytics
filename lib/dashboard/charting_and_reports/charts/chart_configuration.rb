@@ -1119,14 +1119,8 @@ class ChartManager
     },
     electricity_by_month_year_0_1:  {
       name:             'Electricity Use By Month (last 2 years)',
-      chart1_type:      :column,
-      # chart1_subtype:   :stacked,
-      series_breakdown: :none,
-      x_axis:           :month,
+      inherits_from:    :electricity_by_month_acyear_0_1,
       timescale:        [{ twelve_months: 0 }, { twelve_months: -1 }],
-      meter_definition: :allelectricity,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none,
       ignore_single_series_failure: true
     },
     # 8 finance tab charts
