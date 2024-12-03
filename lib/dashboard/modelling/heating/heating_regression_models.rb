@@ -1152,8 +1152,8 @@ module AnalyseHeatingAndHotWater
 
     # see Energy Sparks\Energy Sparks Project Team Documents\Analytics\Modelling\Reassessment of Seasonal Heating Control.gdoc
     # return as method as could eventually be dynamic, but hard code from CONSTANT for the moment
-    # increased to 14 after reviewing seasonal control analysis
-    BALANCE_POINT_TEMPERATURE = 14.0 # used by alerts
+    # increased to 13 after reviewing seasonal control analysis - https://trello.com/c/rn2Vs1xK/4483-the-seasonal-control-page-seems-to-suggest-that-glenmoor-academy-is-using-a-lot-of-heating-in-warmer-weather-it-flags-up-days-in
+    BALANCE_POINT_TEMPERATURE = 13.0 # used by alerts
 
     def balance_point_temperature(_date)
       BALANCE_POINT_TEMPERATURE
