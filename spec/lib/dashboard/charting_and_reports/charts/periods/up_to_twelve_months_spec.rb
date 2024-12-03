@@ -69,7 +69,7 @@ describe Periods::UpToTwelveMonths do
     end
 
     context 'with several calendar years of data' do
-      let(:amr_start_date)  { Date.new(2022, 1, 1) }
+      let(:amr_start_date) { Date.new(2022, 1, 1) }
 
       it 'returns periods' do
         expect(period_list.size).to eq(2)
