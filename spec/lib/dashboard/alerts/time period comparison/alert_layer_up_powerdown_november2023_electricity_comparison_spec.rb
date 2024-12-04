@@ -9,6 +9,8 @@ describe AlertLayerUpPowerdownNovember2023ElectricityComparison do
     described_class.new(meter_collection)
   end
 
+  before { travel_to(Date.new(2023, 12, 31)) }
+
   describe '#analyse' do
     it 'runs and sets variables' do
       alert.analyse(Date.new(2023, 11, 30))
