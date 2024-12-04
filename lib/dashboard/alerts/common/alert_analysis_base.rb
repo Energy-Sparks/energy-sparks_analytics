@@ -234,7 +234,6 @@ class AlertAnalysisBase < ContentBase
   end
 
   def valid_alert?
-    # debugger
     valid_content? && meter_readings_up_to_date_enough?
   end
 
