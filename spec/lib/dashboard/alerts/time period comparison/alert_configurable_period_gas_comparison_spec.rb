@@ -22,8 +22,6 @@ describe AlertConfigurablePeriodGasComparison, :aggregate_failures do
     }
   end
 
-  before { travel_to Date.new(2023, 12, 31) }
-
   describe '#timescale' do
     it { expect(alert.timescale).to eq('custom') }
   end
