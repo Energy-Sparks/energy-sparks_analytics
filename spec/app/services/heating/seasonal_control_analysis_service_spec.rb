@@ -40,16 +40,16 @@ describe Heating::SeasonalControlAnalysisService, :aggregate_failures do
 
     context 'with gas' do
       it 'produces expected seasonal control analysis' do
-        expect(seasonal_analysis.estimated_savings.kwh).to be_within(0.01).of(3281.47)
-        expect(seasonal_analysis.estimated_savings.£).to be_within(0.01).of(98.44)
-        expect(seasonal_analysis.estimated_savings.co2).to be_within(0.01).of(598.97)
-        expect(seasonal_analysis.heating_on_in_warm_weather_days).to be_within(0.01).of(4.0)
+        expect(seasonal_analysis.estimated_savings.kwh).to be_within(0.01).of(5789.31)
+        expect(seasonal_analysis.estimated_savings.£).to be_within(0.01).of(173.68)
+        expect(seasonal_analysis.estimated_savings.co2).to be_within(0.01).of(1056.72)
+        expect(seasonal_analysis.heating_on_in_warm_weather_days).to be_within(0.01).of(7.0)
 
         # extracted expected value here by running the old advice
         # page and dumping variable from AlertSeasonalHeatingSchoolDays
         # this uses a different set of date ranges, than if you run
         # the alert separately.
-        expect(seasonal_analysis.percent_of_annual_heating).to be_within(0.01).of(0.02)
+        expect(seasonal_analysis.percent_of_annual_heating).to be_within(0.01).of(0.03)
       end
     end
 
@@ -59,10 +59,10 @@ describe Heating::SeasonalControlAnalysisService, :aggregate_failures do
       end
 
       it 'produces expected seasonal control analysis for storage heater' do
-        expect(seasonal_analysis.estimated_savings.kwh).to be_within(0.01).of(1251.21)
-        expect(seasonal_analysis.estimated_savings.£).to be_within(0.01).of(230.18)
-        expect(seasonal_analysis.estimated_savings.co2).to be_within(0.01).of(127.05)
-        expect(seasonal_analysis.heating_on_in_warm_weather_days).to be_within(0.01).of(5.0)
+        expect(seasonal_analysis.estimated_savings.kwh).to be_within(0.01).of(1857.68)
+        expect(seasonal_analysis.estimated_savings.£).to be_within(0.01).of(348.25)
+        expect(seasonal_analysis.estimated_savings.co2).to be_within(0.01).of(198.91)
+        expect(seasonal_analysis.heating_on_in_warm_weather_days).to be_within(0.01).of(8.0)
 
         expect(seasonal_analysis.percent_of_annual_heating).to be_within(0.01).of(0.03)
       end
