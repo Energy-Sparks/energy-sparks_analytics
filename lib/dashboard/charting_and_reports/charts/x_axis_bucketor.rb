@@ -95,10 +95,6 @@ class XBucketMonthExcludingYear < XBucketBase
 end
 
 class XBucketMonth < XBucketBase
-  def initialize(type, periods)
-    super(type, periods)
-  end
-
   def key(date, _halfhour_index)
     I18n.l(date, format: "%b %Y")
   end
@@ -129,10 +125,10 @@ class XBucketAcademicYear < XBucketBase
     start_date = period.start_date
     end_date = period.end_date
     if start_date.year == end_date.year
-      if start_date.month < 9
-        start_date -= 1.year
+      if start_date.month < 8
+        start_date = start_date.prev_year
       else
-        end_date += 1.year
+        end_date = end_date.next_year
       end
     end
     period_start_date = I18n.l(start_date, format: '%y')

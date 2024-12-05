@@ -7,18 +7,18 @@ module Periods
     protected
 
     def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
-      periods = []
+      list = []
       period_end = last_meter_date
       while period_end > first_meter_date
         holiday = @meter_collection.holidays.find_summer_holiday_before(period_end)
         if holiday.nil? || holiday.start_date < first_meter_date
-          periods << [first_meter_date, period_end]
+          list << [first_meter_date, period_end]
           break
         end
-        periods << [holiday.end_date + 1, period_end]
+        list << [holiday.end_date + 1, period_end]
         period_end = holiday.end_date
       end
-      periods.map { |args| new_school_period(*args) }
+      list.map { |args| new_school_period(*args) }
     end
 
     def calculate_period_from_date(_date)

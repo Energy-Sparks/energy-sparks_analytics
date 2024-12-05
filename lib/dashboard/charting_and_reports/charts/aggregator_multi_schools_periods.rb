@@ -1,5 +1,5 @@
 # some charts are created by combining multiple charts
-# e.g. a chart compariing a school with benchmark and exemplar schools
+# e.g. a chart comparing a school with benchmark and exemplar schools
 #      is created by combining 3 charts 1 for each school
 #      a school versus its target (school) combines 2 charts
 # or   a chart compariing multiple time periods e.g. this year versus last year
@@ -11,7 +11,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
 
   def initialize(school, chart_config, results)
     @single_series_aggregators = []
-    super(school, chart_config, results)
+    super
   end
 
   def calculate
@@ -89,8 +89,9 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
 
     # Note, there is an assumption about ordering here, that the last series will be
     # the most complete, the reverse ensures this is processed first.
-    valid_aggregators.reverse.each.with_index do |period_data, index|
-      bucket_date_ranges = period_data.results.x_axis_bucket_date_ranges
+    valid_aggregators.sort_by { |aggregator| aggregator.results.x_axis.count }
+                     .reverse.each.with_index do |period_data, index|
+      # bucket_date_ranges = period_data.results.x_axis_bucket_date_ranges
       time_description = period_data.results.xbucketor.compact_date_range_description
 
       if index == 0
