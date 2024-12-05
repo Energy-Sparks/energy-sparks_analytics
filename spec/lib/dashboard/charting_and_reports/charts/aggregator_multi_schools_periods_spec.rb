@@ -137,6 +137,7 @@ describe AggregatorMultiSchoolsPeriods do
             # Oct, Nov, Dec, and 17 days in Jan
             monthly_usage = [daily_kwh * 31, daily_kwh * 30, daily_kwh * 31, daily_kwh * 17]
             # 9 months with no values, then the above
+            p bucketed_data.values.first
             expect(bucketed_data.values.last).to eq(Array.new(9, 0.0) + monthly_usage)
           end
         end
@@ -154,8 +155,7 @@ describe AggregatorMultiSchoolsPeriods do
           it 'has aligned the series correctly' do
             bucketed_data = aggregator.results.bucketed_data
             expect(bucketed_data.values.first.size).to eq(bucketed_data.values.last.size)
-            # TODO: fix me
-            # expect(bucketed_data.values.last.all? { |kwh| kwh > 0.0 }).to be true
+            expect(bucketed_data.values.last.all? { |kwh| kwh > 0.0 }).to be true
           end
         end
       end
