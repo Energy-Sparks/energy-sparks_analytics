@@ -87,10 +87,8 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   def merge_monthly_comparison_charts
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
 
-    months = ->(month_years) { month_years.map { |month_year| month_year[0..2] } }
-    x_axis = months[valid_aggregators.max_by { |aggregator| aggregator.results.x_axis.count }.results.x_axis]
-
-    valid_aggregators.reverse_each do |period_data|
+    x_axis = calculate_x_axis
+    valid_aggregators.reverse_each do |period_data| # reverse is only needed for tests?
       time_description = number_of_periods <= 1 ? '' : period_data.results.xbucketor.compact_date_range_description
 
       # This series will have either the same number or fewer months than the other range
@@ -109,8 +107,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
       else
         data = Array.new(x_axis.length, 0.0)
         count_data = Array.new(x_axis.length, 0)
-
-        sub_array_index = find_sub_array_index(x_axis, months[period_data.results.x_axis])
+        sub_array_index = find_sub_array_index(x_axis, remove_years(period_data.results.x_axis))
         if sub_array_index
           end_index = sub_array_index + period_data.results.x_axis.length
           data[sub_array_index...end_index] = period_data.results.bucketed_data.values[0]
@@ -121,6 +118,22 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
       results.bucketed_data_count[time_description] = count_data
     end
     results.x_axis = x_axis
+  end
+
+  def calculate_x_axis
+    x_axis = remove_years(valid_aggregators.max_by { |aggregator| aggregator.results.x_axis.count }.results.x_axis)
+    valid_aggregators.each do |aggregator|
+      months = remove_years(aggregator.results.x_axis)
+      next if find_sub_array_index(x_axis, months)
+
+      insert_index = x_axis.index(months[0]) || x_axis.length
+      x_axis[insert_index..] = months
+    end
+    x_axis
+  end
+
+  def remove_years(month_years)
+    month_years.map { |month_year| month_year[0..2] }
   end
 
   def find_sub_array_index(array, sub_array)
