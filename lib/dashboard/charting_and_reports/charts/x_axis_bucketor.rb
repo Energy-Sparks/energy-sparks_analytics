@@ -95,10 +95,6 @@ class XBucketMonthExcludingYear < XBucketBase
 end
 
 class XBucketMonth < XBucketBase
-  def initialize(type, periods)
-    super(type, periods)
-  end
-
   def key(date, _halfhour_index)
     I18n.l(date, format: "%b %Y")
   end
@@ -126,9 +122,23 @@ class XBucketAcademicYear < XBucketBase
   end
 
   def description(period)
-    period_start_date = I18n.l(period.start_date, format: '%y')
-    period_end_date = I18n.l(period.end_date, format: '%y')
-    I18n.t('analytics.academic_year', period_start_date: period_start_date, period_end_date: period_end_date, default: nil) || "Academic Year #{period_start_date}/#{period_end_date}"
+    start_date = period.start_date
+    end_date = period.end_date
+    if start_date.year == end_date.year
+      if start_date.month < 8
+        start_date = start_date.prev_year
+      else
+        end_date = end_date.next_year
+      end
+    end
+    period_start_date = I18n.l(start_date, format: '%y')
+    period_end_date = I18n.l(end_date, format: '%y')
+    I18n.t('analytics.academic_year', period_start_date:, period_end_date:, default: nil) ||
+      "Academic Year #{period_start_date}/#{period_end_date}"
+  end
+
+  def same_start_and_end_year(period)
+    period.start_date.year == period.end_date.year
   end
 
   def create_x_axis
