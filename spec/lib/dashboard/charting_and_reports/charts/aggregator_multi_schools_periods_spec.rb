@@ -130,7 +130,6 @@ describe AggregatorMultiSchoolsPeriods do
           # 2022-10-01 - 2023-01-17 = [Oct, Nov, Dec, Jan]
           #
           # The four months should be at the end of the range
-          daily_kwh = 48.0 * usage_per_hh # from the shared context
           # Oct, Nov, Dec, and 17 days in Jan
           monthly_usage = [daily_kwh * 31, daily_kwh * 30, daily_kwh * 31, daily_kwh * 17]
           # 9 months with no values, then the above
