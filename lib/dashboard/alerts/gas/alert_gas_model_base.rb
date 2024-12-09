@@ -87,15 +87,15 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   def a
-    @a ||= @heating_model.average_heating_school_day_a
+    @a ||= @heating_model&.average_heating_school_day_a
   end
 
   def b
-    @b ||= @heating_model.average_heating_school_day_b
+    @b ||= @heating_model&.average_heating_school_day_b
   end
 
   def school_days_heating
-    @school_days_heating ||= @heating_model.number_of_heating_school_days
+    @school_days_heating ||= @heating_model&.number_of_heating_school_days
   end
 
   def school_days_heating_adjective
@@ -111,7 +111,7 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   def non_school_days_heating
-    @non_school_days_heating ||= @heating_model.number_of_non_school_heating_days
+    @non_school_days_heating ||= @heating_model&.number_of_non_school_heating_days
   end
 
   def non_school_days_heating_adjective
