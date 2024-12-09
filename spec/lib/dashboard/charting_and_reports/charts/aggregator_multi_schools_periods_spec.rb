@@ -131,7 +131,7 @@ describe AggregatorMultiSchoolsPeriods do
           #
           # The four months should be at the end of the range
           # Oct, Nov, Dec, and 17 days in Jan
-          monthly_usage = [daily_kwh * 31, daily_kwh * 30, daily_kwh * 31, daily_kwh * 17]
+          monthly_usage = [31, 30, 31, 17].map(&daily_usage.method(:*))
           # 9 months with no values, then the above
           expect(bucketed_data.values.last).to eq(Array.new(9, 0.0) + monthly_usage)
         end
