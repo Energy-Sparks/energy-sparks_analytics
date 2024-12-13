@@ -50,7 +50,8 @@ class PeriodsBase
       daterange:      DateRangePeriods,
       hotwater:       HotWaterPeriod,
       none:           NoPeriod,
-      twelve_months:  Periods::UpToTwelveMonths
+      twelve_months:  Periods::UpToTwelveMonths,
+      fixed_academic_year: Periods::FixedAcademicYear
     }
 
     timescale_type = timescale_from_chart_config(chart_config)

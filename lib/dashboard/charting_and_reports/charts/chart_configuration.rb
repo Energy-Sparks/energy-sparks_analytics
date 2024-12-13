@@ -1112,7 +1112,7 @@ class ChartManager
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
       x_axis:           :month,
-      timescale:        [{ academicyear: 0 }, { academicyear: -1 }],
+      timescale:        [{ fixed_academic_year: 0 }, { fixed_academic_year: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
@@ -1220,7 +1220,7 @@ class ChartManager
     gas_by_month_acyear_0_1: {
       inherits_from:    :gas_by_month_year_0_1,
       name:             'Gas Use By Month (last 2 academic years)',
-      timescale:        [{ academicyear: 0 }, { academicyear: -1 }],
+      timescale:        [{ fixed_academic_year: 0 }, { fixed_academic_year: -1 }],
     },
     electricity_cost_comparison_last_2_years: {
       x_axis:           :month,
