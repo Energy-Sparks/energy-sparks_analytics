@@ -130,7 +130,7 @@ class AggregatorConfig < OpenStruct
     return false unless timescale.length > 1
     return false unless %i[month month_excluding_year].include?(x_axis)
 
-    allowed = %i[up_to_a_year twelve_months academicyear]
+    allowed = %i[up_to_a_year twelve_months academicyear fixed_academic_year]
     timescale.all? { |scale| scale.is_a?(Hash) && allowed.include?(scale.keys[0]) }
   end
 
