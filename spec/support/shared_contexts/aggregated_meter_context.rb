@@ -13,6 +13,8 @@ RSpec.shared_context 'with an aggregated meter with tariffs and school times', s
   let(:carbon_intensity)  { 0.2 }
   let(:flat_rate)         { 0.10 }
 
+  let(:daily_usage)       { 48.0 * usage_per_hh }
+
   let(:amr_start_date)  { Date.new(2023, 12, 1) }
   let(:amr_end_date)    { Date.new(2023, 12, 31) }
 
