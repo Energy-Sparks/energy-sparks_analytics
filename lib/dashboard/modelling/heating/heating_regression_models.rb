@@ -338,7 +338,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def self.find_school_day_rating(days, parameter)
-      school_heating_days_statistics.select { |days_range, _stats| days_range.include?(days) }.values[0][parameter]
+      school_heating_days_statistics.select { |days_range, _stats| days_range.include?(days) }.values.dig(0, parameter)
     end
 
     # based on analysis of 31 schools from 16Feb2019
@@ -372,7 +372,8 @@ module AnalyseHeatingAndHotWater
     end
 
     def self.non_find_school_day_rating(days, parameter)
-      non_school_heating_days_statistics.select { |days_range, _stats| days_range.include?(days) }.values[0][parameter]
+      non_school_heating_days_statistics.select { |days_range, _stats| days_range.include?(days) }
+                                        .values.dig(0, parameter)
     end
 
     # based on analysis of 31 schools from 16Feb2019
