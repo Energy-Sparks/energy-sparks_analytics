@@ -62,14 +62,14 @@ module Baseload
       (asof_date - 364) >= start_date
     end
 
-    def scale_to_year(start_date, end_date)
+    def self.scale_to_year(start_date, end_date)
       (365 / (end_date - start_date + 1)).to_f
     end
 
     def scaled_annual_dates(asof_date)
       end_date = [asof_date, amr_data.end_date].min
       start_date = [end_date - 364, amr_data.start_date].max
-      [start_date, end_date, scale_to_year(start_date, end_date)]
+      [start_date, end_date, self.class.scale_to_year(start_date, end_date)]
     end
 
     # We use 6 rather than 7 days ago because of potential issue with schools
