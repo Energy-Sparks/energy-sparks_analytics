@@ -32,7 +32,7 @@ class PeriodsBase
     classes = {
       year:           YearPeriods,
       up_to_a_year:   UpToAYearPeriods,
-      academicyear:   AcademicYearsPeriod,
+      academicyear:   Periods::AcademicYears,
       activationyear: ActivationYearPeriods,
       month:          MonthPeriods,
       holiday:        HolidayPeriods,          # offset count starts with previous holiday
@@ -50,7 +50,8 @@ class PeriodsBase
       daterange:      DateRangePeriods,
       hotwater:       HotWaterPeriod,
       none:           NoPeriod,
-      twelve_months:  Periods::UpToTwelveMonths
+      twelve_months:  Periods::UpToTwelveMonths,
+      fixed_academic_year: Periods::FixedAcademicYear
     }
 
     timescale_type = timescale_from_chart_config(chart_config)
@@ -188,12 +189,6 @@ class UpToAYearPeriods < YearPeriods
     #avoid skipping a week by aligning to saturday boundary
     move_to_saturday_boundary = weekly_x_axis? ? true : false
     Holidays.periods_cadence(first_meter_date, last_meter_date, include_partial_period: true, move_to_saturday_boundary: move_to_saturday_boundary)
-  end
-end
-
-class AcademicYearsPeriod < YearPeriods
-  def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
-    @meter_collection.holidays.academic_years(first_meter_date, last_meter_date)
   end
 end
 

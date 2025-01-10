@@ -457,8 +457,6 @@ class Holidays
       return acy_years if previous_summer_hol.nil?
       return acy_years if previous_summer_hol.end_date < start_date
 
-      year_name = previous_summer_hol.end_date.year.to_s + '/' + last_summer_hol.start_date.year.to_s
-      AcademicYear.new(previous_summer_hol.end_date + 1, last_summer_hol.end_date, self)
       acy_years.push(AcademicYear.new(previous_summer_hol.end_date + 1, last_summer_hol.end_date, @holidays))
 
       last_summer_hol = previous_summer_hol
