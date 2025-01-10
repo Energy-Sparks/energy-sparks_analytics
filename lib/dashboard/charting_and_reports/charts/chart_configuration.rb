@@ -1135,7 +1135,7 @@ class ChartManager
       name:              '',
       x_axis:            :month,
       inherits_from:     :electricity_cost_comparison_last_2_years,
-      timescale:         [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      timescale:         [{ fixed_academic_year: 0 }, { fixed_academic_year: -1 }],
       ignore_single_series_failure: true,
       yaxis_units:       :accounting_cost,
       meter_definition:  :allelectricity_unmodified
