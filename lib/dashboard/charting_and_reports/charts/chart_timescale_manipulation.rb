@@ -190,7 +190,7 @@ class ChartManagerTimescaleManipulation
   private def determine_chart_range(chart_config)
     aggregator = Aggregator.new(@school, chart_config)
     chart_config, _schools = aggregator.initialise_schools_date_range # get min and max combined meter ranges
-    if chart_config.key?(:min_combined_school_date) || chart_config.key?(:max_combined_school_date)
+    if chart_config[:min_combined_school_date] && chart_config[:max_combined_school_date]
       logger.info "METER range = #{chart_config[:min_combined_school_date]} to #{chart_config[:max_combined_school_date]}"
       [chart_config[:min_combined_school_date], chart_config[:max_combined_school_date]]
     else
