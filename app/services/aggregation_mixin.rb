@@ -158,6 +158,9 @@ module AggregationMixin
     end
     min_date, max_date = combined_amr_data_date_range(meters, ignore_rules)
 
+    # If all meters have an ignore_start_date or ignore_end_date attribute we end up with null dates, so check and throw exception
+    raise EnergySparksUnexpectedStateException, 'Invalid AMR date range. Cannot calculate start date. Ensure at least one meter does not have ignore_start_date attribute' if min_date.nil?
+    raise EnergySparksUnexpectedStateException, 'Invalid AMR date range. Cannot calculate end date. Ensure at least one meter does not have ignore_end_date attribute' if max_date.nil?
     # This can happen if there are 2 meter, with non-overlapping date ranges
     # Without a check, the renaming code is run but we end up with an aggregate meter that
     # contains no readings and has default dates from HalfHourlyData.new. This can cause errors elsewhere as other

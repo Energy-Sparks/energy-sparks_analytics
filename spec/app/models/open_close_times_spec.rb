@@ -15,6 +15,10 @@ describe OpenCloseTimes do
     # before Autumn holiday
     let(:day)                   { Date.new(last_year, 10, 16) }
 
+    before do
+      travel_to(Date.new(2024, 12, 1))
+    end
+
     describe 'with school times only' do
       it 'creates school times' do
         expect(open_close_times.open_times.length).to eq 1

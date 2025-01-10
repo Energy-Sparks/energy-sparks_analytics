@@ -20,6 +20,7 @@ describe CommunityUseBreakdown do
 
   before do
     meter.amr_data.open_close_breakdown = open_close_breakdown
+    travel_to(Date.new(2024, 12, 1))
   end
 
   describe '#days_kwh_x48' do
