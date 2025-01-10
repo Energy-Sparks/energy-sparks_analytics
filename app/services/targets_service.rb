@@ -124,11 +124,9 @@ class TargetsService
   end
 
   def invalid_annual_estimate_less_than_historic_kwh_data_to_date?
-    !target_meter_calculation_problem.nil? &&
-      (
-        target_meter_calculation_problem[:type] == MissingGasEstimationBase::MoreDataAlreadyThanEstimate ||
-        target_meter_calculation_problem[:type] == MissingElectricityEstimation::MoreDataAlreadyThanEstimate
-      )
+    [MissingGasEstimationBase::MoreDataAlreadyThanEstimate,
+     MissingElectricityEstimation::MoreDataAlreadyThanEstimate]
+      .include?(target_meter_calculation_problem&.[](:type))
   end
 
   # returns nil if ok, otherwise { text: "error message", type: ExceptionClass from POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS }
