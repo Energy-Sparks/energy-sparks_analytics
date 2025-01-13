@@ -15,6 +15,8 @@ describe Periods::FixedAcademicYear do
         contain_exactly(have_attributes(start_date: Date.new(2023, 9, 1), end_date: Date.new(2023, 12, 31)))
       expect(period(Date.new(2023, 1, 1), Date.new(2023, 8, 31), 0).periods).to \
         contain_exactly(have_attributes(start_date: Date.new(2023, 1, 1), end_date: Date.new(2023, 8, 31)))
+      expect(period(Date.new(2022, 9, 1), Date.new(2022, 12, 31), 0).periods).to \
+        contain_exactly(have_attributes(start_date: Date.new(2022, 9, 1), end_date: Date.new(2022, 12, 31)))
     end
 
     it 'gets part of the previous academic year' do
