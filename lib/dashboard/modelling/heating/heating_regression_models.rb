@@ -1055,7 +1055,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def number_of_heating_school_days
-      @meter.non_heating_only? ? Float::NAN : @models[HEATINGOCCUPIEDMODEL].samples
+      @meter.non_heating_only? ? nil : @models[HEATINGOCCUPIEDMODEL].samples
     end
 
     def average_heating_school_day_a
