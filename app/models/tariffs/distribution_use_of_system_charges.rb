@@ -64,8 +64,7 @@ class DUOSCharges
   # reused by tnuos class
   def self.region_number(mpan)
     region = (mpan / 100_000_000_000).to_i
-    check_region(mpan, region)
-    region
+    DUOS_BY_REGION.key?(region) ? region : :fallback
   end
 
   private
@@ -132,7 +131,14 @@ class DUOSCharges
     23 => { name: 'NorthEast (YELG)',
             bands: { red: { weekdays: '16:00 – 19:30 ' },
                      amber: { weekdays: '08:00 – 16:00 & 19:30 – 22:00 '  },
-                     green: { weekdays: '00:00 – 08:00 & 22:00 – 24:00 ', weekends: 'all day' } } }
+                     green: { weekdays: '00:00 – 08:00 & 22:00 – 24:00 ', weekends: 'all day' } } },
+    :fallback => { name: 'Fallback for IDNOs',
+                   bands: {
+                      red: { weekdays: '' },
+                      amber: { weekdays: ''  },
+                      green: { weekdays: '', weekends: '' }
+                    }
+    }
   }.freeze
   private_constant :DUOS_BY_REGION
 
@@ -141,8 +147,7 @@ class DUOSCharges
     colour_band = @@band.dig(region, daytype, half_hour_index)
     return colour_band unless colour_band.nil?
 
-    times = DUOS_BY_REGION[region][daytype]
-    cached_band(region, daytype)[half_hour_index] ||= calculate_band(region, times, daytype, half_hour_index)
+    cached_band(region, daytype)[half_hour_index] ||= calculate_band(region, daytype, half_hour_index)
   end
 
   private_class_method def self.cached_band(region, daytype)
@@ -150,11 +155,13 @@ class DUOSCharges
     @@band[region][daytype] ||= {}
   end
 
-  private_class_method def self.calculate_band(region, _times, daytype, half_hour_index)
+  private_class_method def self.calculate_band(region, daytype, half_hour_index)
     DUOS_BY_REGION[region][:bands].each do |band, band_info|
       return band if band_info.key?(daytype) && in_time_range?(band_info[daytype], half_hour_index)
     end
-    raise MissingDuosSetting, "Missing Duos setting for region: #{region} at/on #{daytype} half hour #{half_hour_index}"
+    # Part of work around for IDNOs return nil for now rather than fail
+    # raise MissingDuosSetting, "Missing Duos setting for region: #{region} at/on #{daytype} half hour #{half_hour_index}"
+    return nil
   end
 
   private_class_method def self.in_time_range?(times, half_hour_index)
@@ -198,9 +205,5 @@ class DUOSCharges
     tod = TimeOfDay.new(hour_desc.to_i, minute_desc.to_i)
     tod = TimeOfDay.add_hours_and_minutes(tod, 0, -30) if rollback_30_minutes
     tod
-  end
-
-  private_class_method def self.check_region(mpan, region)
-    raise UnknownDBORegionException, "Unknown MPAN region #{region} for mpan #{mpan}" unless DUOS_BY_REGION.key?(region)
   end
 end
