@@ -12,16 +12,16 @@ module Periods
 
     def self.enumerator(start_date, end_date)
       Enumerator.new do |enumerator|
+        # debugger
         period_end = end_date
-        while period_end >= start_date
-          period_start = Date.new(period_end.year - (period_end.month < 9 ? 1 : 0), 9, 1)
-          if period_start <= start_date
-            enumerator.yield [start_date, period_end]
-            break
-          else
+        period_start = [start_date, Date.new(period_end.year, 9, 1)].max
+        loop do
+          if period_end >= period_start
             enumerator.yield [period_start, period_end]
-            period_end = period_start - 1
+            break if period_start == start_date
           end
+          period_end = [end_date, Date.new(period_end.year, 8, 31)].min
+          period_start = [start_date, period_start - 1.year].max
         end
       end
     end
