@@ -236,10 +236,6 @@ describe GenericAccountingTariff, :aggregate_failures do
         context 'when the DuoS region is unknown' do
           let(:mpxn)  { 2_712_345_678_900 }
 
-          before do
-            allow(meter).to receive(:mpxn).and_return(2_712_345_678_900)
-          end
-
           it 'includes the zero charges as a fallback' do
             # confirm that we've omitted these costs
             expect(accounting_cost.all_costs_x48[:duos_red]).to be_nil
