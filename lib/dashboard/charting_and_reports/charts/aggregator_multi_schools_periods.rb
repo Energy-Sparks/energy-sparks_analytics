@@ -88,7 +88,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
 
     x_axis = calculate_x_axis
-    valid_aggregators.reverse_each do |period_data| # reverse is only needed for tests?
+    valid_aggregators.each do |period_data| # reverse is only needed for tests?
       time_description = number_of_periods <= 1 ? '' : period_data.results.xbucketor.compact_date_range_description
 
       # This series will have either the same number or fewer months than the other range
