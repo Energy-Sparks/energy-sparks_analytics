@@ -152,7 +152,7 @@ describe AggregatorMultiSchoolsPeriods do
           expect(bucketed_data.values).to eq([
             [29, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 1],
             [30, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0]
-          ].map { |arr| arr.map { |v| v * daily_usage } })
+          ].map { |range| range.map { |days| days * daily_usage } })
         end
       end
     end
