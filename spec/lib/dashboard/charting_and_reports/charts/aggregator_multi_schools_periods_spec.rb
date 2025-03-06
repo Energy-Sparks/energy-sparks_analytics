@@ -215,7 +215,7 @@ describe AggregatorMultiSchoolsPeriods do
         end
       end
 
-      context 'when date starts in October' do
+      context 'when data starts after the beginning of the academic year' do
         let(:amr_start_date) { Date.new(2022, 10, 1) }
 
         it_behaves_like 'a successful chart', series_count: 2
