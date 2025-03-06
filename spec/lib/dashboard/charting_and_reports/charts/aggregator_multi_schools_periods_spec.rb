@@ -216,6 +216,15 @@ describe AggregatorMultiSchoolsPeriods do
           )
         end
       end
+
+      context 'when data starts after the beginning of the academic year' do
+        let(:amr_start_date) { Date.new(2022, 10, 1) }
+
+        it_behaves_like 'a successful chart', series_count: 2
+        it 'has the correct data' do
+          expect(aggregator.results.x_axis).to eq(%w[Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug])
+        end
+      end
     end
   end
 end
