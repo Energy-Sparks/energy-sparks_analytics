@@ -201,7 +201,7 @@ module Baseload
     end
 
     def calculator
-      BaseloadCalculator.calculator_for(@meter.amr_data, @meter.sheffield_simulated_solar_pv_panels?)
+      BaseloadCalculator.calculator_for(@meter.amr_data, @meter.solar_pv_panels?)
     end
   end
 end

@@ -250,7 +250,7 @@ module Dashboard
       !@solar_pv_real_metering.nil?
     end
 
-        # num of incoming meters, the aggregation process then implies
+    # num of incoming meters, the aggregation process then implies
     # extra meters - so this method is only valid prior to aggregation
     def solar_pv_sub_meters_to_be_aggregated
       return 0 if attributes(:solar_pv_mpan_meter_mapping).nil?
@@ -386,6 +386,9 @@ module Dashboard
       set_accounting_tariff
     end
 
+    def average_baseload_kw_date_range
+      amr_data.average_baseload_kw_date_range(solar_pv: solar_pv_panels?)
+    end
 
     private
 

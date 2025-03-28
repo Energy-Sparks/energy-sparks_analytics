@@ -17,15 +17,7 @@ describe AMRData do
       let(:overnight) { true }
 
       it 'returns the calculator' do
-        expect(baseload_calculator).to be_a Baseload::OvernightBaseloadCalculator
-      end
-
-      context 'with FEATURE_FLAG_MIDNIGHT_BASELOAD enabled' do
-        it 'returns the new implementation' do
-          ClimateControl.modify FEATURE_FLAG_MIDNIGHT_BASELOAD: 'true' do
-            expect(baseload_calculator).to be_a Baseload::AroundMidnightBaseloadCalculator
-          end
-        end
+        expect(baseload_calculator).to be_a Baseload::AroundMidnightBaseloadCalculator
       end
     end
 

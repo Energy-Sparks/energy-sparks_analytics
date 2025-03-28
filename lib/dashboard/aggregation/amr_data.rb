@@ -437,24 +437,16 @@ class AMRData < HalfHourlyData
     total_kwh
   end
 
-  #Returns a baseload calculator. Parameter controls whether a statistical or
-  #overnight calculator is created. Pass true for schools with sheffield solar pv
-  #
-  # sheffield solar PV data artificially creates PV data which
-  # is not always 100% consistent with real PV data e.g. if orientation is different
-  # so the calculated statistics baseload can pick up morning and evening baseloads
-  # lower than reality, resulting in volatile and less accurate baseload
-  # test is on aggregate.
-  #
-  # So for these schools we use a different method
-  def baseload_calculator(overnight)
+  # Returns a baseload calculator. Parameter controls whether a statistical or overnight calculator is created. Pass
+  # true for schools with solar pv
+  def baseload_calculator(solar_pv)
     @calculators ||= {}
-    @calculators[overnight] ||= Baseload::BaseloadCalculator.calculator_for(self, overnight)
+    @calculators[solar_pv] ||= Baseload::BaseloadCalculator.calculator_for(self, solar_pv)
   end
 
-  def baseload_kw(date, sheffield_solar_pv = false, data_type = :kwh)
+  def baseload_kw(date, solar_pv = false, data_type = :kwh)
     #use appropriate calculator
-    baseload_calculator(sheffield_solar_pv).baseload_kw(date, data_type)
+    baseload_calculator(solar_pv).baseload_kw(date, data_type)
   end
 
   def overnight_baseload_kw(date, data_type = :kwh)
@@ -472,14 +464,14 @@ class AMRData < HalfHourlyData
     baseload_calculator(false).baseload_kw(date, data_type)
   end
 
-  def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
+  def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, solar_pv: false)
     #use appropriate calculator
-    baseload_calculator(sheffield_solar_pv).average_baseload_kw_date_range(date1, date2)
+    baseload_calculator(solar_pv).average_baseload_kw_date_range(date1, date2)
   end
 
-  def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)
+  def baseload_kwh_date_range(date1, date2, solar_pv = false)
     #use appropriate calculator
-    baseload_calculator(sheffield_solar_pv).baseload_kwh_date_range(date1, date2, sheffield_solar_pv)
+    baseload_calculator(solar_pv).baseload_kwh_date_range(date1, date2, solar_pv)
   end
 
   def statistical_peak_kw(date)
