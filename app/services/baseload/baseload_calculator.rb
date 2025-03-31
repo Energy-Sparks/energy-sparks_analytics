@@ -9,7 +9,7 @@ module Baseload
     # Create a baseload calculator suitable for this school. If we are using Solar PV data, as indicated by the flag,
     # we use an alternate method as there are issues e.g. with underestimated early morning usage
     def self.calculator_for(amr_data, solar_pv)
-      klass = solar_pv ? Baseload::AroundMidnightBaseloadCalculator : StatisticalBaseloadCalculator
+      klass = solar_pv ? AroundMidnightBaseloadCalculator : StatisticalBaseloadCalculator
       klass.new(amr_data)
     end
 
@@ -34,7 +34,7 @@ module Baseload
     private
 
     def up_to_1_year_ago
-      [@amr_data.end_date - 365, @amr_data.start_date].max
+      @amr_data.up_to_1_year_ago
     end
   end
 end

@@ -386,10 +386,6 @@ module Dashboard
       set_accounting_tariff
     end
 
-    def average_baseload_kw_date_range
-      amr_data.average_baseload_kw_date_range(solar_pv: solar_pv_panels?)
-    end
-
     private
 
     def set_economic_tariff

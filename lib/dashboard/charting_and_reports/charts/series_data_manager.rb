@@ -998,9 +998,8 @@ module Series
 
     def series_names;  [BASELOAD]; end
 
-    def day_breakdown(d1, d2)
-      kw = meter.amr_data.average_baseload_kw_date_range(d1, d2, sheffield_solar_pv: meter.sheffield_simulated_solar_pv_panels?)
-      { BASELOAD => kw }
+    def day_breakdown(date1, date2)
+      { BASELOAD => Baseload::BaseloadAnalysis(meter).average_baseload_kw_date_range(date1, date2) }
     end
   end
 
