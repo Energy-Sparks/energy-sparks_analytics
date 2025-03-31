@@ -53,8 +53,8 @@ module Baseload
         [
           meter.mpan_mprn,
           {
-            kw: Baseload::BaseloadAnalysis.new(meter).average_baseload_kw_date_range(meter.amr_data.up_to_1_year_ago,
-                                                                                     meter.amr_data.end_date),
+            kw: Baseload::BaseloadAnalysis.new(meter).average_baseload_kw(meter.amr_data.up_to_1_year_ago,
+                                                                          meter.amr_data.end_date),
             £: BaseloadAnalysis.new(meter).scaled_annual_baseload_cost_£(:£)
           }
         ]
