@@ -10,7 +10,7 @@ class HalfHourlyData < Hash
   attr_reader :type, :validated
 
   def initialize(type)
-    super
+    super()
     @min_date = Date.new(4000, 1, 1)
     @max_date = Date.new(1000, 1, 1)
     @validated = false
