@@ -11,7 +11,7 @@ end
 def analyse_meter(school, meter)
   end_date = meter.amr_data.end_date
   start_date = [end_date - 365, meter.amr_data.start_date].max
-  baseload_kw = Baseload::BaseloadAnalysis.new(meter).average_baseload_kw_date_range(start_date, end_date)
+  baseload_kw = Baseload::BaseloadAnalysis.new(meter).average_baseload_kw(start_date, end_date)
   benchmark_baseload_kw = BenchmarkMetrics.recommended_baseload_for_pupils(school.number_of_pupils, school.school_type)
   {
     school_name:        school.name,
