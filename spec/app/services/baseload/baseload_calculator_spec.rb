@@ -10,7 +10,7 @@ describe Baseload::BaseloadCalculator, type: :service do
 
     let(:amr_data)            { meter_collection.electricity_meters.first.amr_data }
 
-    context 'with sheffield solar' do
+    context 'with solar' do
       let(:solar_pv) { true }
 
       it 'returns calculator' do
