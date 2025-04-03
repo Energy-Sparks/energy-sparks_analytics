@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Series::Baseload do
+describe Series::Baseload do # rubocop:disable RSpec/SpecFilePathFormat
   describe '#day_breakdown' do
     it 'calculates baseload' do
       meter_collection = build(:meter_collection, :with_fuel_and_aggregate_meters)
