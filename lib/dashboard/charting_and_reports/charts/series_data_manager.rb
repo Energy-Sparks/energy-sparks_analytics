@@ -52,7 +52,7 @@ module Series
     end
 
     def meter
-      @meter || determine_meter
+      @meter ||= determine_meter
     end
 
     def ignore_missing_amr_data?
@@ -999,7 +999,7 @@ module Series
     def series_names;  [BASELOAD]; end
 
     def day_breakdown(date1, date2)
-      { BASELOAD => Baseload::BaseloadAnalysis.new(meter).average_baseload_kw(date1, date2) }
+      { BASELOAD => ::Baseload::BaseloadAnalysis.new(meter).average_baseload_kw(date1, date2) }
     end
   end
 
