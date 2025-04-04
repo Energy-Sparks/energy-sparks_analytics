@@ -12,7 +12,7 @@ module Periods
       self.class.enumerator(first_meter_date, last_meter_date).map { |args| new_school_period(*args) }
     end
 
-    private_class_method def self.enumerator(start_date, end_date)
+    def self.enumerator(start_date, end_date)
       Enumerator.new do |enumerator|
         period_end = end_date
         while period_end >= start_date
