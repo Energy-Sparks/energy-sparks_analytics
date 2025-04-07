@@ -156,18 +156,6 @@ module Dashboard
       )
     end
 
-    # Centrica
-    def has_community_use?
-      # TODO: check real attribute
-      mpxn.to_i.odd?
-    end
-
-    # Centrica
-    def has_exclusive_community_use?
-      # TODO: check real attribute
-      mpxn.to_i.odd?
-    end
-
     def inspect
       "object_id: #{format('0x00%x', (object_id << 1))}, #{self.class.name}, mpan: #{@mpan_mprn}, fuel_type: #{@fuel_type}"
     end
