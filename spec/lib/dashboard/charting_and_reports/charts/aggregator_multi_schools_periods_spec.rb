@@ -169,7 +169,7 @@ describe AggregatorMultiSchoolsPeriods do
       end
     end
 
-    context 'with two periods of :academicyear' do
+    context 'with two periods of :academicyear' do # TODO: remove as not currently used?
       let(:timescale) { [{ academicyear: 0 }, { academicyear: -1 }] }
 
       before { aggregator.calculate }
