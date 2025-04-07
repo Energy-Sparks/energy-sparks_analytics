@@ -21,7 +21,7 @@ module Dashboard
             storage_heater_config:,
             external_meter_id:,
             dcc_meter:,
-            meter_attributes: {})
+            meter_attributes:)
       @constituent_meters = constituent_meters
       @has_sheffield_solar_pv = constituent_meters.any?(&:sheffield_simulated_solar_pv_panels?)
       @has_metered_solar = constituent_meters.any?(&:solar_pv_real_metering?)
