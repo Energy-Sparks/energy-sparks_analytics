@@ -106,7 +106,6 @@ class MeterCollection
       floor_area: original.floor_area,
       number_of_pupils: original.number_of_pupils,
       solar_pv_installation: original.solar_pv_setup,
-      storage_heater_config: original.storage_heater_setup,
       meter_attributes: original.meter_attributes.merge(pseudo_meter_attributes(pseudo_meter_key))
     )
   end

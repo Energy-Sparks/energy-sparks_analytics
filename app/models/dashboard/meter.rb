@@ -17,7 +17,6 @@ module Dashboard
     def initialize(meter_collection:, amr_data:, type:, identifier:, name:,
                    floor_area: nil, number_of_pupils: nil,
                    solar_pv_installation: nil,
-                   storage_heater_config: nil, # now redundant PH 20Mar2019
                    external_meter_id: nil,
                    dcc_meter: false,
                    meter_attributes: {})
@@ -153,7 +152,6 @@ module Dashboard
         floor_area: meter_to_clone.floor_area,
         number_of_pupils: meter_to_clone.number_of_pupils,
         solar_pv_installation: meter_to_clone.solar_pv_setup,
-        storage_heater_config: meter_to_clone.storage_heater_setup,
         meter_attributes: meter_to_clone.meter_attributes
       )
     end
