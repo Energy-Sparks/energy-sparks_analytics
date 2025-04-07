@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_rel './meter.rb'
 
 module Dashboard
@@ -21,17 +23,15 @@ module Dashboard
             dcc_meter:,
             meter_attributes:)
       @constituent_meters = constituent_meters
-      @has_sheffield_solar_pv = constituent_meters.any?(&:sheffield_simulated_solar_pv_panels?)
-      @has_metered_solar = constituent_meters.any?(&:solar_pv_real_metering?)
       @partial_meter_coverage = partial_meter_coverage_from_meters
     end
 
     def sheffield_simulated_solar_pv_panels?
-      @has_sheffield_solar_pv
+      @sheffield_simulated_solar_pv_panels ||= constituent_meters.any?(&:sheffield_simulated_solar_pv_panels?)
     end
 
     def solar_pv_real_metering?
-      @has_metered_solar
+      @solar_pv_real_metering ||= constituent_meters.any?(&:solar_pv_real_metering?)
     end
 
     def aggregate_meter?
@@ -50,6 +50,5 @@ module Dashboard
         partial_meter_coverage_list
       end
     end
-
   end
 end
