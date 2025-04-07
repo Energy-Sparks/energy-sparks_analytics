@@ -25,24 +25,33 @@ module Dashboard
       @constituent_meters = constituent_meters
       @has_sheffield_solar_pv = constituent_meters.any?(&:sheffield_simulated_solar_pv_panels?)
       @has_metered_solar = constituent_meters.any?(&:solar_pv_real_metering?)
-      add_aggregate_partial_meter_coverage_component(list_of_meters.map(&:partial_meter_coverage))
+      @partial_meter_coverage = partial_meter_coverage_from_meters
     end
 
     def sheffield_simulated_solar_pv_panels?
-      @has_sheffield_solar_pv || super
+      @has_sheffield_solar_pv
     end
 
     def solar_pv_real_metering?
-      @has_metered_solar || super
-    end
-
-    # must be called immediately after construction
-    def set_constituent_meters(list_of_meters)
-      @constituent_meters = list_of_meters
+      @has_metered_solar
     end
 
     def aggregate_meter?
       true
     end
+
+    private
+
+    # aggregate @partial_meter_coverage meter attribute component is an array
+    # of its component meters' partial_meter_coverages
+    def partial_meter_coverage_from_meters
+      partial_meter_coverage_list = @constituent_meters.map(&:partial_meter_coverage)
+      if partial_meter_coverage_list.empty?
+        nil
+      else
+        partial_meter_coverage_list
+      end
+    end
+
   end
 end

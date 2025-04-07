@@ -158,18 +158,6 @@ module Dashboard
       )
     end
 
-    # aggregate @partial_meter_coverage meter attribute component is an array
-    # of its component meters' partial_meter_coverages, or just the component
-    # if only one meter of that fuel type - in which case the meter is copied
-    # and not aggregated - so it shouldn't get here!
-    def add_aggregate_partial_meter_coverage_component(partial_meter_coverage_components)
-      @partial_meter_coverage = if partial_meter_coverage_components.empty?
-                                  nil
-                                else
-                                  partial_meter_coverage_components
-                                end
-    end
-
     # Centrica
     def has_community_use?
       # TODO: check real attribute
