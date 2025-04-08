@@ -243,12 +243,20 @@ describe AggregatorMultiSchoolsPeriods do
       before { aggregator.calculate }
 
       context 'when there is only a year of data' do
+        it 'is not valid' do
+          expect(aggregator.results.valid?).to be false
+        end
+      end
+
+      context 'when there is over a year of data' do
+        let(:amr_start_date) { Date.new(2022, 12, 1) }
+
         it_behaves_like 'a successful chart', series_count: 2
         it 'has the correct data' do
           expect(aggregator.results.x_axis).to eq(%w[Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug])
           expect(aggregator.results.bucketed_data).to eq(
-            { 'Mon 02 Jan 23-Thu 31 Aug 23' =>
-                [0, 0, 0, 0, 30, 28, 31, 30, 31, 30, 31, 31].map(&daily_usage.method(:*)),
+            { 'Thu 01 Dec 22-Thu 31 Aug 23' =>
+                [0, 0, 0, 31, 31, 28, 31, 30, 31, 30, 31, 31].map(&daily_usage.method(:*)),
               'Fri 01 Sep 23-Sun 31 Dec 23' =>
                 [30, 31, 30, 31, 0, 0, 0, 0, 0, 0, 0, 0].map(&daily_usage.method(:*)) }
           )
