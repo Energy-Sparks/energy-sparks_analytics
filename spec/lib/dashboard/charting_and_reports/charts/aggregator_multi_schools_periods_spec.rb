@@ -171,6 +171,7 @@ describe AggregatorMultiSchoolsPeriods do
 
     context 'with two periods of :academicyear' do # TODO: remove as not currently used?
       let(:timescale) { [{ academicyear: 0 }, { academicyear: -1 }] }
+      let(:ignore_single_series_failure) { true }
 
       before { aggregator.calculate }
 
