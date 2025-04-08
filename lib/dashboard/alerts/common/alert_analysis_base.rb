@@ -463,7 +463,7 @@ class AlertAnalysisBase < ContentBase
 
   # slightly iffy way of creating short codes for alert class names
   def self.alert_short_code(alert_class)
-    alert_class.to_s.split(//).select { |char| ('A'..'Z').include?(char) }[1..8].join
+    alert_class.to_s.split(//).select { |char| ('A'..'Z').cover?(char) }[1..8].join
   end
 
   def self.short_code_alert(short_code)
