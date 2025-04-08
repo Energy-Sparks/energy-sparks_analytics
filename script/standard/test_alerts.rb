@@ -46,15 +46,8 @@ overrides = {
 #    AlertChangeInElectricityBaseloadShortTerm,
 #    AlertPreviousYearHolidayComparisonElectricity,
 #    AlertPreviousHolidayComparisonElectricity,
-#    AlertLayerUpPowerdown11November2022ElectricityComparison,
-#    AlertEaster2023ShutdownElectricityComparison,
-#    AlertEaster2023ShutdownGasComparison,
-#    AlertEaster2023ShutdownStorageHeaterComparison
 #    AlertOutOfHoursElectricityUsagePreviousYear
 #     AlertSolarGeneration
-#    AlertJanAug20222023ElectricityComparison,
-#    AlertJanAug20222023GasComparison,
-#    AlertJanAug20222023StorageHeaterComparison,
     #AlertEnergyAnnualVersusBenchmark,
     #AlertAdditionalPrioritisationData,
     #AlertHotWaterEfficiency
