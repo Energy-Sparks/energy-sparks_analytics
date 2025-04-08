@@ -44,13 +44,14 @@ module Charts
         bucketed_data_count[time_description] = count_data
       end
       { x_axis:, bucketed_data:, bucketed_data_count: }
-    rescue EnergySparksNotEnoughDataException
-      {}
     end
 
-    private_class_method def self.calculate_x_axis(results)
+    private_class_method def self.calculate_x_axis(results, chart_config)
       axis_months = results.map { |result| remove_years(result.x_axis) }
-      raise EnergySparksNotEnoughDataException if axis_months.flatten.then { |months| months.uniq.size == months.size }
+      if !chart_config.ignore_single_series_failure &&
+         axis_months.flatten.then { |months| months.uniq.size == months.size }
+        return nil
+      end
 
       axis_months.reverse!
       x_axis, *axis_months = axis_months
