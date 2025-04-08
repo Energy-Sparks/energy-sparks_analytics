@@ -85,7 +85,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   def merge_monthly_comparison_charts
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
 
-    merged = Charts::MergeMonthlyComparisons.merge(valid_aggregators.map(&:results), number_of_periods)
+    merged = Charts::MergeMonthlyComparisons.merge(valid_aggregators.map(&:results), number_of_periods, @chart_config)
     results.x_axis = merged[:x_axis]
     results.bucketed_data = merged[:bucketed_data]
     results.bucketed_data_count = merged[:bucketed_data_count]

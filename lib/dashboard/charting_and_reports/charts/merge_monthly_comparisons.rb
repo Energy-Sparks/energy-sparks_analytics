@@ -5,8 +5,10 @@ module Charts
     # monthly comparison charts e.g. electricity_cost_comparison_last_2_years_accounting
     # can be awkward as some years may occasionally have subtely different numbers of months e.g. 12 v. 13
     # so specific month date matching occurs to match one year with the next
-    def self.merge(results, number_of_periods)
-      x_axis = calculate_x_axis(results)
+    def self.merge(results, number_of_periods, chart_config)
+      x_axis = calculate_x_axis(results, chart_config)
+      return {} if x_axis.nil?
+
       bucketed_data = {}
       bucketed_data_count = {}
       results.each do |result|
@@ -44,8 +46,13 @@ module Charts
       { x_axis:, bucketed_data:, bucketed_data_count: }
     end
 
-    private_class_method def self.calculate_x_axis(results)
+    private_class_method def self.calculate_x_axis(results, chart_config)
       axis_months = results.map { |result| remove_years(result.x_axis) }
+      if !chart_config.ignore_single_series_failure &&
+         axis_months.flatten.then { |months| months.uniq.size == months.size }
+        return nil
+      end
+
       axis_months.reverse!
       x_axis, *axis_months = axis_months
       axis_months.each do |months|
