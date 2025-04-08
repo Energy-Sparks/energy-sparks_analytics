@@ -8,7 +8,6 @@ module Periods
 
     def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
       return [] if first_meter_date.nil? || last_meter_date.nil?
-      return [] if (last_meter_date - first_meter_date) < 1.year.in_days
 
       self.class.enumerator(first_meter_date, last_meter_date).map { |args| new_school_period(*args) }
     end
