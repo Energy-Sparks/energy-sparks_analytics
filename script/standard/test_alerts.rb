@@ -8,8 +8,8 @@ require_rel '../../test_support'
 # end
 
 # Romilly, gas
-asof_date = Date.new(2024, 3, 25)
-schools = ['r*']
+asof_date = Date.new(2025, 4, 4)
+schools = ['l*']
 
 # Mallaig, storage/electricity
 #asof_date = Date.new(2024, 4, 8)
@@ -24,7 +24,7 @@ overrides = {
   cache_school: false,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
   alerts:   { alerts: [
-#    AlertElectricityBaseloadVersusBenchmark
+    AlertElectricityBaseloadVersusBenchmark
 #    AlertThermostaticControl
 #    AlertEnergyAnnualVersusBenchmark,
 #    AlertSchoolWeekComparisonGas,
@@ -58,7 +58,7 @@ overrides = {
     #AlertEnergyAnnualVersusBenchmark,
     #AlertAdditionalPrioritisationData,
     #AlertHotWaterEfficiency
-    AlertGasHeatingHotWaterOnDuringHoliday,
+#    AlertGasHeatingHotWaterOnDuringHoliday,
 #    AlertStorageHeaterHeatingOnDuringHoliday,
 #    AlertElectricityUsageDuringCurrentHoliday
     ],
